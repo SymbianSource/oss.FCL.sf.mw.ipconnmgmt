@@ -1,0 +1,46 @@
+/*
+* Copyright (c) 2004 Nokia Corporation and/or its subsidiary(-ies). 
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:  Configurations
+*
+*/
+
+
+#ifndef ALWAYSONCONFIG_HRH
+#define ALWAYSONCONFIG_HRH
+
+// This flags sets RAU manager stub and connection manager
+// stub in use instead of real ones
+#undef USE_RAU_STUB_IMPLEMENTATION
+
+// This flags sets connection monitoring stub in use
+#undef USE_CONNMON_STUB_IMPLEMENTATION
+
+// This flag sets connection stub in use
+#undef USE_CONNECTION_STUB
+
+#ifdef _DEBUG
+
+// This flag enables logging
+#define LOGGING_ENABLED
+
+// This flag defines file logger to be in use
+// By default RDebug is used
+#define LOGGING_MODE_FILE
+    
+#endif // _DEBUG
+
+// This flag defines whether customized CustomAPI is in use.
+#undef __ALWAYS_ON_CUSTOM_API
+
+#endif // ALWAYSONCONFIG_HRH

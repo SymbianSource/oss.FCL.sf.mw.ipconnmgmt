@@ -1,0 +1,59 @@
+/*
+* Copyright (c) 2006 Nokia Corporation and/or its subsidiary(-ies). 
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description: 
+*     Build mmp file
+*     
+*
+*/
+
+#include <data_caging_paths.hrh>
+#include <platform_paths.hrh>
+
+TARGET        	cmmanagerdatabase.dll
+TARGETTYPE    	dll
+UID           	0x1000008d 0x10281BB9
+CAPABILITY		CAP_GENERAL_DLL
+VENDORID VID_DEFAULT
+
+
+SOURCEPATH      ../src
+
+SOURCE 			cmmanagertableformats.cpp
+SOURCE          datamobilitycommsdattypes.cpp
+
+// Component specific internal headers 
+USERINCLUDE			../inc
+
+// ADO specific internal headers 
+SYSTEMINCLUDE		../../../../inc
+
+//Macro to /epoc32 headers
+MW_LAYER_SYSTEMINCLUDE
+
+LIBRARY       	euser.lib
+//LIBRARY         ECom.lib
+LIBRARY         COMMSDAT.lib
+//LIBRARY         flogger.lib
+
+
+#if defined(ARMCC)
+    DEFFILE ../eabi/cmmanagerdatabase.def
+#elif defined( WINSCW )
+    DEFFILE ../bwinscw/cmmanagerdatabase.def
+#elif defined( WINS )
+    DEFFILE ../BWins/cmmanagerdatabase.def
+#else
+    DEFFILE ../BMarm/cmmanagerdatabase.def
+#endif
+

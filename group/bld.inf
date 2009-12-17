@@ -1,0 +1,42 @@
+/*
+* Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description: Build info for ipconnmgmt package. 
+*
+*/
+
+PRJ_PLATFORMS
+DEFAULT
+
+PRJ_EXPORTS
+// Export CommsDat to emulator
+../data/cccccc00_emulator.cre   /epoc32/winscw/c/private/10202be9/persists/cccccc00.cre
+
+// Export default configuration options
+../inc/meshpreface1.cfg         /epoc32/release/winscw/udeb/z/system/data/meshpreface1.cfg
+
+PRJ_MMPFILES
+#include "../accesspointcontrol/apcontrollistplugin/group/bld.inf"
+#include "../alwayson_net_plugin/group/bld.inf"
+#include "../apengine/group/bld.inf"
+#include "../bearermanagement/group/bld.inf"
+#include "../cmmanager/group/bld.inf"
+#include "../connectionmonitoring/group/bld.inf"
+#include "../connectionutilities/ConnectionDialogs/group/bld.inf"
+#include "../dbcreator/group/bld.inf"
+#include "../ipcm_plat/group/bld.inf"
+#include "../ipcm_pub/group/bld.inf"
+
+
+PRJ_TESTMMPFILES
+

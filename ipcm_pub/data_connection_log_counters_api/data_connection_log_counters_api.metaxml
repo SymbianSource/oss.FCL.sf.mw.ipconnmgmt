@@ -1,0 +1,17 @@
+<?xml version="1.0" ?>
+<api id="91c9872266e185142a2a240bc4ff401e" dataversion="1.0">
+  <name>Data Connection Log Counters API</name>
+  <description>Central Repository keys KLogsGPRSSentCounter, KLogsGPRSReceivedCounter, KLogsWLANSentCounter, and KLogsWLANReceivedCounter (under UID KCRUidDCLLogs) can be used for monitoring byte counts of GPRS/UMTS incoming/outgoing data and WLAN incoming/outgoing data. The data amount is measures so that IP header and IP data are included.</description>
+  <type>c++</type>
+  <subsystem>connectionmonitoring</subsystem>
+  <libs>
+  </libs>
+  <release category="sdk" sinceversion="3.2"/>
+  <attributes>
+     <!-- This indicates wether the api provedes separate html documentation -->
+     <!-- or is the additional documentation generated from headers. -->
+     <!-- If you are unsuere then the value is "no" -->
+     <htmldocprovided>yes</htmldocprovided>
+     <adaptation>no</adaptation>
+  </attributes>
+</api>

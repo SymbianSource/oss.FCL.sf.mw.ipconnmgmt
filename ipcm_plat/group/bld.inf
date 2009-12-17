@@ -1,0 +1,30 @@
+/*
+* Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:  Build info for ipcm_plat. 
+*
+*/
+
+#include "../access_point_engine_misc_api/group/bld.inf"
+#include "../bearer_settings_plugin_api/group/bld.inf"
+#include "../commsdat_wlan_api/group/bld.inf"
+#include "../connection_monitor_extension_api/group/bld.inf"
+#include "../connection_ui_utilities_api/group/bld.inf"
+#include "../disconnect_dialog_api/group/bld.inf"
+#include "../disconnect_dialog_disable_api/group/bld.inf"
+#include "../extended_connection_settings_api/group/bld.inf"
+#include "../mpm_default_connection_api/group/bld.inf"
+#include "../pdpcontextmanager2_reset_factory_settings_api/group/bld.inf"
+#include "../pdpcontextmanager2_settings_api/group/bld.inf"
+#include "../mpm_connect_screen_api/group/bld.inf"
+

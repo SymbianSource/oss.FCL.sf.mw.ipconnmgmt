@@ -1,0 +1,538 @@
+/*
+* Copyright (c) 2004 Nokia Corporation and/or its subsidiary(-ies). 
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:  This file contains all the resources for the 
+*               Connection Ui Utilities Notifier
+*
+*/
+
+
+//  RESOURCE IDENTIFIER
+NAME ACUN // 4 letter ID
+
+//  INCLUDES
+#include <eikon.rh>
+#include <avkon.rsg>
+#include <avkon.rh>
+#include <avkon.mbg>
+#include <avkon.loc>
+
+#include <AvkonIcons.hrh>
+#include "ConnUiUtilsNotif.hrh"
+#include <connectionuiutilities.loc>
+
+//  RESOURCE DEFINITIONS
+
+RESOURCE RSS_SIGNATURE { }
+
+RESOURCE TBUF { buf="ConnUiUtilsNotif"; }
+
+
+RESOURCE AVKON_LIST_QUERY r_select_wlan_list_query
+    {
+    softkeys = R_AVKON_SOFTKEYS_SELECT_CANCEL__SELECT;
+    flags = EEikDialogFlagNotifyEsc | EEikDialogFlagCbaButtons |
+            EEikDialogFlagNoDrag | EEikDialogFlagNoTitleBar;
+
+
+    items = AVKON_LIST_QUERY_DLG_LINE
+        {
+        id = EListQueryControl;
+        control = AVKON_LIST_QUERY_CONTROL
+            {
+            listtype = EAknCtSingleGraphicPopupMenuListBox;
+            listbox = AVKON_LIST_QUERY_LIST
+                {
+                flags = EAknListBoxSelectionList;
+                };
+
+            heading = qtn_wlan_prmpt_select_network;
+            };
+        };
+    }
+    
+RESOURCE DIALOG r_query_dialog
+    {
+    flags = EEikDialogFlagNotifyEsc | EEikDialogFlagCbaButtons | 
+            EEikDialogFlagNoDrag | EEikDialogFlagNoTitleBar | 
+            EEikDialogFlagCbaButtons;
+    buttons = R_AVKON_SOFTKEYS_YES_NO__YES;
+    items =
+        {
+        DLG_LINE
+            {
+            type = EAknCtQuery;
+            id = EGeneralQuery;
+            control = AVKON_CONFIRMATION_QUERY
+                {
+                layout = EConfirmationLayout;
+                label = qtn_offline_activate_wlan;
+                };
+            }
+        };
+    }    
+
+RESOURCE DIALOG r_easy_wep_wpa_dlg
+	{
+    flags = EEikDialogFlagNotifyEsc | EEikDialogFlagCbaButtons | 
+            EEikDialogFlagNoDrag | EEikDialogFlagNoTitleBar |
+            EEikDialogFlagVirtualInput;
+	buttons=R_AVKON_SOFTKEYS_OK_CANCEL__OK;
+    items=
+		{
+		DLG_LINE
+			{
+			type=EAknCtQuery;
+			id=EGeneralQuery;
+			control= AVKON_DATA_QUERY
+				{ 
+				layout=EDataLayout;
+                control = EDWIN
+                    {
+                    avkon_flags = EAknEditorFlagLatinInputModesOnly;
+                    default_case = EAknEditorLowerCase;
+					default_input_mode = EAknEditorTextInputMode;
+                    allowed_input_modes = EAknEditorAllInputModes;
+                    };
+				};
+			}
+		};
+
+	}
+
+RESOURCE TBUF r_info_no_networks_found
+    { 
+    buf = qtn_wlan_info_no_networks_found;
+    }
+
+
+RESOURCE TBUF r_offline_not_possible
+    {
+    buf = qtn_offline_not_possible;
+    }
+
+RESOURCE TBUF r_easy_wep_query_text             { buf = qtn_wlan_prmpt_wep_key; }
+RESOURCE TBUF r_easy_wpa_query_text             { buf = qtn_wlan_prmpt_wpa_key; }
+RESOURCE TBUF r_info_preshared_key_too_short    { buf = qtn_wlan_info_preshared_key_too_short; } 
+RESOURCE TBUF r_info_wep_key_invalid            { buf = qtn_wlan_info_invalid_wep_key; } 
+RESOURCE TBUF r_info_wep_key_illegal_chars      { buf = qtn_wlan_info_wep_key_illegal_chars; } 
+RESOURCE TBUF r_wlan_network_unavailable        { buf = qtn_err_wlan_network_lost; }
+RESOURCE TBUF r_info_preshared_key_not_hexs     { buf = qtn_wlan_info_preshared_key_not_hex; }
+RESOURCE TBUF r_connuiutilities_not_supported   { buf = qtn_err_not_supp; }
+RESOURCE TBUF r_occ_info_no_wlan_available      { buf = qtn_occ_info_no_wlan_available; }
+
+RESOURCE DIALOG r_searching_wlan_wait_note
+	{
+	flags = EAknWaitNoteFlags;
+	buttons=R_AVKON_SOFTKEYS_EMPTY;
+    items=
+		{
+		DLG_LINE
+			{
+			type = EAknCtNote;
+			id = ESearchingWlanWaitNote; 
+			control= AVKON_NOTE 
+                { 
+				layout = EWaitLayout;
+				singular_label = qtn_wlan_wait_searching_networks;				
+                imagefile = AVKON_ICON_FILE;
+				imageid = EMbmAvkonQgn_note_progress;
+				imagemask = EMbmAvkonQgn_note_progress_mask;
+				animation = R_QGN_GRAF_WAIT_BAR_ANIM;				
+				};
+			}
+		};
+	}
+
+	
+RESOURCE DIALOG r_query_dialog_with_heading
+    {
+    flags = EEikDialogFlagNoDrag | EEikDialogFlagNoTitleBar | 
+            EEikDialogFlagCbaButtons | EEikDialogFlagNoBorder | 
+            EEikDialogFlagNoShadow;
+    buttons = R_AVKON_SOFTKEYS_YES_NO__YES;
+    items=
+        {
+        DLG_LINE
+            {
+            type = EAknCtPopupHeadingPane;
+            id = EAknMessageQueryHeaderId;
+            control = AVKON_HEADING
+                {
+                label = "";
+                headinglayout = R_AVKON_WML_SIGN_QUERY_HEADING_PANE;
+                };
+            },
+        DLG_LINE
+            {
+            type = EAknCtQuery;
+            id = EGeneralQuery;
+            control= AVKON_CONFIRMATION_QUERY
+                {
+                layout = EConfirmationLayout;
+                label = "";
+                };
+            }            
+        };
+    }
+    
+    
+RESOURCE CBA r_softkeys_yes_cancel__yes
+    {
+    buttons =
+        {
+        // Differences between ids and texts are intentional!
+        CBA_BUTTON { id = EAknSoftkeySelect; txt = text_softkey_yes; },     
+        CBA_BUTTON { id = EAknSoftkeyNo;     txt = text_softkey_cancel; },
+        CBA_BUTTON { id = EAknSoftkeySelect; txt = text_softkey_yes;}
+        };
+    }
+
+
+RESOURCE CBA r_softkeys_view_no__view
+    {
+    buttons =
+        {
+        CBA_BUTTON { id = EAknSoftkeyView; txt = text_softkey_select; },
+        CBA_BUTTON { id = EAknSoftkeyNo;   txt = text_softkey_cancel;},
+        CBA_BUTTON { id = EAknSoftkeyView; txt = text_softkey_select; }
+        };
+    }
+
+
+
+
+RESOURCE AVKON_LIST_QUERY r_message_query
+{
+   flags = EEikDialogFlagNotifyEsc | EGeneralQueryFlags;
+   softkeys = R_AVKON_SOFTKEYS_SELECT_CANCEL__SELECT;
+   items =
+   {
+      AVKON_LIST_QUERY_DLG_LINE
+      {
+         control = AVKON_LIST_QUERY_CONTROL_WITH_MSGBOX
+         {
+            actuallisttype = EAknCtSinglePopupMenuListBox;
+            listbox = AVKON_LIST_QUERY_LIST
+            {
+            };
+            heading = "...";
+         };
+      }
+   };
+}
+
+
+    
+RESOURCE DIALOG r_connecting_via_info_note
+    {
+    flags = EAknInformationNoteFlags | EEikDialogFlagWait;
+    buttons = R_AVKON_SOFTKEYS_EMPTY;
+    items =
+        {
+        DLG_LINE
+            {
+            type = EAknCtNote;
+            id = EConnectingViaNote;
+            control = AVKON_NOTE 
+                { 
+                layout = ENoteWithImageLayout;
+                singular_label = "";
+                plural_label = "";
+                imagefile = AVKON_ICON_FILE;                
+				imageid = EMbmAvkonQgn_note_info; 
+				imagemask = EMbmAvkonQgn_note_info_mask;   
+                animation = R_QGN_NOTE_INFO_ANIM;
+                };
+            }
+        };
+    }    
+    
+RESOURCE DIALOG r_connected_via_confirm_note
+    {
+    flags = EAknConfirmationNoteFlags | EEikDialogFlagWait;
+    buttons = R_AVKON_SOFTKEYS_EMPTY;
+    items =
+        {
+        DLG_LINE
+            {
+            type = EAknCtNote;
+            id = EConnectingViaConfirmNote;
+            control = AVKON_NOTE
+                { 
+                layout = ENoteWithImageLayout;
+                singular_label = "";
+                plural_label = "";
+                imagefile = AVKON_ICON_FILE;
+				imageid = EMbmAvkonQgn_note_ok; 
+				imagemask = EMbmAvkonQgn_note_ok_mask;
+                animation = R_QGN_NOTE_OK_ANIM;				                
+                };
+            }
+        };
+    }      
+    
+
+RESOURCE DIALOG r_wlan_name_query
+   {
+   flags = EGeneralQueryFlags | EEikDialogFlagNotifyEsc;
+   buttons = R_AVKON_SOFTKEYS_OK_CANCEL__OK;
+   items =
+       {
+       DLG_LINE
+             {
+             type = EAknCtQuery;
+             id = EGeneralQuery;
+             control = AVKON_DATA_QUERY
+                    {
+                    layout = EDataLayout;
+                    label = qtn_wlan_prmpt_network_name;
+                    control = EDWIN
+                        {
+                        maxlength = KWlanMaxSsidLength_;
+                        flags = EEikEdwinNoWrap;
+                        };
+                    };
+             }
+        };
+    }
+
+
+RESOURCE TBUF r_qtn_netw_conset_conf_connected_to           
+    { 
+    buf = qtn_netw_conset_conf_connected_to; 
+    }
+
+RESOURCE TBUF r_qtn_netw_conset_info_roaming_to             
+    { 
+    buf = qtn_netw_conset_info_roaming_to; 
+    }
+
+RESOURCE TBUF r_qtn_netw_conset_prmpt_roam_less_preferred   
+    { 
+    buf = qtn_netw_conset_prmpt_roam_less_preferred; 
+    }
+
+RESOURCE TBUF r_qtn_netw_conset_quest_roam_less_preferred   
+    { 
+    buf = qtn_netw_conset_quest_roam_less_preferred; 
+    }
+
+RESOURCE TBUF r_qtn_netw_conset_prmpt_roam_more_preferred   
+    { 
+    buf = qtn_netw_conset_prmpt_roam_more_preferred; 
+    }
+
+RESOURCE TBUF r_qtn_netw_conset_quest_roam_more_preferred   
+    { 
+    buf = qtn_netw_conset_quest_roam_more_preferred; 
+    }
+
+RESOURCE TBUF r_qtn_netw_conset_quest_connect_via_method    
+    { 
+    buf = qtn_netw_conset_quest_connect_via_method; 
+    }
+
+RESOURCE TBUF r_qtn_netw_conset_conf_connected_via_method
+    { 
+    buf = qtn_netw_conset_conf_connected_via_method;
+    }
+
+RESOURCE TBUF r_qtn_netw_conset_prmpt_connection_needed
+    {
+    buf = qtn_netw_conset_prmpt_connection_needed;
+    }
+
+RESOURCE TBUF r_qtn_netw_conset_msg_query_link_always_accept
+    {
+    buf = qtn_netw_conset_msg_query_link_always_accept;
+    }
+
+RESOURCE TBUF r_qtn_netw_conset_msg_query_link_try_next
+    {
+    buf = qtn_netw_conset_msg_query_link_try_next;
+    }
+
+RESOURCE TBUF r_qtn_wlan_manual_ssid_input
+    {
+    buf = qtn_wlan_manual_ssid_input;
+    }
+
+RESOURCE TBUF r_qtn_wlan_power_save_test_dlg_title
+    {
+    buf = qtn_wlan_power_save_test_dlg_title;
+    }
+
+RESOURCE TBUF r_qtn_wlan_power_save_test_dlg_text
+    {
+    buf = qtn_wlan_power_save_test_dlg_text;
+    }
+
+RESOURCE TBUF r_qtn_wlan_power_save_test_dlg_link
+    {
+    buf = qtn_wlan_power_save_test_dlg_link;
+    }
+
+RESOURCE TBUF r_qtn_occ_connecting_discreet_popup_text1
+    {
+    buf = qtn_occ_connecting_discreet_popup_text1;
+    }
+
+RESOURCE TBUF r_qtn_occ_connecting_discreet_popup_text2
+    {
+    buf = qtn_occ_connecting_discreet_popup_text2;
+    }
+
+RESOURCE TBUF r_qtn_occ_connection_failed_discreet_popup_text1
+    {
+    buf = qtn_occ_connection_failed_discreet_popup_text1;
+    }
+
+RESOURCE TBUF r_qtn_occ_config_failed_discreet_popup_text1
+    {
+    buf = qtn_occ_config_failed_discreet_popup_text1;
+    }
+
+RESOURCE TBUF r_qtn_occ_internal_error_discreet_popup_text2
+    {
+    buf = qtn_occ_internal_error_discreet_popup_text2;
+    }
+
+RESOURCE TBUF r_qtn_occ_wlan_not_found_discreet_popup_text2
+    {
+    buf = qtn_occ_wlan_not_found_discreet_popup_text2;
+    }
+
+RESOURCE TBUF r_qtn_occ_auth_error_discreet_popup_text2
+    {
+    buf = qtn_occ_auth_error_discreet_popup_text2;
+    }
+
+RESOURCE TBUF r_qtn_occ_check_key_discreet_popup_text2
+    {
+    buf = qtn_occ_check_key_discreet_popup_text2;
+    }
+
+RESOURCE TBUF r_qtn_occ_check_settings_discreet_popup_text2
+    {
+    buf = qtn_occ_check_settings_discreet_popup_text2;
+    }
+
+RESOURCE TBUF r_qtn_occ_sim_error_discreet_popup_text2
+    {
+    buf = qtn_occ_sim_error_discreet_popup_text2;
+    }
+
+RESOURCE TBUF r_qtn_occ_service_error_discreet_popup_text2
+    {
+    buf = qtn_occ_service_error_discreet_popup_text2;
+    }
+
+RESOURCE TBUF r_qtn_occ_access_error_discreet_popup_text2
+    {
+    buf = qtn_occ_access_error_discreet_popup_text2;
+    }
+
+RESOURCE TBUF r_qtn_occ_already_act_discreet_popup_text2
+    {
+    buf = qtn_occ_already_act_discreet_popup_text2;
+    }
+
+RESOURCE TBUF r_qtn_occ_wlan_weak_discreet_popup_text2
+    {
+    buf = qtn_occ_wlan_weak_discreet_popup_text2;
+    }
+
+RESOURCE TBUF r_qtn_occ_try_again_discreet_popup_text2
+    {
+    buf = qtn_occ_try_again_discreet_popup_text2;
+    }
+
+RESOURCE TBUF r_qtn_occ_conn_unavailable_discreet_popup_text2
+    {
+    buf = qtn_occ_conn_unavailable_discreet_popup_text2;
+    }
+
+
+RESOURCE CBA r_softkeys_view_empty__view
+    {
+    buttons =
+        {
+        CBA_BUTTON {id=EAknSoftkeyView; txt=text_softkey_select; },
+        CBA_BUTTON {txt=text_softkey_empty;},
+        CBA_BUTTON {id=EAknSoftkeyView; txt=text_softkey_select; }
+        };
+    }
+
+RESOURCE DIALOG r_powersave_query
+    {
+    flags = EEikDialogFlagNoDrag | EEikDialogFlagNoTitleBar | 
+            EEikDialogFlagCbaButtons | EEikDialogFlagNoBorder | 
+            EEikDialogFlagNoShadow | EEikDialogFlagNotifyEsc;
+    buttons = R_AVKON_SOFTKEYS_OK_EMPTY__OK;
+    items =
+        {
+        DLG_LINE
+            {
+            type = EAknCtPopupHeadingPane;
+            id = EAknMessageQueryHeaderId;
+            control = AVKON_HEADING
+                {
+                label = "";
+                headinglayout = R_AVKON_WML_SIGN_QUERY_HEADING_PANE;
+                };
+            },
+
+        DLG_LINE
+            {
+            type = EAknCtMessageQuery;
+            id = EAknMessageQueryContentId;
+            control = AVKON_MESSAGE_QUERY
+                {
+                };
+            }
+        };
+    }
+
+
+RESOURCE TBUF r_qtn_occ_prmpt_cs_data_home_nw
+    {    
+    buf = qtn_occ_prmpt_cs_data_home_nw;
+    }
+    
+RESOURCE TBUF r_qtn_occ_prmpt_cs_data_foreign_nw
+    {    
+    buf = qtn_occ_prmpt_cs_data_foreign_nw;
+    } 
+    
+RESOURCE TBUF r_qtn_occ_detail_cs_data_home_nw
+    {    
+    buf = qtn_occ_detail_cs_data_home_nw;
+    }
+    
+RESOURCE TBUF r_qtn_occ_detail_cs_data_foreign_nw
+    {    
+    buf = qtn_occ_detail_cs_data_foreign_nw;
+    }
+
+RESOURCE TBUF r_qtn_occ_list_cs_data_home_nw_automatic 
+    {    
+    buf = qtn_occ_list_cs_data_home_nw_automatic;
+    }
+
+RESOURCE TBUF r_qtn_occ_list_cs_data_home_nw_this_time 
+    {    
+    buf = qtn_occ_list_cs_data_home_nw_this_time;
+    }
+
+// End of File

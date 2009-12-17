@@ -1,0 +1,97 @@
+/*
+* Copyright (c) 2004 Nokia Corporation and/or its subsidiary(-ies). 
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description: 
+*     This is project specification file for the the Disconnect Dialog.
+*
+*/
+
+#include <data_caging_paths.hrh>
+#include <platform_paths.hrh>
+
+TARGET      DisconnectDlg.dll
+
+TARGETTYPE  DLL
+
+TARGETPATH  /System/libs
+
+UID         0x101FDFAE 0x101F85F3
+
+CAPABILITY CAP_GENERAL_DLL 
+
+VENDORID VID_DEFAULT
+
+START RESOURCE    ../DisconnectDlg/data/DisconnectDlg.rss
+HEADER
+TARGETPATH RESOURCE_FILES_DIR
+LANGUAGE_IDS
+END  // RESOURCE
+
+SOURCEPATH ../DisconnectDlg/src
+SOURCE  DisconnectDlgUi.cpp
+SOURCE  DisconnectDlgDialog.cpp
+SOURCE  ConnectionInfo.cpp
+SOURCE  ConnectionCArray.cpp
+SOURCE  ConnectionModel.cpp
+SOURCE  QueryDisconnectDlgDialog.cpp
+SOURCE	ActiveDisconnectDlgPlugin.cpp
+SOURCE	DisconnectDlgActiveWaiter.cpp
+SOURCE  connectioninfosortkey.cpp
+
+SOURCEPATH ../src
+SOURCE	ExpiryTimer.cpp
+
+USERINCLUDE	    ../DisconnectDlg/inc
+
+// Component specific internal headers 
+USERINCLUDE			../inc
+
+// ADO specific internal headers 
+SYSTEMINCLUDE		../../../inc
+
+//Macro to /epoc32 headers
+MW_LAYER_SYSTEMINCLUDE
+
+SYSTEMINCLUDE   /epoc32/include/uikon
+
+
+LIBRARY euser.lib
+LIBRARY cone.lib
+LIBRARY eikcore.lib
+LIBRARY eikcoctl.lib
+LIBRARY eiksrvui.lib
+LIBRARY avkon.lib
+LIBRARY eikdlg.lib 
+LIBRARY bafl.lib
+LIBRARY	connmon.lib
+LIBRARY commonengine.lib
+LIBRARY eiksrv.lib
+LIBRARY AknIcon.lib
+LIBRARY egul.lib
+LIBRARY apparc.lib
+LIBRARY apgrfx.lib
+LIBRARY fbscli.lib
+LIBRARY AknSkins.lib
+
+DEBUGLIBRARY flogger.lib
+DEBUGLIBRARY efsrv.lib
+
+
+#if defined(ARMCC)
+    DEFFILE ../DisconnectDlg/EABI/DisconnectDlg.DEF
+#elif defined( WINSCW )
+    DEFFILE ../DisconnectDlg/BWinsCw/DISCONNECTDLG.def
+#endif
+
+
+// End of File

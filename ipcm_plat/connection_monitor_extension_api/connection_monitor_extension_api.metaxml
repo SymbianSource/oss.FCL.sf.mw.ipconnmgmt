@@ -1,0 +1,18 @@
+<?xml version="1.0" ?>
+<api id="dd6dec7da0c17441af206ece30de10df" dataversion="1.0">
+  <name>Connection Monitor Extension API</name>
+  <description>Provides bearer specific connection monitoring extensions a way to supply bearer specific connection monitoring information to Connection Monitor Server's clients.</description>
+  <type>c++</type>
+  <subsystem>connectionmonitoring</subsystem>
+  <libs>
+    <lib name="ConnMonExt.lib" />
+  </libs>
+  <release category="domain"/>
+  <attributes>
+     <!-- This indicates wether the api provedes separate html documentation -->
+     <!-- or is the additional documentation generated from headers. -->
+     <!-- If you are unsuere then the value is "no" -->
+     <htmldocprovided>yes</htmldocprovided>
+     <adaptation>no</adaptation>
+  </attributes>
+</api>

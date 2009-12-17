@@ -1,0 +1,18 @@
+<?xml version="1.0" ?>
+<api id="67a65ff10e010cf2bfde4f4bf0369337" dataversion="1.0">
+  <name>Connection UI Utilities API</name>
+  <description>Provides miscellaneous networking UI services (eg. Roaming notifiers, Connecting notes, Progress notes ...).</description>
+  <type>c++</type>
+  <subsystem>networkingutilities</subsystem>
+  <libs>
+    <lib name="ConnectionUiUtilities.lib" />
+  </libs>
+  <release category="domain"/>
+  <attributes>
+     <!-- This indicates wether the api provedes separate html documentation -->
+     <!-- or is the additional documentation generated from headers. -->
+     <!-- If you are unsuere then the value is "no" -->
+     <htmldocprovided>yes</htmldocprovided>
+     <adaptation>no</adaptation>
+  </attributes>
+</api>

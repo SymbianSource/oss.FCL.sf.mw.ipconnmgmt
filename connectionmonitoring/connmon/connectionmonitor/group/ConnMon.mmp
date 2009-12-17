@@ -1,0 +1,88 @@
+/*
+* Copyright (c) 2002-2009 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:  Builds ConnMon.dll.
+*
+*/
+
+#include <platform_paths.hrh>
+
+MACRO           EPOC_SDK=0x07010000
+
+TARGET          ConnMon.dll
+TARGETTYPE      dll
+UID             0x1000008d 0x101F6CEE
+
+VENDORID        VID_DEFAULT
+CAPABILITY      CAP_CLIENT_DLL
+
+SOURCEPATH      ../src
+SOURCE          RConnMon.cpp ConnMonCli.cpp
+SOURCE          ConnMonServ.cpp ConnMonSess.cpp ConnMonIAP.cpp CEventQueue.cpp
+SOURCE          ConnMonNoti.cpp CDataVolume.cpp CCsdFax.cpp CPsdFax.cpp CPlugin.cpp
+SOURCE          CIapSupport.cpp CUiDialogAO.cpp CWlanSupport.cpp
+
+SOURCE          ConnMonBearer.cpp
+SOURCE          ConnMonBearerCSD.cpp ConnMonBearerGPRS.cpp
+SOURCE          ConnMonBearerLAN.cpp ConnMonBearerWLAN.cpp
+
+SOURCE          ConnMonAvailabilityManager.cpp
+SOURCE          ConnMonBearerGroupManager.cpp
+SOURCE          connmoncommsdatcache.cpp
+SOURCE          connmoncommsdatnotifier.cpp
+
+SOURCE          ConnMonUtils.cpp
+
+SOURCE          ConnMonWLANNetwork.cpp
+SOURCE          ConnMonWLANNetworksArrayPckg.cpp
+
+SOURCE          connmonwlannetwork_v2.cpp
+SOURCE          ConnMonWLANNetworksArrayPckg_v2.cpp
+
+SOURCE          ConnMonId.cpp
+SOURCE          ConnMonIdsArrayPckg.cpp
+
+SOURCE          connmontelnoti.cpp
+SOURCE          connmondtmnoti.cpp
+
+SOURCE          ConnMonBearerNotifier.cpp ConnMonEGprsNotifier.cpp ConnMonHsdpaNotifier.cpp
+
+
+USERINCLUDE     ../inc
+MW_LAYER_SYSTEMINCLUDE
+
+// Path for internal headers of the networking ADO.
+SYSTEMINCLUDE   ../../../../inc
+
+
+LIBRARY         euser.lib esock.lib etel.lib etelmm.lib etelpckt.lib
+LIBRARY         CustomAPI.lib
+LIBRARY         featmgr.lib
+LIBRARY         charconv.lib
+LIBRARY         commdb.lib
+LIBRARY         commsdat.lib
+LIBRARY         ecom.lib
+LIBRARY         cmmanagerdatabase.lib
+LIBRARY         centralrepository.lib
+
+DEBUGLIBRARY    flogger.lib
+
+#if defined(ARMCC)
+DEFFILE ../EABI/ConnMon_EKA2.def
+#elif defined( WINSCW )
+DEFFILE ../BWINSCW/CONNMON_EKA2.def
+#else
+DEFFILE ../BMARM/CONNMON_EKA2.def
+#endif
+
+//exportunfrozen

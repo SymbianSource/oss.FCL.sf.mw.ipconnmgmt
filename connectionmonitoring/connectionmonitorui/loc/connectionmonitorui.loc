@@ -1,0 +1,762 @@
+/*
+* Copyright (c) 2002 Nokia Corporation and/or its subsidiary(-ies). 
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:  Localization texts for ConnectionMonitorUi
+*     
+*
+*/
+
+
+
+// LOCALISATION STRINGS
+//d:Title pane text in main view
+//l:title_pane_t2/opt9
+//w:
+//r:1.0
+//
+
+#define qtn_cmon_title	"Conn. Manager"
+
+//d:No active connection in main view
+//l:main_list_empty_pane
+//w:
+//r:1.0
+//
+
+#define qtn_cmon_no_active_connections	"(no active connections)"
+
+//d:Title pane text in main view.
+//l:navi_navi_text_pane_t1
+//w:
+//r:1.0
+//
+
+#define qtn_cmon_navi_one_active_conn "1 active connection"
+
+//d:Title pane text in main view.
+//l:navi_navi_text_pane_t1
+//w:
+//r:1.0
+//
+
+#define qtn_cmon_navi_many_active_conns "%N active connections"
+
+//d:downloaded / uploaded data amounts with two decimal 
+//d:digits (for GPRS connections)
+//l:list_double_graphic_pane_t2
+//w:
+//r:1.0
+//
+
+#define qtn_cmon_ul_dl_data_amounts "%0U / %1U"
+
+//d:duration of the connection over 24h (for CSD and HSCSD connections)
+//l:list_single_heading_pane_t1
+//w:
+//r:1.0
+//
+
+#define qtn_cmon_duration_over_24h  "%0Ud %1U"
+
+//d:Connection status (main view)
+//l:list_double_graphic_pane_t2
+//w:
+//r:1.0
+//
+
+#define qtn_cmon_status_creating    "Creating connection"
+
+//d:Connection status (main view)
+//l:list_double_graphic_pane_t2
+//w:
+//r:1.0
+//
+
+#define qtn_cmon_status_idle    "Idle"
+
+//d:Connection status (main view)
+//l:list_double_graphic_pane_t2
+//w:
+//r:1.0
+//
+
+#define qtn_cmon_status_active  "Active"
+
+//d:Connection status (main view)
+//l:list_double_graphic_pane_t2
+//w:
+//r:1.0
+//
+
+#define qtn_cmon_status_suspended   "On hold"
+
+//d:Connection status (main view)
+//l:list_double_graphic_pane_t2
+//w:
+//r:1.0
+//
+
+#define qtn_cmon_status_closing "Closing connection"
+
+//d:Connection status (main view)
+//l:list_double_graphic_pane_t2
+//w:
+//r:1.0
+//
+
+#define qtn_cmon_status_closed  "Closed"
+
+//d:Connection status (details view)
+//l:list_single_heading_pane_t1
+//w:
+//r:1.0
+//
+
+#define qtn_cmon_status_details_creating    "Creating connection"
+
+//d:Connection status (details view)
+//l:list_single_heading_pane_t1
+//w:
+//r:1.0
+//
+
+#define qtn_cmon_status_details_idle    "Idle"
+
+//d:Connection status (details view)
+//l:list_single_heading_pane_t1
+//w:
+//r:1.0
+//
+
+#define qtn_cmon_status_details_active  "Active"
+
+//d:Connection status (details view)
+//l:list_single_heading_pane_t1
+//w:
+//r:1.0
+//
+
+#define qtn_cmon_status_details_suspended   "On hold"
+
+//d:Connection status (details view)
+//l:list_single_heading_pane_t1
+//w:
+//r:1.0
+//
+
+#define qtn_cmon_status_details_closing "Closing connection"
+
+//d:Connection status (details view)
+//l:list_single_heading_pane_t1
+//w:
+//r:1.0
+//
+
+#define qtn_cmon_status_details_closed  "Closed"
+
+//d:The navi pane displays the “serial number” (%1N) of the
+//d:connection in question and the total amount of the 
+//d:connections.
+//l:navi_navi_text_pane_t1
+//w:
+//r:1.0
+//
+
+#define qtn_cmon_navi_nof_connection    "%0N/%1N"
+
+//d:
+//l:list_single_heading_pane_t2 
+//w:
+//r:1.0
+//
+
+#define qtn_cmon_heading_conn_name  "Name"
+
+//d:
+//l:list_single_heading_pane_t2 
+//w:
+//r:1.0
+//
+
+#define qtn_cmon_heading_bearer   "Bearer"
+
+//d:
+//l:list_single_heading_pane_t2 
+//w:
+//r:1.0
+//
+
+#define qtn_cmon_heading_status "Status"
+
+//d:
+//l:list_single_heading_pane_t2 
+//w:
+//r:1.0
+//
+
+#define qtn_cmon_heading_data_received  "Received"
+
+//d:
+//l:list_single_heading_pane_t2 
+//w:
+//r:1.0
+//
+
+#define qtn_cmon_heading_data_sent  "Sent"
+
+//d:
+//l:list_single_heading_pane_t2 
+//w:
+//r:1.0
+//
+
+#define qtn_cmon_heading_duration   "Duration"
+
+//d:
+//l:list_single_heading_pane_t2 
+//w:
+//r:1.0
+//
+
+#define qtn_cmon_heading_speed      "Speed"
+
+//d:
+//l:list_single_heading_pane_t2 
+//w:
+//r:1.0
+//
+
+#define qtn_cmon_heading_csd_number "Dial-up no."
+
+//d:
+//l:list_single_heading_pane_t2 
+//w:
+//r:1.0
+//
+
+#define qtn_cmon_heading_gprs_apn   "APN"
+
+//d:
+//l:list_single_heading_pane_t2 
+//w:
+//r:1.0
+//
+
+#define qtn_cmon_heading_sharing_info   "Sharing"
+
+//d:
+//l:list_single_heading_pane_t1
+//w:
+//r:1.0
+//
+
+#define qtn_set_bearer_data_call    "Data call"
+
+//d:
+//l:list_single_heading_pane_t1
+//w:
+//r:1.0
+//
+
+#define qtn_set_bearer_packet_data  "Packet data"
+
+//d:
+//l:list_single_heading_pane_t1
+//w:
+//r:1.0
+//
+
+#define qtn_cmon_bearer_hscsd    "High speed GSM"
+
+//d:
+//l:list_single_heading_pane_t1
+//w:
+//r:1.0
+//
+
+#define qtn_log_gprs_amount_b   "%U B"
+
+//d:
+//l:list_single_heading_pane_t1
+//w:
+//r:1.0
+//
+
+#define qtn_log_gprs_amount_kb   "%U kB"
+
+//d:
+//l:list_single_heading_pane_t1
+//w:
+//r:1.0
+//
+
+#define qtn_log_gprs_amount_mb   "%U MB"
+
+//d:
+//l:list_single_heading_pane_t1
+//w:
+//r:1.0
+//
+
+#define qtn_log_gprs_amount_gb   "%U GB"
+
+//d:
+//l:list_double_number_pane_t3
+//w:
+//r:1.0
+//
+
+#define qtn_cmon_data_transf_rate_dl    "%U kB/s"
+
+//d:
+//l:list_single_heading_pane_t1
+//w:
+//r:1.0
+//
+
+#define qtn_cmon_sharing_information    "Between %N instances" 
+
+//d:Confirmation query to close selected connection
+//l:popup_note_window
+//w:
+//r:1.0
+//
+
+#define qtn_cmon_conf_end_single_conn "End connection ’%U’?"
+
+//d:Confirmation query to close all connections
+//l:popup_note_window
+//w:
+//r:1.0
+//
+
+#define qtn_cmon_conf_end_all_conns "%N connections active. End all connections?"
+
+//d:Main view menu item
+//l:list_single_pane_t1_cp2
+//w:
+//r:1.0
+//
+
+#define qtn_cmon_list_options_details "Details"
+
+//d:Main view menu item
+//l:list_single_pane_t1_cp2
+//w:
+//r:1.0
+//
+
+#define qtn_cmon_list_options_end_conn "End connection"
+
+//d:Main view menu item
+//l:list_single_pane_t1_cp2
+//w:
+//r:1.0
+//
+
+#define qtn_cmon_list_options_end_all "End all connections"
+
+//d:Application name
+//l:list_single_large_graphic_pane_t1
+//w:
+//r:1.0
+//
+
+#define qtn_apps_cmon_list "Conn. manager"
+
+//d:Application name
+//l:cell_app_pane_t1
+//w:
+//r:1.0
+//
+
+#define qtn_apps_cmon_grid "Conn. manager"
+
+//d:Transferred KBytes
+//l:list_single_heading_pane_t1
+//w:
+//r:1.0
+//
+
+#define qtn_cmon_data_transf_rate_ul    "%U kB/s"
+
+//d:
+//l:list_single_heading_pane_t1
+//w:
+//r:1.0
+//
+
+#define qtn_cmon_item_conn_name_modem   "Modem connection"
+
+//d:Confirmation query to close modem connection
+//l:popup_note_window
+//w:
+//r:1.0
+//
+
+#define qtn_cmon_conf_end_modem_conn    "End modem connection?"
+
+//d:when user rejects the query, an information note
+//l:popup_note_window
+//w:
+//r:1.0
+//
+
+#define qtn_cmon_info_conn_already_end    "Connection was already closed."
+
+//d:Connection Manager’s Active connections main view
+//l:list_double2_large_graphic_pane
+//w:
+//r:3.0
+//
+#define qtn_cmon_active_data_connections 		"Active data connections"
+
+//d:Connection Manager’s Available WLAN networks main view
+//l:list_double2_large_graphic_pane
+//w:
+//r:3.0
+//
+#define qtn_cmon_available_wlan_networks 		"Available WLAN networks"
+
+//d: WLAN network mode value text,mode, terminal is connected to another terminal or multiple
+//d:terminals (point-to-multipoint) without utilising any physical access points.  
+//l:list_single_heading_pane_t1  
+//w:
+//r:3.1
+//
+#define qtn_cmon_wlan_newtwork_mode_adhoc 		"Ad-hoc"
+
+//d: WLAN network mode value text, the terminal is connected over WLAN to a physical WLAN access point.
+//l:list_single_heading_pane_t1 
+//w:
+//r:3.1
+//
+#define qtn_cmon_wlan_newtwork_mode_infra		"Infrastructure"
+
+
+//d: WLAN network security mode value text, this is the abbrevation of a kind of security mode 
+//l:list_single_heading_pane_t1  
+//w:
+//r:3.1
+//
+#define qtn_cmon_wlan_security_mode_wep             	"WEP"
+
+//d: WLAN network security mode value text, this is the abbrevation of a kind of security mode  
+//l:list_single_heading_pane_t1 
+//w:
+//r:3.1
+//
+#define qtn_cmon_wlan_security_mode_802_1x           	"802.1x"
+
+//d: WLAN network security mode value text, this is the abbrevation of a kind of security mode  
+//l:list_single_heading_pane_t1  
+//w:
+//r:3.1
+//
+#define qtn_cmon_wlan_security_mode_wpa             	"WPA/WPA2"
+
+//d:Title of Active connections main view 
+//l:title_pane_t2/opt9
+//w:
+//r:3.0
+//
+#define qtn_cmon_title_active_conns                	 	"Active data connections"
+
+//d: Title of Available WLAN networks main view
+//l:title_pane_t2/opt9
+//w:
+//r:3.0
+//
+#define qtn_cmon_title_available_wlan               		"Available WLAN networks"
+
+//d: WLAN network bearer type value text 
+//l:list_single_heading_pane_t1
+//w:
+//r:3.0
+//
+#define qtn_wlan_sett_bearer_wlan            		"Wireless LAN"
+
+//d: WLAN network security mode value text 
+//l:list_single_heading_pane_t1 
+//w:
+//r:3.1
+//
+#define qtn_cmon_wlan_security_mode_open            	"Open network"
+
+//d: WLAN network name (SSID) detail of the network
+//l:list_single_heading_pane_t2 
+//w:
+//r:3.0
+//
+#define qtn_cmon_heading_wlan_network_name               	"Network"
+
+//d: WLAN network signal strength detail of the network
+//l:list_single_heading_pane_t2 
+//w:
+//r:3.0
+//
+#define qtn_cmon_heading_wlan_signal_strength            	"Signal"
+
+//d: WLAN network mode detail of the network
+//l:list_single_heading_pane_t2 
+//w:
+//r:3.0
+//
+#define qtn_cmon_heading_wlan_network_mode               	"Mode"
+
+//d:WLAN network  Security mode used by the WLAN network detail of the network
+//l:list_single_heading_pane_t2 
+//w:
+//r:3.0
+//
+#define qtn_cmon_heading_wlan_security_mode              	"Security"
+
+//d:WLAN network  Current transmit (TX) power level detail of the network
+//l:list_single_heading_pane_t2 
+//w:
+//r:3.0
+//
+#define qtn_cmon_heading_wlan_tx_power              	"TX power"
+
+//d:WLAN network  Amount of physical WLAN access points detail of the network
+//l:list_single_heading_pane_t2 
+//w:
+//r:3.0
+//
+#define qtn_cmon_heading_wlan_nw_ap_amount          	"Coverage"
+
+//d:WLAN network  Maximum data rate detail of the network
+//l:list_single_heading_pane_t2 
+//w:
+//r:3.0
+//
+#define qtn_cmon_heading_wlan_nw_max_rate           	"Max. rate"
+
+//d:WLAN network Amount of physical WLAN access points (AP) in range, if a single AP is in range
+//l:list_single_heading_pane_t1 
+//w:
+//r:3.0
+//
+#define qtn_cmon_wlan_ap_amount_in_range            	"1 access point"
+
+//d:WLAN network Amount of physical WLAN access points (AP) in range, if multiple APs in range (%N is the amount)
+//l:list_single_heading_pane_t1 
+//w:
+//r:3.0
+//
+#define qtn_cmon_wlan_ap_amount_in_range_many       	"%N access points"
+
+//d:WLAN network Current transmit (TX) power level in milliwatts (mW
+//l:list_single_heading_pane_t1 
+//w:
+//r:3.0
+//
+#define qtn_cmon_wlan_tx_power_level                		"%N mW"
+
+//d:WLAN network Maximum data rate in network (of best AP in range)
+//d:in megabits per secondin
+//l:list_single_heading_pane_t1 
+//w:
+//r:3.0
+//
+#define qtn_cmon_wlan_max_data_rate                 	"%U Mbit/s"
+
+//d: WLAN network signal strength value text 
+//l:list_single_heading_pane_t1 
+//w:
+//r:3.0
+//
+#define qtn_cmon_wlan_singal_strength_low           	"Low (%N%)"
+
+//d: WLAN network signal strength value text 
+//l:list_single_heading_pane_t1 
+//w:
+//r:3.0
+//
+#define qtn_cmon_wlan_singal_strength_medium        	"Medium (%N%)"
+
+//d: WLAN network signal strength value text 
+//l:list_single_heading_pane_t1 
+//w:
+//r:3.0
+//
+#define qtn_cmon_wlan_singal_strength_good          	"Good (%N%)"
+
+//d: WLAN network signal strength text  if the network in question becomes unavailable while
+//d:in details view,
+//l:list_single_heading_pane_t1 
+//w:
+//r:3.0
+//
+#define qtn_cmon_wlan_signal_strength_no_signal            	"No signal"
+
+//d:Navi pane text in Available WLAN networks main view, if only one network is available. 
+//l:navi_navi_text_pane_t1 
+//w:
+//r:3.0
+//
+#define qtn_cmon_navi_one_wlan_nw_available         	"1 network available"
+
+//d:Navi pane text in Available WLAN networks main view, if more than one network is available 
+//d:(%N is the amount of networks).
+//l:navi_navi_text_pane_t1 
+//w:
+//r:3.0
+//
+#define qtn_cmon_navi_many_wlan_nws_available       	"%N networks available"
+
+//d:Navi pane text in Available WLAN networks details view. 
+//d:The navi pane displays the “serial number” (%0N) of the
+//d:network in question and the total amount of the connections
+//d:(%1N) using the navigation text component: %0N/%1N
+//l:navi_navi_text_pane_t1 
+//w:
+//r:3.0
+//
+#define qtn_cmon_navi_nof_wlan_network       		"%0N/%1N"
+
+//d:Available WLAN networks main view — No networks available
+//l:main_list_empty_pane
+//w:
+//r:3.0
+//
+#define qtn_cmon_no_wlan_networks_available         	"(no available WLAN networks)"
+
+//d:Available WLAN networks main view options menu item. 
+//l:list_single_pane_t1_cp2
+//w:
+//r:3.0
+//
+#define qtn_cmon_options_create_wlan_iap       	"Create internet access point"
+
+//d:Available WLAN networks main view options menu - create internet access point item 
+//d:was selected this confirmation query note is displayed.
+//l:popup_note_window
+//w:
+//r:3.0
+//
+#define qtn_cmon_quest_create_wlan_iap  "Create internet access point for WLAN network '%U'?"
+
+//d:Available WLAN networks main view options menu - create internet access point item 
+//d:and secure network was selected this information note is poped up.
+//l:popup_note_window
+//w:
+//r:3.0
+//
+#define qtn_cmon_info_wlan_secure_nw_iap_create     	"You can create an internet access point for a secure WLAN network via Connection settings, Access points."
+
+//d:Available WLAN networks main view — One or more networks available, options menu item
+//l:list_single_pane_t1_cp2
+//w:
+//r:3.0
+//
+#define qtn_cmon_options_refresh               		"Refresh"
+
+
+//d: Unavailable attribute (details view)
+//l:list_single_heading_pane_t1
+//w:
+//r:3.0
+//
+#define qtn_cmon_parameter_unavailable  "(unavailable)"
+
+//d:
+//l:list_single_heading_pane_t2 
+//w:
+//r:3.0
+//
+#define qtn_cmon_heading_data_total  "Total"
+
+
+//d:"Connection summary note" note- info text
+//l:heading_pane_t1
+//w:
+//r:3.1
+//
+#define qtn_cmon_summary_heading  "Connection summary"
+
+//d:First line topic of "Connection summary note" note
+//d:displays the total transferred data amount (received and sent summarized)
+//l:heading_pane_t1
+//w:
+//r:3.1
+//
+#define qtn_cmon_summary_transferred "Transferred data:"
+
+//d:Third line topic of "Connection summary note" note,
+//d:displays the duration of the connection
+//l:heading_pane_t1
+//w:
+//r:3.1
+//
+#define qtn_cmon_summary_duration "Duration:"
+
+//d:Available WLAN networks main view options menu - create internet access point item 
+//d:final confirmation note is poped up when access point item has been created successfully
+//l:popup_note_window
+//w:
+//r:3.1
+//
+#define qtn_cmon_conf_wlan_iap_created	"Internet access point defined for WLAN network '%U'."
+
+//d:Text in middle soft key (opens a view for detailed information)
+//l:control_pane_t3/opt7
+//w:
+//r:3.2
+//
+#define qtn_msk_cmon_details "Details"
+
+//d:The name of the application which uses the connection (MessagingServer)
+//l:list_single_heading_pane_t1
+//w:
+//r:3.2
+//
+#define qtn_cmon_sharing_app_msg_server  "Messaging" 
+
+//d:The name of the application which uses the connection (DownaloadMgrServer)
+//l:list_single_heading_pane_t1
+//w:
+//r:3.2
+//
+#define qtn_cmon_sharing_app_dl_mg  "Downloads" 
+
+//d:The name of the application which uses the connection (Feeds Server)
+//l:list_single_heading_pane_t1
+//w:
+//r:3.2
+//
+#define qtn_cmon_sharing_app_rss_server  "Web Feeds" 
+
+//d:The name of the application which uses the connection (Java MIDlets)
+//l:list_single_heading_pane_t1
+//w:
+//r:3.2
+//
+#define qtn_cmon_sharing_app_java_midlet  "Application" 
+
+//d:The name of the application which uses the connection (Unknown instance)
+//l:list_single_heading_pane_t1
+//w:
+//r:3.2
+//
+#define qtn_cmon_sharing_app_unknown  "(unknown)" 
+
+//d:The name of the application which uses the connection 
+//d:(SUPL (Secure User Plane Location) server)
+//l:list_single_heading_pane_t1
+//w:
+//r:3.2
+//
+#define qtn_cmon_sharing_app_supl "Positioning server" 
+
+// End of File

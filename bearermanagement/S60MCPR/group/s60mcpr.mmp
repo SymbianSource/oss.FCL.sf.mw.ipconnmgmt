@@ -1,0 +1,93 @@
+/*
+ * Copyright (c) 2008-2009 Nokia Corporation and/or its subsidiary(-ies). 
+ * All rights reserved.
+ * This component and the accompanying materials are made available
+ * under the terms of "Eclipse Public License v1.0"
+ * which accompanies this distribution, and is available
+ * at the URL "http://www.eclipse.org/legal/epl-v10.html".
+ *
+ * Initial Contributors:
+ * Nokia Corporation - initial contribution.
+ *
+ * Contributors:
+ *
+ * Description: S60 MCPR and TM
+ *
+ */
+
+
+#include <cflog.mmh>
+#include <platform_paths.hrh>
+
+TARGET            s60mcpr.dll
+TARGETTYPE        PLUGIN
+
+UID               0x10009D8D 0x101F6D4A 
+VENDORID          0x70000001
+
+// Enable the utrace logging
+MACRO             SYMBIAN_TRACE_ENABLE
+
+USERINCLUDE       ../inc
+
+MW_LAYER_SYSTEMINCLUDE
+SYSTEMINCLUDE   ../../../inc
+
+SOURCEPATH        ../src
+
+SOURCE            s60mcpr.cpp
+SOURCE            s60mcprfactory.cpp
+SOURCE            s60mcprstates.cpp
+SOURCE            s60mcpractivities.cpp
+SOURCE            s60mcprmobilityactivity.cpp
+SOURCE            s60mcprerrorrecoveryactivity.cpp
+SOURCE            s60mcprsimpleselectactivity.cpp
+SOURCE            s60mpmrequests.cpp
+SOURCE            s60mpmnotifications.cpp
+SOURCE            s60tiermanager.cpp
+SOURCE            s60tiermanagerfactory.cpp
+SOURCE            s60tiermanagerselector.cpp
+SOURCE            s60extendedtmselector.cpp
+SOURCE            s60tmactivities.cpp
+SOURCE            s60tmprovideractivity.cpp
+SOURCE            ecom_impl.cpp
+#ifdef SYMBIAN_ADAPTIVE_TCP_RECEIVE_WINDOW
+SOURCE            s60tcprecvwin.cpp
+#endif
+
+
+START RESOURCE 101F6D4A.rss
+TARGET            s60mcpr.rsc
+END
+
+LIBRARY euser.lib
+LIBRARY esocksvr.lib
+LIBRARY serverden.lib
+LIBRARY esock.lib
+LIBRARY netmeta.lib
+LIBRARY netsm.lib
+LIBRARY commsfw.lib
+LIBRARY coreproviders.lib
+LIBRARY mobilitycoreproviders.lib
+LIBRARY esock_api_ext.lib
+LIBRARY commsdat.lib
+LIBRARY simpleselectorbase.lib
+LIBRARY insock.lib
+LIBRARY nodemessages.lib
+LIBRARY meshmachine.lib
+LIBRARY netinterfaces.lib
+LIBRARY virtualconstructors.lib
+LIBRARY factories.lib
+LIBRARY mpm.lib
+LIBRARY commdb.lib
+LIBRARY extendedconnpref.lib
+#ifdef SYMBIAN_ADAPTIVE_TCP_RECEIVE_WINDOW
+LIBRARY centralrepository.lib
+#endif
+
+//MI support
+#include <elements/sd_mintercept.mmh>
+
+
+
+CAPABILITY CommDD PowerMgmt ReadDeviceData WriteDeviceData TrustedUI ProtServ NetworkControl NetworkServices LocalServices ReadUserData WriteUserData

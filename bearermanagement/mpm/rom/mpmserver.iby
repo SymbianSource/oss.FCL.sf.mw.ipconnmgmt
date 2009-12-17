@@ -1,0 +1,31 @@
+/*
+* Copyright (c) 2004-2009 Nokia Corporation and/or its subsidiary(-ies). 
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description: MPM server
+*
+*/
+
+#ifndef MPMSERVER_IBY
+#define MPMSERVER_IBY
+
+#include <bldvariant.hrh>
+
+#ifdef FF_PLATFORM_SIMULATOR
+file=ABI_DIR\BUILD_DIR\mpmserver_platsim.exe  PROGRAMS_DIR\mpmserver.exe
+#else
+file=ABI_DIR\BUILD_DIR\mpmserver.exe  PROGRAMS_DIR\mpmserver.exe
+#endif
+
+#endif //MPMSERVER_IBY
+
+//  End of File

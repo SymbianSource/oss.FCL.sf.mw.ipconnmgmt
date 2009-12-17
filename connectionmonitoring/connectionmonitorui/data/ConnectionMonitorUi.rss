@@ -1,0 +1,422 @@
+/*
+* Copyright (c) 2002 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:
+*     This file contains all the resources for the ConnectionMonitorUi.
+*
+*
+*/
+
+
+//  RESOURCE IDENTIFIER
+NAME    CMUI // 4 letter ID
+//
+//  INCLUDES
+
+#include <connectionmonitorui.loc>
+#include <eikon.rh>
+#include "ConnectionMonitorUi.hrh"
+#include <ConnectionMonitorUi.mbg>
+#include <avkon.rsg>
+#include <avkon.rh>
+#include <avkon.mbg>
+#include <avkon.hrh>
+#include <avkon.loc>
+
+#include <appinfo.rh>
+#include <data_caging_paths_strings.hrh>
+
+//  CONSTANTS
+//#define ?constant   ?value
+
+//  MACROS
+//#define ?macro
+
+//  RESOURCE DEFINITIONS
+
+RESOURCE RSS_SIGNATURE { }
+
+RESOURCE TBUF { buf="ConnectionMonitorUi"; }
+
+RESOURCE EIK_APP_INFO
+    {
+    status_pane = r_connmonui_status_pane;
+    }
+
+RESOURCE STATUS_PANE_APP_MODEL r_connmonui_status_pane
+    {
+    panes =
+        {
+        SPANE_PANE
+            {
+            id = EEikStatusPaneUidTitle;
+            type = EAknCtTitlePane;
+            resource = r_connmonui_title_pane;
+            }
+        };
+    }
+
+RESOURCE TITLE_PANE r_connmonui_title_pane
+    {
+    txt = qtn_cmon_title;
+    }
+
+RESOURCE TBUF r_qtn_cmon_no_active_connections { buf=qtn_cmon_no_active_connections; }
+RESOURCE TBUF r_qtn_cmon_navi_one_active_conn   { buf=qtn_cmon_navi_one_active_conn; }
+RESOURCE TBUF r_qtn_cmon_navi_many_active_conns { buf=qtn_cmon_navi_many_active_conns; }
+
+RESOURCE TBUF r_qtn_set_bearer_data_call    { buf=qtn_set_bearer_data_call; }
+RESOURCE TBUF r_qtn_set_bearer_packet_data  { buf=qtn_set_bearer_packet_data; }
+RESOURCE TBUF r_qtn_cmon_bearer_hscsd       { buf=qtn_cmon_bearer_hscsd; }
+RESOURCE TBUF r_qtn_wlan_sett_bearer_wlan   { buf=qtn_wlan_sett_bearer_wlan; }
+
+
+RESOURCE TBUF r_qtn_cmon_heading_conn_name { buf=qtn_cmon_heading_conn_name; }
+RESOURCE TBUF r_qtn_cmon_heading_bearer { buf=qtn_cmon_heading_bearer; }
+RESOURCE TBUF r_qtn_cmon_heading_status { buf=qtn_cmon_heading_status; }
+RESOURCE TBUF r_qtn_cmon_heading_data_total { buf=qtn_cmon_heading_data_total; }
+RESOURCE TBUF r_qtn_cmon_heading_data_received { buf=qtn_cmon_heading_data_received; }
+RESOURCE TBUF r_qtn_cmon_heading_data_sent { buf=qtn_cmon_heading_data_sent; }
+RESOURCE TBUF r_qtn_cmon_heading_duration { buf=qtn_cmon_heading_duration; }
+RESOURCE TBUF r_qtn_cmon_heading_speed { buf=qtn_cmon_heading_speed; }
+RESOURCE TBUF r_qtn_cmon_heading_csd_number { buf=qtn_cmon_heading_csd_number; }
+RESOURCE TBUF r_qtn_cmon_heading_gprs_apn { buf=qtn_cmon_heading_gprs_apn; }
+RESOURCE TBUF r_qtn_cmon_heading_sharing_info { buf=qtn_cmon_heading_sharing_info; }
+
+RESOURCE TBUF r_qtn_cmon_status_creating { buf=qtn_cmon_status_creating; }
+RESOURCE TBUF r_qtn_cmon_status_idle { buf=qtn_cmon_status_idle; }
+RESOURCE TBUF r_qtn_cmon_status_active { buf=qtn_cmon_status_active; }
+RESOURCE TBUF r_qtn_cmon_status_suspended { buf=qtn_cmon_status_suspended; }
+RESOURCE TBUF r_qtn_cmon_status_closing { buf=qtn_cmon_status_closing; }
+RESOURCE TBUF r_qtn_cmon_status_closed { buf=qtn_cmon_status_closed; }
+
+RESOURCE TBUF r_qtn_cmon_status_details_creating { buf=qtn_cmon_status_details_creating; }
+RESOURCE TBUF r_qtn_cmon_status_details_idle { buf=qtn_cmon_status_details_idle; }
+RESOURCE TBUF r_qtn_cmon_status_details_active { buf=qtn_cmon_status_details_active; }
+RESOURCE TBUF r_qtn_cmon_status_details_suspended { buf=qtn_cmon_status_details_suspended; }
+RESOURCE TBUF r_qtn_cmon_status_details_closing { buf=qtn_cmon_status_details_closing; }
+RESOURCE TBUF r_qtn_cmon_status_details_closed { buf=qtn_cmon_status_details_closed; }
+
+RESOURCE TBUF r_qtn_log_gprs_amount_b { buf=qtn_log_gprs_amount_b; }
+RESOURCE TBUF r_qtn_log_gprs_amount_kb { buf=qtn_log_gprs_amount_kb; }
+RESOURCE TBUF r_qtn_log_gprs_amount_mb { buf=qtn_log_gprs_amount_mb; }
+RESOURCE TBUF r_qtn_log_gprs_amount_gb { buf=qtn_log_gprs_amount_gb; }
+
+RESOURCE TBUF r_qtn_cmon_data_transf_rate_dl { buf=qtn_cmon_data_transf_rate_dl; }
+RESOURCE TBUF r_qtn_cmon_data_transf_rate_ul { buf=qtn_cmon_data_transf_rate_ul; }
+
+RESOURCE TBUF r_qtn_cmon_ul_dl_data_amounts { buf=qtn_cmon_ul_dl_data_amounts; }
+RESOURCE TBUF r_qtn_cmon_navi_nof_connection { buf=qtn_cmon_navi_nof_connection; }
+
+RESOURCE TBUF r_text_calc_decimal_separator { buf=text_calc_decimal_separator; }
+
+RESOURCE TBUF r_qtn_cmon_item_conn_name_modem { buf=qtn_cmon_item_conn_name_modem; }
+
+RESOURCE TBUF r_qtn_cmon_conf_end_single_conn { buf=qtn_cmon_conf_end_single_conn; }
+RESOURCE TBUF r_qtn_cmon_conf_end_all_conns { buf=qtn_cmon_conf_end_all_conns; }
+RESOURCE TBUF r_qtn_cmon_conf_end_modem_conn { buf=qtn_cmon_conf_end_modem_conn; }
+RESOURCE TBUF r_qtn_cmon_duration_over_24h { buf=qtn_cmon_duration_over_24h; }
+RESOURCE TBUF r_qtn_cmon_info_conn_already_end { buf=qtn_cmon_info_conn_already_end; }
+
+RESOURCE TBUF r_qtn_cmon_wlan_singal_strength_low { buf=qtn_cmon_wlan_singal_strength_low; }
+RESOURCE TBUF r_qtn_cmon_wlan_singal_strength_medium { buf=qtn_cmon_wlan_singal_strength_medium; }
+RESOURCE TBUF r_qtn_cmon_wlan_singal_strength_good { buf=qtn_cmon_wlan_singal_strength_good; }
+RESOURCE TBUF r_qtn_cmon_wlan_signal_strength_no_signal
+                            { buf=qtn_cmon_wlan_signal_strength_no_signal; }
+
+RESOURCE TBUF r_qtn_cmon_wlan_newtwork_mode_adhoc { buf=qtn_cmon_wlan_newtwork_mode_adhoc; }
+RESOURCE TBUF r_qtn_cmon_wlan_newtwork_mode_infra { buf=qtn_cmon_wlan_newtwork_mode_infra; }
+
+RESOURCE TBUF r_qtn_cmon_wlan_security_mode_open { buf=qtn_cmon_wlan_security_mode_open; }
+RESOURCE TBUF r_qtn_cmon_wlan_security_mode_wep { buf=qtn_cmon_wlan_security_mode_wep; }
+RESOURCE TBUF r_qtn_cmon_wlan_security_mode_802_1x { buf=qtn_cmon_wlan_security_mode_802_1x; }
+RESOURCE TBUF r_qtn_cmon_wlan_security_mode_wpa { buf=qtn_cmon_wlan_security_mode_wpa; }
+
+RESOURCE TBUF r_qtn_cmon_wlan_tx_power_level { buf=qtn_cmon_wlan_tx_power_level; }
+
+RESOURCE TBUF r_qtn_cmon_heading_wlan_network_name { buf=qtn_cmon_heading_wlan_network_name; }
+RESOURCE TBUF r_qtn_cmon_heading_wlan_signal_strength
+                            { buf=qtn_cmon_heading_wlan_signal_strength; }
+RESOURCE TBUF r_qtn_cmon_heading_wlan_network_mode { buf=qtn_cmon_heading_wlan_network_mode; }
+RESOURCE TBUF r_qtn_cmon_heading_wlan_security_mode { buf=qtn_cmon_heading_wlan_security_mode; }
+RESOURCE TBUF r_qtn_cmon_heading_wlan_tx_power { buf=qtn_cmon_heading_wlan_tx_power; }
+
+RESOURCE TBUF r_qtn_cmon_parameter_unavailable { buf=qtn_cmon_parameter_unavailable; }
+
+RESOURCE TBUF r_qtn_cmon_sharing_app_msg_server { buf=qtn_cmon_sharing_app_msg_server; }
+RESOURCE TBUF r_qtn_cmon_sharing_app_dl_mg { buf=qtn_cmon_sharing_app_dl_mg; }
+RESOURCE TBUF r_qtn_cmon_sharing_app_rss_server { buf=qtn_cmon_sharing_app_rss_server; }
+RESOURCE TBUF r_qtn_cmon_sharing_app_java_midlet { buf=qtn_cmon_sharing_app_java_midlet; }
+RESOURCE TBUF r_qtn_cmon_sharing_app_unknown { buf=qtn_cmon_sharing_app_unknown; }
+RESOURCE TBUF r_qtn_cmon_sharing_app_supl { buf=qtn_cmon_sharing_app_supl; }
+
+
+//----------------------------------------------------
+//
+//    r_connectionmonitorui_title
+//
+//----------------------------------------------------
+//
+RESOURCE TBUF r_connectionmonitorui_title
+    {
+    buf = qtn_cmon_title_active_conns;
+    }
+
+//----------------------------------------------------
+//
+//    r_connectionmonitorui_hotkeys
+//
+//----------------------------------------------------
+//
+RESOURCE HOTKEYS r_connectionmonitorui_hotkeys
+    {
+    control=
+        {
+        HOTKEY { command=EAknCmdExit; key='e'; }
+        };
+    }
+
+#ifdef RD_CONTROL_PANEL
+
+//----------------------------------------------------
+//
+//    r_connectionmonitorui_view_buttons
+//
+//----------------------------------------------------
+//
+RESOURCE CBA r_cp_connectionmonitorui_view_buttons
+    {
+    buttons =
+        {
+        CBA_BUTTON {id=EAknSoftkeyOptions; txt=text_softkey_option;},
+        CBA_BUTTON {id=EAknSoftkeyExit; txt=text_softkey_back;},
+        CBA_BUTTON {id=EAknSoftkeyDetails; txt=qtn_msk_cmon_details;}
+        };
+    }
+
+//----------------------------------------------------
+//
+//    r_connectionmonitorui_view
+//
+//----------------------------------------------------
+//
+RESOURCE AVKON_VIEW r_cp_connectionmonitorui_view
+    {
+      hotkeys=r_connectionmonitorui_hotkeys;
+      menubar=r_connectionmonitorui_menubar_view;
+      cba=r_cp_connectionmonitorui_view_buttons;
+    }
+
+#endif // RD_CONTROL_PANEL
+
+//----------------------------------------------------
+//
+//    r_connectionmonitorui_view_buttons
+//
+//----------------------------------------------------
+//
+RESOURCE CBA r_connectionmonitorui_view_buttons
+    {
+    buttons =
+        {
+        CBA_BUTTON {id=EAknSoftkeyOptions; txt=text_softkey_option;},
+        CBA_BUTTON {id=EAknSoftkeyExit; txt=text_softkey_exit;},
+        CBA_BUTTON {id=EAknSoftkeyDetails; txt=qtn_msk_cmon_details;}
+        };
+    }
+
+//----------------------------------------------------
+//
+//    r_connectionmonitorui_view
+//
+//----------------------------------------------------
+//
+RESOURCE AVKON_VIEW r_connectionmonitorui_view
+    {
+      hotkeys=r_connectionmonitorui_hotkeys;
+      menubar=r_connectionmonitorui_menubar_view;
+      cba=r_connectionmonitorui_view_buttons;
+    }
+
+//----------------------------------------------------
+//
+//    r_connectionmonitorui_menubar_view
+//
+//----------------------------------------------------
+//
+RESOURCE MENU_BAR r_connectionmonitorui_menubar_view
+    {
+    titles=
+        {
+        MENU_TITLE { menu_pane=r_connectionmonitorui_app_menu; txt="App"; },
+        MENU_TITLE { menu_pane=r_connectionmonitorui_view_menu; txt="View"; }
+        };
+    }
+
+//----------------------------------------------------
+//
+//    r_connectionmonitorui_view_menu
+//
+//----------------------------------------------------
+//
+RESOURCE MENU_PANE r_connectionmonitorui_view_menu
+    {
+    items=
+        {
+        MENU_ITEM { command=EConnectionMonitorUiCmdAppDetails;
+                                txt = qtn_cmon_list_options_details;  flags = EEikMenuItemSpecific;},
+        MENU_ITEM { command=EConnectionMonitorUiCmdAppEndConn;
+                                txt = qtn_cmon_list_options_end_conn; flags = EEikMenuItemSpecific;},
+        MENU_ITEM { command=EConnectionMonitorUiCmdAppEndAll;
+                                txt = qtn_cmon_list_options_end_all; }
+        };
+    }
+
+//----------------------------------------------------
+//
+//    r_connectionmonitorui_detailsview
+//
+//----------------------------------------------------
+//
+RESOURCE AVKON_VIEW r_connectionmonitorui_detailsview
+    {
+    hotkeys=r_connectionmonitorui_hotkeys;
+    cba=R_AVKON_SOFTKEYS_OK_EMPTY__OK;
+    }
+
+//----------------------------------------------------
+//
+//    r_connectionmonitorui_app_menu
+//
+//----------------------------------------------------
+//
+RESOURCE MENU_PANE r_connectionmonitorui_app_menu
+    {
+    items=
+        {
+        MENU_ITEM { command=EAknCmdHelp; txt = qtn_options_help; },
+        MENU_ITEM { command=EAknCmdExit; txt=qtn_options_exit; }
+        };
+    }
+
+// ICONARRAYS
+
+RESOURCE AKN_ICON_ARRAY r_listbox_icons
+    {
+    bmpfile = APP_BITMAP_DIR"\\ConnectionMonitorUi.mbm";
+    icons =
+        {
+        AKN_ICON
+            {
+            iconId = EMbmConnectionmonitoruiQgn_prop_wml_gprs;
+            maskId = EMbmConnectionmonitoruiQgn_prop_wml_gprs_mask;
+            },
+        AKN_ICON
+            {
+            iconId = EMbmConnectionmonitoruiQgn_prop_wml_csd;
+            maskId = EMbmConnectionmonitoruiQgn_prop_wml_csd_mask;
+            },
+        AKN_ICON
+            {
+            iconId = EMbmConnectionmonitoruiQgn_prop_wml_hscsd;
+            maskId = EMbmConnectionmonitoruiQgn_prop_wml_hscsd_mask;
+            },
+        AKN_ICON
+            {
+            iconId = EMbmConnectionmonitoruiQgn_prop_cmon_gprs_suspended;
+            maskId = EMbmConnectionmonitoruiQgn_prop_cmon_gprs_suspended_mask;
+            }
+        };
+    }
+
+RESOURCE TBUF r_qtn_appl_option_item { buf=qtn_appl_option_item; }
+
+RESOURCE DIALOG r_end_conn_confirmation_query
+    {
+    flags=EGeneralQueryFlags;
+    buttons=R_AVKON_SOFTKEYS_YES_NO__YES;
+    items=
+        {
+        DLG_LINE
+            {
+            type=EAknCtQuery;
+            id = EGeneralQuery;
+            control= AVKON_CONFIRMATION_QUERY
+                {
+                layout = EConfirmationQueryLayout;
+                };
+            }
+        };
+    }
+
+//----------------------------------------------------
+//
+//    r_qtn_cmon_connection_summary_note_text
+//
+//----------------------------------------------------
+//
+RESOURCE TBUF r_qtn_cmon_connection_summary_note_text { buf =
+    qtn_cmon_summary_heading"\n"qtn_cmon_summary_transferred"\n%0U\n"qtn_cmon_summary_duration"\n%1U"; }
+
+//----------------------------------------------------
+//
+//    r_qtn_cmon_connection_summary_note
+//
+//----------------------------------------------------
+//
+RESOURCE DIALOG r_qtn_cmon_connection_summary_note
+    {
+    flags = EAknInformationNoteFlags;
+    buttons = R_AVKON_SOFTKEYS_EMPTY;
+    items=
+        {
+        DLG_LINE
+            {
+            type = EAknCtNote;
+            id = EGeneralNote;
+            control= AVKON_NOTE
+                {
+                layout = ETextualNotificationLayout;
+                singular_label = "";
+                plural_label = "";
+                };
+            }
+        };
+    }
+
+//----------------------------------------------------
+//
+//    r_connectionmonitorui_localisable_app_info
+//
+//----------------------------------------------------
+//
+RESOURCE LOCALISABLE_APP_INFO r_connectionmonitorui_localisable_app_info
+    {
+    short_caption = qtn_apps_cmon_grid;
+    caption_and_icon =
+    CAPTION_AND_ICON_INFO
+        {
+        caption = qtn_apps_cmon_list;
+#ifdef __SCALABLE_ICONS
+        number_of_icons = 1;
+        icon_file = "Z:"APP_BITMAP_DIR"\\connectionmonitorui_aif.mif";
+#else
+        number_of_icons = 2;
+        icon_file =  "Z:"APP_BITMAP_DIR"\\connectionmonitorui_aif.mbm";
+#endif
+        };
+    }
+
+
+
+// End of File

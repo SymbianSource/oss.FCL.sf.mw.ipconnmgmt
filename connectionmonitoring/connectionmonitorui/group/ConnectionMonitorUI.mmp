@@ -1,0 +1,113 @@
+/*
+* Copyright (c) 2002 Nokia Corporation and/or its subsidiary(-ies). 
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description: 
+*     This is the project specification file for ConnectionMonitorUi.
+*     
+*
+*/
+
+#include <data_caging_paths.hrh>
+#include <platform_paths.hrh>
+
+
+TARGET        ConnectionMonitorUi.exe
+TARGETTYPE    exe
+
+
+UID  0x100039CE 0x101F84D0
+
+CAPABILITY   CAP_APPLICATION NetworkControl ProtServ
+
+VENDORID VID_DEFAULT
+
+SOURCEPATH ../src
+SOURCE  ConnectionMonitorUiApp.cpp 
+SOURCE  ConnectionMonitorUiAppUi.cpp
+SOURCE  ConnectionMonitorUiDocument.cpp
+SOURCE  ConnectionMonitorUiContainer.cpp
+SOURCE  ConnectionMonitorUiView.cpp
+SOURCE  ConnectionMonitorUiDetailsView.cpp
+SOURCE  ConnectionMonitorUiDetailsContainer.cpp
+SOURCE  ConnectionInfoBase.cpp
+SOURCE  CsdConnectionInfo.cpp
+SOURCE  GprsConnectionInfo.cpp
+SOURCE  ConnectionArray.cpp
+SOURCE  FeatureManagerWrapper.cpp
+SOURCE  WlanConnectionInfo.cpp
+SOURCE  EasyWLANConnectionInfo.cpp
+SOURCE  ActiveWrapper.cpp
+
+
+START RESOURCE ../data/ConnectionMonitorUi.rss
+HEADER
+TARGETPATH APP_RESOURCE_DIR
+LANGUAGE_IDS
+END  // RESOURCE
+
+// Component specific internal headers 
+USERINCLUDE			../inc
+
+// ADO-SUBSYSTEM specific internal headers 
+SYSTEMINCLUDE		../../inc
+
+// ADO specific internal headers 
+SYSTEMINCLUDE		../../../inc
+
+//Macro to /epoc32 headers
+MW_LAYER_SYSTEMINCLUDE
+
+#ifdef SYMBIAN_ENABLE_SPLIT_HEADERS
+APP_LAYER_SYSTEMINCLUDE
+#endif
+
+
+SYSTEMINCLUDE   /epoc32/include/libc
+
+
+LIBRARY euser.lib
+LIBRARY apparc.lib
+LIBRARY cone.lib
+LIBRARY eikcore.lib 
+LIBRARY eikcoctl.lib
+LIBRARY avkon.lib
+LIBRARY eikctl.lib
+LIBRARY	bafl.lib
+LIBRARY commonengine.lib
+LIBRARY	connmon.lib
+LIBRARY	estlib.lib
+LIBRARY egul.lib 
+LIBRARY apgrfx.lib
+LIBRARY hlplch.lib
+LIBRARY AknSkins.lib 
+LIBRARY AKNNOTIFY.LIB
+LIBRARY FeatMgr.lib
+LIBRARY commsdat.lib
+LIBRARY cmmanager.lib
+
+DEBUGLIBRARY flogger.lib
+DEBUGLIBRARY efsrv.lib
+
+
+epocstacksize 0x5000
+
+// DEFFILE ?filename
+
+
+START RESOURCE ../data/ConnectionMonitorUi_reg.rss
+DEPENDS connectionmonitorui.rsg
+// Do not change the UID below.
+TARGETPATH /private/10003a3f/apps
+END
+
+

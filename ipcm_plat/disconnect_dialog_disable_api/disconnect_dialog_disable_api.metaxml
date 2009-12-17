@@ -1,0 +1,17 @@
+<?xml version="1.0" ?>
+<api id="a573d197faed19acd84af72206b72873" dataversion="1.0">
+  <name>Disconnect Dialog Disable API</name>
+  <description>P&amp;S API for MMS to disable disconnect dialog. This API is meant to be temporary and it will be removed when Symbian APIs make proper solution possible.</description>
+  <type>c++</type>
+  <subsystem>bearermanagement</subsystem>
+  <libs>
+  </libs>
+  <release category="domain"/>
+  <attributes>
+     <!-- This indicates wether the api provedes separate html documentation -->
+     <!-- or is the additional documentation generated from headers. -->
+     <!-- If you are unsuere then the value is "no" -->
+     <htmldocprovided>yes</htmldocprovided>
+     <adaptation>no</adaptation>
+  </attributes>
+</api>

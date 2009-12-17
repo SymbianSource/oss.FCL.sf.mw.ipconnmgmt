@@ -1,0 +1,77 @@
+/*
+* Copyright (c) 2005 Nokia Corporation and/or its subsidiary(-ies). 
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description: 
+*     This is project specification file for the ApSettingsPlugin.
+*
+*
+*/
+
+#include <data_caging_paths.hrh>    //this is needed for RESOURCE_FILES_DIR
+#include <platform_paths.hrh>
+
+CAPABILITY          CAP_ECOM_PLUGIN
+TARGET              ApSettingsPlugin.dll
+TARGETTYPE          PLUGIN
+UID                 0x10009D8D 0x1020736C
+VENDORID            VID_DEFAULT
+
+SOURCEPATH          ../src
+SOURCE              APSettingsPlugin.cpp
+SOURCE              ApSettingsPluginImplementationTable.cpp
+SOURCE              utilities.cpp
+
+// Component specific internal headers 
+USERINCLUDE			../inc
+
+// ADO specific internal headers 
+SYSTEMINCLUDE		../../../inc
+
+//Macro to /epoc32 headers
+MW_LAYER_SYSTEMINCLUDE
+
+SOURCEPATH          ../data
+
+//ECOM resource definition
+START RESOURCE      1020736C.rss
+TARGET              ApSettingsPlugin.rsc
+END // ECOM resource definition
+
+//ApSettingsPlugin resources
+START RESOURCE      ApSettingsPluginRsc.rss
+HEADER
+TARGETPATH          RESOURCE_FILES_DIR
+LANGUAGE_IDS
+END // ApSettingsPlugin resources
+
+LIBRARY             euser.lib
+LIBRARY             ecom.lib
+LIBRARY             efsrv.lib
+LIBRARY             avkon.lib
+LIBRARY             bafl.lib 
+LIBRARY             cone.lib 
+LIBRARY             eikcoctl.lib 
+LIBRARY             eikcore.lib 
+LIBRARY             commonengine.lib//For RConeResourceLoader
+LIBRARY             GSFramework.lib
+LIBRARY             egul.lib // CGulIcon
+LIBRARY             aknskins.lib // AknsUtils.h
+LIBRARY             ApSettingsHandlerUI.lib //ApSettingsHandlerUI.h
+LIBRARY             GSEcomPlugin.lib
+LIBRARY             commonui.lib 
+LIBRARY 			aknnotify.lib
+LIBRARY	            centralrepository.lib
+LIBRARY             cmmanager.lib
+
+
+

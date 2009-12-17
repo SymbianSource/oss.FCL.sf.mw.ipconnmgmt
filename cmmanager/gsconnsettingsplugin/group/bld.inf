@@ -1,0 +1,43 @@
+/*
+* Copyright (c) 2007 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:  This file provides the information required for building
+*               Connectivity Settings plugin
+*
+*/
+
+#include <platform_paths.hrh>
+
+PRJ_PLATFORMS
+DEFAULT
+
+PRJ_EXPORTS
+../rom/gsconnsettingsplugin.iby CORE_MW_LAYER_IBY_EXPORT_PATH( gsconnsettingsplugin.iby )
+../rom/gsconnsettingspluginresources.iby LANGUAGE_MW_LAYER_IBY_EXPORT_PATH( gsconnsettingspluginresources.iby )
+
+../loc/gsconnsettingsplugin.loc MW_LAYER_LOC_EXPORT_PATH( gsconnsettingsplugin.loc )
+
+PRJ_EXTENSIONS
+START EXTENSION s60/mifconv
+  OPTION TARGETFILE gsconnsettingsplugin.mif
+  OPTION HEADERFILE gsconnsettingsplugin.mbg
+  /* Using Connectivity plugin icon. Should be changed when correct (qgn_prop_cp_conn_settings) icon available */
+  OPTION SOURCES -c8,8 qgn_prop_cp_conn
+END
+
+PRJ_MMPFILES
+gsconnsettingsplugin.mmp
+
+PRJ_TESTMMPFILES
+
+//  End of File

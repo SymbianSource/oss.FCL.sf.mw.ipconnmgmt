@@ -1,0 +1,48 @@
+/*
+* Copyright (c) 2005 Nokia Corporation and/or its subsidiary(-ies). 
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description: 
+*		Localization strings for Plugin
+*
+*/
+
+
+//  LOCALISATION STRINGS
+
+
+//d:Text of a list item in Connection view's list
+//d:Item opens Access points view
+//l:list_single_large_graphic_pane_t1
+//r:3.1
+//
+#define qtn_set_folder_conn_accpoints "Access points"
+        
+//d: In case of error, the error code is passed to error resolver
+//d: and the error note is displayed accordingly. If error resolver
+//d: cannot resolve the error, an error note "System error" is displayed.
+//l: popup_note_window/opt2
+//w:
+//r:3.1
+//
+#define qtn_err_os_general "System error"
+
+//d:Text of a list item in Connection view's list
+//d:Item opens Access points view
+//l:list_single_large_graphic_pane_t1_cp2
+//r:3.2
+//
+#define qtn_netw_conset_network_connections "Network destinations"
+
+// End of File
+
+

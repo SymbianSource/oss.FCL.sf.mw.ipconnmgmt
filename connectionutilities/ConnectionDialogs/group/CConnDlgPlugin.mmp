@@ -1,0 +1,97 @@
+/*
+* Copyright (c) 2002 Nokia Corporation and/or its subsidiary(-ies). 
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description: 
+*     This is project specification file for the CConnDlgPlugin
+*
+*
+*/
+
+
+#include <data_caging_paths.hrh>
+#include <platform_paths.hrh>
+
+
+TARGET      CCONNDLGPLUGIN.DLL
+TARGETTYPE  DLL 
+TARGETPATH  /System/libs
+
+UID         0x101FDFAE 0x10008D55 
+CAPABILITY CAP_GENERAL_DLL 
+VENDORID VID_DEFAULT
+
+USERINCLUDE     ../cconndlg/inc ../data
+
+// Component specific internal headers 
+USERINCLUDE			../inc
+
+// ADO specific internal headers 
+SYSTEMINCLUDE		../../../inc
+
+//Macro to /epoc32 headers
+MW_LAYER_SYSTEMINCLUDE
+
+SYSTEMINCLUDE   /epoc32/include/uikon
+
+
+START RESOURCE ../cconndlg/data/CConnDlgPlugin.rss
+HEADER
+TARGETPATH RESOURCE_FILES_DIR
+LANGUAGE_IDS
+END  // RESOURCE
+
+
+SOURCEPATH  ../cconndlg/src
+SOURCE  ConnDlgPlugin.cpp IAPDialog.cpp  AuthenticationDialog.cpp
+SOURCE  ReconnectDialog.cpp NewIapDialog.cpp QosDialog.cpp
+SOURCE  ActiveIapPlugin.cpp
+SOURCE  ActiveBase.cpp
+SOURCE  SelectConnectionDialog.cpp
+SOURCE  ActiveSelectConnectionPlugin.cpp
+SOURCE  SelectExplicitDialog.cpp
+SOURCE  ActiveSelectExplicit.cpp
+SOURCE  sortsnaputils.cpp
+
+SOURCEPATH  ../src
+SOURCE  ConnectionInfo.cpp ConnectionInfoKey.cpp ConnectionInfoArray.cpp ExpiryTimer.cpp
+SOURCE  ActiveIAPListing.cpp
+SOURCE  ConnectionDialogsNotifBase.cpp
+
+LIBRARY euser.lib eikdlg.lib eiksrv.lib cone.lib commdb.lib eikcore.lib
+LIBRARY eikcoctl.lib bafl.lib
+LIBRARY avkon.lib
+LIBRARY CommonEngine.lib
+LIBRARY AknSkins.lib
+LIBRARY Ecom.lib
+LIBRARY centralrepository.lib 
+LIBRARY FeatMgr.lib 
+LIBRARY eiksrvui.lib
+LIBRARY cmmanager.lib
+LIBRARY mpm.lib
+LIBRARY hlplch.lib
+LIBRARY COMMSDAT.lib
+LIBRARY cmmanagerdatabase.lib
+LIBRARY	egul.lib
+
+
+DEBUGLIBRARY flogger.lib
+DEBUGLIBRARY efsrv.lib
+
+
+#ifdef WINSCW
+    DEFFILE ../cconndlg/BWinsCw/CConnDlgPlugin.DEF
+#else
+    DEFFILE ../cconndlg/EABI/CCONNDLGPLUGIN.DEF
+#endif
+
+// End of File

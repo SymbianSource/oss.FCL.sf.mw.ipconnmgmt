@@ -1,0 +1,27 @@
+<file xmlns="http://www.s60.com/xml/genconfml/1" name="VariantData_commsdat.xml" target="private\10281BC3\">			 
+
+	<setting ref="Global/*"/>
+	<setting ref="DNs/*"/>
+	<setting ref="APs/*"/>
+	<setting ref="WLAN_APs/*"/>
+	<setting ref="CSD_APs/*"/>
+	<setting ref="HSCSD_APs/*"/>
+	<setting ref="LAN_APs/*"/>
+	<setting ref="VPN_APs/*"/>
+	
+	<xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xmlns:xi="http://www.w3.org/2001/xinclude">
+		<xsl:output method="xml" indent="yes" encoding="UTF-8"/>
+		<xsl:template match="configuration">
+		<data>
+			<xsl:copy-of select="data/Global"/>			
+			<xsl:copy-of select="data/APs"/>
+			<xsl:copy-of select="data/WLAN_APs"/>
+			<xsl:copy-of select="data/CSD_APs"/>
+			<xsl:copy-of select="data/HSCSD_APs"/>
+			<xsl:copy-of select="data/LAN_APs"/>
+			<xsl:copy-of select="data/VPN_APs"/>
+			<xsl:copy-of select="data/DNs"/>
+		</data>
+		</xsl:template>				
+	</xsl:stylesheet>
+</file>

@@ -1,0 +1,18 @@
+<?xml version="1.0" ?>
+<api id="d7abf56e3fafedb47da958a6a793cd8d" dataversion="1.0">
+  <name>Access Point Settings Handler API</name>
+  <description>Provides applications with the possibility to include Access Point choice.</description>
+  <type>c++</type>
+  <subsystem>networkingutilities</subsystem>
+  <libs>
+    <lib name="apsettingshandlerui.lib" />
+  </libs>
+  <release category="sdk" sinceversion="0.9" deprecatedsince="3.2"/>
+  <attributes>
+     <!-- This indicates wether the api provedes separate html documentation -->
+     <!-- or is the additional documentation generated from headers. -->
+     <!-- If you are unsuere then the value is "no" -->
+     <htmldocprovided>yes</htmldocprovided>
+     <adaptation>no</adaptation>
+  </attributes>
+</api>

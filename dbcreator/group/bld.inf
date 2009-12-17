@@ -1,0 +1,40 @@
+/*
+* Copyright (c) 2007 Nokia Corporation and/or its subsidiary(-ies). 
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:   Build information for the DbCreator.
+*
+*/
+
+
+#include <platform_paths.hrh>
+
+PRJ_PLATFORMS
+DEFAULT
+
+PRJ_EXPORTS
+../conf/commsdatcreator.confml				MW_LAYER_CONFML(commsdatcreator.confml)
+../conf/commsdatcreator_01.gcfml			MW_LAYER_GCFML(commsdatcreator_01.gcfml)
+../conf/commsdatcreator_10281BC8.crml	MW_LAYER_CRML(commsdatcreator_10281BC8.crml)
+../rom/commsdatcreator.iby						CORE_MW_LAYER_IBY_EXPORT_PATH(commsdatcreator.iby)
+
+
+PRJ_MMPFILES
+// None
+
+#include "../commsdatcreator/group/bld.inf"
+/* CommsDatCreator RFS functionality is disabled in the emulator */
+#ifndef WINSCW
+	#include "../commsdatcreatorrfsplugin/group/bld.inf"
+#endif
+#include "../commsdatstartup/group/bld.inf"
+#include "../dbcreatorexe/group/bld.inf"

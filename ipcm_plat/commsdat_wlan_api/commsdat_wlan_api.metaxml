@@ -1,0 +1,18 @@
+<?xml version="1.0" ?>
+<api id="d30c60651eeb10f5fb33ccaadaebac1a" dataversion="1.0">
+  <name>CommsDat WLAN API</name>
+  <description>Provides const definitions for CommsDat WLAN tables.</description>
+  <type>c++</type>
+  <subsystem>networkingutilities</subsystem>
+  <libs>
+    <lib name="cmmanagerdatabase.lib" />
+  </libs>
+  <release category="domain"/>
+  <attributes>
+     <!-- This indicates wether the api provedes separate html documentation -->
+     <!-- or is the additional documentation generated from headers. -->
+     <!-- If you are unsuere then the value is "no" -->
+     <htmldocprovided>yes</htmldocprovided>
+     <adaptation>no</adaptation>
+  </attributes>
+</api>

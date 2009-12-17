@@ -1,0 +1,88 @@
+/*
+* Copyright (c) 2004-2009 Nokia Corporation and/or its subsidiary(-ies). 
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description: MPM server
+*
+*/
+
+#include <platform_paths.hrh>
+
+#ifdef PLATFORM_SIMULATOR
+MACRO             _PLATFORM_SIMULATOR_
+TARGET            mpmserver_platsim.exe
+#else
+TARGET            mpmserver.exe
+#endif
+
+TARGETTYPE        exe
+
+UID               0x1000008d 0x101f6d12
+
+VENDORID          VID_DEFAULT
+CAPABILITY        CAP_SERVER NetworkControl
+
+epocstacksize 0x5000
+
+SOURCEPATH        ../src
+SOURCE            mpmdialog.cpp
+SOURCE            mpmconnmonevents.cpp
+SOURCE            mpmconnmonreqs.cpp
+SOURCE            mpmserversession.cpp
+SOURCE            mpmserver.cpp
+SOURCE            mpmstarter.cpp
+SOURCE            mpmdisconnectdlg.cpp
+SOURCE            mpmdtmwatcher.cpp
+SOURCE            mpmroamingwatcher.cpp 
+SOURCE            mpmconfirmdlg.cpp
+SOURCE            mpmconfirmdlgstarting.cpp
+SOURCE            mpmconfirmdlgroaming.cpp
+SOURCE            mpmdefaultconnection.cpp
+SOURCE            mpmdefaultconnserver.cpp
+SOURCE            mpmdefaultconnserversession.cpp
+SOURCE            mpmcommsdataccess.cpp
+SOURCE            mpmwlanquerydialog.cpp
+SOURCE            mpmiapselection.cpp
+SOURCE            mpmcsidwatcher.cpp
+SOURCE            mpmdialogbase.cpp
+SOURCE            mpmwlanavailability.cpp
+
+USERINCLUDE       ../inc
+
+// Default system include paths for middleware layer modules.
+MW_LAYER_SYSTEMINCLUDE 
+
+// Path for internal headers of the networking ADO. 
+SYSTEMINCLUDE     ../../../inc
+
+LIBRARY           euser.lib
+LIBRARY           agentdialog.lib
+LIBRARY           commdb.lib
+LIBRARY           commsdat.lib
+LIBRARY           esock.lib
+LIBRARY           connmon.lib
+LIBRARY           disconnectdlgclient.lib
+LIBRARY           commonengine.lib
+LIBRARY           featmgr.lib
+LIBRARY           centralrepository.lib
+LIBRARY           etel.lib 
+LIBRARY           etelmm.lib
+LIBRARY           etel3rdparty.lib
+LIBRARY           etelpckt.lib
+LIBRARY           connectionuiutilities.lib
+LIBRARY           cmmanagerdatabase.lib
+LIBRARY           charconv.lib
+LIBRARY           wifiprotclient.lib
+LIBRARY           wifiprotplugin.lib
+LIBRARY           cmmanager.lib
+DEBUGLIBRARY      flogger.lib
+

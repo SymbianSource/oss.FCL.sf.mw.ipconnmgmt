@@ -1,0 +1,80 @@
+/*
+* Copyright (c) 2002 Nokia Corporation and/or its subsidiary(-ies). 
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description: 
+*	 This file provides the information required for building the
+*    whole of a Connection Dialogs.
+*
+*/
+
+
+#include <platform_paths.hrh>
+
+PRJ_PLATFORMS
+DEFAULT
+
+PRJ_EXPORTS
+// export iby files
+../rom/agentdialog.iby				CORE_MW_LAYER_IBY_EXPORT_PATH(agentdialog.iby)
+../rom/cconndlg.iby				CORE_MW_LAYER_IBY_EXPORT_PATH(cconndlg.iby)
+../rom/cconndlgResources.iby			LANGUAGE_MW_LAYER_IBY_EXPORT_PATH(cconndlgResources.iby)
+
+../rom/ConnectionDialogs.iby			CORE_MW_LAYER_IBY_EXPORT_PATH(ConnectionDialogs.iby)
+
+../rom/ConnectionUiUtilities.iby		CORE_MW_LAYER_IBY_EXPORT_PATH(ConnectionUiUtilities.iby)
+../rom/ConnectionUiUtilitiesResources.iby	LANGUAGE_MW_LAYER_IBY_EXPORT_PATH(ConnectionUiUtilitiesResources.iby)
+
+../rom/DisconnectDlg.iby			CORE_MW_LAYER_IBY_EXPORT_PATH(DisconnectDlg.iby)
+../rom/DisconnectDlgResources.iby		LANGUAGE_MW_LAYER_IBY_EXPORT_PATH(DisconnectDlgResources.iby)
+
+// export localised loc file
+../cconndlg/loc/agentdialog.loc				MW_LAYER_LOC_EXPORT_PATH(agentdialog.loc)
+../ConnectionUiUtilities/loc/ConnectionUiUtilities.loc	MW_LAYER_LOC_EXPORT_PATH(connectionuiutilities.loc)
+../DisconnectDlg/loc/DisconnectDlg.loc			MW_LAYER_LOC_EXPORT_PATH(disconnectdlg.loc)
+
+../conf/connectiondialogs.confml		APP_LAYER_CONFML(connectiondialogs.confml)
+../conf/connectiondialogs_101FD67E.crml		APP_LAYER_CRML(connectiondialogs_101FD67E.crml)
+../conf/connectiondialogs_10008D55.crml		APP_LAYER_CRML(connectiondialogs_10008D55.crml)
+
+PRJ_MMPFILES
+//gnumakefile DisconnectDlgIcons.MK
+//gnumakefile ConnUiUtilsIcons.MK
+
+./connectiondialogswrapper.mmp
+
+./CConnDlgClient.mmp
+./CConnDlgPlugin.mmp
+
+./DisconnectDlg.mmp
+./DisconnectDlgClient.mmp
+
+./ConnectionUiUtilities.mmp
+./ConnUiUtilsNotif.mmp
+
+PRJ_EXTENSIONS
+START EXTENSION s60/mifconv
+OPTION TARGETFILE connectionuiutilities.mif
+OPTION HEADERFILE connectionuiutilities.mbg
+OPTION SOURCES -c8,8 qgn_indi_wlan_signal_low_add -c8,8 qgn_indi_wlan_signal_med_add -c8,8 qgn_indi_wlan_signal_good_add -c8,8 qgn_indi_wlan_secure_network_add -c8,8 qgn_prop_snote_wlan_adhoc -c8,8 qgn_prop_snote_wlan_infra -c8,8 qgn_indi_wifi_protected_add -c8,1 qgn_prop_wlan_bearer.svg -c8,1 qgn_prop_wml_gprs.svg 
+END
+
+PRJ_EXTENSIONS
+START EXTENSION s60/mifconv
+OPTION TARGETFILE disconnectdlgui.mif
+OPTION HEADERFILE disconnectdlgui.mbg
+OPTION SOURCES -c8,8 qgn_menu_cmon_cxt -c8,8 qgn_menu_fax_lst -c8,8 qgn_prop_netw_shared_conn
+END
+
+PRJ_TESTMMPFILES
+
+// End of file

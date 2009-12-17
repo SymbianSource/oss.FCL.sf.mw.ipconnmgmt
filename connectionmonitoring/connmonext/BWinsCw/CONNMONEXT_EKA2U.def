@@ -1,0 +1,10 @@
+EXPORTS
+	??0CConnectionMonitorPlugin@@QAE@XZ @ 1 NONAME ; CConnectionMonitorPlugin::CConnectionMonitorPlugin(void)
+	??1CConnectionMonitorPlugin@@UAE@XZ @ 2 NONAME ; CConnectionMonitorPlugin::~CConnectionMonitorPlugin(void)
+	?CancelRegisterAttribute@CConnectionMonitorPlugin@@QBEXI@Z @ 3 NONAME ; void CConnectionMonitorPlugin::CancelRegisterAttribute(unsigned int) const
+	?CancelRegisterPlugin@CConnectionMonitorPlugin@@QAEXXZ @ 4 NONAME ; void CConnectionMonitorPlugin::CancelRegisterPlugin(void)
+	?Event@CConnectionMonitorPlugin@@QBEHIPBXI@Z @ 5 NONAME ; int CConnectionMonitorPlugin::Event(unsigned int, void const *, unsigned int) const
+	?RegisterAttribute@CConnectionMonitorPlugin@@QBEHI@Z @ 6 NONAME ; int CConnectionMonitorPlugin::RegisterAttribute(unsigned int) const
+	?RegisterPluginL@CConnectionMonitorPlugin@@QAEXI@Z @ 7 NONAME ; void CConnectionMonitorPlugin::RegisterPluginL(unsigned int)
+	?Version@CConnectionMonitorPlugin@@QBE?AVTVersion@@XZ @ 8 NONAME ; class TVersion CConnectionMonitorPlugin::Version(void) const
+

@@ -1,0 +1,26 @@
+/*
+* Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies). 
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:
+*
+*/
+#ifndef PDPCONTEXTMANAGER2_IBY
+#define PDPCONTEXTMANAGER2_IBY
+
+#ifdef __ALWAYS_ONLINE_PDPCONTEXT2
+
+ECOM_PLUGIN(PDPCONTEXTMANAGER2.DLL,10281F41.rsc)
+
+#endif //__ALWAYS_ONLINE_PDPCONTEXT2
+
+#endif //PDPCONTEXTMANAGER2_IBY

@@ -1,0 +1,158 @@
+/*
+* Copyright (c) 2002 Nokia Corporation and/or its subsidiary(-ies). 
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description: 
+*     This is project specification file for the ApSettingsHandler.
+*
+*/
+
+
+#include <data_caging_paths.hrh>
+#include <platform_paths.hrh>
+
+
+TARGET      ApSettingsHandlerUI.dll
+TARGETTYPE      DLL
+UID         0x1000008d 0x10008d3B
+
+CAPABILITY CAP_GENERAL_DLL
+
+VENDORID VID_DEFAULT
+
+
+SOURCEPATH ../src
+SOURCE  apsettingshandleruiImpl.cpp
+SOURCE  apsettingsui.cpp
+SOURCE  apsettingshandlerui.cpp
+SOURCE  ApSelQueryDialog.cpp
+SOURCE  TextOverrides.cpp
+SOURCE  ApSelectorDialog.cpp
+SOURCE  ApSelectorListBox.cpp
+SOURCE  ApSelectorListBoxModel.cpp
+SOURCE  ApSettingsModel.cpp
+SOURCE  ApSettingsCommons.cpp
+SOURCE  ApSettingsDlg.cpp
+SOURCE  ApSelPopupList.cpp
+SOURCE  apsettingsdeleteoperation.cpp
+SOURCE  AccessPointTextSettingPage.cpp
+SOURCE  ApNetSelPopupList.cpp
+SOURCE  ApNetSelectorListBoxModel.cpp
+SOURCE  FeatureManagerWrapper.cpp
+SOURCE  ApMultiLineDataQueryDialog.cpp
+
+
+START RESOURCE ../data/apsetui.rss
+HEADER
+TARGETPATH RESOURCE_FILES_DIR
+LANGUAGE_IDS
+
+END  // RESOURCE
+
+// Component specific internal headers 
+USERINCLUDE			../inc
+
+// ADO specific internal headers 
+SYSTEMINCLUDE		../../../inc
+
+//Macro to /epoc32 headers
+MW_LAYER_SYSTEMINCLUDE
+
+#ifdef SYMBIAN_ENABLE_SPLIT_HEADERS
+APP_LAYER_SYSTEMINCLUDE
+#endif
+
+LIBRARY euser.lib
+LIBRARY cone.lib
+LIBRARY eikcore.lib
+LIBRARY eikcoctl.lib
+LIBRARY avkon.lib
+LIBRARY eikdlg.lib 
+LIBRARY bafl.lib
+LIBRARY eikctl.lib
+LIBRARY apengine.lib 
+LIBRARY commonengine.lib 
+LIBRARY diskspacereserver.lib
+LIBRARY commdb.lib
+LIBRARY insock.lib
+LIBRARY sysutil.lib
+LIBRARY commonui.lib
+LIBRARY FeatMgr.lib
+LIBRARY AknInputLanguage.lib
+
+LIBRARY WEPSecuritySettingsUi.lib
+LIBRARY WPASecuritySettingsUi.lib
+LIBRARY ConnectionUiUtilities.lib
+LIBRARY centralrepository.lib
+
+
+#if defined(ARMCC)
+    DEFFILE ../EABI/ApSettingsHandlerUI_EKA2.def
+#elif defined( WINSCW )
+    DEFFILE ../BWinsCw/ApSettingsHandlerUI_EKA2.def
+#elif defined( WINS )
+    DEFFILE ../BWins/ApSettingsHandlerUI_EKA2.def
+#else
+    DEFFILE ../BMarm/ApSettingsHandlerUI_EKA2.def
+#endif
+
+
+#ifdef __SERIES60_HELP
+    LIBRARY         hlplch.lib // for "Help" options menu
+#endif // __SERIES60_HELP
+
+
+LIBRARY efsrv.lib
+LIBRARY AknSkins.lib
+LIBRARY charconv.lib
+
+
+// Define this macro if you wish to enable IPv6 support for testing
+// It will override FeatureManager's NOT SUPPORTED....
+// MACRO __TEST_IPV6_SUPPORT    
+
+// Define this macro if you wish to disable HsCSD support for testing
+// It will override shared datakey setting....
+// MACRO __TEST_NO_HSCSD
+
+
+// Define this to test CSD support.
+// MACRO __TEST_CSD_SUPPORT
+
+
+// Define this to test HSCSD support.
+// MACRO __TEST_HSCSD_SUPPORT
+
+// Define this to test CDMA write-protect support.
+//MACRO __TEST_CDMA_WRITE_PROTECT
+
+// Define this to test WLAN support.
+//#define __TEST_WLAN_SUPPORT_ENABLED
+
+// Define this to use logging.
+// #define __TEST_LOGGING_ENABLED
+
+
+#ifdef __TEST_LOGGING_ENABLED
+    MACRO __TEST_LOGGING
+    LIBRARY flogger.lib
+#endif
+
+// Define this to test LAN support.
+#ifdef WINS
+    MACRO __TEST_LAN_BEARER
+#endif
+
+#ifdef __TEST_WLAN_SUPPORT_ENABLED
+    MACRO __TEST_WLAN_SUPPORT
+#endif // __TEST_WLAN_SUPPORT
+// End of File

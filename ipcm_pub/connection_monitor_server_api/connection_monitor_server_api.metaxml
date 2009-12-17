@@ -1,0 +1,18 @@
+<?xml version="1.0" ?>
+<api id="49d1f1bbc3fe47c6d3428037e1a43324" dataversion="1.0">
+  <name>Connection Monitor Server API</name>
+  <description>Provides an API for ip data connection monitoring with some management capabilities.</description>
+  <type>c++</type>
+  <subsystem>connectionmonitoring</subsystem>
+  <libs>
+    <lib name="ConnMon.lib" />
+  </libs>
+  <release category="sdk" sinceversion="2.6"/>
+  <attributes>
+     <!-- This indicates wether the api provedes separate html documentation -->
+     <!-- or is the additional documentation generated from headers. -->
+     <!-- If you are unsuere then the value is "no" -->
+     <htmldocprovided>yes</htmldocprovided>
+     <adaptation>no</adaptation>
+  </attributes>
+</api>

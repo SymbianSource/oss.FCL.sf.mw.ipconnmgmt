@@ -1,0 +1,48 @@
+EXPORTS
+	?AuthoritativeDelete@CConnMonDeleteConnection@@QBEHXZ @ 1 NONAME ; public: int __thiscall CConnMonDeleteConnection::AuthoritativeDelete(void)const 
+	?AuthoritativeDelete@CConnMonDeleteSubConnection@@QBEHXZ @ 2 NONAME ; public: int __thiscall CConnMonDeleteSubConnection::AuthoritativeDelete(void)const 
+	?CancelAsyncRequest@RConnectionMonitor@@QAEXH@Z @ 3 NONAME ; public: void __thiscall RConnectionMonitor::CancelAsyncRequest(int)
+	?CancelNotifications@RConnectionMonitor@@QAEXXZ @ 4 NONAME ; public: void __thiscall RConnectionMonitor::CancelNotifications(void)
+	?Close@RConnectionMonitor@@QAEXXZ @ 5 NONAME ; public: void __thiscall RConnectionMonitor::Close(void)
+	?ConnectL@RConnectionMonitor@@QAEHXZ @ 6 NONAME ; public: int __thiscall RConnectionMonitor::ConnectL(void)
+	?ConnectionActivity@CConnMonConnectionActivityChange@@QBEHXZ @ 7 NONAME ; public: int __thiscall CConnMonConnectionActivityChange::ConnectionActivity(void)const 
+	?ConnectionId@CConnMonEventBase@@QBEIXZ @ 8 NONAME ; public: unsigned int __thiscall CConnMonEventBase::ConnectionId(void)const 
+	?ConnectionStatus@CConnMonConnectionStatusChange@@QBEHXZ @ 9 NONAME ; public: int __thiscall CConnMonConnectionStatusChange::ConnectionStatus(void)const 
+	?DownlinkData@CConnMonDeleteConnection@@QBEIXZ @ 10 NONAME ; public: unsigned int __thiscall CConnMonDeleteConnection::DownlinkData(void)const 
+	?DownlinkData@CConnMonDeleteSubConnection@@QBEIXZ @ 11 NONAME ; public: unsigned int __thiscall CConnMonDeleteSubConnection::DownlinkData(void)const 
+	?DownlinkData@CConnMonDownlinkDataThreshold@@QBEIXZ @ 12 NONAME ; public: unsigned int __thiscall CConnMonDownlinkDataThreshold::DownlinkData(void)const 
+	?E32Dll@@YAHW4TDllReason@@@Z @ 13 NONAME ; int __cdecl E32Dll(enum TDllReason)
+	?EventType@CConnMonEventBase@@QBEHXZ @ 14 NONAME ; public: int __thiscall CConnMonEventBase::EventType(void)const 
+	?GetBoolAttribute@RConnectionMonitor@@QAEXIIIAAHAAVTRequestStatus@@@Z @ 15 NONAME ; public: void __thiscall RConnectionMonitor::GetBoolAttribute(unsigned int,unsigned int,unsigned int,int &,class TRequestStatus &)
+	?GetConnectionCount@RConnectionMonitor@@QAEXAAIAAVTRequestStatus@@@Z @ 16 NONAME ; public: void __thiscall RConnectionMonitor::GetConnectionCount(unsigned int &,class TRequestStatus &)
+	?GetConnectionInfo@RConnectionMonitor@@QBEHIAAI0@Z @ 17 NONAME ; public: int __thiscall RConnectionMonitor::GetConnectionInfo(unsigned int,unsigned int &,unsigned int &)const 
+	?GetIntAttribute@RConnectionMonitor@@QAEXIIIAAHAAVTRequestStatus@@@Z @ 18 NONAME ; public: void __thiscall RConnectionMonitor::GetIntAttribute(unsigned int,unsigned int,unsigned int,int &,class TRequestStatus &)
+	?GetPckgAttribute@RConnectionMonitor@@QBEXIIIAAVTDes8@@AAVTRequestStatus@@@Z @ 19 NONAME ; public: void __thiscall RConnectionMonitor::GetPckgAttribute(unsigned int,unsigned int,unsigned int,class TDes8 &,class TRequestStatus &)const 
+	?GetStringAttribute@RConnectionMonitor@@QBEXIIIAAVTDes16@@AAVTRequestStatus@@@Z @ 20 NONAME ; public: void __thiscall RConnectionMonitor::GetStringAttribute(unsigned int,unsigned int,unsigned int,class TDes16 &,class TRequestStatus &)const 
+	?GetSubConnectionInfo@RConnectionMonitor@@QBEHIIAAI@Z @ 21 NONAME ; public: int __thiscall RConnectionMonitor::GetSubConnectionInfo(unsigned int,unsigned int,unsigned int &)const 
+	?GetUintAttribute@RConnectionMonitor@@QAEXIIIAAIAAVTRequestStatus@@@Z @ 22 NONAME ; public: void __thiscall RConnectionMonitor::GetUintAttribute(unsigned int,unsigned int,unsigned int,unsigned int &,class TRequestStatus &)
+	?NetworkStatus@CConnMonNetworkStatusChange@@QBEHXZ @ 23 NONAME ; public: int __thiscall CConnMonNetworkStatusChange::NetworkStatus(void)const 
+	?NotifyEventL@RConnectionMonitor@@QAEHAAVMConnectionMonitorObserver@@@Z @ 24 NONAME ; public: int __thiscall RConnectionMonitor::NotifyEventL(class MConnectionMonitorObserver &)
+	?SetBoolAttribute@RConnectionMonitor@@QBEHIIIH@Z @ 25 NONAME ; public: int __thiscall RConnectionMonitor::SetBoolAttribute(unsigned int,unsigned int,unsigned int,int)const 
+	?SetIntAttribute@RConnectionMonitor@@QBEHIIIH@Z @ 26 NONAME ; public: int __thiscall RConnectionMonitor::SetIntAttribute(unsigned int,unsigned int,unsigned int,int)const 
+	?SetPckgAttribute@RConnectionMonitor@@QBEHIIIABVTDes8@@@Z @ 27 NONAME ; public: int __thiscall RConnectionMonitor::SetPckgAttribute(unsigned int,unsigned int,unsigned int,class TDes8 const &)const 
+	?SetStringAttribute@RConnectionMonitor@@QBEHIIIABVTDes16@@@Z @ 28 NONAME ; public: int __thiscall RConnectionMonitor::SetStringAttribute(unsigned int,unsigned int,unsigned int,class TDes16 const &)const 
+	?SetUintAttribute@RConnectionMonitor@@QBEHIIII@Z @ 29 NONAME ; public: int __thiscall RConnectionMonitor::SetUintAttribute(unsigned int,unsigned int,unsigned int,unsigned int)const 
+	?SubConnectionId@CConnMonConnectionActivityChange@@QBEIXZ @ 30 NONAME ; public: unsigned int __thiscall CConnMonConnectionActivityChange::SubConnectionId(void)const 
+	?SubConnectionId@CConnMonConnectionStatusChange@@QBEIXZ @ 31 NONAME ; public: unsigned int __thiscall CConnMonConnectionStatusChange::SubConnectionId(void)const 
+	?SubConnectionId@CConnMonCreateSubConnection@@QBEIXZ @ 32 NONAME ; public: unsigned int __thiscall CConnMonCreateSubConnection::SubConnectionId(void)const 
+	?SubConnectionId@CConnMonDeleteSubConnection@@QBEIXZ @ 33 NONAME ; public: unsigned int __thiscall CConnMonDeleteSubConnection::SubConnectionId(void)const 
+	?SubConnectionId@CConnMonDownlinkDataThreshold@@QBEIXZ @ 34 NONAME ; public: unsigned int __thiscall CConnMonDownlinkDataThreshold::SubConnectionId(void)const 
+	?SubConnectionId@CConnMonUplinkDataThreshold@@QBEIXZ @ 35 NONAME ; public: unsigned int __thiscall CConnMonUplinkDataThreshold::SubConnectionId(void)const 
+	?ThreadStart@CConnMonScheduler@@SAHAAVTSignal@1@@Z @ 36 NONAME ; public: static int __cdecl CConnMonScheduler::ThreadStart(class CConnMonScheduler::TSignal &)
+	?UplinkData@CConnMonDeleteConnection@@QBEIXZ @ 37 NONAME ; public: unsigned int __thiscall CConnMonDeleteConnection::UplinkData(void)const 
+	?UplinkData@CConnMonDeleteSubConnection@@QBEIXZ @ 38 NONAME ; public: unsigned int __thiscall CConnMonDeleteSubConnection::UplinkData(void)const 
+	?UplinkData@CConnMonUplinkDataThreshold@@QBEIXZ @ 39 NONAME ; public: unsigned int __thiscall CConnMonUplinkDataThreshold::UplinkData(void)const 
+	?RegistrationStatus@CConnMonNetworkRegistrationChange@@QBEHXZ @ 40 NONAME ; public: int __thiscall CConnMonNetworkRegistrationChange::RegistrationStatus(void)const 
+	?Bearer@CConnMonBearerChange@@QBEHXZ @ 41 NONAME ; public: int __thiscall CConnMonBearerChange::Bearer(void)const 
+	?SignalStrength@CConnMonSignalStrengthChange@@QBEHXZ @ 42 NONAME ; public: int __thiscall CConnMonSignalStrengthChange::SignalStrength(void)const 
+	?Availability@CConnMonBearerAvailabilityChange@@QBEHXZ @ 43 NONAME ; public: int __thiscall CConnMonBearerAvailabilityChange::Availability(void)const 
+	?Data@CConnMonGenericEvent@@QBEPAXXZ @ 44 NONAME ; public: void * __thiscall CConnMonGenericEvent::Data(void)const 
+	?IapAvailability@CConnMonIapAvailabilityChange@@QBE?AVTConnMonIapInfo@@XZ @ 45 NONAME ; class TConnMonIapInfo CConnMonIapAvailabilityChange::IapAvailability(void) const
+	?TransmitPower@CConnMonTransmitPowerChange@@QBEIXZ @ 46 NONAME ; unsigned int CConnMonTransmitPowerChange::TransmitPower(void) const
+

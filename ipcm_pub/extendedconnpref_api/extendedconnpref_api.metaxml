@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<api id="73bfd02c12f0135a4cf31b94a56e910f" dataversion="2.0">
+  <name>Extendedconnpref API</name>
+  <description>Provides an API for configuring creation of an IP connection.</description>
+  <type>c++</type>
+  <collection>bearermanagement</collection>
+  <libs>
+    <lib name="extendedconnpref.lib"/>
+    <lib name="netmeta.lib"/>
+  </libs>
+  <release category="public" sinceversion="5.2"/>
+  <attributes>
+    <htmldocprovided>yes</htmldocprovided>
+    <adaptation>no</adaptation>
+  </attributes>
+</api>

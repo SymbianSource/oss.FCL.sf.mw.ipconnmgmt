@@ -1,0 +1,161 @@
+EXPORTS
+	_ZN17CConnMonScheduler11ThreadStartERNS_7TSignalE @ 1 NONAME
+	_ZN18RConnectionMonitor12NotifyEventLER26MConnectionMonitorObserver @ 2 NONAME
+	_ZN18RConnectionMonitor15GetIntAttributeEjjjRiR14TRequestStatus @ 3 NONAME
+	_ZN18RConnectionMonitor16GetBoolAttributeEjjjRiR14TRequestStatus @ 4 NONAME
+	_ZN18RConnectionMonitor16GetUintAttributeEjjjRjR14TRequestStatus @ 5 NONAME
+	_ZN18RConnectionMonitor18CancelAsyncRequestEi @ 6 NONAME
+	_ZN18RConnectionMonitor18GetConnectionCountERjR14TRequestStatus @ 7 NONAME
+	_ZN18RConnectionMonitor19CancelNotificationsEv @ 8 NONAME
+	_ZN18RConnectionMonitor5CloseEv @ 9 NONAME
+	_ZN18RConnectionMonitor8ConnectLEv @ 10 NONAME
+	_ZNK17CConnMonEventBase12ConnectionIdEv @ 11 NONAME
+	_ZNK17CConnMonEventBase9EventTypeEv @ 12 NONAME
+	_ZNK18RConnectionMonitor15SetIntAttributeEjjji @ 13 NONAME
+	_ZNK18RConnectionMonitor16GetPckgAttributeEjjjR5TDes8R14TRequestStatus @ 14 NONAME
+	_ZNK18RConnectionMonitor16SetBoolAttributeEjjji @ 15 NONAME
+	_ZNK18RConnectionMonitor16SetPckgAttributeEjjjRK5TDes8 @ 16 NONAME
+	_ZNK18RConnectionMonitor16SetUintAttributeEjjjj @ 17 NONAME
+	_ZNK18RConnectionMonitor17GetConnectionInfoEjRjS0_ @ 18 NONAME
+	_ZNK18RConnectionMonitor18GetStringAttributeEjjjR6TDes16R14TRequestStatus @ 19 NONAME
+	_ZNK18RConnectionMonitor18SetStringAttributeEjjjRK6TDes16 @ 20 NONAME
+	_ZNK18RConnectionMonitor20GetSubConnectionInfoEjjRj @ 21 NONAME
+	_ZNK20CConnMonBearerChange6BearerEv @ 22 NONAME
+	_ZNK20CConnMonGenericEvent4DataEv @ 23 NONAME
+	_ZNK24CConnMonDeleteConnection10UplinkDataEv @ 24 NONAME
+	_ZNK24CConnMonDeleteConnection12DownlinkDataEv @ 25 NONAME
+	_ZNK24CConnMonDeleteConnection19AuthoritativeDeleteEv @ 26 NONAME
+	_ZNK27CConnMonCreateSubConnection15SubConnectionIdEv @ 27 NONAME
+	_ZNK27CConnMonDeleteSubConnection10UplinkDataEv @ 28 NONAME
+	_ZNK27CConnMonDeleteSubConnection12DownlinkDataEv @ 29 NONAME
+	_ZNK27CConnMonDeleteSubConnection15SubConnectionIdEv @ 30 NONAME
+	_ZNK27CConnMonDeleteSubConnection19AuthoritativeDeleteEv @ 31 NONAME
+	_ZNK27CConnMonNetworkStatusChange13NetworkStatusEv @ 32 NONAME
+	_ZNK27CConnMonUplinkDataThreshold10UplinkDataEv @ 33 NONAME
+	_ZNK27CConnMonUplinkDataThreshold15SubConnectionIdEv @ 34 NONAME
+	_ZNK28CConnMonSignalStrengthChange14SignalStrengthEv @ 35 NONAME
+	_ZNK29CConnMonDownlinkDataThreshold12DownlinkDataEv @ 36 NONAME
+	_ZNK29CConnMonDownlinkDataThreshold15SubConnectionIdEv @ 37 NONAME
+	_ZNK30CConnMonConnectionStatusChange15SubConnectionIdEv @ 38 NONAME
+	_ZNK30CConnMonConnectionStatusChange16ConnectionStatusEv @ 39 NONAME
+	_ZNK32CConnMonBearerAvailabilityChange12AvailabilityEv @ 40 NONAME
+	_ZNK32CConnMonConnectionActivityChange15SubConnectionIdEv @ 41 NONAME
+	_ZNK32CConnMonConnectionActivityChange18ConnectionActivityEv @ 42 NONAME
+	_ZNK33CConnMonNetworkRegistrationChange18RegistrationStatusEv @ 43 NONAME
+	_ZNK29CConnMonIapAvailabilityChange15IapAvailabilityEv @ 44 NONAME
+	_ZNK27CConnMonTransmitPowerChange13TransmitPowerEv @ 45 NONAME
+	_ZN10TConnMonId8FromPtrCERK7TPtrC16 @ 46 NONAME
+	_ZN10TConnMonIdC1Ej @ 47 NONAME
+	_ZN10TConnMonIdC2Ej @ 48 NONAME
+	_ZN19ConnMonIdsArrayPckgC1Ej @ 49 NONAME
+	_ZN19ConnMonIdsArrayPckgC2Ej @ 50 NONAME
+	_ZN19ConnMonIdsArrayPckgD0Ev @ 51 NONAME
+	_ZN19ConnMonIdsArrayPckgD1Ev @ 52 NONAME
+	_ZN19ConnMonIdsArrayPckgD2Ev @ 53 NONAME
+	_ZN19TConnMonWLANNetwork12LessBySignalERKS_S1_ @ 54 NONAME
+	_ZN19TConnMonWLANNetwork8FromPtrCERK7TPtrC16 @ 55 NONAME
+	_ZN19TConnMonWLANNetworkC1ERK4TBufILi32EEjjjRK6RArrayIiE @ 56 NONAME
+	_ZN19TConnMonWLANNetworkC2ERK4TBufILi32EEjjjRK6RArrayIiE @ 57 NONAME
+	_ZN19TConnMonWLANNetworkD0Ev @ 58 NONAME
+	_ZN19TConnMonWLANNetworkD1Ev @ 59 NONAME
+	_ZN19TConnMonWLANNetworkD2Ev @ 60 NONAME
+	_ZN28ConnMonWLANNetworksArrayPckgC1Ej @ 61 NONAME
+	_ZN28ConnMonWLANNetworksArrayPckgC2Ej @ 62 NONAME
+	_ZN28ConnMonWLANNetworksArrayPckgD0Ev @ 63 NONAME
+	_ZN28ConnMonWLANNetworksArrayPckgD1Ev @ 64 NONAME
+	_ZN28ConnMonWLANNetworksArrayPckgD2Ev @ 65 NONAME
+	_ZNK10TConnMonId2IdEv @ 66 NONAME
+	_ZNK10TConnMonId5ToBufEv @ 67 NONAME
+	_ZNK12TConnMonSNAP5ValidEv @ 68 NONAME
+	_ZNK18RConnectionMonitor16GetPckgAttributeEjjjR6TDes16R14TRequestStatus @ 69 NONAME
+	_ZNK19ConnMonIdsArrayPckg3BufEv @ 70 NONAME
+	_ZNK19ConnMonIdsArrayPckg9UnpackToLER6RArrayI10TConnMonIdE @ 71 NONAME
+	_ZNK19TConnMonWLANNetwork5ToBufEv @ 72 NONAME
+	_ZNK28ConnMonWLANNetworksArrayPckg3BufEv @ 73 NONAME
+	_ZNK28ConnMonWLANNetworksArrayPckg9UnpackToLER6RArrayI19TConnMonWLANNetworkE @ 74 NONAME
+	_ZNK31CConnMonSNAPsAvailabilityChange15SNAPsAvailabileEv @ 75 NONAME
+	_ZNK31CConnMonSNAPsAvailabilityChange16SNAPAvailabilityEv @ 76 NONAME
+	_ZTI10TConnMonId @ 77 NONAME ; #<TI>#
+	_ZTI12TConnMonSNAP @ 78 NONAME ; #<TI>#
+	_ZTI15TConnMonRealIap @ 79 NONAME ; #<TI>#
+	_ZTI17TConnMonBearerCSD @ 80 NONAME ; #<TI>#
+	_ZTI17TConnMonBearerLAN @ 81 NONAME ; #<TI>#
+	_ZTI18TConnMonBearerGPRS @ 82 NONAME ; #<TI>#
+	_ZTI18TConnMonBearerWLAN @ 83 NONAME ; #<TI>#
+	_ZTI18TConnMonVirtualIap @ 84 NONAME ; #<TI>#
+	_ZTI19ConnMonIdsArrayPckg @ 85 NONAME ; #<TI>#
+	_ZTI19TConnMonWLANNetwork @ 86 NONAME ; #<TI>#
+	_ZTI20CCDIAPMetadataRecord @ 87 NONAME ABSENT ; #<TI>#
+	_ZTI21CCDSNAPMetadataRecord @ 88 NONAME ABSENT ; #<TI>#
+	_ZTI22CCDMIPServiceExtRecord @ 89 NONAME ABSENT ; #<TI>#
+	_ZTI25CConnMonCommsDataNotifier @ 90 NONAME ; #<TI>#
+	_ZTI27CConnMonAvailabilityManager @ 91 NONAME ; #<TI>#
+	_ZTI28ConnMonWLANNetworksArrayPckg @ 92 NONAME ; #<TI>#
+	_ZTI31CConnMonIapsAvailabilityManager @ 93 NONAME ; #<TI>#
+	_ZTI32CConnMonSNAPsAvailabilityManager @ 94 NONAME ; #<TI>#
+	_ZTI36CCDDataMobilitySelectionPolicyRecord @ 95 NONAME ABSENT ; #<TI>#
+	_ZTI37CCDGlobalBearerTypePriorizationRecord @ 96 NONAME ABSENT ; #<TI>#
+	_ZTV10TConnMonId @ 97 NONAME ; #<VT>#
+	_ZTV12TConnMonSNAP @ 98 NONAME ; #<VT>#
+	_ZTV15TConnMonRealIap @ 99 NONAME ; #<VT>#
+	_ZTV17TConnMonBearerCSD @ 100 NONAME ; #<VT>#
+	_ZTV17TConnMonBearerLAN @ 101 NONAME ; #<VT>#
+	_ZTV18TConnMonBearerGPRS @ 102 NONAME ; #<VT>#
+	_ZTV18TConnMonBearerWLAN @ 103 NONAME ; #<VT>#
+	_ZTV18TConnMonVirtualIap @ 104 NONAME ; #<VT>#
+	_ZTV19ConnMonIdsArrayPckg @ 105 NONAME ; #<VT>#
+	_ZTV19TConnMonWLANNetwork @ 106 NONAME ; #<VT>#
+	_ZTV20CCDIAPMetadataRecord @ 107 NONAME ABSENT; #<VT>#
+	_ZTV21CCDSNAPMetadataRecord @ 108 NONAME  ABSENT ; #<VT>#
+	_ZTV22CCDMIPServiceExtRecord @ 109 NONAME ABSENT ; #<VT>#
+	_ZTV25CConnMonCommsDataNotifier @ 110 NONAME ; #<VT>#
+	_ZTV27CConnMonAvailabilityManager @ 111 NONAME ; #<VT>#
+	_ZTV28ConnMonWLANNetworksArrayPckg @ 112 NONAME ; #<VT>#
+	_ZTV31CConnMonIapsAvailabilityManager @ 113 NONAME ; #<VT>#
+	_ZTV32CConnMonSNAPsAvailabilityManager @ 114 NONAME ; #<VT>#
+	_ZTV36CCDDataMobilitySelectionPolicyRecord @ 115 NONAME ABSENT ; #<VT>#
+	_ZTV37CCDGlobalBearerTypePriorizationRecord @ 116 NONAME ABSENT ; #<VT>#
+	_ZN19CConnMonWlanNetwork15CompareBySignalERKS_S1_ @ 117 NONAME
+	_ZN19CConnMonWlanNetwork4NewLERK4TBufILi32EEjjjRK5TBuf8ILi6EERK7TDesC16 @ 118 NONAME
+	_ZN19CConnMonWlanNetwork4NewLERS_ @ 119 NONAME
+	_ZN19CConnMonWlanNetwork4NewLEv @ 120 NONAME
+	_ZN19CConnMonWlanNetwork8FromPtrCERK7TPtrC16PS_ @ 121 NONAME
+	_ZN19CConnMonWlanNetworkD0Ev @ 122 NONAME
+	_ZN19CConnMonWlanNetworkD1Ev @ 123 NONAME
+	_ZN19CConnMonWlanNetworkD2Ev @ 124 NONAME
+	_ZN19CConnMonWlanNetworkaSERS_ @ 125 NONAME
+	_ZN32CConnMonWlanNetworksPtrArrayPckgC1Ej @ 126 NONAME
+	_ZN32CConnMonWlanNetworksPtrArrayPckgC2Ej @ 127 NONAME
+	_ZN32CConnMonWlanNetworksPtrArrayPckgD0Ev @ 128 NONAME
+	_ZN32CConnMonWlanNetworksPtrArrayPckgD1Ev @ 129 NONAME
+	_ZN32CConnMonWlanNetworksPtrArrayPckgD2Ev @ 130 NONAME
+	_ZNK19CConnMonWlanNetwork5ToBufEv @ 131 NONAME
+	_ZNK32CConnMonWlanNetworksPtrArrayPckg3BufEv @ 132 NONAME
+	_ZNK32CConnMonWlanNetworksPtrArrayPckg9UnpackToLER13RPointerArrayI19CConnMonWlanNetworkE @ 133 NONAME
+	_ZTI32CConnMonWlanNetworksPtrArrayPckg @ 134 NONAME ; #<TI>#
+	_ZTV32CConnMonWlanNetworksPtrArrayPckg @ 135 NONAME ; #<VT>#
+	_ZNK24CConnMonBearerInfoChange10BearerInfoEv @ 136 NONAME
+	_ZNK25CConnMonBearerGroupChange12BearerGroupsERjS0_ @ 137 NONAME
+	_ZNK25CConnMonBearerGroupChange8InternalEv @ 138 NONAME
+	_ZN26CConnMonWlanProbeRawBuffer4NewLEPK6HBufC8 @139
+	_ZN26CConnMonWlanProbeRawBuffer4NewLERS_ @140
+	_ZN26CConnMonWlanProbeRawBuffer4NewLEv @141
+	_ZN26CConnMonWlanProbeRawBuffer8FromPtrCERK6TPtrC8PS_ @142
+	_ZN26CConnMonWlanProbeRawBufferD0Ev @143
+	_ZN26CConnMonWlanProbeRawBufferD1Ev @144
+	_ZN26CConnMonWlanProbeRawBufferD2Ev @145
+	_ZN26CConnMonWlanProbeRawBufferaSERS_ @146
+	_ZN31CConnMonWlanProbeRawBuffersPckgC1Ej @147
+	_ZN31CConnMonWlanProbeRawBuffersPckgC2Ej @148
+	_ZN31CConnMonWlanProbeRawBuffersPckgD0Ev @149
+	_ZN31CConnMonWlanProbeRawBuffersPckgD1Ev @150
+	_ZN31CConnMonWlanProbeRawBuffersPckgD2Ev @151
+	_ZNK26CConnMonWlanProbeRawBuffer5ToBufEv @152
+	_ZNK31CConnMonWlanProbeRawBuffersPckg3BufEv @153
+	_ZNK31CConnMonWlanProbeRawBuffersPckg9UnpackToLER13RPointerArrayI26CConnMonWlanProbeRawBufferE @154
+	_ZTI31CConnMonWlanProbeRawBuffersPckg @155
+	_ZTV31CConnMonWlanProbeRawBuffersPckg @156
+	_ZNK26CConnMonWlanProbeRawBuffer9RawBufferEv @157
+	_ZNK31CConnMonWlanProbeRawBuffersPckg5CountEv @158
+	_ZNK31CConnMonWlanProbeRawBuffersPckg5TotalEv @159
+

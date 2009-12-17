@@ -1,0 +1,130 @@
+/*
+* Copyright (c) 2004 Nokia Corporation and/or its subsidiary(-ies). 
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:  This is project specification file for the 
+*               Connection Ui Utilities Notifier
+*
+*
+*/
+
+
+#include <data_caging_paths.hrh>
+#include <platform_paths.hrh>
+
+TARGET      ConnUiUtilsNotif.DLL
+
+TARGETTYPE  DLL
+
+TARGETPATH  /System/libs
+
+UID         0x101FDFAE 0x101FD668       
+
+CAPABILITY CAP_GENERAL_DLL 
+
+VENDORID VID_DEFAULT
+
+START RESOURCE ../ConnectionUiUtilities/data/ConnUiUtilsNotif.rss
+HEADER
+    TARGETPATH  RESOURCE_FILES_DIR
+    LANGUAGE_IDS
+END     // RESOURCE
+
+SOURCEPATH  ../ConnectionUiUtilities/NotifSrc
+SOURCE      ConnUiUtilsNotif.cpp
+
+SOURCE      SelectWLANDlg.cpp
+SOURCE      SelectWLanDlgPlugin.cpp
+SOURCE      ActiveSelectWLanDlgPlugin.cpp
+SOURCE      wlancoveragecheck.cpp
+
+SOURCE      OfflineWlanNoteDlg.cpp
+SOURCE      OfflineWlanNoteNotif.cpp
+
+SOURCE      WlanNetworkDataProvider.cpp
+SOURCE      NetworkInfoBase.cpp
+SOURCE      NetworkInfoArray.cpp
+SOURCE      NetworkInfoKey.cpp
+
+SOURCE      WepWpaQueryDlg.cpp
+SOURCE      EasyWepDlgNotif.cpp
+SOURCE      EasyWpaDlgNotif.cpp
+
+SOURCE      OfflineWlanDisabledNoteNotif.cpp
+SOURCE      ActiveOfflineWlanDisabledNote.cpp
+
+SOURCE      WLANNetworkUnavailableNoteNotif.cpp
+SOURCE      ActiveWLANNetworkUnavailableNote.cpp
+
+SOURCE      ConfirmationQuery.cpp
+SOURCE      ConfirmationQueryNotif.cpp
+SOURCE      ActiveConnectViaNote.cpp
+SOURCE      ConnectViaNoteNotif.cpp
+SOURCE      NoteDlgSuppressingSwitch.cpp
+SOURCE      wlanpowersavetest.cpp
+SOURCE      wlanpowersavetestnotif.cpp
+SOURCE      easywapidlgnotif.cpp
+SOURCE      nowlannetworksavailablenotif.cpp
+SOURCE      connectingviadiscreetpopup.cpp
+SOURCE      connectingviadiscreetpopupnotif.cpp
+SOURCE      connectionerrordiscreetpopup.cpp
+SOURCE      connectionerrordiscreetpopupnotif.cpp
+
+SOURCEPATH  ../src
+SOURCE      ConnectionInfo.cpp
+SOURCE      ConnectionDialogsNotifBase.cpp
+SOURCE	ExpiryTimer.cpp
+
+USERINCLUDE     ../ConnectionUiUtilities/NotifInc
+USERINCLUDE     ../ConnectionUiUtilities/inc
+
+// Component specific internal headers 
+USERINCLUDE			../inc
+
+// ADO specific internal headers 
+SYSTEMINCLUDE		../../../inc
+
+//Macro to /epoc32 headers
+MW_LAYER_SYSTEMINCLUDE
+
+SYSTEMINCLUDE   /epoc32/include/libc 
+SYSTEMINCLUDE   /epoc32/include/uikon
+
+
+LIBRARY     euser.lib eikdlg.lib eiksrv.lib cone.lib eikcore.lib eikcoctl.lib
+LIBRARY     bafl.lib avkon.lib AknSkins.lib Ecom.lib 
+LIBRARY		eiksrvui.lib
+LIBRARY     commonengine.lib
+LIBRARY     AKNNOTIFY.LIB
+LIBRARY     AknIcon.lib
+LIBRARY     egul.lib
+LIBRARY	    centralrepository.lib 
+LIBRARY	    aknlayout.lib 
+LIBRARY     AknCapServerClient.lib
+LIBRARY     FeatMgr.lib
+LIBRARY     charconv.lib
+
+LIBRARY     commdb.lib
+LIBRARY		  cmmanager.lib
+LIBRARY     etel3rdparty.lib 
+
+#if defined(ARMCC)
+    DEFFILE ../ConnectionUiUtilities/EABI/ConnUiUtilsNotif.DEF
+#elif defined( WINSCW )
+    DEFFILE ../ConnectionUiUtilities/BWinsCw/ConnUiUtilsNotif.DEF
+#endif
+
+DEBUGLIBRARY flogger.lib
+DEBUGLIBRARY efsrv.lib
+
+
+// End of File

@@ -1,0 +1,45 @@
+/*
+* Copyright (c) 2003 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:  Builds ConnMonExt.dll.
+*
+*/
+
+#include <platform_paths.hrh>
+
+MACRO           EPOC_SDK=0x07010000
+
+TARGET          ConnMonExt.dll
+TARGETTYPE      dll
+UID             0x1000008d 0x101F6D0A
+
+VENDORID        VID_DEFAULT
+CAPABILITY      CAP_CLIENT_DLL
+
+SOURCEPATH      ../src
+SOURCE          ConnMonExt.cpp
+
+USERINCLUDE     ../inc
+MW_LAYER_SYSTEMINCLUDE
+
+LIBRARY         euser.lib
+LIBRARY         connmon.lib
+DEBUGLIBRARY    flogger.lib
+
+#if defined(ARMCC)
+    DEFFILE ../EABI/ConnMonExt_EKA2.def
+#elif defined( WINSCW )
+    DEFFILE ../BWinsCw/CONNMONEXT_EKA2.def
+#else
+    DEFFILE ../BMarm/CONNMONEXT_EKA2.def
+#endif

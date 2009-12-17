@@ -1,0 +1,508 @@
+/*
+* Copyright (c) 2005 Nokia Corporation and/or its subsidiary(-ies). 
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description: 
+*     This is a localisation file for Connection Ui Utilities
+*     A .loc file is the one and only place where the logical strings
+*     to be localised are defined.
+*
+*/
+
+
+
+// LOCALISATION STRINGS
+
+//d:"Always ask" dialog - Setting list item title
+//l:list_setting_pane_t1
+//w:
+//r:3.1
+//
+#define qtn_netw_sett_default_iap		"Default access point"
+
+//d:"Always ask" dialog - Setting choice item
+//l:list_set_graphic_pane_t1
+//w:
+//r:3.0
+//
+#define qtn_netw_sett_iap_pref_prompt		"Ask when needed"
+
+//d:"Always ask" dialog - Setting choice item
+//l:list_set_graphic_pane_t1
+//w:
+//r:3.0
+//
+#define qtn_netw_sett_iap_pref_user_def		"User defined"
+
+
+
+//d:"Change connection" dialog - info text
+//l:loc_type_pane
+//w:
+//r:3.0
+//
+#define qtn_netw_detail_change_connection_desc  "Current connection is \'%U\'. Select new:"
+
+//d:"Change connection" dialog - title
+//l:heading_pane_t1
+//w:
+//r:3.0
+//
+#define qtn_netw_prmpt_change_connection        "Change connection:"
+
+//d:"Change connection" dialog - information note to confirm change of used access point
+//l:popup_note_window
+//w:
+//r:3.0
+//
+#define qtn_netw_conf_connection_changed        "Connection changed. Now connected via \'%U\'"
+
+
+
+//d:"Search for WLAN" - wait note
+//l:popup_note_wait_window
+//w:
+//r:3.0
+//
+#define qtn_wlan_wait_searching_networks         "Searching WLAN networks"
+
+//d:"Search for WLAN" - information note
+//l:popup_note_window
+//w:
+//r:3.0
+//
+#define qtn_wlan_info_no_networks_found         "No WLAN networks found"
+
+//d:"Search for WLAN" - title for list query
+//l:heading_pane_t1
+//w:
+//r:3.0
+//
+#define qtn_wlan_prmpt_select_network            "Select WLAN network:"
+
+//d:"Off-line mode" - confirmation query
+//l:popup_note_window
+//w:
+//r:3.0
+//
+#define qtn_offline_activate_wlan               "Do you want to create a WLAN connection in Off-line mode?"
+
+//d: Wait note text during collection of access points
+//l: popup_note_wait_window
+//w:
+//r:3.0
+//
+#define qtn_netw_wait_checking_avail_conn       "Checking available connections"
+
+//d:Special IAP to enable the search for surrounding WLAN networks
+//l:list_single_graphic_pane_t1_cp2
+//w:
+//r:3.0
+//
+#define qtn_wlan_search_for_networks    "Search for WLAN"
+
+
+//d:"Search for WLAN" WEP key - data query
+//l:popup_query_data_window/opt5
+//w:
+//r:3.0
+//
+#define qtn_wlan_prmpt_wep_key         "Enter WEP key for WLAN:"
+
+//d:"Search for WLAN" WPA key - data query
+//l:popup_query_data_window/opt5
+//w:
+//r:3.0
+//
+#define qtn_wlan_prmpt_wpa_key         "Enter pre-shared key for WLAN:"
+
+//d:"Search for WLAN" WPA key too short - information note
+//l:popup_note_window
+//w:
+//r:3.0
+//
+#define qtn_wlan_info_preshared_key_too_short         "Key must be at least 8 characters long"
+
+//d:"Search for WLAN" Entered WEP key's length is not valid - information note
+//l:popup_note_window
+//w:
+//r:3.0
+//
+#define qtn_wlan_info_invalid_wep_key         "Invalid WEP key"
+
+//d:"Search for WLAN" Illegal characters in entered WEP key - information note
+//l:popup_note_window
+//w:
+//r:3.0
+//
+#define qtn_wlan_info_wep_key_illegal_chars        "Illegal characters in WEP key"
+
+//d:Coverage is lost to selected WLAN network - error note
+//l:popup_note_window
+//w:
+//r:3.0
+//
+#define qtn_err_wlan_network_lost                "WLAN network lost"
+
+//d:Confirmation note, after the connection has been successfully establilshed
+//l:popup_note_window/opt2
+//w:
+//r:3.2
+//
+#define qtn_netw_conset_conf_connected_to         "Connected to '%0U' via\n '%1U'"
+
+//d:Information note, is displayed when the roaming to another connection method is started
+//l:popup_note_window/opt2
+//w:
+//r:3.2
+//
+#define qtn_netw_conset_info_roaming_to         "Changing connection to: '%U'"
+
+
+//d:Confirmation query, is aksed when a change in connection method is take place, heading
+//l:heading_pane_t1
+//w:
+//r:3.2
+//
+#define qtn_netw_conset_prmpt_roam_less_preferred    "Connection was lost. "
+
+//d:Confirmation query, is aksed when a change in connection method is take place
+//l:popup_info_list_pane_t1
+//w:
+//r:3.2
+//
+#define qtn_netw_conset_quest_roam_less_preferred    "Re-establish connection to '%0U' via method '%1U'?"
+
+//d:Confirmation query, is aksed when a change in connection method is take place, heading
+//l:heading_pane_t1
+//w:
+//r:3.2
+//
+#define qtn_netw_conset_prmpt_roam_more_preferred    "Preferred connection: "
+
+//d:Confirmation query, is aksed when a change in connection method is take place
+//l:popup_info_list_pane_t1
+//w:
+//r:3.2
+//
+#define qtn_netw_conset_quest_roam_more_preferred    "Connection to '%0U' now available via method '%1U'. Connect?"
+
+//d:Confirmation query, to ask the user a confirmation before establishing a 
+//d:connection to the destination %0U via the Connection Method %1U
+//l:popup_info_list_pane_t1
+//w:
+//r:3.2
+//
+#define qtn_netw_conset_quest_connect_via_method    "Connect to destination '%0U' via connection method '%1U'?"
+
+//d:Confirmation note, after the connection has been successfully establilshed
+//l:popup_note_window/opt2
+//w:
+//r:3.2
+//
+#define qtn_netw_conset_conf_connected_via_method   "Connected via:\n '%U'"
+
+//d:Title of the MessageQuery with links when a new connection needs to be
+//d:established.
+//l:heading_pane_t1
+//w:
+//r:3.2
+//
+#define qtn_netw_conset_prmpt_connection_needed     "Connection needed:"
+
+//d:Link inside a MessageQuery to change the seamlessness value of the selected
+//d:Connection Method
+//l:popup_info_list_pane_t1
+//w:
+//r:3.2
+//
+#define qtn_netw_conset_msg_query_link_always_accept "-Remember this and connect"
+
+//d:Link inside a MessageQuery to refuse connection with the selected method,
+//d: but to keep the possibility to try with the next best method.
+//l:popup_info_list_pane_t1
+//w:
+//r:3.2
+//
+#define qtn_netw_conset_msg_query_link_try_next     "-Try next best method"
+
+
+//d:Entry to enable the manual input of WLAN network’s SSID, e.g. in case
+//d:of a hidden network which is not directly visible in the scan results
+//l:list_single_graphic_pane_t1_cp2
+//w:
+//r:3.2
+//
+#define qtn_wlan_manual_ssid_input                  "Other (hidden network)"
+
+
+//d:Prompt text for WLAN network name query.
+//l:popup_query_data_window
+//w:
+//r:3.2
+//
+#define qtn_wlan_prmpt_network_name                 "WLAN network name:"
+
+//d:Information note for the user when the entered key is not hexadecimal
+//l:popup_snote_single_text_window
+//w:
+//r:5.0
+//
+#define qtn_wlan_info_preshared_key_not_hex         "Invalid characters in pre-shared key. 64-digit key must be in hexadecimal format."
+
+// d: Generic error note to be displayed when user tries to  
+// d: use some feature which is not supported 
+// l: popup_note_window/opt1
+// w: Errorres
+//r:5.0
+// 
+#define qtn_err_not_supp "Feature is not supported"
+
+//d:Title of Power save test notification dialog.
+//l:heading_pane_t1
+//w:
+//r:9.1
+//
+#define qtn_wlan_power_save_test_dlg_title     "Power save test"
+
+//d:Power save test notification, Informs that power consumption 
+//d:will increase while using the selected WLAN.
+//l:popup_info_list_pane_t1
+//w:
+//r:9.1
+//
+#define qtn_wlan_power_save_test_dlg_text    "The power-save feature of the WLAN station you are connecting to may be incompatible or performing incorrectly. WLAN power-saving of your mobile has been disabled, and battery consumption may be affected."
+
+//d:Link inside the Power save test notification dialog 
+//d:to disable the notification in the future.
+//l:popup_info_list_pane_t1
+//w:
+//r:9.1
+//
+#define qtn_wlan_power_save_test_dlg_link "Disable notification"
+
+//d:Text of discreet popup row 1 informing the connecting status
+//l:popup_discreet_window_t1
+//w:
+//r:5.2
+//
+#define qtn_occ_connecting_discreet_popup_text1 "Connecting"
+
+//d:Text of discreet popup row 2 informing about the used IAP for the connection
+//l:popup_discreet_window_t2
+//w:
+//r:5.2
+//
+#define qtn_occ_connecting_discreet_popup_text2 "Via '%U'"
+
+
+//d:Title of information query when new WLAN networks are found 
+//l:heading_pane_t1
+//w:
+//r:5.2
+//
+#define qtn_occ_prmpt_new_wlans_found	"New WLAN networks found"
+
+//d:Text asking to select a WLAN network to be used from the list instead of
+//d:cellular data
+//l:loc_type_pane
+//w:
+//r:5.2
+//
+#define qtn_occ_detail_new_wlans_select	"Select a WLAN network to be used instead of cellular data."
+
+//d:Selection item in New WLAN networks found query note to choose only the 
+//d:known networks for connection
+//l:list_single_graphic_pane_t1_cp2
+//w:
+//r:5.2
+//
+#define qtn_occ_list_new_wlans_use_only_known	"Use only known networks"
+
+
+//d:No WLAN networks are available at the moment - note
+//l:popup_note_window
+//w:
+//r:5.2
+//
+#define qtn_occ_info_no_wlan_available "No WLAN networks are available at the moment. Connection not available."
+
+
+//d:Confirmation query, to ask the user a confirmation before establishing a 
+//d:connection to the cellular network in home country
+//l:loc_type_pane
+//w:
+//r:5.2
+//
+#define qtn_occ_detail_cs_data_home_nw    "Connect to Internet using cellular data? Data costs may apply."
+
+//d:Title of the MessageQuery when a new connection needs to be established.
+//l:heading_pane_t1
+//w:
+//r:5.2
+//
+#define qtn_occ_prmpt_cs_data_home_nw  "Connecting to Internet"
+
+//d:Option for connection query.
+//l:list_single_pane_t1_cp2
+//w:
+//r:5.2
+//
+#define qtn_occ_list_cs_data_home_nw_automatic "Connect automatically"
+
+//d:Option for connection query.
+//l:list_single_pane_t1_cp2
+//w:
+//r:5.2
+//
+#define qtn_occ_list_cs_data_home_nw_this_time "Connect this time"
+
+
+//d:Title of the MessageQuery when a new connection needs to be established.
+//l:heading_pane_t1
+//w:
+//r:5.2
+//
+#define qtn_occ_prmpt_cs_data_foreign_nw  "Connecting to Internet"
+
+//d:Confirmation query, to ask the user a confirmation before establishing a 
+//d:connection to the cellular network abroad
+//l:loc_type_pane
+//w:
+//r:5.2
+//
+#define qtn_occ_detail_cs_data_foreign_nw    "Connect to Internet in this country using cellular data? Data costs may increase considerably."
+
+//d:Option for connection query in foreign network.
+//l:list_single_pane_t1_cp2
+//w:
+//r:5.2
+//
+#define qtn_occ_list_cs_data_foreign_nw_this_time "Connect this time"
+
+//d:Option for connection query in foreign network.
+//l:list_single_pane_t1_cp2
+//w:
+//r:5.2
+//
+#define qtn_occ_list_cs_data_foreign_nw_automatic "Connect automatically"
+
+
+//d:Text of discreet popup row 1 informing the connection failure
+//l:popup_discreet_window_t1
+//w:
+//r:5.2
+//
+#define qtn_occ_connection_failed_discreet_popup_text1 "Connection failed"
+
+//d:Text of discreet popup row 2 informing reason for connection failure as Internal error.
+//l:popup_discreet_window_t2
+//w:
+//r:5.2
+//
+#define qtn_occ_internal_error_discreet_popup_text2 "Internal error"
+
+//d:Text of discreet popup row 2 informing connection failure because of no WLAN networks
+//l:popup_discreet_window_t2
+//w:
+//r:5.2
+//
+#define qtn_occ_wlan_not_found_discreet_popup_text2	"WLAN network not found"
+
+//d:Text of discreet popup row 2 informing connection/configuration failure 
+//d:because of unsuccessful authentication
+//l:popup_discreet_window_t2
+//w:
+//r:5.2
+//
+#define qtn_occ_auth_error_discreet_popup_text2	"Authentication unsuccessful"
+
+//d:Text of discreet popup row 2 informing connection failure because of 
+//d:incorrect security key
+//l:popup_discreet_window_t2
+//w:
+//r:5.2
+//
+#define qtn_occ_check_key_discreet_popup_text2	"Check security key"
+
+//d:Text of discreet popup row 2 informing connection failure because of 
+//d:incorrect connection settings
+//l:popup_discreet_window_t2
+//w:
+//r:5.2
+//
+#define qtn_occ_check_settings_discreet_popup_text2	"Check connection settings"
+
+//d:Text of discreet popup row 2 informing connection failure because of 
+//d:missing SIM card
+//l:popup_discreet_window_t2
+//w:
+//r:5.2
+//
+#define qtn_occ_sim_error_discreet_popup_text2	"SIM card missing"
+
+//d:Text of discreet popup row 2 informing connection failure because
+//d:of unreachable service
+//l:popup_discreet_window_t2
+//w:
+//r:5.2
+//
+#define qtn_occ_service_error_discreet_popup_text2	"Service unreachable"
+
+//d:Text of discreet popup row 2 informing connection failure because of 
+//d:permission denial
+//l:popup_discreet_window_t2
+//w:
+//r:5.2
+//
+#define qtn_occ_access_error_discreet_popup_text2	"Permission denied"
+
+//d:Text of discreet popup row 2 informing connection failure because 
+//d:another connection is already active
+//l:popup_discreet_window_t2
+//w:
+//r:5.2
+//
+#define qtn_occ_already_act_discreet_popup_text2	"Connection already active"
+
+//d:Text of discreet popup row 2 informing connection failure because 
+//d: signal is too weak
+//l:popup_discreet_window_t2
+//w:
+//r:5.2
+//
+#define qtn_occ_wlan_weak_discreet_popup_text2	"Signal too weak"
+
+//d:Text of discreet popup row 2 informing connection/configration failure and
+//d:suggesting to try again
+//l:popup_discreet_window_t2
+//w:
+//r:5.2
+//
+#define qtn_occ_try_again_discreet_popup_text2	"Please try again"
+
+//d:Text of discreet popup row 2 informing connection failure
+//l:popup_discreet_window_t2
+//w:
+//r:5.2
+//
+#define qtn_occ_conn_unavailable_discreet_popup_text2	"Connection unavailable"
+
+
+//d:Text of discreet popup row 1 informing configuration failure
+//l:popup_discreet_window_t1
+//w:
+//r:5.2
+//
+#define qtn_occ_config_failed_discreet_popup_text1 "Configuration failed"
+
+// End of File

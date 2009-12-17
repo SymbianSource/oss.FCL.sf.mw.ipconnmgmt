@@ -1,0 +1,41 @@
+/*
+* Copyright (c) 2004-2009 Nokia Corporation and/or its subsidiary(-ies). 
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description: Build info for MPM
+*
+*/
+
+#include <platform_paths.hrh>
+
+PRJ_PLATFORMS
+DEFAULT
+
+PRJ_EXPORTS
+../inc/rmpm.h                   |../../../inc/rmpm.h
+../inc/rmpm.inl                 |../../../inc/rmpm.inl
+../rom/mpm.iby                  CORE_MW_LAYER_IBY_EXPORT_PATH(mpm.iby)
+../rom/mpmdefaultconnection.iby CORE_MW_LAYER_IBY_EXPORT_PATH(mpmdefaultconnection.iby)
+../rom/mpmserver.iby            CORE_MW_LAYER_IBY_EXPORT_PATH(mpmserver.iby)
+../conf/mpm.confml              MW_LAYER_CONFML(mpm.confml)
+../conf/mpm_101f6d12.crml       MW_LAYER_CRML(mpm_101f6d12.crml)
+../conf/mpm_101f6d50.crml       MW_LAYER_CRML(mpm_101f6d50.crml)
+
+PRJ_MMPFILES
+mpmclient.mmp
+mpmserver.mmp
+mpmdefaultconnectionclient.mmp
+mpmserver_platsim.mmp // mpmserver-variant for Platsim
+
+PRJ_TESTMMPFILES
+
+//  End of File

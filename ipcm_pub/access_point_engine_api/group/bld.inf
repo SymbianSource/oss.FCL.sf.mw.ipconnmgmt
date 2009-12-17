@@ -1,0 +1,38 @@
+/*
+* Copyright (c) 2006 Nokia Corporation and/or its subsidiary(-ies). 
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:  File that exports the files belonging to 
+:                Access Point Engine API
+*
+*/
+
+
+#include <platform_paths.hrh>
+
+PRJ_PLATFORMS
+DEFAULT
+
+PRJ_EXPORTS
+
+../inc/APUtils.h     MW_LAYER_PUBLIC_EXPORT_PATH(ApUtils.h)
+../inc/APDataHandler.h     MW_LAYER_PUBLIC_EXPORT_PATH(ApDataHandler.h)
+../inc/ActiveApDb.h     MW_LAYER_PUBLIC_EXPORT_PATH(ActiveApDb.h)
+../inc/ApEngineConsts.h     MW_LAYER_PUBLIC_EXPORT_PATH(ApEngineConsts.h)
+../inc/ApEngineVer.h     MW_LAYER_PUBLIC_EXPORT_PATH(ApEngineVer.h)
+../inc/Aplistitemlist.h     MW_LAYER_PUBLIC_EXPORT_PATH(ApListItemList.h)
+../inc/ApNetworkItemlist.h     MW_LAYER_PUBLIC_EXPORT_PATH(ApNetworkItemList.h)
+../inc/ApListItem.h     MW_LAYER_PUBLIC_EXPORT_PATH(ApListItem.h)
+../inc/APSelect.h     MW_LAYER_PUBLIC_EXPORT_PATH(ApSelect.h)
+../inc/APNetworks.h     MW_LAYER_PUBLIC_EXPORT_PATH(ApNetworks.h)
+../inc/ApNetworkItem.h     MW_LAYER_PUBLIC_EXPORT_PATH(ApNetworkItem.h)
+../inc/APAccessPointItem.h     MW_LAYER_PUBLIC_EXPORT_PATH(ApAccessPointItem.h)

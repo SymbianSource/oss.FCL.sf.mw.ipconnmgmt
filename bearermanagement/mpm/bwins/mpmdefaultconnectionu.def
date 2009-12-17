@@ -1,0 +1,7 @@
+EXPORTS
+	?ClearDefaultIAP@RMPMDefaultConnection@@QAEHXZ @ 1 NONAME ; int RMPMDefaultConnection::ClearDefaultIAP(void)
+	?Close@RMPMDefaultConnection@@QAEXXZ @ 2 NONAME ; void RMPMDefaultConnection::Close(void)
+	?Connect@RMPMDefaultConnection@@QAEHXZ @ 3 NONAME ; int RMPMDefaultConnection::Connect(void)
+	?SetDefaultIAP@RMPMDefaultConnection@@QAEHH@Z @ 4 NONAME ; int RMPMDefaultConnection::SetDefaultIAP(int)
+	?Version@RMPMDefaultConnection@@QBE?AVTVersion@@XZ @ 5 NONAME ; class TVersion RMPMDefaultConnection::Version(void) const
+

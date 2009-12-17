@@ -1,0 +1,44 @@
+/*
+* Copyright (c) 2003 Nokia Corporation and/or its subsidiary(-ies). 
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:  Project specification for Accesspoint Engine filter
+*               Component Validation Test.
+*      
+*
+*/
+
+
+#include <platform_paths.hrh>
+
+TARGET      ApEngineCvt.exe
+TARGETTYPE  exe
+
+SOURCEPATH  ../tsrc
+
+SOURCE      ApEngineCvt.cpp 
+
+// Component specific internal headers 
+USERINCLUDE			../inc
+
+// ADO-SUBSYSTEM specific internal headers 
+SYSTEMINCLUDE		../../inc
+
+// ADO specific internal headers 
+SYSTEMINCLUDE		../../../inc
+
+//Macro to /epoc32 headers
+MW_LAYER_SYSTEMINCLUDE
+
+LIBRARY     ApEngine.lib
+LIBRARY	    commdb.lib
+LIBRARY     euser.lib

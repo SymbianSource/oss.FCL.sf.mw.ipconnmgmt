@@ -1,0 +1,59 @@
+/*
+* Copyright (c) 2004 Nokia Corporation and/or its subsidiary(-ies). 
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description: 
+*     This is project specification file for the DisconnectDlgClient
+*
+*
+*/
+
+
+#include <platform_paths.hrh>
+
+TARGET      DisconnectDlgClient.dll
+TARGETTYPE  DLL
+
+UID     0x1000008d 0x101F85F2 
+
+CAPABILITY      CAP_GENERAL_DLL
+VENDORID VID_DEFAULT
+
+SOURCEPATH  ../DisconnectDlg/clientsrc
+SOURCE      DisconnectDlgClient.cpp
+
+USERINCLUDE ../DisconnectDlg/inc
+
+// Component specific internal headers 
+USERINCLUDE			../inc
+
+// ADO specific internal headers 
+SYSTEMINCLUDE		../../../inc
+
+//Macro to /epoc32 headers
+MW_LAYER_SYSTEMINCLUDE
+
+LIBRARY     euser.lib
+LIBRARY	    connmon.lib
+
+DEBUGLIBRARY flogger.lib
+DEBUGLIBRARY efsrv.lib
+
+
+
+#if defined(ARMCC)
+    DEFFILE ../DisconnectDlg/EABI/DISCONNECTDLGCLIENT.def
+#elif defined( WINSCW )
+    DEFFILE ../DisconnectDlg/BWinsCw/DISCONNECTDLGCLIENT.def
+#endif
+
+// End of file

@@ -1,0 +1,22 @@
+EXPORTS
+	?SetDisconnectDialog@TExtendedConnPref@@QAEXH@Z @ 1 NONAME ; void TExtendedConnPref::SetDisconnectDialog(int)
+	?SetSnapPurpose@TExtendedConnPref@@QAEXW4TSnapPurpose@CMManager@@@Z @ 2 NONAME ; void TExtendedConnPref::SetSnapPurpose(enum CMManager::TSnapPurpose)
+	?DisconnectDialog@TExtendedConnPref@@QBEHXZ @ 3 NONAME ; int TExtendedConnPref::DisconnectDialog(void) const
+	?SnapId@TExtendedConnPref@@QBEKXZ @ 4 NONAME ; unsigned long TExtendedConnPref::SnapId(void) const
+	?SetForcedRoaming@TExtendedConnPref@@QAEXH@Z @ 5 NONAME ; void TExtendedConnPref::SetForcedRoaming(int)
+	?ForcedRoaming@TExtendedConnPref@@QBEHXZ @ 6 NONAME ; int TExtendedConnPref::ForcedRoaming(void) const
+	?IapId@TExtendedConnPref@@QBEKXZ @ 7 NONAME ; unsigned long TExtendedConnPref::IapId(void) const
+	?SetBearerSet@TExtendedConnPref@@QAEXK@Z @ 8 NONAME ; void TExtendedConnPref::SetBearerSet(unsigned long)
+	?SetIapId@TExtendedConnPref@@QAEXK@Z @ 9 NONAME ; void TExtendedConnPref::SetIapId(unsigned long)
+	?ConnSelectionDialog@TExtendedConnPref@@QBEHXZ @ 10 NONAME ; int TExtendedConnPref::ConnSelectionDialog(void) const
+	?SetSnapId@TExtendedConnPref@@QAEXK@Z @ 11 NONAME ; void TExtendedConnPref::SetSnapId(unsigned long)
+	??0TExtendedConnPref@@QAE@XZ @ 12 NONAME ; TExtendedConnPref::TExtendedConnPref(void)
+	?GetAttribPtr@TExtendedConnPref@@MBEPAEH@Z @ 13 NONAME ; unsigned char * TExtendedConnPref::GetAttribPtr(int) const
+	?GetVDataTable@TExtendedConnPref@@MBEPBUSVDataTableEntry@Meta@@XZ @ 14 NONAME ; struct Meta::SVDataTableEntry const * TExtendedConnPref::GetVDataTable(void) const
+	?SetNoteBehaviour@TExtendedConnPref@@QAEXK@Z @ 15 NONAME ; void TExtendedConnPref::SetNoteBehaviour(unsigned long)
+	?GetVDataTableStatic@TExtendedConnPref@@KAPBUSVDataTableEntry@Meta@@XZ @ 16 NONAME ; struct Meta::SVDataTableEntry const * TExtendedConnPref::GetVDataTableStatic(void)
+	?NoteBehaviour@TExtendedConnPref@@QBEKXZ @ 17 NONAME ; unsigned long TExtendedConnPref::NoteBehaviour(void) const
+	?BearerSet@TExtendedConnPref@@QBEKXZ @ 18 NONAME ; unsigned long TExtendedConnPref::BearerSet(void) const
+	?SetConnSelectionDialog@TExtendedConnPref@@QAEXH@Z @ 19 NONAME ; void TExtendedConnPref::SetConnSelectionDialog(int)
+	?SnapPurpose@TExtendedConnPref@@QBE?AW4TSnapPurpose@CMManager@@XZ @ 20 NONAME ; enum CMManager::TSnapPurpose TExtendedConnPref::SnapPurpose(void) const
+

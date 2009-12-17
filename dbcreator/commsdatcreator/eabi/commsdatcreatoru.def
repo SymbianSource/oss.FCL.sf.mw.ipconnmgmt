@@ -1,0 +1,37 @@
+EXPORTS
+	_ZN19CCdcCommsDatCreator13CreateTablesLEv @ 1 NONAME
+	_ZN19CCdcCommsDatCreator13DumpCommsDatLERK4TBufILi256EE @ 2 NONAME
+	_ZN19CCdcCommsDatCreator15CreateCommsDatLERK4TBufILi256EE @ 3 NONAME
+	_ZN19CCdcCommsDatCreator4NewLEv @ 4 NONAME
+	_ZN19CCdcCommsDatCreator5NewLCEv @ 5 NONAME
+	_ZTI10CReaderXML @ 6 NONAME ; #<TI>#
+	_ZTI11CDumpTables @ 7 NONAME ; #<TI>#
+	_ZTI11CReaderBase @ 8 NONAME ; #<TI>#
+	_ZTI11CWlanTables @ 9 NONAME ; #<TI>#
+	_ZTI12CProcessorDN @ 10 NONAME ; #<TI>#
+	_ZTI13CProcessorLan @ 11 NONAME ; #<TI>#
+	_ZTI13CProcessorVpn @ 12 NONAME ; #<TI>#
+	_ZTI13CTagContainer @ 13 NONAME ; #<TI>#
+	_ZTI14CProcessorBase @ 14 NONAME ; #<TI>#
+	_ZTI14CProcessorWlan @ 15 NONAME ; #<TI>#
+	_ZTI15CEapTypeElement @ 16 NONAME ; #<TI>#
+	_ZTI16CProcessorGlobal @ 17 NONAME ; #<TI>#
+	_ZTI19CCdcCommsDatCreator @ 18 NONAME ; #<TI>#
+	_ZTI19CDataMobilityTables @ 19 NONAME ; #<TI>#
+	_ZTI20CProcessorPacketData @ 20 NONAME ; #<TI>#
+	_ZTV10CReaderXML @ 21 NONAME ; #<VT>#
+	_ZTV11CDumpTables @ 22 NONAME ; #<VT>#
+	_ZTV11CReaderBase @ 23 NONAME ; #<VT>#
+	_ZTV11CWlanTables @ 24 NONAME ; #<VT>#
+	_ZTV12CProcessorDN @ 25 NONAME ; #<VT>#
+	_ZTV13CProcessorLan @ 26 NONAME ; #<VT>#
+	_ZTV13CProcessorVpn @ 27 NONAME ; #<VT>#
+	_ZTV13CTagContainer @ 28 NONAME ; #<VT>#
+	_ZTV14CProcessorBase @ 29 NONAME ; #<VT>#
+	_ZTV14CProcessorWlan @ 30 NONAME ; #<VT>#
+	_ZTV15CEapTypeElement @ 31 NONAME ; #<VT>#
+	_ZTV16CProcessorGlobal @ 32 NONAME ; #<VT>#
+	_ZTV19CCdcCommsDatCreator @ 33 NONAME ; #<VT>#
+	_ZTV19CDataMobilityTables @ 34 NONAME ; #<VT>#
+	_ZTV20CProcessorPacketData @ 35 NONAME ; #<VT>#
+

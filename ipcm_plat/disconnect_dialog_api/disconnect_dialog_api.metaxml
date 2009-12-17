@@ -1,0 +1,18 @@
+<?xml version="1.0" ?>
+<api id="1873c1fda7b347e70949498b5381854c" dataversion="1.0">
+  <name>Disconnect Dialog API</name>
+  <description>Provides a list of the active connections for the user in order to close one of them. When a connection is selected from this UI, it is also closed by this component.</description>
+  <type>c++</type>
+  <subsystem>networkingutilities</subsystem>
+  <libs>
+    <lib name="DisconnectDlgClient.lib" />
+  </libs>
+  <release category="domain"/>
+  <attributes>
+     <!-- This indicates wether the api provedes separate html documentation -->
+     <!-- or is the additional documentation generated from headers. -->
+     <!-- If you are unsuere then the value is "no" -->
+     <htmldocprovided>yes</htmldocprovided>
+     <adaptation>no</adaptation>
+  </attributes>
+</api>

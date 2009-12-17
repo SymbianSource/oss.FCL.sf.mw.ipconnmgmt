@@ -1,0 +1,128 @@
+/*
+* Copyright (c) 2007 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:    Localization strings for Connectivity Settings plugin.
+*
+*/
+
+
+//  LOCALISATION STRINGS
+
+// **CAPTIONS
+
+//d:Plugin title.
+//d:Long string.
+//l:title_pane_t2/opt9
+//w:
+//r:5.2
+//
+#define qtn_occ_title_connectivity_settings "Connectivity Settings"
+
+//d:Plugin caption.
+//d:Used by GS FW.
+//l:list_single_large_graphic_pane_t1
+//w:
+//r:5.2
+//
+#define qtn_set_folder_occ_connectivity_settings "Connectivity settings"
+
+// **OPTIONS MENU
+
+//d:Text of a list item in Connectivity Settings plugin main view's list
+//d:Item opens "Join new WLAN networks" radio button setting page
+//l:list_setting_pane_t1
+//w:
+//r: 5.2
+#define qtn_occ_sett_usage_of_wlan "Join WLAN networks"
+
+//d:Text in radio button list
+//l:list_set_graphic_pane_t1
+//w:
+//r: 5.2
+#define qtn_occ_sett_usage_of_wlan_known "Known"
+
+//d:Text in radio button list
+//l:list_set_graphic_pane_t1
+//w:
+//r: 5.2
+#define qtn_occ_sett_usage_of_wlan_manual "Manual"
+
+//d:Text of a list item in Connectivity Settings plugin main view's list
+//d:Item opens "Cellular data usage abroad" radio button setting page
+//l:list_setting_pane_t1
+//w:
+//r: 5.2
+#define qtn_occ_sett_data_usage_abroad "Cellular data usage abroad"
+
+//d:Text in radio button list
+//l:list_set_graphic_pane_t1
+//w:
+//r: 5.2
+#define qtn_occ_sett_data_usage_abroad_automatic "Automatic"
+
+//d:Text in radio button list
+//l:list_set_graphic_pane_t1
+//w:
+//r: 5.2
+#define qtn_occ_sett_data_usage_abroad_confirm "Confirm"
+
+//d:Text in radio button list
+//l:list_set_graphic_pane_t1
+//w:
+//r: 5.2
+#define qtn_occ_sett_data_usage_abroad_wlan_only "WLAN only"
+
+
+//d:Text of a list item in Connectivity Settings plugin main view's list
+//d:Item opens "Cellular data usage in home network" radio button setting page
+//l:list_setting_pane_t1
+//w:
+//r: 5.2
+#define qtn_occ_sett_data_usage_home_nw "Cellular data usage in home network"
+
+//d:Text in radio button list
+//l:list_set_graphic_pane_t1
+//w:
+//r: 5.2
+#define qtn_occ_sett_data_usage_home_nw_automatic "Automatic"
+
+//d:Text in radio button list
+//l:list_set_graphic_pane_t1
+//w:
+//r: 5.2
+#define qtn_occ_sett_data_usage_home_nw_confirm "Confirm" 
+
+//d:Text in radio button list
+//l:list_set_graphic_pane_t1
+//w:
+//r: 5.2
+#define qtn_occ_sett_data_usage_home_nw_wlan_only "WLAN only"
+
+
+//d: Info popup note for "Known" selection of "Join WLAN networks"
+//l: popup_preview_text_window_t1/opt5
+//w:
+//r: 5.2
+//
+#define qtn_occ_info_popup_wlan_usage_known "Known WLAN networks will be joined automatically."
+
+
+//d: Info popup note for "Manual" selection of "Join WLAN networks"
+//l: popup_preview_text_window_t1/opt5
+//w:
+//r: 5.2
+//
+#define qtn_occ_info_popup_wlan_usage_manual "Phone will not join WLAN networks automatically. WLAN network can be taken into use via WLAN wizard."
+
+
+// End of File

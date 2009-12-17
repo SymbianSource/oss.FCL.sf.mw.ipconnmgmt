@@ -1,0 +1,48 @@
+EXPORTS
+	UplinkData__C27CConnMonUplinkDataThreshold @ 1 NONAME R3UNUSED ; CConnMonUplinkDataThreshold::UplinkData(void) const
+	AuthoritativeDelete__C27CConnMonDeleteSubConnection @ 2 NONAME R3UNUSED ; CConnMonDeleteSubConnection::AuthoritativeDelete(void) const
+	CancelAsyncRequest__18RConnectionMonitori @ 3 NONAME R3UNUSED ; RConnectionMonitor::CancelAsyncRequest(int)
+	CancelNotifications__18RConnectionMonitor @ 4 NONAME R3UNUSED ; RConnectionMonitor::CancelNotifications(void)
+	Close__18RConnectionMonitor @ 5 NONAME R3UNUSED ; RConnectionMonitor::Close(void)
+	ConnectL__18RConnectionMonitor @ 6 NONAME R3UNUSED ; RConnectionMonitor::ConnectL(void)
+	ConnectionActivity__C32CConnMonConnectionActivityChange @ 7 NONAME R3UNUSED ; CConnMonConnectionActivityChange::ConnectionActivity(void) const
+	ConnectionId__C17CConnMonEventBase @ 8 NONAME R3UNUSED ; CConnMonEventBase::ConnectionId(void) const
+	ConnectionStatus__C30CConnMonConnectionStatusChange @ 9 NONAME R3UNUSED ; CConnMonConnectionStatusChange::ConnectionStatus(void) const
+	DownlinkData__C24CConnMonDeleteConnection @ 10 NONAME R3UNUSED ; CConnMonDeleteConnection::DownlinkData(void) const
+	DownlinkData__C27CConnMonDeleteSubConnection @ 11 NONAME R3UNUSED ; CConnMonDeleteSubConnection::DownlinkData(void) const
+	DownlinkData__C29CConnMonDownlinkDataThreshold @ 12 NONAME R3UNUSED ; CConnMonDownlinkDataThreshold::DownlinkData(void) const
+	E32Dll__F10TDllReason @ 13 NONAME R3UNUSED ; E32Dll(TDllReason)
+	EventType__C17CConnMonEventBase @ 14 NONAME R3UNUSED ; CConnMonEventBase::EventType(void) const
+	GetBoolAttribute__18RConnectionMonitorUiUiUiRiR14TRequestStatus @ 15 NONAME ; RConnectionMonitor::GetBoolAttribute(unsigned int, unsigned int, unsigned int, int &, TRequestStatus &)
+	GetConnectionCount__18RConnectionMonitorRUiR14TRequestStatus @ 16 NONAME R3UNUSED ; RConnectionMonitor::GetConnectionCount(unsigned int &, TRequestStatus &)
+	GetConnectionInfo__C18RConnectionMonitorUiRUiT2 @ 17 NONAME ; RConnectionMonitor::GetConnectionInfo(unsigned int, unsigned int &, unsigned int &) const
+	GetIntAttribute__18RConnectionMonitorUiUiUiRiR14TRequestStatus @ 18 NONAME ; RConnectionMonitor::GetIntAttribute(unsigned int, unsigned int, unsigned int, int &, TRequestStatus &)
+	GetPckgAttribute__C18RConnectionMonitorUiUiUiR5TDes8R14TRequestStatus @ 19 NONAME ; RConnectionMonitor::GetPckgAttribute(unsigned int, unsigned int, unsigned int, TDes8 &, TRequestStatus &) const
+	GetStringAttribute__C18RConnectionMonitorUiUiUiR6TDes16R14TRequestStatus @ 20 NONAME ; RConnectionMonitor::GetStringAttribute(unsigned int, unsigned int, unsigned int, TDes16 &, TRequestStatus &) const
+	GetSubConnectionInfo__C18RConnectionMonitorUiUiRUi @ 21 NONAME ; RConnectionMonitor::GetSubConnectionInfo(unsigned int, unsigned int, unsigned int &) const
+	GetUintAttribute__18RConnectionMonitorUiUiUiRUiR14TRequestStatus @ 22 NONAME ; RConnectionMonitor::GetUintAttribute(unsigned int, unsigned int, unsigned int, unsigned int &, TRequestStatus &)
+	NetworkStatus__C27CConnMonNetworkStatusChange @ 23 NONAME R3UNUSED ; CConnMonNetworkStatusChange::NetworkStatus(void) const
+	NotifyEventL__18RConnectionMonitorR26MConnectionMonitorObserver @ 24 NONAME R3UNUSED ; RConnectionMonitor::NotifyEventL(MConnectionMonitorObserver &)
+	SetBoolAttribute__C18RConnectionMonitorUiUiUii @ 25 NONAME ; RConnectionMonitor::SetBoolAttribute(unsigned int, unsigned int, unsigned int, int) const
+	SetIntAttribute__C18RConnectionMonitorUiUiUii @ 26 NONAME ; RConnectionMonitor::SetIntAttribute(unsigned int, unsigned int, unsigned int, int) const
+	SetPckgAttribute__C18RConnectionMonitorUiUiUiRC5TDes8 @ 27 NONAME ; RConnectionMonitor::SetPckgAttribute(unsigned int, unsigned int, unsigned int, TDes8 const &) const
+	SetStringAttribute__C18RConnectionMonitorUiUiUiRC6TDes16 @ 28 NONAME ; RConnectionMonitor::SetStringAttribute(unsigned int, unsigned int, unsigned int, TDes16 const &) const
+	SetUintAttribute__C18RConnectionMonitorUiUiUiUi @ 29 NONAME ; RConnectionMonitor::SetUintAttribute(unsigned int, unsigned int, unsigned int, unsigned int) const
+	SubConnectionId__C27CConnMonCreateSubConnection @ 30 NONAME R3UNUSED ; CConnMonCreateSubConnection::SubConnectionId(void) const
+	SubConnectionId__C27CConnMonDeleteSubConnection @ 31 NONAME R3UNUSED ; CConnMonDeleteSubConnection::SubConnectionId(void) const
+	SubConnectionId__C27CConnMonUplinkDataThreshold @ 32 NONAME R3UNUSED ; CConnMonUplinkDataThreshold::SubConnectionId(void) const
+	SubConnectionId__C29CConnMonDownlinkDataThreshold @ 33 NONAME R3UNUSED ; CConnMonDownlinkDataThreshold::SubConnectionId(void) const
+	SubConnectionId__C30CConnMonConnectionStatusChange @ 34 NONAME R3UNUSED ; CConnMonConnectionStatusChange::SubConnectionId(void) const
+	SubConnectionId__C32CConnMonConnectionActivityChange @ 35 NONAME R3UNUSED ; CConnMonConnectionActivityChange::SubConnectionId(void) const
+	ThreadStart__17CConnMonSchedulerRQ217CConnMonScheduler7TSignal @ 36 NONAME R3UNUSED ; CConnMonScheduler::ThreadStart(CConnMonScheduler::TSignal &)
+	UplinkData__C24CConnMonDeleteConnection @ 37 NONAME R3UNUSED ; CConnMonDeleteConnection::UplinkData(void) const
+	UplinkData__C27CConnMonDeleteSubConnection @ 38 NONAME R3UNUSED ; CConnMonDeleteSubConnection::UplinkData(void) const
+	AuthoritativeDelete__C24CConnMonDeleteConnection @ 39 NONAME R3UNUSED ; CConnMonDeleteConnection::AuthoritativeDelete(void) const
+	RegistrationStatus__C33CConnMonNetworkRegistrationChange @ 40 NONAME R3UNUSED ; CConnMonNetworkRegistrationChange::RegistrationStatus(void) const
+	Bearer__C20CConnMonBearerChange @ 41 NONAME R3UNUSED ; CConnMonBearerChange::Bearer(void) const
+	SignalStrength__C28CConnMonSignalStrengthChange @ 42 NONAME R3UNUSED ; CConnMonSignalStrengthChange::SignalStrength(void) const
+	Availability__C32CConnMonBearerAvailabilityChange @ 43 NONAME R3UNUSED ; CConnMonBearerAvailabilityChange::Availability(void) const
+	Data__C20CConnMonGenericEvent @ 44 NONAME R3UNUSED ; CConnMonGenericEvent::Data(void) const
+	IapAvailability__C29CConnMonIapAvailabilityChange @ 45 NONAME R3UNUSED ; CConnMonIapAvailabilityChange::IapAvailability(void) const
+	TransmitPower__C27CConnMonTransmitPowerChange @ 46 NONAME R3UNUSED ; CConnMonTransmitPowerChange::TransmitPower(void) const
+

@@ -1,0 +1,97 @@
+EXPORTS
+	?AuthoritativeDelete@CConnMonDeleteConnection@@QBEHXZ @ 1 NONAME ; int CConnMonDeleteConnection::AuthoritativeDelete(void) const
+	?AuthoritativeDelete@CConnMonDeleteSubConnection@@QBEHXZ @ 2 NONAME ; int CConnMonDeleteSubConnection::AuthoritativeDelete(void) const
+	?Availability@CConnMonBearerAvailabilityChange@@QBEHXZ @ 3 NONAME ; int CConnMonBearerAvailabilityChange::Availability(void) const
+	?Bearer@CConnMonBearerChange@@QBEHXZ @ 4 NONAME ; int CConnMonBearerChange::Bearer(void) const
+	?CancelAsyncRequest@RConnectionMonitor@@QAEXH@Z @ 5 NONAME ; void RConnectionMonitor::CancelAsyncRequest(int)
+	?CancelNotifications@RConnectionMonitor@@QAEXXZ @ 6 NONAME ; void RConnectionMonitor::CancelNotifications(void)
+	?Close@RConnectionMonitor@@QAEXXZ @ 7 NONAME ; void RConnectionMonitor::Close(void)
+	?ConnectL@RConnectionMonitor@@QAEHXZ @ 8 NONAME ; int RConnectionMonitor::ConnectL(void)
+	?ConnectionActivity@CConnMonConnectionActivityChange@@QBEHXZ @ 9 NONAME ; int CConnMonConnectionActivityChange::ConnectionActivity(void) const
+	?ConnectionId@CConnMonEventBase@@QBEIXZ @ 10 NONAME ; unsigned int CConnMonEventBase::ConnectionId(void) const
+	?ConnectionStatus@CConnMonConnectionStatusChange@@QBEHXZ @ 11 NONAME ; int CConnMonConnectionStatusChange::ConnectionStatus(void) const
+	?Data@CConnMonGenericEvent@@QBEPAXXZ @ 12 NONAME ; void * CConnMonGenericEvent::Data(void) const
+	?DownlinkData@CConnMonDeleteConnection@@QBEIXZ @ 13 NONAME ; unsigned int CConnMonDeleteConnection::DownlinkData(void) const
+	?DownlinkData@CConnMonDeleteSubConnection@@QBEIXZ @ 14 NONAME ; unsigned int CConnMonDeleteSubConnection::DownlinkData(void) const
+	?DownlinkData@CConnMonDownlinkDataThreshold@@QBEIXZ @ 15 NONAME ; unsigned int CConnMonDownlinkDataThreshold::DownlinkData(void) const
+	?EventType@CConnMonEventBase@@QBEHXZ @ 16 NONAME ; int CConnMonEventBase::EventType(void) const
+	?GetBoolAttribute@RConnectionMonitor@@QAEXIIIAAHAAVTRequestStatus@@@Z @ 17 NONAME ; void RConnectionMonitor::GetBoolAttribute(unsigned int, unsigned int, unsigned int, int &, class TRequestStatus &)
+	?GetConnectionCount@RConnectionMonitor@@QAEXAAIAAVTRequestStatus@@@Z @ 18 NONAME ; void RConnectionMonitor::GetConnectionCount(unsigned int &, class TRequestStatus &)
+	?GetConnectionInfo@RConnectionMonitor@@QBEHIAAI0@Z @ 19 NONAME ; int RConnectionMonitor::GetConnectionInfo(unsigned int, unsigned int &, unsigned int &) const
+	?GetIntAttribute@RConnectionMonitor@@QAEXIIIAAHAAVTRequestStatus@@@Z @ 20 NONAME ; void RConnectionMonitor::GetIntAttribute(unsigned int, unsigned int, unsigned int, int &, class TRequestStatus &)
+	?GetPckgAttribute@RConnectionMonitor@@QBEXIIIAAVTDes8@@AAVTRequestStatus@@@Z @ 21 NONAME ; void RConnectionMonitor::GetPckgAttribute(unsigned int, unsigned int, unsigned int, class TDes8 &, class TRequestStatus &) const
+	?GetStringAttribute@RConnectionMonitor@@QBEXIIIAAVTDes16@@AAVTRequestStatus@@@Z @ 22 NONAME ; void RConnectionMonitor::GetStringAttribute(unsigned int, unsigned int, unsigned int, class TDes16 &, class TRequestStatus &) const
+	?GetSubConnectionInfo@RConnectionMonitor@@QBEHIIAAI@Z @ 23 NONAME ; int RConnectionMonitor::GetSubConnectionInfo(unsigned int, unsigned int, unsigned int &) const
+	?GetUintAttribute@RConnectionMonitor@@QAEXIIIAAIAAVTRequestStatus@@@Z @ 24 NONAME ; void RConnectionMonitor::GetUintAttribute(unsigned int, unsigned int, unsigned int, unsigned int &, class TRequestStatus &)
+	?NetworkStatus@CConnMonNetworkStatusChange@@QBEHXZ @ 25 NONAME ; int CConnMonNetworkStatusChange::NetworkStatus(void) const
+	?NotifyEventL@RConnectionMonitor@@QAEHAAVMConnectionMonitorObserver@@@Z @ 26 NONAME ; int RConnectionMonitor::NotifyEventL(class MConnectionMonitorObserver &)
+	?RegistrationStatus@CConnMonNetworkRegistrationChange@@QBEHXZ @ 27 NONAME ; int CConnMonNetworkRegistrationChange::RegistrationStatus(void) const
+	?SetBoolAttribute@RConnectionMonitor@@QBEHIIIH@Z @ 28 NONAME ; int RConnectionMonitor::SetBoolAttribute(unsigned int, unsigned int, unsigned int, int) const
+	?SetIntAttribute@RConnectionMonitor@@QBEHIIIH@Z @ 29 NONAME ; int RConnectionMonitor::SetIntAttribute(unsigned int, unsigned int, unsigned int, int) const
+	?SetPckgAttribute@RConnectionMonitor@@QBEHIIIABVTDes8@@@Z @ 30 NONAME ; int RConnectionMonitor::SetPckgAttribute(unsigned int, unsigned int, unsigned int, class TDes8 const &) const
+	?SetStringAttribute@RConnectionMonitor@@QBEHIIIABVTDes16@@@Z @ 31 NONAME ; int RConnectionMonitor::SetStringAttribute(unsigned int, unsigned int, unsigned int, class TDes16 const &) const
+	?SetUintAttribute@RConnectionMonitor@@QBEHIIII@Z @ 32 NONAME ; int RConnectionMonitor::SetUintAttribute(unsigned int, unsigned int, unsigned int, unsigned int) const
+	?SignalStrength@CConnMonSignalStrengthChange@@QBEHXZ @ 33 NONAME ; int CConnMonSignalStrengthChange::SignalStrength(void) const
+	?SubConnectionId@CConnMonConnectionActivityChange@@QBEIXZ @ 34 NONAME ; unsigned int CConnMonConnectionActivityChange::SubConnectionId(void) const
+	?SubConnectionId@CConnMonConnectionStatusChange@@QBEIXZ @ 35 NONAME ; unsigned int CConnMonConnectionStatusChange::SubConnectionId(void) const
+	?SubConnectionId@CConnMonCreateSubConnection@@QBEIXZ @ 36 NONAME ; unsigned int CConnMonCreateSubConnection::SubConnectionId(void) const
+	?SubConnectionId@CConnMonDeleteSubConnection@@QBEIXZ @ 37 NONAME ; unsigned int CConnMonDeleteSubConnection::SubConnectionId(void) const
+	?SubConnectionId@CConnMonDownlinkDataThreshold@@QBEIXZ @ 38 NONAME ; unsigned int CConnMonDownlinkDataThreshold::SubConnectionId(void) const
+	?SubConnectionId@CConnMonUplinkDataThreshold@@QBEIXZ @ 39 NONAME ; unsigned int CConnMonUplinkDataThreshold::SubConnectionId(void) const
+	?ThreadStart@CConnMonScheduler@@SAHAAVTSignal@1@@Z @ 40 NONAME ; int CConnMonScheduler::ThreadStart(class CConnMonScheduler::TSignal &)
+	?UplinkData@CConnMonDeleteConnection@@QBEIXZ @ 41 NONAME ; unsigned int CConnMonDeleteConnection::UplinkData(void) const
+	?UplinkData@CConnMonDeleteSubConnection@@QBEIXZ @ 42 NONAME ; unsigned int CConnMonDeleteSubConnection::UplinkData(void) const
+	?UplinkData@CConnMonUplinkDataThreshold@@QBEIXZ @ 43 NONAME ; unsigned int CConnMonUplinkDataThreshold::UplinkData(void) const
+	?IapAvailability@CConnMonIapAvailabilityChange@@QBE?AVTConnMonIapInfo@@XZ @ 44 NONAME ; class TConnMonIapInfo CConnMonIapAvailabilityChange::IapAvailability(void) const
+	??0ConnMonIdsArrayPckg@@QAE@I@Z @ 45 NONAME ; ConnMonIdsArrayPckg::ConnMonIdsArrayPckg(unsigned int)
+	??0ConnMonWLANNetworksArrayPckg@@QAE@I@Z @ 46 NONAME ; ConnMonWLANNetworksArrayPckg::ConnMonWLANNetworksArrayPckg(unsigned int)
+	??0TConnMonId@@QAE@I@Z @ 47 NONAME ; TConnMonId::TConnMonId(unsigned int)
+	??0TConnMonWLANNetwork@@QAE@ABV?$TBuf@$0CA@@@IIIABV?$RArray@H@@@Z @ 48 NONAME ; TConnMonWLANNetwork::TConnMonWLANNetwork(class TBuf<32> const &, unsigned int, unsigned int, unsigned int, class RArray<int> const &)
+	??1ConnMonIdsArrayPckg@@UAE@XZ @ 49 NONAME ; ConnMonIdsArrayPckg::~ConnMonIdsArrayPckg(void)
+	??1ConnMonWLANNetworksArrayPckg@@UAE@XZ @ 50 NONAME ; ConnMonWLANNetworksArrayPckg::~ConnMonWLANNetworksArrayPckg(void)
+	??1TConnMonWLANNetwork@@UAE@XZ @ 51 NONAME ; TConnMonWLANNetwork::~TConnMonWLANNetwork(void)
+	?Buf@ConnMonIdsArrayPckg@@QBEPAVHBufC16@@XZ @ 52 NONAME ; class HBufC16 * ConnMonIdsArrayPckg::Buf(void) const
+	?Buf@ConnMonWLANNetworksArrayPckg@@QBEPAVHBufC16@@XZ @ 53 NONAME ; class HBufC16 * ConnMonWLANNetworksArrayPckg::Buf(void) const
+	?FromPtrC@TConnMonId@@SA?AV1@ABVTPtrC16@@@Z @ 54 NONAME ; class TConnMonId TConnMonId::FromPtrC(class TPtrC16 const &)
+	?FromPtrC@TConnMonWLANNetwork@@SA?AV1@ABVTPtrC16@@@Z @ 55 NONAME ; class TConnMonWLANNetwork TConnMonWLANNetwork::FromPtrC(class TPtrC16 const &)
+	?GetPckgAttribute@RConnectionMonitor@@QBEXIIIAAVTDes16@@AAVTRequestStatus@@@Z @ 56 NONAME ; void RConnectionMonitor::GetPckgAttribute(unsigned int, unsigned int, unsigned int, class TDes16 &, class TRequestStatus &) const
+	?Id@TConnMonId@@QBEIXZ @ 57 NONAME ; unsigned int TConnMonId::Id(void) const
+	?LessBySignal@TConnMonWLANNetwork@@SAHABV1@0@Z @ 58 NONAME ; int TConnMonWLANNetwork::LessBySignal(class TConnMonWLANNetwork const &, class TConnMonWLANNetwork const &)
+	?SNAPAvailability@CConnMonSNAPsAvailabilityChange@@QBE?AVTConnMonSNAPInfo@@XZ @ 59 NONAME ; class TConnMonSNAPInfo CConnMonSNAPsAvailabilityChange::SNAPAvailability(void) const
+	?SNAPsAvailabile@CConnMonSNAPsAvailabilityChange@@QBEIXZ @ 60 NONAME ; unsigned int CConnMonSNAPsAvailabilityChange::SNAPsAvailabile(void) const
+	?ToBuf@TConnMonId@@UBEPBVHBufC16@@XZ @ 61 NONAME ; class HBufC16 const * TConnMonId::ToBuf(void) const
+	?ToBuf@TConnMonWLANNetwork@@UBEPBVHBufC16@@XZ @ 62 NONAME ; class HBufC16 const * TConnMonWLANNetwork::ToBuf(void) const
+	?TransmitPower@CConnMonTransmitPowerChange@@QBEIXZ @ 63 NONAME ; unsigned int CConnMonTransmitPowerChange::TransmitPower(void) const
+	?UnpackToL@ConnMonIdsArrayPckg@@QBEXAAV?$RArray@VTConnMonId@@@@@Z @ 64 NONAME ; void ConnMonIdsArrayPckg::UnpackToL(class RArray<class TConnMonId> &) const
+	?UnpackToL@ConnMonWLANNetworksArrayPckg@@QBEXAAV?$RArray@VTConnMonWLANNetwork@@@@@Z @ 65 NONAME ; void ConnMonWLANNetworksArrayPckg::UnpackToL(class RArray<class TConnMonWLANNetwork> &) const
+	?Valid@TConnMonSNAP@@QBEHXZ @ 66 NONAME ; int TConnMonSNAP::Valid(void) const
+	??0CConnMonWlanNetworksPtrArrayPckg@@QAE@I@Z @ 67 NONAME ; CConnMonWlanNetworksPtrArrayPckg::CConnMonWlanNetworksPtrArrayPckg(unsigned int)
+	??1CConnMonWlanNetwork@@UAE@XZ @ 68 NONAME ; CConnMonWlanNetwork::~CConnMonWlanNetwork(void)
+	??1CConnMonWlanNetworksPtrArrayPckg@@UAE@XZ @ 69 NONAME ; CConnMonWlanNetworksPtrArrayPckg::~CConnMonWlanNetworksPtrArrayPckg(void)
+	??4CConnMonWlanNetwork@@QAEAAV0@AAV0@@Z @ 70 NONAME ; class CConnMonWlanNetwork & CConnMonWlanNetwork::operator=(class CConnMonWlanNetwork &)
+	?Buf@CConnMonWlanNetworksPtrArrayPckg@@QBEPAVHBufC16@@XZ @ 71 NONAME ; class HBufC16 * CConnMonWlanNetworksPtrArrayPckg::Buf(void) const
+	?CompareBySignal@CConnMonWlanNetwork@@SAHABV1@0@Z @ 72 NONAME ; int CConnMonWlanNetwork::CompareBySignal(class CConnMonWlanNetwork const &, class CConnMonWlanNetwork const &)
+	?FromPtrC@CConnMonWlanNetwork@@SAHABVTPtrC16@@PAV1@@Z @ 73 NONAME ; int CConnMonWlanNetwork::FromPtrC(class TPtrC16 const &, class CConnMonWlanNetwork *)
+	?NewL@CConnMonWlanNetwork@@SAPAV1@AAV1@@Z @ 74 NONAME ; class CConnMonWlanNetwork * CConnMonWlanNetwork::NewL(class CConnMonWlanNetwork &)
+	?NewL@CConnMonWlanNetwork@@SAPAV1@ABV?$TBuf@$0CA@@@IIIABV?$TBuf8@$05@@ABVTDesC16@@@Z @ 75 NONAME ; class CConnMonWlanNetwork * CConnMonWlanNetwork::NewL(class TBuf<32> const &, unsigned int, unsigned int, unsigned int, class TBuf8<6> const &, class TDesC16 const &)
+	?NewL@CConnMonWlanNetwork@@SAPAV1@XZ @ 76 NONAME ; class CConnMonWlanNetwork * CConnMonWlanNetwork::NewL(void)
+	?ToBuf@CConnMonWlanNetwork@@QBEPBVHBufC16@@XZ @ 77 NONAME ; class HBufC16 const * CConnMonWlanNetwork::ToBuf(void) const
+	?UnpackToL@CConnMonWlanNetworksPtrArrayPckg@@QBEXAAV?$RPointerArray@VCConnMonWlanNetwork@@@@@Z @ 78 NONAME ; void CConnMonWlanNetworksPtrArrayPckg::UnpackToL(class RPointerArray<class CConnMonWlanNetwork> &) const
+	?BearerGroups@CConnMonBearerGroupChange@@QBEXAAI0@Z @ 79 NONAME ; void CConnMonBearerGroupChange::BearerGroups(unsigned int &, unsigned int &) const
+	?BearerInfo@CConnMonBearerInfoChange@@QBEHXZ @ 80 NONAME ; int CConnMonBearerInfoChange::BearerInfo(void) const
+	?Internal@CConnMonBearerGroupChange@@QBEHXZ @ 81 NONAME ; int CConnMonBearerGroupChange::Internal(void) const
+	??0CConnMonWlanProbeRawBuffersPckg@@QAE@I@Z @ 82 NONAME ; CConnMonWlanProbeRawBuffersPckg::CConnMonWlanProbeRawBuffersPckg(unsigned int)
+	??1CConnMonWlanProbeRawBuffer@@UAE@XZ @ 83 NONAME ; CConnMonWlanProbeRawBuffer::~CConnMonWlanProbeRawBuffer(void)
+	??1CConnMonWlanProbeRawBuffersPckg@@UAE@XZ @ 84 NONAME ; CConnMonWlanProbeRawBuffersPckg::~CConnMonWlanProbeRawBuffersPckg(void)
+	??4CConnMonWlanProbeRawBuffer@@QAEAAV0@AAV0@@Z @ 85 NONAME ; class CConnMonWlanProbeRawBuffer & CConnMonWlanProbeRawBuffer::operator=(class CConnMonWlanProbeRawBuffer &)
+	?Buf@CConnMonWlanProbeRawBuffersPckg@@QBEPAVHBufC8@@XZ @ 86 NONAME ; class HBufC8 * CConnMonWlanProbeRawBuffersPckg::Buf(void) const
+	?Count@CConnMonWlanProbeRawBuffersPckg@@QBEIXZ @ 87 NONAME ; unsigned int CConnMonWlanProbeRawBuffersPckg::Count(void) const
+	?FromPtrC@CConnMonWlanProbeRawBuffer@@SAHABVTPtrC8@@PAV1@@Z @ 88 NONAME ; int CConnMonWlanProbeRawBuffer::FromPtrC(class TPtrC8 const &, class CConnMonWlanProbeRawBuffer *)
+	?NewL@CConnMonWlanProbeRawBuffer@@SAPAV1@AAV1@@Z @ 89 NONAME ; class CConnMonWlanProbeRawBuffer * CConnMonWlanProbeRawBuffer::NewL(class CConnMonWlanProbeRawBuffer &)
+	?NewL@CConnMonWlanProbeRawBuffer@@SAPAV1@PBVHBufC8@@@Z @ 90 NONAME ; class CConnMonWlanProbeRawBuffer * CConnMonWlanProbeRawBuffer::NewL(class HBufC8 const *)
+	?NewL@CConnMonWlanProbeRawBuffer@@SAPAV1@XZ @ 91 NONAME ; class CConnMonWlanProbeRawBuffer * CConnMonWlanProbeRawBuffer::NewL(void)
+	?RawBuffer@CConnMonWlanProbeRawBuffer@@QBEPAVHBufC8@@XZ @ 92 NONAME ; class HBufC8 * CConnMonWlanProbeRawBuffer::RawBuffer(void) const
+	?ToBuf@CConnMonWlanProbeRawBuffer@@QBEPBVHBufC8@@XZ @ 93 NONAME ; class HBufC8 const * CConnMonWlanProbeRawBuffer::ToBuf(void) const
+	?Total@CConnMonWlanProbeRawBuffersPckg@@QBEIXZ @ 94 NONAME ; unsigned int CConnMonWlanProbeRawBuffersPckg::Total(void) const
+	?UnpackToL@CConnMonWlanProbeRawBuffersPckg@@QBEXAAV?$RPointerArray@VCConnMonWlanProbeRawBuffer@@@@@Z @ 95 NONAME ; void CConnMonWlanProbeRawBuffersPckg::UnpackToL(class RPointerArray<class CConnMonWlanProbeRawBuffer> &) const
+

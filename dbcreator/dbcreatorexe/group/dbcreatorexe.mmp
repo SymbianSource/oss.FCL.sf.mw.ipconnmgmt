@@ -1,0 +1,51 @@
+/*
+* Copyright (c) 2002 Nokia Corporation and/or its subsidiary(-ies). 
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:   Project description file for the dbcreator
+*
+*/
+
+
+
+#include <platform_paths.hrh>
+
+TARGET      dbcreator.exe
+TARGETTYPE  exe
+UID         0x100039CE 0x10207371
+  
+CAPABILITY READDEVICEDATA WRITEDEVICEDATA NetworkControl
+VENDORID VID_DEFAULT
+
+EPOCSTACKSIZE 0x5000 
+
+LANG SC
+    
+SOURCEPATH     ../Src
+
+		
+SOURCE        main.cpp
+SOURCE        cdcdbcreator.cpp
+
+
+// Component specific internal headers 
+USERINCLUDE			../Inc
+
+USERINCLUDE			../../inc
+
+//Macro to /epoc32 headers
+MW_LAYER_SYSTEMINCLUDE
+
+LIBRARY        euser.lib
+LIBRARY        bafl.lib
+LIBRARY        commsdatcreator.lib
+DEBUGLIBRARY   flogger.lib

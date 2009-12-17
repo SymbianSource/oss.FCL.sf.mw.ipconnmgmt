@@ -1,0 +1,193 @@
+/*
+* Copyright (c) 2004 Nokia Corporation and/or its subsidiary(-ies). 
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description: 
+*     This file contains all the resources for the Disconnect Dialog App.
+*
+*/
+
+
+// RESOURCE IDENTIFIER
+
+NAME FAET
+
+// INCLUDES
+#include <disconnectdlg.loc>
+#include <eikon.rh>
+#include <avkon.rsg>
+#include <avkon.rh>
+#include <avkon.mbg>
+#include <avkon.loc>
+
+// RESOURCE DEFINITIONS 
+
+RESOURCE RSS_SIGNATURE { }
+
+RESOURCE TBUF { buf = "DisconnectDlg"; }
+
+RESOURCE EIK_APP_INFO
+    {
+    }
+
+RESOURCE TBUF r_qtn_netw_conf_conn_disconnected 
+    { 
+    buf = qtn_netw_conf_conn_disconnected; 
+    }
+
+RESOURCE TBUF r_qtn_netw_conf_modem_conn_disconnected 
+    { 
+    buf = qtn_netw_conf_modem_conn_disconnected; 
+    }
+
+RESOURCE TBUF r_qtn_cmon_info_conn_already_end 
+    { 
+    buf = qtn_cmon_info_conn_already_end; 
+    }
+
+RESOURCE TBUF r_qtn_netw_info_disconnect_failed 
+    { 
+    buf = qtn_netw_info_disconnect_failed; 
+    }
+
+RESOURCE TBUF r_qtn_cmon_item_conn_name_modem 
+    { 
+    buf= qtn_cmon_item_conn_name_modem; 
+    }
+
+RESOURCE TBUF r_qtn_netw_head_conn_to_close 
+    { 
+    buf= qtn_netw_head_conn_to_close; 
+    }
+
+RESOURCE TBUF r_qtn_netw_ddlg_app_rss_server 
+    { 
+    buf= qtn_netw_ddlg_app_rss_server; 
+    }
+
+RESOURCE TBUF r_qtn_netw_ddlg_app_dl_mgr 
+    { 
+    buf= qtn_netw_ddlg_app_dl_mgr; 
+    }
+
+RESOURCE TBUF r_qtn_netw_ddlg_app_msg_server 
+    { 
+    buf= qtn_netw_ddlg_app_msg_server; 
+    }
+
+RESOURCE TBUF r_qtn_netw_ddlg_app_java_midlet 
+    { 
+    buf= qtn_netw_ddlg_app_java_midlet; 
+    }
+
+RESOURCE TBUF r_qtn_netw_ddlg_app_unknown 
+    { 
+    buf= qtn_netw_ddlg_app_unknown; 
+    }
+
+RESOURCE TBUF r_qtn_netw_ddlg_app_supl 
+    { 
+    buf= qtn_netw_ddlg_app_supl; 
+    }
+
+RESOURCE CBA r_disconnectdlg_discon_cancel__select
+    {
+    buttons =
+        {
+        CBA_BUTTON { id = EAknSoftkeyOk; txt = qtn_netw_softkey_disconnect; },
+        CBA_BUTTON { id = EAknSoftkeyCancel; txt = text_softkey_cancel; },
+        CBA_BUTTON { id = EAknSoftkeyOk; txt= qtn_msk_select;}
+        };
+    }
+
+RESOURCE AVKON_LIST_QUERY r_disconnectdlg_dialog
+    {
+	flags=  EEikDialogFlagNotifyEsc | EEikDialogFlagWait;
+    softkeys = r_disconnectdlg_discon_cancel__select;
+    items = 
+	    {
+	    AVKON_LIST_QUERY_DLG_LINE 
+	        {
+	        control = AVKON_LIST_QUERY_CONTROL
+		        {
+				listtype = EAknCtDoubleLargeGraphicPopupMenuListBox;
+				heading = qtn_netw_head_conn_to_close;
+		        listbox = AVKON_LIST_QUERY_LIST
+		            {
+		            // array of items will be defined dynamically
+		            };
+		        };
+	        }
+	    };
+    }
+
+RESOURCE DIALOG r_disconnectdlg_info_note
+    {
+    flags = EAknInformationNoteFlags | EEikDialogFlagWait;
+    buttons = R_AVKON_SOFTKEYS_EMPTY;
+    items =
+        {
+        DLG_LINE
+            {
+            type = EAknCtNote;
+            id = EGeneralNote;
+            control = AVKON_NOTE 
+                { 
+                layout = EGeneralLayout;
+                singular_label = "";
+                plural_label = "";
+                animation = R_QGN_NOTE_INFO_ANIM;
+                };
+            }
+        };
+    }
+
+RESOURCE DIALOG r_disconnectdlg_confirm_note
+    {
+    flags = EAknConfirmationNoteFlags | EEikDialogFlagWait;
+    buttons = R_AVKON_SOFTKEYS_EMPTY;
+    items =
+        {
+        DLG_LINE
+            {
+            type = EAknCtNote;
+            id = EGeneralNote;
+            control = AVKON_NOTE 
+                { 
+                layout = EGeneralLayout;
+                singular_label = "";
+                plural_label = "";
+                animation = R_QGN_NOTE_OK_ANIM;
+                };
+            }
+        };
+    }
+
+
+RESOURCE DIALOG r_disconnectdlg_proceed
+    {
+    flags = EEikDialogFlagNotifyEsc | EEikDialogFlagWait;
+    buttons = R_AVKON_SOFTKEYS_OK_CANCEL__OK;
+    items =
+        {
+        DLG_LINE
+            {
+            type = EAknCtQuery;
+            id = EGeneralQuery;
+            control = AVKON_CONFIRMATION_QUERY 
+                {
+                layout = EConfirmationQueryLayout;
+                label = "";
+                };
+            }
+        };
+    }

@@ -1,0 +1,42 @@
+/*
+* Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:  Build information file for Data Connection Logger.
+*
+*/
+
+#include <platform_paths.hrh>
+
+PRJ_PLATFORMS
+
+DEFAULT
+
+PRJ_EXPORTS
+
+../rom/DataConnectionLogger.iby CORE_MW_LAYER_IBY_EXPORT_PATH(DataConnectionLogger.iby)
+
+../conf/dcl.confml              APP_LAYER_CONFML(dcl.confml)
+../conf/dcl_101F4CD5.crml       APP_LAYER_CRML(dcl_101F4CD5.crml)
+../conf/dcl_101F6CFE.crml       APP_LAYER_CRML(dcl_101F6CFE.crml)
+
+// Backup registration file
+#ifndef __COMMDB_PROTECTION
+backup_registration.xml  /epoc32/data/z/private/101F6CFE/backup_registration.xml
+backup_registration.xml  /epoc32/release/winscw/udeb/z/private/101F6CFE/backup_registration.xml
+backup_registration.xml  /epoc32/release/winscw/urel/z/private/101F6CFE/backup_registration.xml
+#endif
+
+PRJ_MMPFILES
+
+// Builds DataConnectionLogger.exe
+dcl.mmp

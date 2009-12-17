@@ -1,0 +1,27 @@
+/*
+* Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies). 
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description: S60 MCPR IP TM 
+*
+*/
+#ifndef S60MCPR_IPTRANSPORT_IBY
+#define S60MCPR_IPTRANSPORT_IBY
+
+#include <mobilitycoreproviders.iby>
+
+#ifdef _DEBUG
+ECOM_PLUGIN_UDEB(s60mcpr.dll,101F6D4A.rss)
+#else
+ECOM_PLUGIN(s60mcpr.dll,101F6D4A.rss)
+#endif
+#endif //S60MCPR_IPTRANSPORT_IBY

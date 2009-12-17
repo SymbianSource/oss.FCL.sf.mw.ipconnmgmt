@@ -1,0 +1,62 @@
+/*
+* Copyright (c) 2002 Nokia Corporation and/or its subsidiary(-ies). 
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description: 
+*     This is project specification file for the CConnDlgClient
+*
+*
+*/
+
+
+#include <platform_paths.hrh>
+
+TARGET      AGENTDIALOG.DLL
+TARGETTYPE  DLL
+
+UID     0x1000008d 0x10008F6D
+
+CAPABILITY CAP_GENERAL_DLL
+VENDORID VID_DEFAULT
+
+
+SOURCEPATH  ../cconndlg/clientsrc
+SOURCE GenConAgentDialogServer.cpp
+SOURCE ActiveLogin.cpp
+
+USERINCLUDE     ../cconndlg/inc ../cconndlg/clientinc
+
+// Component specific internal headers 
+USERINCLUDE			../inc
+
+// ADO specific internal headers 
+SYSTEMINCLUDE		../../../inc
+
+//Macro to /epoc32 headers
+MW_LAYER_SYSTEMINCLUDE
+
+LIBRARY     euser.lib
+
+DEBUGLIBRARY flogger.lib
+
+#ifdef WINSCW
+    DEFFILE ../cconndlg/BWinsCw/AgentDialog.def
+#else   
+    DEFFILE ../cconndlg/EABI/agentdialog.def
+#endif  // WINSCW
+
+
+START WINS
+BASEADDRESS     0x46200000
+END
+
+// End of file

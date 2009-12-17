@@ -1,0 +1,222 @@
+/*
+* Copyright (c) 2006 Nokia Corporation and/or its subsidiary(-ies). 
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:  Resource definitions for project cmpluginpacketdata
+*
+*/
+
+
+NAME    PDPL
+
+// INCLUDES
+#include <avkon.rsg>
+#include <avkon.rh>    
+#include <avkon.loc>
+#include <uikon.rh>
+#include <eikon.rh>
+#include <cmpsettingsconsts.h>
+#include <eikon.rsg>
+#include <AvkonIcons.hrh>
+#include <cmmanager.loc>
+#include <cmmanager.rsg>
+
+#include <cmpluginpacketdata.loc>
+
+// RESOURCE IDENTIFIERS
+
+RESOURCE RSS_SIGNATURE { }
+
+RESOURCE TBUF { buf = "cmpacketdataplugin"; }
+
+// CONSTANTS
+
+//For Ip address editor
+#define IPADDRESS_MIN_FIRST_FIELD_VALUE     0
+#define IPADDRESS_MIN_SECOND_FIELD_VALUE    0
+#define IPADDRESS_MIN_THIRD_FIELD_VALUE     0
+#define IPADDRESS_MIN_FOURTH_FIELD_VALUE    0
+#define IPADDRESS_MAX_FIRST_FIELD_VALUE     255
+#define IPADDRESS_MAX_SECOND_FIELD_VALUE    255
+#define IPADDRESS_MAX_THIRD_FIELD_VALUE     255
+#define IPADDRESS_MAX_FOURTH_FIELD_VALUE    255
+
+
+// RESOURCE DEFINITIONS
+
+// ---------------------------------------------------------------------------
+// r_gprs_plugin_view_ap_name
+// localised string
+// ---------------------------------------------------------------------------
+RESOURCE TBUF r_gprs_plugin_view_ap_name                              
+    {
+    buf = qtn_set_access_point_name;
+    }
+                
+// ---------------------------------------------------------------------------
+// r_gprs_plugin_sett_val_field_none
+// localised string
+// ---------------------------------------------------------------------------
+RESOURCE TBUF r_gprs_plugin_sett_val_field_none
+    {
+    buf = qtn_selec_sett_val_field_none;
+    }
+                
+// ---------------------------------------------------------------------------
+// r_gprs_plugin_view_pdp_type
+// localised string
+// ---------------------------------------------------------------------------
+RESOURCE TBUF r_gprs_plugin_view_pdp_type
+    {
+    buf = qtn_set_network_type;
+    }
+
+// ---------------------------------------------------------------------------
+// r_gprs_plugin_view_pdp_type_ipv4
+// localised string
+// ---------------------------------------------------------------------------
+RESOURCE TBUF r_gprs_plugin_view_pdp_type_ipv4
+    {
+    buf = qtn_set_nw_type_ipv4;
+    }
+
+// ---------------------------------------------------------------------------
+// r_gprs_plugin_view_pdp_type_ipv6
+// localised string
+// ---------------------------------------------------------------------------
+RESOURCE TBUF r_gprs_plugin_view_pdp_type_ipv6
+    {
+    buf = qtn_set_nw_type_ipv6;
+    }
+
+// ---------------------------------------------------------------------------
+// r_gprs_plugin_apn_prompt
+// localised string
+// ---------------------------------------------------------------------------
+RESOURCE TBUF r_gprs_plugin_apn_prompt             
+    {
+    buf = qtn_netw_conset_prmpt_packet_data_apn;
+    }
+
+// ---------------------------------------------------------------------------
+// r_qtn_netw_conset_bearer_supported_packet_data
+// localised string
+// ---------------------------------------------------------------------------
+RESOURCE TBUF r_qtn_netw_conset_bearer_supported_packet_data
+    {
+    buf = qtn_netw_conset_bearer_supported_packet_data;
+    }
+
+// ---------------------------------------------------------------------------
+// r_qtn_netw_conset_bearer_available_packet_data
+// localised string
+// ---------------------------------------------------------------------------
+RESOURCE TBUF r_qtn_netw_conset_bearer_available_packet_data
+    {
+    buf = qtn_netw_conset_bearer_available_packet_data;
+    }
+
+// ---------------------------------------------------------------------------
+// r_qtn_netw_conset_packet_data_available
+// localised string
+// ---------------------------------------------------------------------------
+RESOURCE TBUF r_qtn_netw_conset_packet_data_available
+    {
+    buf = qtn_netw_conset_packet_data_available;
+    }
+
+// ---------------------------------------------------------------------------
+// r_gprs_plugin_view_set_bearer_packet_data
+// localised string
+// ---------------------------------------------------------------------------
+RESOURCE TBUF r_gprs_plugin_view_set_bearer_packet_data
+    {
+    buf = qtn_set_bearer_packet_data;
+    }
+
+// ---------------------------------------------------------------------------
+// r_qtn_netw_conset_popup_bearer_packet_data
+// localised string
+// ---------------------------------------------------------------------------
+RESOURCE TBUF r_qtn_netw_conset_popup_bearer_packet_data
+    {
+    buf = qtn_netw_conset_popup_bearer_packet_data;
+    }
+                
+// ---------------------------------------------------------------------------
+// r_qtn_set_bearer_packet_data
+// localised string
+// ---------------------------------------------------------------------------
+RESOURCE TBUF r_qtn_set_bearer_packet_data
+    {
+    buf = qtn_set_bearer_packet_data;
+    }
+
+// ---------------------------------------------------------------------------
+// r_setting_app_edwin_gprsap_name
+// edwin for packet data access point name setting page
+// ---------------------------------------------------------------------------
+RESOURCE EDWIN r_setting_app_edwin_gprsap_name
+    {
+    width=KGprsApNameWidth;
+    lines=KGprsApNameLines;
+    maxlength=KMaxGprsApNameLength;
+    allowed_input_modes = EAknEditorTextInputMode | EAknEditorNumericInputMode;
+    default_input_mode = EAknEditorTextInputMode;
+    default_case = EAknEditorLowerCase;
+    avkon_flags = EAknEditorFlagLatinInputModesOnly;
+    flags = EEikEdwinAutoSelection | EEikEdwinNoLineOrParaBreaks;
+    }
+
+// ---------------------------------------------------------------------------
+// r_text_setting_page_gprsap_name
+// setting page for packet data access point name
+// ---------------------------------------------------------------------------
+RESOURCE AVKON_SETTING_PAGE r_text_setting_page_gprsap_name
+    {
+    number= EAknSettingPageNoOrdinalDisplayed;
+    softkey_resource = R_AVKON_SOFTKEYS_OK_CANCEL__OK;
+    label= qtn_set_access_point_name;
+    type = EEikCtEdwin;
+    editor_resource_id = r_setting_app_edwin_gprsap_name;
+    }
+
+// ---------------------------------------------------------------------------
+// r_apn_name_query
+// 
+// ---------------------------------------------------------------------------
+RESOURCE DIALOG r_apn_name_query
+    {
+    flags = EGeneralQueryFlags | EEikDialogFlagNoShadow;
+    buttons = R_AVKON_SOFTKEYS_OK_CANCEL__OK;
+    items =
+        {
+        DLG_LINE
+            {
+            type = EAknCtQuery;
+            id = EGeneralQuery;
+            control = AVKON_DATA_QUERY 
+                { 
+                layout = EDataLayoutAllowEmptyInput;
+                control = EDWIN
+                    {
+                    maxlength=KMaxGprsApNameLength;
+                    allowed_input_modes = EAknEditorTextInputMode | EAknEditorNumericInputMode;
+                    default_input_mode = EAknEditorTextInputMode;
+                    avkon_flags = EAknEditorFlagLatinInputModesOnly;
+                    flags = EEikEdwinNoHorizScrolling;
+                    default_case = EAknEditorLowerCase;
+                    };
+                };
+            }
+        };
+    }

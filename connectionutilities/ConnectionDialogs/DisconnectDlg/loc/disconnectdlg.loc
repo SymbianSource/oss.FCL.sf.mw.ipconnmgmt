@@ -1,0 +1,114 @@
+/*
+* Copyright (c) 2004 Nokia Corporation and/or its subsidiary(-ies). 
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description: 
+*     
+*
+*/
+
+
+
+// LOCALISATION STRINGS
+//d:left softkey
+//l:control_pane_t1/opt7
+//w:
+//r:2.6
+//
+#define qtn_netw_softkey_disconnect "Disconnect"
+
+//d:a connection was succesfully closed
+//l:popup_note_window
+//w:
+//r:2.6
+//
+#define qtn_netw_conf_conn_disconnected "%U disconnected"
+
+//d:an external (modem) connection was succesfully closed
+//l:popup_note_window
+//w:
+//r:2.6
+//
+#define qtn_netw_conf_modem_conn_disconnected "Modem connection disconnected"
+
+//d:an already closed connection was attempted to close
+//l:popup_note_window
+//w:
+//r:2.6
+//
+#define qtn_cmon_info_conn_already_end "Connection was already closed"
+
+//d:an already closed connection was attempted to close
+//l:popup_note_window
+//w:
+//r:2.6
+//
+#define qtn_netw_info_disconnect_failed "Closing the connection failed"
+
+//d:if the connection is external (modem), this text should be displayed as IAP
+//l:list_double_large_graphic_pane_t1
+//w:
+//r:2.6
+//
+#define qtn_cmon_item_conn_name_modem "Modem connection"
+
+//d:prompt text of the list query dialog
+//l:heading_pane_t1
+//w:
+//r:2.6
+//
+#define qtn_netw_head_conn_to_close "Connection to close:"
+
+//d: the name of the application which uses the connection (Feeds Server)
+//l:list_double_large_graphic_pane_t2_cp2
+//w:
+//r:3.1
+//
+#define qtn_netw_ddlg_app_rss_server  "Web Feeds" 
+
+//d: the name of the application which uses the connection (DownaloadMgrServer)
+//l:list_double_large_graphic_pane_t2_cp2
+//w:
+//r:3.1
+//
+#define qtn_netw_ddlg_app_dl_mgr  "Downloads" 
+
+//d: the name of the application which uses the connection (MessagingServer)
+//l:list_double_large_graphic_pane_t2_cp2
+//w:
+//r:3.1
+//
+#define qtn_netw_ddlg_app_msg_server  "Messaging" 
+
+//d: the name of the application which uses the connection (Java MIDlets)
+//l:list_double_large_graphic_pane_t2_cp2
+//w:
+//r:3.1
+//
+#define qtn_netw_ddlg_app_java_midlet  "Java app." 
+
+//d: the name of the application which uses the connection (Unknown instance)
+//l:list_double_large_graphic_pane_t2_cp2
+//w:
+//r:3.1
+//
+#define qtn_netw_ddlg_app_unknown  "(unknown)" 
+
+//d: the name of the application which uses the connection (PositioningServer)
+//l:list_double_large_graphic_pane_t2_cp2
+//w:
+//r:5.0
+//
+#define qtn_netw_ddlg_app_supl  "Positioning server."
+
+
+// End of File

@@ -1,0 +1,149 @@
+/*
+* Copyright (c) 2006 Nokia Corporation and/or its subsidiary(-ies). 
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:  Resource definitions for project VPN Plugin
+*
+*/
+
+//  LOCALISATION STRINGS
+
+//d: First line of a double large graphic style listbox - VPN specific
+//l: list_single_graphic_pane_t1_cp2
+//w: 
+//r: 3.2
+//
+#define qtn_netw_conset_bearer_supported_vpn "VPN"
+
+//d: The name for the newly created connection method
+//l: list_double_graphic_pane_t1
+//w: 
+//r: 3.2
+//
+#define qtn_netw_conset_method_name_vpn "VPN over ’%U’"
+
+
+//d: Note displayed upon opening the VPN connection method settings
+//d: if the VPN connection method is invalid
+//l: popup_note_window
+//w: 
+//r: 3.2
+//
+#define qtn_vpn_info_vpn_iap_incomplete "VPN access point is incomplete. Try reconfiguring the access point."
+
+//d: VPN policy setting
+//l: list_setting_pane_t1
+//w:
+//r: 3.2
+//
+#define qtn_vpn_sett_vpn_iap_policy_reference "VPN policy"
+
+//d: Possible value for VPN policy setting
+//l: list_set_graphic_pane_t1
+//w:
+//r: 5.1
+//
+#define qtn_vpn_sett_vpn_iap_policy_reference_compulsory "Must be defined"
+
+//d: Information note indicatinf that no VPN policies are installed and that
+//d: one is needed if a VPN connection method is to be used
+//l: popup_note_window
+//w:
+//r: 3.2
+//
+#define qtn_vpn_info_no_policies_installed "No VPN policies installed. Please install a policy via VPN policies view."
+
+//d: Internet access point setting
+//l: list_setting_pane_t1
+//w:
+//r: 3.2
+//
+#define qtn_vpn_sett_vpn_iap_real_netw_reference "Network connection"
+
+//d: Setting value text in internet access point settings view
+//l: list_set_graphic_pane_t1
+//w:
+//r: 5.1
+//
+#define qtn_vpn_sett_vpn_iap_real_netw_ref_compulsory "Must be defined"
+
+//d: Note displayed to indicate that the VPN client is not available
+//d: and new VPN connection methods cannot be added. This may be 
+//d: due to the VPN client residing on a disconnected memory card
+//l: popup_note_window
+//w: 
+//r: 3.2
+//
+#define qtn_vpn_info_mgmt_ui_not_accessible "Unable to access VPN data. Memory card might not be accessible."
+
+//d: Title of Select VPN Policy list query.
+//l: heading_pane_t1 
+//w: 
+//r: 3.2
+//
+#define qtn_netw_conset_prmpt_vpn_policy "Select VPN policy:"
+
+//d: Title of Select VPN real connection selection query list box
+//l: heading_pane_t1 
+//w: 
+//r: 3.2
+//
+#define qtn_netw_conset_prmpt_vpn_real_connection "Select connection:"
+
+//d: Primary item in 'Select VPN real connection selection query'
+//d: for selecting a WLAN network as an underlying VPN connection method
+//l: list_double_large_graphic_pane_t1_cp2
+//w: 
+//r: 3.2
+//
+#define qtn_netw_conset_vpn_easy_wlan "WLAN network"
+
+//d: Secondary item in the 'Select VPN real connection selection query'
+//d: paired with the WLAN network primary item
+//l: list_double_large_graphic_pane_t2_cp2
+//w: 
+//r: 3.2
+//
+#define qtn_netw_conset_vpn_easy_wlan_prompt "Prompt for WLAN"
+
+//d: Destination list text, notes the number of connections methods
+//d: belonging to the destination
+//l: list_double_large_graphic_pane_t2_cp2
+//w: 
+//r: 3.2
+//
+#define qtn_netw_conset_conn_methods_amount_many    "%N connection methods"
+
+//d: Destination list text. Notes that the destination has one 
+//d: connection method
+//l: list_double_large_graphic_pane_t2_cp2
+//w: 
+//r: 3.2
+//
+#define qtn_netw_conset_conn_methods_amount_one      "1 connection method"
+
+//d: Note shown when attempting to create a VPN access point using the wizard.
+//d: Shown if there are no valid underlying connection methods to select.
+//l: popup_note_window
+//w: 
+//r: 3.2
+//
+#define qtn_netw_conset_info_no_cm_to_bind_to "Unable to add. No valid destinations or connection methods to be used exist."
+
+//d: Query displayed when an incomplete VPN connection method is tried to be saved
+//d: Operation is confirmed with this confirmation query.
+//l: popup_note_window
+//w: 
+//r: 3.2
+//
+#define qtn_vpn_quest_vpn_iap_incomplete_delete "Incomplete VPN access point details. Exit without saving?"
+

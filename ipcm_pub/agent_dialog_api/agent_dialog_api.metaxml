@@ -1,0 +1,18 @@
+<?xml version="1.0" ?>
+<api id="6ae4508d41bbdb8169f513f403d4e2ac" dataversion="1.0">
+  <name>Agent Dialog API</name>
+  <description>Provides user interaction needed when setting up a connection to the Internet.</description>
+  <type>c++</type>
+  <subsystem>networkingutilities</subsystem>
+  <libs>
+    <lib name="agentdialog.lib" />
+  </libs>
+  <release category="sdk" sinceversion="1.0"/>
+  <attributes>
+     <!-- This indicates wether the api provedes separate html documentation -->
+     <!-- or is the additional documentation generated from headers. -->
+     <!-- If you are unsuere then the value is "no" -->
+     <htmldocprovided>yes</htmldocprovided>
+     <adaptation>no</adaptation>
+  </attributes>
+</api>

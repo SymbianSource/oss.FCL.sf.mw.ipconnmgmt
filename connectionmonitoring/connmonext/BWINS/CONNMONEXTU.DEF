@@ -1,0 +1,11 @@
+EXPORTS
+	??0CConnectionMonitorPlugin@@QAE@XZ @ 1 NONAME ; public: __thiscall CConnectionMonitorPlugin::CConnectionMonitorPlugin(void)
+	??1CConnectionMonitorPlugin@@UAE@XZ @ 2 NONAME ; public: virtual __thiscall CConnectionMonitorPlugin::~CConnectionMonitorPlugin(void)
+	?CancelRegisterAttribute@CConnectionMonitorPlugin@@QBEXI@Z @ 3 NONAME ; public: void __thiscall CConnectionMonitorPlugin::CancelRegisterAttribute(unsigned int)const 
+	?CancelRegisterPlugin@CConnectionMonitorPlugin@@QAEXXZ @ 4 NONAME ; public: void __thiscall CConnectionMonitorPlugin::CancelRegisterPlugin(void)
+	?E32Dll@@YAHW4TDllReason@@@Z @ 5 NONAME ; int __cdecl E32Dll(enum TDllReason)
+	?Event@CConnectionMonitorPlugin@@QBEHIPBXI@Z @ 6 NONAME ; public: int __thiscall CConnectionMonitorPlugin::Event(unsigned int,void const *,unsigned int)const 
+	?RegisterAttribute@CConnectionMonitorPlugin@@QBEHI@Z @ 7 NONAME ; public: int __thiscall CConnectionMonitorPlugin::RegisterAttribute(unsigned int)const 
+	?RegisterPluginL@CConnectionMonitorPlugin@@QAEXI@Z @ 8 NONAME ; public: void __thiscall CConnectionMonitorPlugin::RegisterPluginL(unsigned int)
+	?Version@CConnectionMonitorPlugin@@QBE?AVTVersion@@XZ @ 9 NONAME ; public: class TVersion  __thiscall CConnectionMonitorPlugin::Version(void)const 
+

@@ -1,0 +1,129 @@
+EXPORTS
+	_ZN17CConnMonScheduler11ThreadStartERNS_7TSignalE @ 1 NONAME
+	_ZN18RConnectionMonitor12NotifyEventLER26MConnectionMonitorObserver @ 2 NONAME
+	_ZN18RConnectionMonitor15GetIntAttributeEjjjRiR14TRequestStatus @ 3 NONAME
+	_ZN18RConnectionMonitor16GetBoolAttributeEjjjRiR14TRequestStatus @ 4 NONAME
+	_ZN18RConnectionMonitor16GetUintAttributeEjjjRjR14TRequestStatus @ 5 NONAME
+	_ZN18RConnectionMonitor18CancelAsyncRequestEi @ 6 NONAME
+	_ZN18RConnectionMonitor18GetConnectionCountERjR14TRequestStatus @ 7 NONAME
+	_ZN18RConnectionMonitor19CancelNotificationsEv @ 8 NONAME
+	_ZN18RConnectionMonitor5CloseEv @ 9 NONAME
+	_ZN18RConnectionMonitor8ConnectLEv @ 10 NONAME
+	_ZNK17CConnMonEventBase12ConnectionIdEv @ 11 NONAME
+	_ZNK17CConnMonEventBase9EventTypeEv @ 12 NONAME
+	_ZNK18RConnectionMonitor15SetIntAttributeEjjji @ 13 NONAME
+	_ZNK18RConnectionMonitor16GetPckgAttributeEjjjR5TDes8R14TRequestStatus @ 14 NONAME
+	_ZNK18RConnectionMonitor16SetBoolAttributeEjjji @ 15 NONAME
+	_ZNK18RConnectionMonitor16SetPckgAttributeEjjjRK5TDes8 @ 16 NONAME
+	_ZNK18RConnectionMonitor16SetUintAttributeEjjjj @ 17 NONAME
+	_ZNK18RConnectionMonitor17GetConnectionInfoEjRjS0_ @ 18 NONAME
+	_ZNK18RConnectionMonitor18GetStringAttributeEjjjR6TDes16R14TRequestStatus @ 19 NONAME
+	_ZNK18RConnectionMonitor18SetStringAttributeEjjjRK6TDes16 @ 20 NONAME
+	_ZNK18RConnectionMonitor20GetSubConnectionInfoEjjRj @ 21 NONAME
+	_ZNK20CConnMonBearerChange6BearerEv @ 22 NONAME
+	_ZNK20CConnMonGenericEvent4DataEv @ 23 NONAME
+	_ZNK24CConnMonDeleteConnection10UplinkDataEv @ 24 NONAME
+	_ZNK24CConnMonDeleteConnection12DownlinkDataEv @ 25 NONAME
+	_ZNK24CConnMonDeleteConnection19AuthoritativeDeleteEv @ 26 NONAME
+	_ZNK27CConnMonCreateSubConnection15SubConnectionIdEv @ 27 NONAME
+	_ZNK27CConnMonDeleteSubConnection10UplinkDataEv @ 28 NONAME
+	_ZNK27CConnMonDeleteSubConnection12DownlinkDataEv @ 29 NONAME
+	_ZNK27CConnMonDeleteSubConnection15SubConnectionIdEv @ 30 NONAME
+	_ZNK27CConnMonDeleteSubConnection19AuthoritativeDeleteEv @ 31 NONAME
+	_ZNK27CConnMonNetworkStatusChange13NetworkStatusEv @ 32 NONAME
+	_ZNK27CConnMonUplinkDataThreshold10UplinkDataEv @ 33 NONAME
+	_ZNK27CConnMonUplinkDataThreshold15SubConnectionIdEv @ 34 NONAME
+	_ZNK28CConnMonSignalStrengthChange14SignalStrengthEv @ 35 NONAME
+	_ZNK29CConnMonDownlinkDataThreshold12DownlinkDataEv @ 36 NONAME
+	_ZNK29CConnMonDownlinkDataThreshold15SubConnectionIdEv @ 37 NONAME
+	_ZNK30CConnMonConnectionStatusChange15SubConnectionIdEv @ 38 NONAME
+	_ZNK30CConnMonConnectionStatusChange16ConnectionStatusEv @ 39 NONAME
+	_ZNK32CConnMonBearerAvailabilityChange12AvailabilityEv @ 40 NONAME
+	_ZNK32CConnMonConnectionActivityChange15SubConnectionIdEv @ 41 NONAME
+	_ZNK32CConnMonConnectionActivityChange18ConnectionActivityEv @ 42 NONAME
+	_ZNK33CConnMonNetworkRegistrationChange18RegistrationStatusEv @ 43 NONAME
+	_ZTI11CConnMonIAP @ 44 NONAME ; #<TI>#
+	_ZTI11CDataVolume @ 45 NONAME ; #<TI>#
+	_ZTI11CEventQueue @ 46 NONAME ; #<TI>#
+	_ZTI13CDataNotifier @ 47 NONAME ; #<TI>#
+	_ZTI13CModeNotifier @ 48 NONAME ; #<TI>#
+	_ZTI14CConnMonServer @ 49 NONAME ; #<TI>#
+	_ZTI15CBearerNotifier @ 50 NONAME ; #<TI>#
+	_ZTI15CConnMonSession @ 51 NONAME ; #<TI>#
+	_ZTI17CActivityNotifier @ 52 NONAME ; #<TI>#
+	_ZTI17CConnMonEventBase @ 53 NONAME ; #<TI>#
+	_ZTI17CConnMonScheduler @ 54 NONAME ; #<TI>#
+	_ZTI17CCsdFaxUpNotifier @ 55 NONAME ; #<TI>#
+	_ZTI17CProgressNotifier @ 56 NONAME ; #<TI>#
+	_ZTI17CPsdFaxUpNotifier @ 57 NONAME ; #<TI>#
+	_ZTI18CCsdStatusNotifier @ 58 NONAME ; #<TI>#
+	_ZTI18CGsmSignalNotifier @ 59 NONAME ; #<TI>#
+	_ZTI18CPsdStatusNotifier @ 60 NONAME ; #<TI>#
+	_ZTI19CConnUpDownNotifier @ 61 NONAME ; #<TI>#
+	_ZTI19CNetwStatusNotifier @ 62 NONAME ; #<TI>#
+	_ZTI20CConnMonBearerChange @ 63 NONAME ; #<TI>#
+	_ZTI20CConnMonEventHandler @ 64 NONAME ; #<TI>#
+	_ZTI20CConnMonGenericEvent @ 65 NONAME ; #<TI>#
+	_ZTI22CSubConnUpDownNotifier @ 66 NONAME ; #<TI>#
+	_ZTI23CConnMonDelayedShutdown @ 67 NONAME ; #<TI>#
+	_ZTI24CConnMonCreateConnection @ 68 NONAME ; #<TI>#
+	_ZTI24CConnMonDeleteConnection @ 69 NONAME ; #<TI>#
+	_ZTI25CNetwRegistrationNotifier @ 70 NONAME ; #<TI>#
+	_ZTI27CBearerAvailabilityNotifier @ 71 NONAME ; #<TI>#
+	_ZTI27CConnMonCreateSubConnection @ 72 NONAME ; #<TI>#
+	_ZTI27CConnMonDeleteSubConnection @ 73 NONAME ; #<TI>#
+	_ZTI27CConnMonNetworkStatusChange @ 74 NONAME ; #<TI>#
+	_ZTI27CConnMonUplinkDataThreshold @ 75 NONAME ; #<TI>#
+	_ZTI28CConnMonSignalStrengthChange @ 76 NONAME ; #<TI>#
+	_ZTI29CConnMonDownlinkDataThreshold @ 77 NONAME ; #<TI>#
+	_ZTI30CConnMonConnectionStatusChange @ 78 NONAME ; #<TI>#
+	_ZTI32CConnMonBearerAvailabilityChange @ 79 NONAME ; #<TI>#
+	_ZTI32CConnMonConnectionActivityChange @ 80 NONAME ; #<TI>#
+	_ZTI33CConnMonNetworkRegistrationChange @ 81 NONAME ; #<TI>#
+	_ZTI7CCsdFax @ 82 NONAME ; #<TI>#
+	_ZTI7CPlugin @ 83 NONAME ; #<TI>#
+	_ZTI7CPsdFax @ 84 NONAME ; #<TI>#
+	_ZTI8CTimerAO @ 85 NONAME ; #<TI>#
+	_ZTV11CConnMonIAP @ 86 NONAME ; #<VT>#
+	_ZTV11CDataVolume @ 87 NONAME ; #<VT>#
+	_ZTV11CEventQueue @ 88 NONAME ; #<VT>#
+	_ZTV13CDataNotifier @ 89 NONAME ; #<VT>#
+	_ZTV13CModeNotifier @ 90 NONAME ; #<VT>#
+	_ZTV14CConnMonServer @ 91 NONAME ; #<VT>#
+	_ZTV15CBearerNotifier @ 92 NONAME ; #<VT>#
+	_ZTV15CConnMonSession @ 93 NONAME ; #<VT>#
+	_ZTV17CActivityNotifier @ 94 NONAME ; #<VT>#
+	_ZTV17CConnMonEventBase @ 95 NONAME ; #<VT>#
+	_ZTV17CConnMonScheduler @ 96 NONAME ; #<VT>#
+	_ZTV17CCsdFaxUpNotifier @ 97 NONAME ; #<VT>#
+	_ZTV17CProgressNotifier @ 98 NONAME ; #<VT>#
+	_ZTV17CPsdFaxUpNotifier @ 99 NONAME ; #<VT>#
+	_ZTV18CCsdStatusNotifier @ 100 NONAME ; #<VT>#
+	_ZTV18CGsmSignalNotifier @ 101 NONAME ; #<VT>#
+	_ZTV18CPsdStatusNotifier @ 102 NONAME ; #<VT>#
+	_ZTV19CConnUpDownNotifier @ 103 NONAME ; #<VT>#
+	_ZTV19CNetwStatusNotifier @ 104 NONAME ; #<VT>#
+	_ZTV20CConnMonBearerChange @ 105 NONAME ; #<VT>#
+	_ZTV20CConnMonEventHandler @ 106 NONAME ; #<VT>#
+	_ZTV20CConnMonGenericEvent @ 107 NONAME ; #<VT>#
+	_ZTV22CSubConnUpDownNotifier @ 108 NONAME ; #<VT>#
+	_ZTV23CConnMonDelayedShutdown @ 109 NONAME ; #<VT>#
+	_ZTV24CConnMonCreateConnection @ 110 NONAME ; #<VT>#
+	_ZTV24CConnMonDeleteConnection @ 111 NONAME ; #<VT>#
+	_ZTV25CNetwRegistrationNotifier @ 112 NONAME ; #<VT>#
+	_ZTV27CBearerAvailabilityNotifier @ 113 NONAME ; #<VT>#
+	_ZTV27CConnMonCreateSubConnection @ 114 NONAME ; #<VT>#
+	_ZTV27CConnMonDeleteSubConnection @ 115 NONAME ; #<VT>#
+	_ZTV27CConnMonNetworkStatusChange @ 116 NONAME ; #<VT>#
+	_ZTV27CConnMonUplinkDataThreshold @ 117 NONAME ; #<VT>#
+	_ZTV28CConnMonSignalStrengthChange @ 118 NONAME ; #<VT>#
+	_ZTV29CConnMonDownlinkDataThreshold @ 119 NONAME ; #<VT>#
+	_ZTV30CConnMonConnectionStatusChange @ 120 NONAME ; #<VT>#
+	_ZTV32CConnMonBearerAvailabilityChange @ 121 NONAME ; #<VT>#
+	_ZTV32CConnMonConnectionActivityChange @ 122 NONAME ; #<VT>#
+	_ZTV33CConnMonNetworkRegistrationChange @ 123 NONAME ; #<VT>#
+	_ZTV7CCsdFax @ 124 NONAME ; #<VT>#
+	_ZTV7CPlugin @ 125 NONAME ; #<VT>#
+	_ZTV7CPsdFax @ 126 NONAME ; #<VT>#
+	_ZTV8CTimerAO @ 127 NONAME ; #<VT>#
+

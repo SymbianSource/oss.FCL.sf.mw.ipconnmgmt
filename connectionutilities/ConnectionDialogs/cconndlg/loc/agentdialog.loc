@@ -1,0 +1,171 @@
+/*
+* Copyright (c) 2002 Nokia Corporation and/or its subsidiary(-ies). 
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description: 
+*     This is a localisation file.
+*     A .loc file is the one and only place where the logical strings
+*     to be localised are defined.
+*
+*/
+
+
+//	Included localisation string resource headers
+
+//  LOCALISATION STRINGS
+
+//d:reconect dialog
+//l:popup_note_window
+//w:
+//r:1.0
+//
+#define qtn_ics_q_conn_lost_reconn "Network connection lost. Do you want to re-connect?"
+
+//d:iap list title
+//l:heading_pane_t1
+//w:
+//r:1.0
+//
+#define qtn_ics_ap_list_title "Select Access Point:"
+
+//d:new iap yes no dialog
+//l:popup_note_window
+//w:
+//r:1.0
+//
+#define qtn_ics_ap_connect_text "Attempt to connect to %U?"
+
+//d: username query string in agent dialog
+//l:popup_query_data_window
+//w:
+//r:1.0
+//
+#define qtn_ics_username_query_title "Enter username:"
+
+//d: password query string in agent dialog
+//l: popup_query_data_window
+//w:
+//r:1.0
+//
+#define qtn_ics_password_query_title "Enter password:"
+
+//d:Qos dialog
+//l:popup_note_window
+//w:
+//r:1.0
+//
+#define qtn_ics_q_conn_qos_reconn "The connection quality is lower than required.Do you wish to disconnect?"
+
+//d:New username query string in agent dialog
+//l:popup_query_data_window
+//w:
+//r:2.1
+//
+#define qtn_netw_iap_auth_username "Access point user name:"
+
+//d:New password query string in agent dialog
+//l:popup_query_data_window
+//w:
+//r:2.1
+//
+#define qtn_netw_iap_auth_password "Access point password:"
+
+//d:Special IAP to enable the search for surrounding WLAN networks
+//l:list_single_graphic_pane_t1_cp2
+//w:
+//r:3.0
+//
+#define qtn_wlan_search_for_networks    "Search for WLAN"
+
+//d: Wait note text during collection of access points
+//l: popup_note_wait_window
+//w:
+//r:3.0
+//
+#define qtn_netw_wait_checking_avail_conn "Checking available connections"
+
+
+//d:Connection selection title
+//l:heading_pane_t1
+//w:
+//r:3.2
+//
+#define qtn_netw_conset_prmpt_select_connection     "Select connection:"
+
+//d:First item of Connection selection to enable the search for surrounding 
+//d:WLAN networks
+//l:list_double_large_graphic_pane_t1_cp2
+//w:
+//r:3.2
+//
+#define qtn_netw_conset_easy_wlan                   "Search WLAN"
+
+//d:Last item of Connection selection to see Connection Methods that are not 
+//d:included in destinations.
+//l:list_double_large_graphic_pane_t1_cp2
+//w:
+//r:3.2
+//
+#define qtn_netw_conset_dest_uncategorized          "Uncategorized"
+
+//d:Second line of last item of Connection selection. Singular version.
+//l:list_double_large_graphic_pane_t2_cp2
+//w:
+//r:3.2
+//
+#define qtn_netw_conset_conn_methods_amount_one     "1 connection method"
+
+//d:Second line of last item of Connection selection. It shows the number of 
+//d:available uncategorized connection methods.
+//l:list_double_large_graphic_pane_t2_cp2
+//w:
+//r:3.2
+//
+#define qtn_netw_conset_conn_methods_amount_many    "%N connection methods"
+
+//d:Text of menu item to select the currently selected destination.
+//l:list_single_pane_t1_cp2
+//w:
+//r:3.2
+//
+#define qtn_set_cmd_select                          "Select"
+
+//d:Text of menu item to let the user to select an explicit connection method
+//l:list_single_pane_t1_cp2
+//w:
+//r:3.2
+//
+#define qtn_netw_conset_options_select_method       "Choose connection method"
+
+//d:Title of Selecting an explicit connection method notifier
+//l:heading_pane_t1
+//w:
+//r:3.2
+//
+#define qtn_netw_conset_prmpt_select_conn_method    "Select connection method:"
+
+//d:Softkey used to select an explicit connection method
+//l:control_pane_t1/opt7
+//w:
+//r:3.2
+//
+#define qtn_netw_conset_softkey_connect             "Connect"
+
+//d:Text of menu item to connect to the currently selected destination.
+//l:list_single_pane_t1_cp2
+//w:
+//r:3.2
+//
+#define qtn_set_cmd_connect                          "Connect"
+
+
+// End of File

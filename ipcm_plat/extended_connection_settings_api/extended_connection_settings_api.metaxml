@@ -1,0 +1,18 @@
+<?xml version="1.0" ?>
+<api id="43e3f4cdb8fb8eec5e9ab4529e045109" dataversion="1.0">
+  <name>Extended Connection Settings API</name>
+  <description>Provides full access (read/write) to Destinations and Connection Methods. The API also provides UI for manipulating Destinations and Connection Methods.</description>
+  <type>c++</type>
+  <subsystem>networkingutilities</subsystem>
+  <libs>
+    <lib name="cmmanager.lib" />
+  </libs>
+  <release category="domain"/>
+  <attributes>
+     <!-- This indicates wether the api provedes separate html documentation -->
+     <!-- or is the additional documentation generated from headers. -->
+     <!-- If you are unsuere then the value is "no" -->
+     <htmldocprovided>yes</htmldocprovided>
+     <adaptation>no</adaptation>
+  </attributes>
+</api>

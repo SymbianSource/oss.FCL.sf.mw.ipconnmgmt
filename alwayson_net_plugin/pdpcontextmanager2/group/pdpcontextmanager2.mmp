@@ -1,0 +1,90 @@
+/*
+* Copyright (c) 2004,2006 Nokia Corporation and/or its subsidiary(-ies). 
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:  mmp file of the project
+*
+*/
+
+
+#include <platform_paths.hrh>
+#include "../inc/alwaysonconfig.hrh"
+
+TARGET          pdpcontextmanager2.dll
+TARGETTYPE      PLUGIN
+UID             0x10009D8D 0x10281F41
+
+CAPABILITY      CAP_ECOM_PLUGIN
+VENDORID        VID_DEFAULT
+
+SOURCEPATH      ../src
+SOURCE          alwaysonlinepdpplugin.cpp
+SOURCE          caoserver.cpp
+SOURCE          caoconnectionmanager.cpp
+SOURCE          caotimer.cpp
+SOURCE          caoraumanager.cpp
+SOURCE          caosettings.cpp
+SOURCE          caogpds.cpp
+SOURCE          caoconnection.cpp
+SOURCE          caoconnectionmonitor.cpp
+SOURCE          taostate.cpp
+SOURCE          taostateinit.cpp
+SOURCE          taostatestarting.cpp
+SOURCE          taostatedisabled.cpp
+SOURCE          taostateconnecting.cpp
+SOURCE          taostateconnected.cpp
+SOURCE          taostatedisconnected.cpp
+SOURCE          taostatewaiting.cpp
+SOURCE          taostateunconnected.cpp
+SOURCE          taostateresetfactorysettings.cpp
+SOURCE          taostateexternalconnection.cpp
+SOURCE          caoraumanagerimpl.cpp
+SOURCE          caoconnectionmonitorimpl.cpp
+SOURCE          caoconnectionimpl.cpp
+SOURCE          linger.cpp
+
+
+// Component specific internal headers 
+USERINCLUDE		../inc
+
+
+// Default system include paths for application layer modules.
+APP_LAYER_SYSTEMINCLUDE
+
+
+SOURCEPATH          ../data
+
+
+START RESOURCE 10281f41.rss
+TARGET   pdpcontextmanager2.rsc
+END // RESOURCE
+
+
+LIBRARY         euser.lib
+LIBRARY         ecom.lib
+LIBRARY         commdb.lib
+LIBRARY         esock.lib
+LIBRARY         flogger.lib
+LIBRARY         centralrepository.lib
+LIBRARY         connmon.lib
+LIBRARY         cenrepnotifhandler.lib
+LIBRARY         etel3rdparty.lib
+LIBRARY         etelmm.lib
+LIBRARY         CustomAPI.lib
+LIBRARY         etel.lib
+#ifdef LOGGING_ENABLED
+#ifdef LOGGING_MODE_FILE
+LIBRARY         efsrv.lib
+#endif // LOGGING_MODE_FILE
+#endif // LOGGING_ENABLED
+
+// End of file

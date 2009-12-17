@@ -1,0 +1,18 @@
+<?xml version="1.0" ?>
+<api id="4b950b5ff5cb2e7fd0b6c8e0591ea243" dataversion="1.0">
+  <name>Connection Settings UI API</name>
+  <description>Connection Settings UI API provides UI for applications to let the user to choose a Destination or a Connection Method. The main purpose is to save the selected Destination or Connection method and use it as permanent setting.</description>
+  <type>c++</type>
+  <subsystem>cmmanager</subsystem>
+  <libs>
+    <lib name="cmmanager.lib" />
+  </libs>
+  <release category="sdk" sinceversion="3.2"/>
+  <attributes>
+     <!-- This indicates wether the api provides separate html documentation -->
+     <!-- or is the additional documentation generated from headers. -->
+     <!-- If you are unsure then the value is "no" -->
+     <htmldocprovided>yes</htmldocprovided>
+     <adaptation>no</adaptation>
+  </attributes>
+</api>

@@ -1,0 +1,10 @@
+EXPORTS
+	??0RDisconnectDlgServer@@QAE@XZ @ 1 NONAME ; RDisconnectDlgServer::RDisconnectDlgServer(void)
+	??1RDisconnectDlgServer@@QAE@XZ @ 2 NONAME ; RDisconnectDlgServer::~RDisconnectDlgServer(void)
+	?CancelDisconnectDlg@RDisconnectDlgServer@@QAEXXZ @ 3 NONAME ; void RDisconnectDlgServer::CancelDisconnectDlg(void)
+	?Close@RDisconnectDlgServer@@QAEXXZ @ 4 NONAME ; void RDisconnectDlgServer::Close(void)
+	?Connect@RDisconnectDlgServer@@QAEHXZ @ 5 NONAME ; int RDisconnectDlgServer::Connect(void)
+	?DisconnectDlg@RDisconnectDlgServer@@QAEXAAVTRequestStatus@@H@Z @ 6 NONAME ; void RDisconnectDlgServer::DisconnectDlg(class TRequestStatus &, int)
+	?Version@RDisconnectDlgServer@@QBE?AVTVersion@@XZ @ 7 NONAME ; class TVersion RDisconnectDlgServer::Version(void) const
+	?DisconnectDlg@RDisconnectDlgServer@@QAEXAAVTRequestStatus@@AAKH@Z @ 8 NONAME ; void RDisconnectDlgServer::DisconnectDlg(class TRequestStatus &, unsigned long &, int)
+

@@ -1,0 +1,88 @@
+/*
+* Copyright (c) 2002 Nokia Corporation and/or its subsidiary(-ies). 
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description: 
+*     This is project specification file for the ConnectionUiUtilities.
+*
+*/
+
+
+#include <data_caging_paths.hrh>
+#include <platform_paths.hrh>
+
+
+TARGET      ConnectionUiUtilities.dll
+TARGETTYPE  DLL
+
+CAPABILITY CAP_GENERAL_DLL
+VENDORID VID_DEFAULT
+
+
+START RESOURCE ../ConnectionUiUtilities/data/ConnectionUiUtilities.rss
+HEADER
+TARGETPATH  RESOURCE_FILES_DIR
+LANGUAGE_IDS
+END     // RESOURCE
+
+
+SOURCEPATH ../ConnectionUiUtilities/src
+SOURCE ConnectionUiUtilities.cpp
+SOURCE ConnectionUiUtilitiesClient.cpp
+SOURCE ConnectionUiUtilitiesImpl.cpp
+SOURCE ConnectionUiUtilitiesPanic.cpp
+SOURCE ChangeConnectionDlg.cpp
+SOURCE ActiveCChangeConnectionDlg.cpp
+SOURCE ActiveWrapper.cpp
+
+
+SOURCEPATH ../src
+SOURCE ConnectionInfo.cpp
+SOURCE ConnectionInfoKey.cpp
+SOURCE ConnectionInfoArray.cpp
+SOURCE ActiveIAPListing.cpp
+SOURCE ExpiryTimer.cpp
+
+
+USERINCLUDE	    ../ConnectionUiUtilities/inc
+
+// Component specific internal headers 
+USERINCLUDE			../inc
+
+// ADO specific internal headers 
+SYSTEMINCLUDE		../../../inc
+
+//Macro to /epoc32 headers
+MW_LAYER_SYSTEMINCLUDE
+
+LIBRARY euser.lib cone.lib eikcore.lib eikcoctl.lib avkon.lib eikdlg.lib 
+LIBRARY bafl.lib commonengine.lib commdb.lib AknSkins.lib FeatMgr.lib 
+LIBRARY AknNotify.lib
+LIBRARY Ecom.lib
+LIBRARY	centralrepository.lib 
+LIBRARY	aknlayout.lib 
+
+DEBUGLIBRARY flogger.lib
+
+
+#if defined( ARMCC )
+
+    DEFFILE ../ConnectionUiUtilities/EABI/ConnectionUiUtilities_PROT.def
+
+#elif defined( WINSCW )
+
+    DEFFILE ../ConnectionUiUtilities/BWinsCw/ConnectionUiUtilities_PROT.def
+
+#endif
+
+
+// End of File

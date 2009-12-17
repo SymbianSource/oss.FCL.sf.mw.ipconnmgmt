@@ -1,0 +1,11 @@
+EXPORTS
+	__24CConnectionMonitorPlugin @ 1 NONAME R3UNUSED ; CConnectionMonitorPlugin::CConnectionMonitorPlugin(void)
+	CancelRegisterPlugin__24CConnectionMonitorPlugin @ 2 NONAME R3UNUSED ; CConnectionMonitorPlugin::CancelRegisterPlugin(void)
+	E32Dll__F10TDllReason @ 3 NONAME R3UNUSED ; E32Dll(TDllReason)
+	Event__C24CConnectionMonitorPluginUiPCvUi @ 4 NONAME ; CConnectionMonitorPlugin::Event(unsigned int, void const *, unsigned int) const
+	RegisterAttribute__C24CConnectionMonitorPluginUi @ 5 NONAME R3UNUSED ; CConnectionMonitorPlugin::RegisterAttribute(unsigned int) const
+	RegisterPluginL__24CConnectionMonitorPluginUi @ 6 NONAME R3UNUSED ; CConnectionMonitorPlugin::RegisterPluginL(unsigned int)
+	Version__C24CConnectionMonitorPlugin @ 7 NONAME R3UNUSED ; CConnectionMonitorPlugin::Version(void) const
+	"_._24CConnectionMonitorPlugin" @ 8 NONAME R3UNUSED ; CConnectionMonitorPlugin::~CConnectionMonitorPlugin(void)
+	CancelRegisterAttribute__C24CConnectionMonitorPluginUi @ 9 NONAME R3UNUSED ; CConnectionMonitorPlugin::CancelRegisterAttribute(unsigned int) const
+
