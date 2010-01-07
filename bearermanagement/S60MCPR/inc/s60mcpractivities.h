@@ -358,6 +358,14 @@ namespace S60MCprErrorRecoveryActivity
             virtual void DoL();
             DECLARE_SMELEMENT_FOOTER( TSendPropagateRecoveryResponse )
             
+
+            DECLARE_SMELEMENT_HEADER( TSendPropagateRecoveryErrContextResponse,
+                                      CS60ConnectionRecoveryActivity::TTransitionBase, 
+                                      NetStateMachine::MStateTransition, 
+                                      TContext)
+            virtual void DoL();
+            DECLARE_SMELEMENT_FOOTER( TSendPropagateRecoveryErrContextResponse )
+
         protected:
             /**
              * C++ constructor.
@@ -711,7 +719,18 @@ namespace S60MCprMobilityActivity
                                       CS60MobilityActivity::TContext )
             virtual void DoL();
             DECLARE_SMELEMENT_FOOTER( TSendApplicationReject )
-            
+
+			/**
+			 * TRANSITION/ACTION: Stop the mcpr's data client (should only ever be one) and error mobility on the cpr
+			 */
+			DECLARE_SMELEMENT_HEADER( TErrorOriginatorAndStopDataClient, 
+				                      MeshMachine::TStateTransition<TContext>, 
+                                      NetStateMachine::MStateTransition, 
+                                      CS60MobilityActivity::TContext )
+			virtual void DoL();
+            DECLARE_SMELEMENT_FOOTER( TErrorOriginatorAndStopDataClient )
+
+
             /**
              * TRANSITION/ACTION: Unregister preferred carrier notifications.
              */

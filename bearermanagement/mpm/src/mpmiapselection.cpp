@@ -438,7 +438,9 @@ void CMPMIapSelection::ExplicitConnectionL()
         if ( ( iChooseIapPref.BearerSet() & TExtendedConnPref::EExtendedConnBearerWLAN ) ||
              ( iChooseIapPref.BearerSet() == TExtendedConnPref::EExtendedConnBearerUnknown ) )
             {
-            if ( iNewWlansAllowed )
+            if ( iNewWlansAllowed && 
+            	   ( iChooseIapPref.BearerSet() == 
+            	     TExtendedConnPref::EExtendedConnBearerWLAN ) )
                 {
                 // User allows only WLAN connections, check WLAN availability.
                 // A note will be shown if no WLANs are available.
@@ -1347,11 +1349,15 @@ void CMPMIapSelection::TriggerInformationNoteL()
     // ConnectioUiUtilities client side has a nonblocking active object 
     // implementation
     //
-    CConnectionUiUtilities* connUiUtils = CConnectionUiUtilities::NewL();        
+    if ( !( iChooseIapPref.NoteBehaviour() &
+           TExtendedConnPref::ENoteBehaviourConnDisableNotes ) )
+        {           	
+        CConnectionUiUtilities* connUiUtils = CConnectionUiUtilities::NewL();        
                             
-    connUiUtils->NoWLANNetworksAvailableNote();
+        connUiUtils->NoWLANNetworksAvailableNote();
                             
-    delete connUiUtils;            
+        delete connUiUtils;
+        }            
     }
 
 // -----------------------------------------------------------------------------

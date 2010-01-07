@@ -329,15 +329,6 @@ RESOURCE TBUF r_cmmanagerui_conf_default_ask_once
 RESOURCE TBUF r_cmmanagerui_default_connection_title 
     { buf = qtn_netw_conset_default_connection_title; }
 
-RESOURCE TBUF r_cmmanagerui_roaming_confirmation      	
-    { buf = qtn_netw_conset_sett_roaming_confirmation; }
-
-RESOURCE TBUF r_cmmanagerui_roaming_automatic           	
-    { buf = qtn_netw_conset_sett_roaming_automatic; }
-
-RESOURCE TBUF r_cmmanagerui_roaming_confirm           	
-    { buf = qtn_netw_conset_sett_roaming_confirm; }
-
 RESOURCE TBUF r_qtn_netw_conset_navi_nof_destinations 
     { buf = qtn_netw_conset_navi_nof_destinations; }
 

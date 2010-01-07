@@ -178,7 +178,9 @@ TBool CSelectWLANDlg::OkToExitL( TInt aButtonId )
     CLOG_ENTERFN( "CSelectWLANDlg::OkToExitL " );  
     
     TBool result( EFalse );
-    if ( aButtonId == EAknSoftkeySelect || aButtonId == EAknSoftkeyOk )
+    
+    if ( ( aButtonId == EAknSoftkeySelect || aButtonId == EAknSoftkeyOk ) &&
+         !iFromOkToExit )
         {
         __ASSERT_DEBUG( iPlugin, User::Panic( KErrNullPointer, KErrNone ) );
         
@@ -586,27 +588,17 @@ void CSelectWLANDlg::DestroyWaitDialog()
 TKeyResponse CSelectWLANDlg::OfferKeyEventL( const TKeyEvent& aKeyEvent, 
                                              TEventCode aType)
     {
-    if( NeedToDismissQueryL(aKeyEvent) )
+    if( aType == EEventKey && aKeyEvent.iCode == EKeyPhoneSend )
         {
-        return EKeyWasConsumed;
-        }
- 	
-    return CAknListQueryDialog::OfferKeyEventL(aKeyEvent,aType);
-    }
-    
-// ---------------------------------------------------------
-// CSelectWLANDlg::NeedToDismissQueryL
-// ---------------------------------------------------------
-//
-TBool CSelectWLANDlg::NeedToDismissQueryL(const TKeyEvent& aKeyEvent)
-    {
-    if (aKeyEvent.iCode == EKeyPhoneSend)
-        {
-        TryExitL(EEikBidCancel);
-        return ETrue;
+        // Let's not obscure the Dialer in the background
+        if ( iExpiryTimer && !iFromOkToExit )
+            {
+            iExpiryTimer->Cancel();
+            iExpiryTimer->StartShort();    
+            }
         }
         
-    return EFalse;
+    return CAknListQueryDialog::OfferKeyEventL( aKeyEvent,aType ); 
     }
 
 // ---------------------------------------------------------

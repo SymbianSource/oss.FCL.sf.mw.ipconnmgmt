@@ -434,4 +434,5 @@ EXPORTS
 	_ZN14CCmManagerImpl17WatcherUnRegisterEv @ 433 NONAME
 	_ZN14CCmManagerImpl18RemoveDestFromPoolEP18CCmDestinationImpl @ 434 NONAME
 	_ZN14CCmManagerImpl24DestinationStillExistedLEP18CCmDestinationImpl @ 435 NONAME
+	_ZN23CmPluginBaseSettingsDlg14OfferKeyEventLERK9TKeyEvent10TEventCode @ 436 NONAME
 

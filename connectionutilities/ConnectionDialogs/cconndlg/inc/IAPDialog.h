@@ -71,6 +71,15 @@ NONSHARABLE_CLASS( CIapDialog ) : public CAknListQueryDialog, public MExpiryTime
         virtual TBool OkToExitL( TInt aButtonId );
         
         /**
+        * from CCoeControl
+        * @param aKeyEvent Event to handled.
+        * @param aType Type of the key event. 
+        * @return Response code (EKeyWasConsumed, EKeyWasNotConsumed). 
+        */
+        TKeyResponse OfferKeyEventL( const TKeyEvent& aKeyEvent, 
+                                     TEventCode aType);
+        
+        /**
         * Dialog refreshing
         */
         void RefreshDialogL( CConnectionInfoArray* aIAP, 

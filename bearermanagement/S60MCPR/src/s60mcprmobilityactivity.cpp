@@ -463,6 +463,23 @@ namespace S60MCprMobilityActivity
 
     
     // -----------------------------------------------------------------------------
+    // CS60MobilityActivity::TErrorOriginatorAndStopDataClient::DoL
+    // -----------------------------------------------------------------------------
+    //
+    DEFINE_SMELEMENT( CS60MobilityActivity::TErrorOriginatorAndStopDataClient, 
+                      NetStateMachine::MStateTransition, CS60MobilityActivity::TContext )
+    void CS60MobilityActivity::TErrorOriginatorAndStopDataClient::DoL()
+        {
+		// Post error to originators
+		TEBase::TError errmsg(TCFMobilityProvider::TStartMobility::Id(), iContext.iNodeActivity->Error());
+		iContext.iNodeActivity->PostToOriginators(errmsg);
+
+		RNodeInterface* dc = iContext.Node().GetFirstClient<TDefaultClientMatchPolicy>(TClientType(TCFClientType::EData),
+			TClientType(TCFClientType::EData, TCFClientType::ELeaving));
+		iContext.iNodeActivity->PostRequestTo(*dc, TCFDataClient::TStop(iContext.iNodeActivity->Error()).CRef());
+		}
+	
+    // -----------------------------------------------------------------------------
     // CS60MobilityActivity::TAwaitingPreferredCarrierOrCancelOrRejected::Accept
     // -----------------------------------------------------------------------------
     //

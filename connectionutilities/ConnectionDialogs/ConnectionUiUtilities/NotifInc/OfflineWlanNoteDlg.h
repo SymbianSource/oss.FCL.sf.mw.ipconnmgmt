@@ -58,8 +58,6 @@ public:
     * Destructor
     */
     virtual ~COfflineWlanNoteDlg();
-    
-    TBool NeedToDismissQueryL(const TKeyEvent& aKeyEvent);     
 
 private:
     /**

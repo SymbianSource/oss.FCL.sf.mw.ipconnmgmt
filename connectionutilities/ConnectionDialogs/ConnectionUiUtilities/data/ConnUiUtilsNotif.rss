@@ -318,49 +318,14 @@ RESOURCE TBUF r_qtn_netw_conset_info_roaming_to
     buf = qtn_netw_conset_info_roaming_to; 
     }
 
-RESOURCE TBUF r_qtn_netw_conset_prmpt_roam_less_preferred   
-    { 
-    buf = qtn_netw_conset_prmpt_roam_less_preferred; 
-    }
-
 RESOURCE TBUF r_qtn_netw_conset_quest_roam_less_preferred   
     { 
     buf = qtn_netw_conset_quest_roam_less_preferred; 
     }
 
-RESOURCE TBUF r_qtn_netw_conset_prmpt_roam_more_preferred   
-    { 
-    buf = qtn_netw_conset_prmpt_roam_more_preferred; 
-    }
-
-RESOURCE TBUF r_qtn_netw_conset_quest_roam_more_preferred   
-    { 
-    buf = qtn_netw_conset_quest_roam_more_preferred; 
-    }
-
-RESOURCE TBUF r_qtn_netw_conset_quest_connect_via_method    
-    { 
-    buf = qtn_netw_conset_quest_connect_via_method; 
-    }
-
 RESOURCE TBUF r_qtn_netw_conset_conf_connected_via_method
     { 
     buf = qtn_netw_conset_conf_connected_via_method;
-    }
-
-RESOURCE TBUF r_qtn_netw_conset_prmpt_connection_needed
-    {
-    buf = qtn_netw_conset_prmpt_connection_needed;
-    }
-
-RESOURCE TBUF r_qtn_netw_conset_msg_query_link_always_accept
-    {
-    buf = qtn_netw_conset_msg_query_link_always_accept;
-    }
-
-RESOURCE TBUF r_qtn_netw_conset_msg_query_link_try_next
-    {
-    buf = qtn_netw_conset_msg_query_link_try_next;
     }
 
 RESOURCE TBUF r_qtn_wlan_manual_ssid_input

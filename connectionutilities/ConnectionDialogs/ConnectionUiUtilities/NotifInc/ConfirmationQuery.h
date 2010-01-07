@@ -76,7 +76,8 @@ NONSHARABLE_CLASS( CConfirmationQuery ) : public CAknListQueryDialog, public MEx
         */
         void TryExitL( TInt aButtonId );
         
-        TBool NeedToDismissQueryL(const TKeyEvent& aKeyEvent);
+        TKeyResponse OfferKeyEventL( const TKeyEvent& aKeyEvent, 
+                                     TEventCode aType);
         
         /**
         * Sets the available choices for the query into the class variable

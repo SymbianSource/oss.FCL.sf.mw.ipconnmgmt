@@ -327,10 +327,12 @@ namespace S60MCprMobilityActivity
                                 TTag<S60MCprStates::KWaitPolicyServerResponse|NetStateMachine::EBackward> )
     // On error, we do not terminate the activity.
     // We need to inform the client and propose a new handshake should the client wish to continue
-    THROUGH_NODEACTIVITY_ENTRY( KErrorTag, 
-                                MeshMachine::TRaiseAndClearActivityError,
-                                TTag<MeshMachine::KCancelTag> )
-//                                S60MCprMobilityActivity::TStartMobilityHandshakeBackwards )
+	// Shut down the layer, to release the rejected bearer
+	NODEACTIVITY_ENTRY(KErrorTag,
+		               CS60MobilityActivity::TErrorOriginatorAndStopDataClient,
+                       CoreNetStates::TAwaitingDataClientStopped,
+                       TTag<MeshMachine::KCancelTag>)
+
     // When closing, always continue to cancel the activity.
     LAST_NODEACTIVITY_ENTRY( KCancelTag,
                              CS60MobilityActivity::TCancelMobilityActivity )
@@ -358,7 +360,7 @@ namespace S60MCprConnectionGoneDownRecoveryActivity
                                 S60MCprErrorRecoveryActivity::CS60ConnectionRecoveryActivity::TStoreErrorContext, 
                                 CoreStates::TNoTagOrNoPeer )
     LAST_NODEACTIVITY_ENTRY( CoreStates::KNoPeer,
-                             S60MCprErrorRecoveryActivity::CS60ConnectionRecoveryActivity::TSendPropagateRecoveryResponse ) //Take error codes directly from the request
+                             S60MCprErrorRecoveryActivity::CS60ConnectionRecoveryActivity::TSendPropagateRecoveryErrContextResponse ) //Take error codes directly from the request
     THROUGH_NODEACTIVITY_ENTRY( KNoTag,
                                 MeshMachine::TDoNothing,
                                 S60MCprErrorRecoveryActivity::TProcessErrorBlockedByMobilityHandshaking )

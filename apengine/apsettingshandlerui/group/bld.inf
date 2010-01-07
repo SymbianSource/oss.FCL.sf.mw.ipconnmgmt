@@ -29,7 +29,7 @@ PRJ_EXPORTS
 ../Rom/ApSettingsHandlerUIResources.iby	LANGUAGE_MW_LAYER_IBY_EXPORT_PATH(ApSettingsHandlerUIResources.iby)
 
 // export localised loc file
-../loc/ApSettingsHandlerUI.loc	MW_LAYER_LOC_EXPORT_PATH(apsettingshandlerui.loc)
+../loc/apsettingshandlerui.loc	MW_LAYER_LOC_EXPORT_PATH(apsettingshandlerui.loc)
 
 PRJ_MMPFILES
 // gnumakefile apsettingshandleruiicons_dc.mk

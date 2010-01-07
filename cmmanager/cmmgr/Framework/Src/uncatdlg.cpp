@@ -121,7 +121,11 @@ void CUncatDlg::DynInitMenuPaneL( TInt aResourceId, CEikMenuPane* aMenuPane )
         if ( !iCmManager->DestinationCountL() )
             {
             hideMove = ETrue;
-            }               
+            }
+
+        // No priorities in Uncategorized -> always disabled
+        hidePrioritise = ETrue;
+
         aMenuPane->SetItemDimmed( ECmManagerUiCmdCmAdd, hideAdd );
         aMenuPane->SetItemDimmed( ECmManagerUiCmdCmPrioritise, hidePrioritise  );
         aMenuPane->SetItemDimmed( ECmManagerUiCmdCmCopyToOtherDestination, hideCopy );

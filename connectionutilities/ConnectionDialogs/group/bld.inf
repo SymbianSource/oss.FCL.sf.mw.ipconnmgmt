@@ -39,8 +39,8 @@ PRJ_EXPORTS
 
 // export localised loc file
 ../cconndlg/loc/agentdialog.loc				MW_LAYER_LOC_EXPORT_PATH(agentdialog.loc)
-../ConnectionUiUtilities/loc/ConnectionUiUtilities.loc	MW_LAYER_LOC_EXPORT_PATH(connectionuiutilities.loc)
-../DisconnectDlg/loc/DisconnectDlg.loc			MW_LAYER_LOC_EXPORT_PATH(disconnectdlg.loc)
+../ConnectionUiUtilities/loc/connectionuiutilities.loc	MW_LAYER_LOC_EXPORT_PATH(connectionuiutilities.loc)
+../DisconnectDlg/loc/disconnectdlg.loc			MW_LAYER_LOC_EXPORT_PATH(disconnectdlg.loc)
 
 ../conf/connectiondialogs.confml		APP_LAYER_CONFML(connectiondialogs.confml)
 ../conf/connectiondialogs_101FD67E.crml		APP_LAYER_CRML(connectiondialogs_101FD67E.crml)

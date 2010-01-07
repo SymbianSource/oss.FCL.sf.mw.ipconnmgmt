@@ -956,6 +956,15 @@ NONSHARABLE_CLASS( CCmManagerImpl ) : public CBase
          * Get Snap Table ID from CommsDat
          */
         TUint32 GetSnapTableIdL();
+
+        /**
+         * Check if the attribute is bearerspecific
+         *
+         * @since 9.2
+         * @param aAttribute  attribute-id to be checked
+         * @return ETrue if aAttribute is bearerspecific, otherwise EFalse
+         */
+        TBool IsBearerSpecific( TUint32 aAttribute ) const;
         
 #include "cmmanagerimpl.inl"               
     //=========================================================================

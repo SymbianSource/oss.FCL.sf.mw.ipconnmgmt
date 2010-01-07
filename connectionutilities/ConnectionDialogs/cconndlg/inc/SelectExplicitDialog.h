@@ -89,10 +89,14 @@ NONSHARABLE_CLASS( CSelectExplicitDialog ) : public CAknListQueryDialog, public 
         */
         inline TBool GetOkToExit();
         
+        /**
+        * from CCoeControl
+        * @param aKeyEvent Event to handled.
+        * @param aType Type of the key event. 
+        * @return Response code (EKeyWasConsumed, EKeyWasNotConsumed). 
+        */
         TKeyResponse OfferKeyEventL( const TKeyEvent& aKeyEvent, 
                                      TEventCode aType);
-        
-        TBool NeedToDismissQueryL(const TKeyEvent& aKeyEvent);                                
 
         /**
         * Dialog expiration timeout callback

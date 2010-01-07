@@ -415,6 +415,24 @@ ChooseBestIAP() already completed or in progress %d", KErrAlreadyExists )
     
     if ( error != KErrNone )
         {
+        // Connection preferences are not valid. Display
+        // an error note and complete with the error code.
+        //
+        if ( ! ( mpmConnPref.NoteBehaviour() &
+            TExtendedConnPref::ENoteBehaviourConnDisableNotes ) )
+            {
+            CConnectionUiUtilities* connUiUtils = NULL;
+        
+            TRAP_IGNORE( connUiUtils = CConnectionUiUtilities::NewL() );
+            
+            if ( connUiUtils )
+                {
+                connUiUtils->ConnectionErrorDiscreetPopup( error );
+                delete connUiUtils;
+                connUiUtils = NULL;
+                }
+            }    	
+        	
         MPMLOGSTRING( "CMPMServerSession::HandleServerChooseIapL - Error \
 while extracting TCommDbConnPref from TConnPref" )
         aMessage.Complete( error );
@@ -1425,13 +1443,17 @@ Warning: ChooseBestIap has not been called yet" )
     if ( !( iIapSelection->MpmConnPref().NoteBehaviour() &
             TExtendedConnPref::ENoteBehaviourConnDisableNotes ) )
         {
-        CConnectionUiUtilities* connUiUtils = CConnectionUiUtilities::NewL();
-        // Note: Below function shows the discreet popup only if the error code
-        // belongs to the set of errors that are shown to the user.
-        // Otherwise the popup is not shown.
-        connUiUtils->ConnectionErrorDiscreetPopup( error );
-        delete connUiUtils;
-        connUiUtils = NULL;
+        CConnectionUiUtilities* connUiUtils = NULL;
+        TRAPD( popupCreateError, connUiUtils = CConnectionUiUtilities::NewL() );
+        if ( popupCreateError == KErrNone && connUiUtils )
+            {
+            // Note: Below function shows the discreet popup only if the error code
+            // belongs to the set of errors that are shown to the user.
+            // Otherwise the popup is not shown.
+            connUiUtils->ConnectionErrorDiscreetPopup( error );
+            delete connUiUtils;
+            connUiUtils = NULL;
+            }
         }
 
     // Read the Connection Id of the application
@@ -2647,18 +2669,21 @@ No notification requested" )
     TConnectionState state;
     iMyServer.GetConnectionState( iConnId, state );
     
-    // If session is roaming, notification must be delayed.
-    // But, only ConnMon initiated notifications need to be delayed.
-    // Required notifications must go through whenever MPM decides
-    // to initiate them.
-    //
-    if( ( iStoredIapInfo.HoldPrefIapNotif() && aCaller == EConnMon)  ||
-        ( state == ERoaming && aCaller == EConnMon ) )
+    if( iMigrateState != EMigrateUserConfirmation )
         {
-        MPMLOGSTRING( "CMPMServerSession::PrefIAPNotificationL - \
+        // If session is roaming, notification must be delayed.
+        // But, only ConnMon initiated notifications need to be delayed.
+        // Required notifications must go through whenever MPM decides
+        // to initiate them.
+        //
+        if( ( iStoredIapInfo.HoldPrefIapNotif() && aCaller == EConnMon )  ||
+                ( state == ERoaming && aCaller == EConnMon ) )
+            {
+            MPMLOGSTRING( "CMPMServerSession::PrefIAPNotificationL - \
 Mobility ongoing, notification will be handled later" )
-        iStoredIapInfo.SetStoredIapInfo( aIapInfo );
-        return;
+            iStoredIapInfo.SetStoredIapInfo( aIapInfo );
+            return;
+            }
         }
 
     TInt err(0);
@@ -2745,6 +2770,12 @@ Roaming from Iap %i to Iap %i", oldIapId, validateIapId )
                 iConfirmDlgRoaming = NULL;
                 }
 
+            // Reset migrate state
+            if ( iMigrateState == EMigrateUserConfirmation )
+                {
+                iMigrateState = EMigrateNone;
+                }
+            
             // Write buffer to BM
             //
             TPtrC8 d( reinterpret_cast< TUint8* >( &notifInfo ),
@@ -2807,6 +2838,24 @@ void CMPMServerSession::StartIAPNotificationL( const TUint32 aIapId )
         MPMLOGSTRING( "CMPMServerSession::StartIAPNotificationL - \
 No notification requested" )
         return;
+        }
+    
+    // Show the connecting discreet popup to the user when migrating to another iap
+    if ( !( iIapSelection->MpmConnPref().NoteBehaviour() &
+            TExtendedConnPref::ENoteBehaviourConnDisableNotes) )
+        {
+        TBool connectionAlreadyActive = iMyServer.CheckIfStarted( aIapId );
+        CConnectionUiUtilities* connUiUtils = NULL;
+        TRAPD( popupError,
+               connUiUtils = CConnectionUiUtilities::NewL();
+               connUiUtils->ConnectingViaDiscreetPopup(
+                   aIapId,
+                   connectionAlreadyActive );
+               delete connUiUtils; );
+        if ( popupError && connUiUtils )
+            {
+            delete connUiUtils;
+            }
         }
 
     TMpmNotificationStartIAP notifInfo;
@@ -3261,17 +3310,21 @@ void CMPMServerSession::ChooseIapComplete(
     MPMLOGSTRING2( "CMPMServerSession::ChooseIapComplete aError = %d", aError )
 
     // Show error popup if it's allowed per client request
-    if ( !( iIapSelection->MpmConnPref().NoteBehaviour() &
-            TExtendedConnPref::ENoteBehaviourConnDisableNotes )
+    if ( ChooseBestIapCalled() && (!( iIapSelection->MpmConnPref().NoteBehaviour() &
+            TExtendedConnPref::ENoteBehaviourConnDisableNotes ))
             && ( aError != KErrNone ) )
         {
-        CConnectionUiUtilities* connUiUtils = CConnectionUiUtilities::NewL();
-        // Note: Below function shows the discreet popup only if the error code
-        // belongs to the set of errors that are shown to the user.
-        // Otherwise the popup is not shown.
-        connUiUtils->ConnectionErrorDiscreetPopup( aError );
-        delete connUiUtils;
-        connUiUtils = NULL;
+        CConnectionUiUtilities* connUiUtils = NULL;
+        TRAPD( error, connUiUtils = CConnectionUiUtilities::NewL() );
+        if ( error == KErrNone && connUiUtils )
+            {
+            // Note: Below function shows the discreet popup only if the error code
+            // belongs to the set of errors that are shown to the user.
+            // Otherwise the popup is not shown.
+            connUiUtils->ConnectionErrorDiscreetPopup( aError );
+            delete connUiUtils;
+            connUiUtils = NULL;
+            }
         }
     
     // Try to write back arguments and complete message.
@@ -3604,9 +3657,10 @@ TConnMonIapInfo CMPMServerSession::GetAvailableIAPs()
     TConnMonIapInfo availableIAPs;
     
     availableIAPs = MyServer().Events()->GetAvailableIAPs();
-    
+#ifndef __WINSCW__  
     // Remove iaps not according to bearer set
     TRAP_IGNORE ( RemoveIapsAccordingToBearerSetL ( availableIAPs ) );
+#endif
     
     return availableIAPs;
     }

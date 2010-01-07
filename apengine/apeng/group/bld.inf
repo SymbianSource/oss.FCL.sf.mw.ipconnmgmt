@@ -27,7 +27,7 @@ PRJ_EXPORTS
 ../Rom/ApEngineResources.iby	LANGUAGE_MW_LAYER_IBY_EXPORT_PATH(ApEngineResources.iby)
 
 // export localised loc file
-../loc/ApEngine.loc	MW_LAYER_LOC_EXPORT_PATH(apengine.loc)
+../loc/apengine.loc	MW_LAYER_LOC_EXPORT_PATH(apengine.loc)
 
 ../conf/accesspoints.confml		APP_LAYER_CONFML(accesspoints.confml)
 ../conf/accesspoints_10008D3A.crml	APP_LAYER_CRML(accesspoints_10008D3A.crml)

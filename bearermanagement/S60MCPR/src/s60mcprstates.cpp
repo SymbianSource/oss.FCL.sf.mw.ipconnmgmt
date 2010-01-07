@@ -56,13 +56,6 @@ void THandleMPMStatusChange::DoL()
         S60MCPRLOGSTRING2("S60MCPR<%x>::THandleMPMStatusChange::DoL() calling IAPConnectionStartedL IAP %d",(TInt*)&iContext.Node(),iapid)
         // TODO use progress notification KLinkLayerOpen once Symbian provides them.
         node.Policy()->IAPConnectionStartedL( iapid );  // codescanner::leave
-        
-        /** HACK ALERT
-        *
-        * Due to regression in MOBILITY the EStartedFlag for serviceprovider is set here!
-        * TODO Remove this hack whenever possible!!!
-        */
-        node.ServiceProvider()->SetFlags( TCFClientType::EStarted );       
         }
     else if ( msg.iValue == TCFControlProvider::TDataClientStatusChange::EStopped &&
               node.RequestPermissionToSendStopped() )
@@ -351,11 +344,22 @@ TBool TAwaitingServiceIdRequest::Accept()
         // Get MCPR
         CS60MetaConnectionProvider& node = (CS60MetaConnectionProvider&)iContext.Node();
 
+        _LIT( KIapProxyServiceSetting, "IAP\\IAPService" );
+        TBuf<KCommsDbSvrMaxColumnNameLength*2 +1> field;
+        if (msg)
+            {
+            TRAP_IGNORE(msg->iMessage.ReadL(0, field));
+            }
+
+        S60MCPRLOGSTRING2("S60MCPR<%x>::TAwaitingServiceIdRequest::Accept() ServiceId = %x", 
+            (TInt*)&iContext.Node(), node.PolicyPrefs().ServiceId())
+
         // Only EIntSetting is supported 
         // 
         if ( ( TMCprGetConnectionSetting::TConnectionSettingType)msg->iSettingType == 
                TMCprGetConnectionSetting::EIntSetting
-               && node.PolicyPrefs().ServiceId() != 0 )
+               && node.PolicyPrefs().ServiceId() != 0 
+               && field.Compare( KIapProxyServiceSetting ) == 0  )
             {
             S60MCPRLOGSTRING1("S60MCPR<%x>::TAwaitingServiceIdRequest::Accept() TMCprGetConnectionSetting EIntSetting", 
                 (TInt*)&iContext.Node())

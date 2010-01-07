@@ -2584,6 +2584,12 @@ void CCmDestinationImpl::SetMetadataL( TSnapMetadataField aMetaField,
 
         case ESnapMetadataDestinationIsLocalised:
             {
+            // Check that aValue is within valid range.
+            if ( aValue > ELocalisedDestIntranet )
+                {
+                User::Leave( KErrArgument );
+                }
+            
             TUint32 oldVal = TUint32(iData->iMetaDataRec->iMetadata) & 
                              ESnapMetadataInternet;
             if ( aValue != ENotLocalisedDest )
@@ -2638,10 +2644,26 @@ void CCmDestinationImpl::SetMetadataL( TSnapMetadataField aMetaField,
 
         case ESnapMetadataPurpose:
             {
+            // Check that aValue is within valid range.
+            if ( aValue > ESnapPurposeIntranet )
+                {
+                User::Leave( KErrArgument );
+                }
+            
+            // Check if destination with the given purpose already
+            // exists
+            CheckIfPurposeExistL( aValue );
+            
             // ESnapPurposeInternet and ESnapPurposeMMS need special
             // handling
             switch( aValue )
                 {
+                case ESnapPurposeUnknown:
+                    {
+                    // This also clears ESnapMetadataInternet
+                    SetMetadataL( ESnapMetadataDestinationIsLocalised, ENotLocalisedDest );
+                    break;
+                    }
                 case ESnapPurposeInternet:
                     {
                     // This sets ESnapMetadataInternet and
@@ -2659,7 +2681,8 @@ void CCmDestinationImpl::SetMetadataL( TSnapMetadataField aMetaField,
                     {
                     SetMetadataL( ESnapMetadataDestinationIsLocalised, 
                                   ELocalisedDestMMS );
-                    SetMetadataL( ESnapMetadataHiddenAgent, 1 );
+                    iData->iMetaDataRec->iMetadata = 
+                        ESnapMetadataHiddenAgent | iData->iMetaDataRec->iMetadata;
                     }
                     break;
                 case ESnapPurposeIntranet:
@@ -2671,10 +2694,6 @@ void CCmDestinationImpl::SetMetadataL( TSnapMetadataField aMetaField,
                 default:
                     break;
                 }
-            
-            // Check if destination with the given purpose already
-            // exists
-            CheckIfPurposeExistL( aValue );
             
             TUint32 value = aValue << 8;
             // reset the purpose bit
@@ -2701,11 +2720,14 @@ void CCmDestinationImpl::SetMetadataL( TSnapMetadataField aMetaField,
             
         case ESnapMetadataHiddenAgent:
             {
+            TUint32 internet = iData->iMetaDataRec->iMetadata & ESnapMetadataInternet;
+            TUint32 internetLocal = ( iData->iMetaDataRec->iMetadata & ESnapMetadataDestinationIsLocalised ) >> 4;
+            TUint32 internetPurpose = ( iData->iMetaDataRec->iMetadata & ESnapMetadataPurpose ) >> 8;
             if( aValue )
                 {
-                if ( iData->iMetaDataRec->iMetadata & ESnapMetadataInternet
-                     || ( ( iData->iMetaDataRec->iMetadata >> 4 ) & ELocalisedDestInternet )
-                     || ( ( iData->iMetaDataRec->iMetadata >> 8 ) & ESnapPurposeInternet ) )
+                if ( internet
+                     || ( internetLocal == ELocalisedDestInternet )
+                     || ( internetPurpose == ESnapPurposeInternet ) )
                     {
                     User::Leave( KErrArgument );
                     }

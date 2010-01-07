@@ -62,8 +62,6 @@ NONSHARABLE_CLASS( CSelectWLANDlg ) : public CAknListQueryDialog, public MExpiry
         * @return The value of iFromOkToExit.
         */
         inline TBool GetOkToExit();
-        
-        TBool NeedToDismissQueryL(const TKeyEvent& aKeyEvent);
 
 
     protected:
@@ -97,6 +95,12 @@ NONSHARABLE_CLASS( CSelectWLANDlg ) : public CAknListQueryDialog, public MExpiry
         */
         void HandleResourceChange( TInt aType );
         
+        /**
+        * from CCoeControl
+        * @param aKeyEvent Event to handled.
+        * @param aType Type of the key event. 
+        * @return Response code (EKeyWasConsumed, EKeyWasNotConsumed). 
+        */
         TKeyResponse OfferKeyEventL( const TKeyEvent& aKeyEvent, 
                                      TEventCode aType);
                                      

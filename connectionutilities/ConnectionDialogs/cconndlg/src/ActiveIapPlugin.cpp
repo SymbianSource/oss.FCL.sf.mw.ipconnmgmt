@@ -35,14 +35,6 @@
 #include <CConnDlgPlugin.rsg>
 
 
-// CONSTANTS
-
-// Panic string
-#if defined(_DEBUG)
-_LIT( KErrNullPointer, "NULL pointer" );
-#endif
-
-
 ///////////////////////////////////////////////////////////////////////////////
 
 // ---------------------------------------------------------

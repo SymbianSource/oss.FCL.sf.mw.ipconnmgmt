@@ -116,7 +116,11 @@ class CmPluginBaseSettingsDlg : public CAknDialog,
         /** From MEikListBoxObserver */
         IMPORT_C void HandleListBoxEventL( CEikListBox* aListBox, 
                                         TListBoxEvent aEventType );
-                                               
+
+        /** From CCoeControl */
+        IMPORT_C TKeyResponse OfferKeyEventL
+            ( const TKeyEvent& aKeyEvent, TEventCode aType ); 
+                                              
         /**
         * Updates Setting items in the listbox (setting names and values are
         * refreshed).

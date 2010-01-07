@@ -263,7 +263,7 @@ TKeyResponse CDestDlg::OfferKeyEventL( const TKeyEvent& aKeyEvent,
             }
         default:
             {
-            retVal = CAknDialog::OfferKeyEventL( aKeyEvent, aType );
+            retVal = iListbox->OfferKeyEventL(aKeyEvent, aType);
             break;
             }
         }

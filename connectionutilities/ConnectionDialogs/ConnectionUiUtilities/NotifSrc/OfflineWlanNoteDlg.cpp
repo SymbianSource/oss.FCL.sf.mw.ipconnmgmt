@@ -90,21 +90,6 @@ void COfflineWlanNoteDlg::PreLayoutDynInitL()
     iExpiryTimer->Start();
     }
 
-// ---------------------------------------------------------
-// COfflineWlanNoteDlg::NeedToDismissQueryL
-// ---------------------------------------------------------
-//
-TBool COfflineWlanNoteDlg::NeedToDismissQueryL(const TKeyEvent& aKeyEvent)
-    {
-    if (aKeyEvent.iCode == EKeyPhoneSend)
-        {
-        TryExitL(EEikBidCancel);
-        return ETrue;
-        }
-        
-    return EFalse;
-    }
-
 
 void COfflineWlanNoteDlg::HandleTimedOut()
     {

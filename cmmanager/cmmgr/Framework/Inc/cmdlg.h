@@ -150,11 +150,6 @@ NONSHARABLE_CLASS( CCmDlg ) : public CAknDialog
         void HandleInfoPopupNoteEvent(
             CAknInfoPopupNoteController* aController,
             TAknInfoPopupNoteEvent aEvent ); 
-
-        /**
-        * Shows the 'bearer type: ' popup note
-        */
-        void ShowPopupNoteL();          
         
         /**
         * @return the currently focused connection method in the list

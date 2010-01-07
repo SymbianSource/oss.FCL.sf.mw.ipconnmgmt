@@ -78,11 +78,12 @@ SOURCE      connectingviadiscreetpopup.cpp
 SOURCE      connectingviadiscreetpopupnotif.cpp
 SOURCE      connectionerrordiscreetpopup.cpp
 SOURCE      connectionerrordiscreetpopupnotif.cpp
+SOURCE      nowlansdiscreetpopup.cpp
 
 SOURCEPATH  ../src
 SOURCE      ConnectionInfo.cpp
 SOURCE      ConnectionDialogsNotifBase.cpp
-SOURCE	ExpiryTimer.cpp
+SOURCE      ExpiryTimer.cpp
 
 USERINCLUDE     ../ConnectionUiUtilities/NotifInc
 USERINCLUDE     ../ConnectionUiUtilities/inc

@@ -43,6 +43,11 @@ public:
     * Starts up the timer       
     */
     void Start();
+    
+    /**
+     * Starts up the short timer       
+     */
+    void StartShort();
 
 private:
     /**

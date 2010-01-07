@@ -168,13 +168,6 @@
 #define qtn_netw_conset_info_roaming_to         "Changing connection to: '%U'"
 
 
-//d:Confirmation query, is aksed when a change in connection method is take place, heading
-//l:heading_pane_t1
-//w:
-//r:3.2
-//
-#define qtn_netw_conset_prmpt_roam_less_preferred    "Connection was lost. "
-
 //d:Confirmation query, is aksed when a change in connection method is take place
 //l:popup_info_list_pane_t1
 //w:
@@ -182,12 +175,6 @@
 //
 #define qtn_netw_conset_quest_roam_less_preferred    "Re-establish connection to '%0U' via method '%1U'?"
 
-//d:Confirmation query, is aksed when a change in connection method is take place, heading
-//l:heading_pane_t1
-//w:
-//r:3.2
-//
-#define qtn_netw_conset_prmpt_roam_more_preferred    "Preferred connection: "
 
 //d:Confirmation query, is aksed when a change in connection method is take place
 //l:popup_info_list_pane_t1
@@ -196,13 +183,6 @@
 //
 #define qtn_netw_conset_quest_roam_more_preferred    "Connection to '%0U' now available via method '%1U'. Connect?"
 
-//d:Confirmation query, to ask the user a confirmation before establishing a 
-//d:connection to the destination %0U via the Connection Method %1U
-//l:popup_info_list_pane_t1
-//w:
-//r:3.2
-//
-#define qtn_netw_conset_quest_connect_via_method    "Connect to destination '%0U' via connection method '%1U'?"
 
 //d:Confirmation note, after the connection has been successfully establilshed
 //l:popup_note_window/opt2
@@ -210,30 +190,6 @@
 //r:3.2
 //
 #define qtn_netw_conset_conf_connected_via_method   "Connected via:\n '%U'"
-
-//d:Title of the MessageQuery with links when a new connection needs to be
-//d:established.
-//l:heading_pane_t1
-//w:
-//r:3.2
-//
-#define qtn_netw_conset_prmpt_connection_needed     "Connection needed:"
-
-//d:Link inside a MessageQuery to change the seamlessness value of the selected
-//d:Connection Method
-//l:popup_info_list_pane_t1
-//w:
-//r:3.2
-//
-#define qtn_netw_conset_msg_query_link_always_accept "-Remember this and connect"
-
-//d:Link inside a MessageQuery to refuse connection with the selected method,
-//d: but to keep the possibility to try with the next best method.
-//l:popup_info_list_pane_t1
-//w:
-//r:3.2
-//
-#define qtn_netw_conset_msg_query_link_try_next     "-Try next best method"
 
 
 //d:Entry to enable the manual input of WLAN network’s SSID, e.g. in case
@@ -305,36 +261,12 @@
 #define qtn_occ_connecting_discreet_popup_text2 "Via '%U'"
 
 
-//d:Title of information query when new WLAN networks are found 
-//l:heading_pane_t1
-//w:
-//r:5.2
-//
-#define qtn_occ_prmpt_new_wlans_found	"New WLAN networks found"
-
-//d:Text asking to select a WLAN network to be used from the list instead of
-//d:cellular data
-//l:loc_type_pane
-//w:
-//r:5.2
-//
-#define qtn_occ_detail_new_wlans_select	"Select a WLAN network to be used instead of cellular data."
-
-//d:Selection item in New WLAN networks found query note to choose only the 
-//d:known networks for connection
-//l:list_single_graphic_pane_t1_cp2
-//w:
-//r:5.2
-//
-#define qtn_occ_list_new_wlans_use_only_known	"Use only known networks"
-
-
 //d:No WLAN networks are available at the moment - note
-//l:popup_note_window
+//l:popup_discreet_window_t1/opt4
 //w:
 //r:5.2
 //
-#define qtn_occ_info_no_wlan_available "No WLAN networks are available at the moment. Connection not available."
+#define qtn_occ_info_no_wlan_available "No WLANs found."
 
 
 //d:Confirmation query, to ask the user a confirmation before establishing a 

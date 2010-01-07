@@ -22,9 +22,10 @@
 
 // INCLUDES
 #include "ConnectionDialogsNotifBase.h"
+#include "nowlansdiscreetpopup.h"
 
 //FORWARD DECLARATION
-class CActiveWLANNetworkUnavailableNote;
+class CNoWlansDiscreetPopup;
 
 /**
  * CNoWLANNetworksAvailableNotif class
@@ -83,7 +84,7 @@ NONSHARABLE_CLASS( CNoWLANNetworksAvailableNotif )
     
     protected:
         // pointer to active object, owned
-        CActiveWLANNetworkUnavailableNote* iActiveNote;
+        CNoWlansDiscreetPopup* iActiveNote;
 
     };    
 

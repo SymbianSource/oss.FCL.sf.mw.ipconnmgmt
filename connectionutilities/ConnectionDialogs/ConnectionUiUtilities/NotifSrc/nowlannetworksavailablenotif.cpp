@@ -15,10 +15,10 @@
 *
 */
 
-
 // INCLUDE FILES
+#include "ConnectionDialogsUidDefs.h"
 #include "nowlannetworksavailablenotif.h"
-#include "ActiveWLANNetworkUnavailableNote.h"
+#include "nowlansdiscreetpopup.h"
 #include "ConnUiUtilsNotif.h"
 
 
@@ -59,10 +59,9 @@ void CNoWLANNetworksAvailableNotif::StartL( const TDesC8& /*aBuffer*/,
     iMessage   = aMessage;
     iCancelled = EFalse;
             
-    iActiveNote = new( ELeave ) CActiveWLANNetworkUnavailableNote( this );
+    iActiveNote = CNoWlansDiscreetPopup::NewL( this );
         
-    iActiveNote->LaunchWLANNetworkUnavailable( 
-                   CActiveWLANNetworkUnavailableNote::EWlanNote2 );       
+    iActiveNote->StartL();       
     }
     
 // ---------------------------------------------------------
@@ -70,17 +69,13 @@ void CNoWLANNetworksAvailableNotif::StartL( const TDesC8& /*aBuffer*/,
 // ---------------------------------------------------------
 //
 void CNoWLANNetworksAvailableNotif::CompleteL( TInt aStatus )
-    {    
-    delete iActiveNote;
-    iActiveNote = NULL;
-    
+    {
     iCancelled = ETrue;
     
     if ( !iMessage.IsNull() )
         {
         iMessage.Complete( aStatus );
         }
-    Cancel();
     }    
 
 // ---------------------------------------------------------
@@ -124,7 +119,10 @@ void CNoWLANNetworksAvailableNotif::Cancel()
             {
             iMessage.Complete( KErrCancel );
             }
-        
+        }
+    
+    if ( iActiveNote )
+        {
         delete iActiveNote;
         iActiveNote = NULL;
         }

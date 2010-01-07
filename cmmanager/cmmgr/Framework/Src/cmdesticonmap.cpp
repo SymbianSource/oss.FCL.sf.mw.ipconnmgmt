@@ -233,11 +233,8 @@ void CCmDestinationIconMap::ConstructFromResourceL(
 // -----------------------------------------------------------------------------
 //
 void CCmDestinationIconMap::LoadIconL()
-    {
-    if ( iConsArray )
-        {
-        iConsArray->ResetAndDestroy();
-        }
+    { 
+    iConsArray->ResetAndDestroy();
     // Draw all the Icons.
     TParse mbmFile;
     User::LeaveIfError( mbmFile.Set( KManagerIconFilename, 

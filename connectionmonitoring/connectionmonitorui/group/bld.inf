@@ -31,7 +31,7 @@ PRJ_EXPORTS
 ../ROM/ConnectionMonitorUiResources.iby	LANGUAGE_MW_LAYER_IBY_EXPORT_PATH(ConnectionMonitorUiResources.iby)
 
 // export localised loc file
-../loc/ConnectionMonitorUi.loc	MW_LAYER_LOC_EXPORT_PATH(connectionmonitorui.loc)
+../loc/connectionmonitorui.loc	MW_LAYER_LOC_EXPORT_PATH(connectionmonitorui.loc)
 
 PRJ_MMPFILES
 ./ConnectionMonitorUI.mmp

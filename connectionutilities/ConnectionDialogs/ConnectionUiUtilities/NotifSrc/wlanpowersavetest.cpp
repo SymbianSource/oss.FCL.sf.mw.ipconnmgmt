@@ -100,9 +100,9 @@ TKeyResponse CWlanPowerSaveQuery::OfferKeyEventL( const TKeyEvent& aKeyEvent,
     {
     CLOG_ENTERFN( "CWlanPowerSaveQuery::OfferKeyEventL" );
     TInt code = aKeyEvent.iCode;
-
+        
     switch ( code )
-        {
+        {    
         case EKeyUpArrow:
         case EKeyDownArrow:
             {
@@ -190,21 +190,6 @@ void CWlanPowerSaveQuery::TryExitL( TInt aButtonId )
     CLOG_ENTERFN( "CWlanPowerSaveQuery::TryExitL" );
     CAknMessageQueryDialog::TryExitL( aButtonId );
     CLOG_LEAVEFN( "CWlanPowerSaveQuery::TryExitL" );
-    }
-
-// ---------------------------------------------------------
-// CWlanPowerSaveQuery::NeedToDismissQueryL
-// ---------------------------------------------------------
-//
-TBool CWlanPowerSaveQuery::NeedToDismissQueryL(const TKeyEvent& aKeyEvent)
-    {
-    if (aKeyEvent.iCode == EKeyPhoneSend)
-        {
-        TryExitL(EEikBidCancel);
-        return ETrue;
-        }
-        
-    return EFalse;
     }
 
 // End of File

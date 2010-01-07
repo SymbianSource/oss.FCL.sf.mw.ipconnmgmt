@@ -206,28 +206,18 @@ void CSelectExplicitDialog::RefreshDialogL( CConnectionInfoArray* aIAP,
 TKeyResponse CSelectExplicitDialog::OfferKeyEventL( const TKeyEvent& aKeyEvent, 
                                                     TEventCode aType)
     {
-    if( NeedToDismissQueryL(aKeyEvent) )
+    if( aType == EEventKey && aKeyEvent.iCode == EKeyPhoneSend )
         {
-        return EKeyWasConsumed;
-        }
- 	
-    return CAknListQueryDialog::OfferKeyEventL(aKeyEvent,aType);
-    }    
-    
-// ---------------------------------------------------------
-// CSelectExplicitDialog::NeedToDismissQueryL
-// ---------------------------------------------------------
-//
-TBool CSelectExplicitDialog::NeedToDismissQueryL(const TKeyEvent& aKeyEvent)
-    {
-    if (aKeyEvent.iCode == EKeyPhoneSend)
-        {
-        TryExitL(EEikBidCancel);
-        return ETrue;
+        // Let's not obscure the Dialer in the background
+        if ( iExpiryTimer )
+            {
+            iExpiryTimer->Cancel();
+            iExpiryTimer->StartShort();    
+            }
         }
         
-    return EFalse;
-    }
+    return CAknListQueryDialog::OfferKeyEventL( aKeyEvent,aType ); 
+    }    
 	
 void CSelectExplicitDialog::HandleTimedOut()
     {

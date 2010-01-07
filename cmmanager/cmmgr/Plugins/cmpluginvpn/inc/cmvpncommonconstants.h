@@ -21,6 +21,7 @@
 // CONSTANTS
 _LIT( KPluginVPNResDirAndFileName, "z:cmpluginvpnui.rsc" );
 
-const TInt KVpnProxyPortNumberDefault = 80;
+// Do not change this default to other value because proxy number is using this value as default port number
+const TInt KVpnProxyPortNumberDefault = 0;
 
 #endif  // CMVPNCOMMONCONSTANTS_H

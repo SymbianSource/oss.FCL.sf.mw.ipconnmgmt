@@ -360,6 +360,38 @@ namespace S60MCprErrorRecoveryActivity
         activity.ReplyToOriginators( err );
         }
 
+    // -----------------------------------------------------------------------------
+    // CS60ConnectionRecoveryActivity::TSendPropagateRecoveryErrContextResponse::DoL
+    // -----------------------------------------------------------------------------
+    //
+    DEFINE_SMELEMENT( CS60ConnectionRecoveryActivity::TSendPropagateRecoveryErrContextResponse, 
+                      NetStateMachine::MStateTransition, 
+                      CS60ConnectionRecoveryActivity::TContext )
+    void CS60ConnectionRecoveryActivity::TSendPropagateRecoveryErrContextResponse::DoL()  // codescanner::leave
+        {
+        __ASSERT_DEBUG(iContext.iNodeActivity, User::Panic(KS60MCprPanic, KPanicNoActivity));
+                
+        CS60ConnectionRecoveryActivity& activity = 
+            static_cast<CS60ConnectionRecoveryActivity&>(*iContext.iNodeActivity);
+
+        TInt error = activity.iOriginalErrContext.iStateChange.iError;
+        
+        if ( error == KErrNone )
+            {
+            error = KErrDisconnected;
+            S60MCPRLOGSTRING2("S60MCPR<%x>::TSendPropagateRecoveryErrContextResponse::DoL() overriding error code %d",(TInt*)&iContext.Node(), error);
+            }
+
+        // Override original error with activity error.
+        TEErrorRecovery::TErrorRecoveryResponse err( TErrResponse( TErrResponse::EPropagate,
+                                                                   error,
+                                                                   activity.iOriginalErrContext.iMessageId ) );
+        S60MCPRLOGSTRING2("S60MCPR<%x>::TSendPropagateRecoveryErrContextResponse::DoL() %d",(TInt*)&iContext.Node(), error);
+        // We must clear out the activity error to prevent last automatic error message from the node.
+        iContext.iNodeActivity->SetError( KErrNone );
+        activity.ReplyToOriginators( err );
+        }
+
     } // namespace S60MCprErrorRecoveryActivity
 
 //  End of File

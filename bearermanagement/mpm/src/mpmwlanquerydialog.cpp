@@ -431,6 +431,11 @@ void CMPMWlanQueryDialog::StartWlanQueryL()
     MPMLOGSTRING2( "CMPMWlanQueryDialog::StartWlanQuery KCTSYEmergencyCallInfo = %d", 
                    emergencyCallEstablished )
 
+    // Get note behaviour setting
+    TUint32 noteBehaviour( 0 );
+    noteBehaviour = iIapSelection.MpmConnPref().NoteBehaviour();
+    MPMLOGSTRING2( "CMPMWlanQueryDialog::StartWlanQuery noteBehaviour = %d", noteBehaviour )
+    
     if( !emergencyCallEstablished && 
         iIapSelection.Session()->IsPhoneOfflineL() && 
         !activeWlanIap && 
@@ -443,6 +448,11 @@ void CMPMWlanQueryDialog::StartWlanQueryL()
             {
             MPMLOGSTRING( "CMPMWlanQueryDialog::StartWlanQuery user has already refused offline" )
             iIapSelection.UserWlanSelectionDoneL( KErrCancel, iWlanIapId );
+            }
+        else if ( noteBehaviour & TExtendedConnPref::ENoteBehaviourConnDisableQueries )
+            {
+            MPMLOGSTRING( "CMPMWlanQueryDialog::StartWlanQuery offline note query not shown due to disabled queries" )
+            iIapSelection.UserWlanSelectionDoneL( KErrPermissionDenied, iWlanIapId );
             }
         else
             {

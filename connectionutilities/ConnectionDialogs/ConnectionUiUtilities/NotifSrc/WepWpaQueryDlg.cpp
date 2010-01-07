@@ -27,6 +27,7 @@
 #include "EasyWepDlgNotif.h"
 #include "EasyWpaDlgNotif.h"
 #include "ConnectionDialogsLogger.h"
+#include "ExpiryTimer.h"
 
 
 // CONSTANTS
@@ -85,6 +86,7 @@ CWepWpaQueryDlg::~CWepWpaQueryDlg()
     {
     STATIC_CAST( CEikServAppUi*, 
                 CCoeEnv::Static()->AppUi() )->SuppressAppSwitching( EFalse );
+    delete iExpiryTimer;
     }
 
 
@@ -272,18 +274,33 @@ TBool CWepWpaQueryDlg::OkToExitL( TInt aButtonId )
     }
 
 // ---------------------------------------------------------
-// CWepWpaQueryDlg::NeedToDismissQueryL
+// CWepWpaQueryDlg::OfferKeyEventL
 // ---------------------------------------------------------
 //
-TBool CWepWpaQueryDlg::NeedToDismissQueryL(const TKeyEvent& aKeyEvent)
+TKeyResponse CWepWpaQueryDlg::OfferKeyEventL( const TKeyEvent& aKeyEvent, 
+                                                 TEventCode aType)
     {
-    if (aKeyEvent.iCode == EKeyPhoneSend)
+    if( aType == EEventKey && aKeyEvent.iCode == EKeyPhoneSend )
         {
-        TryExitL(EEikBidCancel);
-        return ETrue;
-        }
+        // Let's not obscure the Dialer in the background
+        if ( !iExpiryTimer )
+            {
+            iExpiryTimer = CExpiryTimer::NewL( *this );
+            }
+        else
+            {
+            iExpiryTimer->Cancel();
+            }
         
-    return EFalse;
+        iExpiryTimer->StartShort();
+        }
+    
+    return CAknTextQueryDialog::OfferKeyEventL( aKeyEvent,aType ); 
+    }
+
+void CWepWpaQueryDlg::HandleTimedOut()
+    {
+    TRAP_IGNORE( TryExitL( EAknSoftkeyCancel ) );
     }
 
 // End of File

@@ -20,7 +20,7 @@
 
 REM Test agent dialog server
 
-file=ABI_DIR\DEBUG_DIR\agentdialog.dll    SHARED_LIB_DIR\agentdialog.dll
+file=ABI_DIR\BUILD_DIR\agentdialog.dll    SHARED_LIB_DIR\agentdialog.dll
 
 
 #if defined(TEXT_ONLY_ROM)

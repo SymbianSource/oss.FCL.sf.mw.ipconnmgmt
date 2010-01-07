@@ -22,8 +22,10 @@
 PRJ_EXPORTS
 ../rom/s60mcpr.iby     CORE_MW_LAYER_IBY_EXPORT_PATH(s60mcpr.iby)
 
+#ifdef SYMBIAN_ADAPTIVE_TCP_RECEIVE_WINDOW
 ../data/s60mcpr.confml          MW_LAYER_CONFML(s60mcpr.confml)
 ../data/s60mcpr_101F6D4A.crml   MW_LAYER_CRML(s60mcpr_101F6D4A.crml)
+#endif // SYMBIAN_ADAPTIVE_TCP_RECEIVE_WINDOW
 
 PRJ_MMPFILES
 ../group/s60mcpr.mmp

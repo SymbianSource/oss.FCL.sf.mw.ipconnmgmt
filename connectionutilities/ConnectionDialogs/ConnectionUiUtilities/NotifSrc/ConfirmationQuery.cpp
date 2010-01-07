@@ -125,20 +125,24 @@ void CConfirmationQuery::TryExitL( TInt aButtonId )
     }
 
 // ---------------------------------------------------------
-// CConfirmationQuery::NeedToDismissQueryL
+// CConfirmationQuery::OfferKeyEventL
 // ---------------------------------------------------------
 //
-TBool CConfirmationQuery::NeedToDismissQueryL(const TKeyEvent& aKeyEvent)
+TKeyResponse CConfirmationQuery::OfferKeyEventL( const TKeyEvent& aKeyEvent, 
+                                                 TEventCode aType)
     {
-    if (aKeyEvent.iCode == EKeyPhoneSend)
+    if( aType == EEventKey && aKeyEvent.iCode == EKeyPhoneSend )
         {
-        TryExitL(EEikBidCancel);
-        return ETrue;
+        // Let's not obscure the Dialer in the background
+        if ( iExpiryTimer )
+            {
+            iExpiryTimer->Cancel();
+            iExpiryTimer->StartShort();    
+            }
         }
-        
-    return EFalse;
-    }
-
+    
+    return CAknListQueryDialog::OfferKeyEventL( aKeyEvent,aType ); 
+    } 
 
 // ---------------------------------------------------------
 // CConfirmationQuery::SetChoices

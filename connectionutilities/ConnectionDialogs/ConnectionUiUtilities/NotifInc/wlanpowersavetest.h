@@ -87,14 +87,6 @@ NONSHARABLE_CLASS( CWlanPowerSaveQuery ) : public CAknMessageQueryDialog
         * @param aButtonId The id of the pressed button.
         */
         void TryExitL( TInt aButtonId );
-        
-         /**
-        * Called by OfferkeyEventL(), gives a change to dismiss the query even with
-        * keys different than Enter of Ok.
-        * @param aKeyEvent has the key event details
-        * @return whether to dismiss the dialog or not.
-        */
-        TBool NeedToDismissQueryL( const TKeyEvent& aKeyEvent );
 
     private:
         /**

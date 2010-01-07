@@ -42,7 +42,6 @@
 
 #if defined(_DEBUG)
 _LIT( KErrNullPointer, "NULL pointer" );
-_LIT( KErrActiveObjectNull, "iActiveSelectExplicit not NULL" );
 #endif
 
 
@@ -362,17 +361,16 @@ void CSelectConnectionDialog::ProcessCommandL( TInt aCommand )
 
         case ESelectConnectionCmdChooseMethod:
             {
-            __ASSERT_DEBUG( !iActiveSelectExplicit, 
-                            User::Panic( KErrActiveObjectNull, KErrNone ) );
-
-            iActiveSelectExplicit = CActiveSelectExplicit::NewL( this, 
-                                    iDestIDs[ListBox()->CurrentItemIndex()],
-                                    iRefreshInterval,
-                                    iBearerSet, 
-                                    iIsWLANFeatureSupported,
-                                    iDefaultCMId );
-            iActiveSelectExplicit->ShowSelectExplicitL();
-
+            if ( !iActiveSelectExplicit )
+                {
+                iActiveSelectExplicit = CActiveSelectExplicit::NewL( this, 
+                                        iDestIDs[ListBox()->CurrentItemIndex()],
+                                        iRefreshInterval,
+                                        iBearerSet, 
+                                        iIsWLANFeatureSupported,
+                                       iDefaultCMId );
+                iActiveSelectExplicit->ShowSelectExplicitL();
+                }
             break;
             }
 
@@ -394,6 +392,16 @@ TKeyResponse CSelectConnectionDialog::OfferKeyEventL(
                                                    TEventCode aType )
     {
     CLOG_ENTERFN( "CSelectConnectionDialog::OfferKeyEventL" );
+    
+    if( aType == EEventKey && aKeyEvent.iCode == EKeyPhoneSend )
+        {
+        // Let's not obscure the Dialer in the background
+        if ( iExpiryTimer && !iActiveSelectExplicit )
+            {
+            iExpiryTimer->Cancel();
+            iExpiryTimer->StartShort();    
+            }
+        }
 
     TKeyResponse result( EKeyWasNotConsumed );
     TInt indexBefore = -1;

@@ -29,7 +29,7 @@ PRJ_EXPORTS
 ../rom/ApSettingsPluginResources.iby	LANGUAGE_MW_LAYER_IBY_EXPORT_PATH(ApSettingsPluginResources.iby)
 
 // export localised loc file
-../loc/ApSettingsPlugin.loc	MW_LAYER_LOC_EXPORT_PATH(apsettingsplugin.loc)
+../loc/apsettingsplugin.loc	MW_LAYER_LOC_EXPORT_PATH(apsettingsplugin.loc)
 
 PRJ_MMPFILES
 ./ApSettingsPlugin.mmp

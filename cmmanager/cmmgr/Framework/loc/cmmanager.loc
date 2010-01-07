@@ -43,12 +43,6 @@
 //
 #define qtn_netw_conset_options_edit    "Edit"
 
-//d: Options menu text. Opens a submenu to manage the highlighted destination
-//l: list_single_pane_t1_cp2
-//w: 
-//r: 3.2
-//
-#define qtn_netw_conset_options_manage_destination    "Manage"
 
 //d: Options menu text. Opens a radio button page to select default conneciton
 //l: list_single_pane_t1_cp2
@@ -311,13 +305,6 @@
 //
 #define qtn_netw_conset_options_delete_method "Delete"
 
-//d: Connection method list text. Opens a submenu for managing the highlighted
-//d: connection method
-//l: list_single_pane_t1_cp2/opt3
-//w: 
-//r: 3.2
-//
-#define qtn_netw_conset_options_organise "Organise"
 
 //d:Connection method list text. Prioritise the highlighted connecton method
 //l: list_single_popup_submenu_pane_t1
@@ -734,29 +721,6 @@
 //r: 3.2
 //
 #define qtn_set_options_exit "Exit"
-
-
-//d: Setting list item text.
-//l: list_setting_pane_t1
-//w: 
-//r: 3.2
-//
-#define qtn_netw_conset_sett_roaming_confirmation "Utilise this method"
-
-//d: Setting list item text shown if automatic roaming is selected.
-//l: list_set_graphic_pane_t1
-//w: 
-//r: 3.2
-//
-
-#define qtn_netw_conset_sett_roaming_automatic "Automatically"
-
-//d: Setting list item text shown if confirmation takes place upon roaming.
-//l: list_set_graphic_pane_t1
-//w: 
-//r: 3.2
-//
-#define qtn_netw_conset_sett_roaming_confirm "After confirmation"
 
 //d: Bearer type cannot be modified info text 
 //l: popup_note_window

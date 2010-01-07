@@ -256,6 +256,26 @@ void CIapDialog::RefreshDialogL( CConnectionInfoArray* aIAP,
     CLOG_LEAVEFN( "CIapDialog::RefreshDialogL " );  
     }
 
+// ---------------------------------------------------------
+// CIapDialog::OfferKeyEventL
+// ---------------------------------------------------------
+//
+TKeyResponse CIapDialog::OfferKeyEventL( const TKeyEvent& aKeyEvent, 
+                                         TEventCode aType)
+    {
+    if( aType == EEventKey && aKeyEvent.iCode == EKeyPhoneSend )
+        {
+        // Let's not obscure the Dialer in the background
+        if ( iExpiryTimer )
+            {
+            iExpiryTimer->Cancel();
+            iExpiryTimer->StartShort();    
+            }
+        }
+        
+    return CAknListQueryDialog::OfferKeyEventL( aKeyEvent,aType ); 
+    }
+
 void CIapDialog::HandleTimedOut()
     {
     TRAP_IGNORE( TryExitL(EAknSoftkeyCancel) );

@@ -187,8 +187,7 @@ void CCmDlg::PreLayoutDynInitL()
         {
         iListbox->ScrollToMakeItemVisible( iHighlight );
         iListbox->SetCurrentItemIndexAndDraw( iHighlight );
-        }
-    ShowPopupNoteL();        
+        }    
     }
     
 // --------------------------------------------------------------------------
@@ -206,6 +205,7 @@ void CCmDlg::DynInitMenuPaneL( TInt aResourceId,
             aMenuPane->DeleteMenuItem( EAknCmdHelp );		    
             }
         // Menu items
+    	TBool hideEdit      ( EFalse );
         TBool hideAdd       ( EFalse );
         TBool hideRename    ( EFalse );
         TBool hideDelete    ( EFalse );
@@ -218,10 +218,12 @@ void CCmDlg::DynInitMenuPaneL( TInt aResourceId,
         // 2. Embedded Destinations
         if ( !( iListbox->Model()->ItemTextArray()->MdcaCount() ) )
             {
+            hidePrioritise = ETrue;
+            hideEdit = ETrue;
             hideRename  = ETrue;
             hideDelete  = ETrue;
             hideCopy = ETrue;
-            hideMove = ETrue; 
+            hideMove = ETrue;
             }
         // Embedded destinations can be deleted but not edited
         else if ( ( CurrentCML()->GetBoolAttributeL(ECmDestination) ) )
@@ -241,36 +243,11 @@ void CCmDlg::DynInitMenuPaneL( TInt aResourceId,
                 hidePrioritise = ETrue;
                 }
             }
-        // No available destination to copy/move the CM to
-        RArray<TUint32> destinations( KCmArrayMediumGranularity );
-        CleanupClosePushL( destinations );
-        iCmManager->AllDestinationsL( destinations );
-        for ( TInt i = 0; i < destinations.Count(); i++ )
-            {            
-            CCmDestinationImpl* dest = 
-                                    iCmManager->DestinationL( destinations[i] );
-            CleanupStack::PushL( dest );
-            // Not allowed to copy/move CMs into Level1 protected destinations
-            if ( dest->ProtectionLevel() != CMManager::EProtLevel1 )
-                {
-                // iCmDestinationImpl is null in Uncat dlg - ignore
-                // Don't count the current destination
-                if ( !iCmDestinationImpl || 
-                     dest->Id() != iCmDestinationImpl->Id() ) 
-                    {
-                    hideCopy = EFalse;
-                    hideMove = EFalse;
-                    CleanupStack::PopAndDestroy( dest );
-                    break;
-                    }
-                }
-            CleanupStack::PopAndDestroy( dest );                
-            }
-        CleanupStack::PopAndDestroy( &destinations );    
-        
+     
         // Show or hide menu items
         if ( aResourceId == R_CM_MENU )
             {            
+            aMenuPane->SetItemDimmed( ECmManagerUiCmdCmEdit,    hideEdit );
             aMenuPane->SetItemDimmed( ECmManagerUiCmdCmAdd,     hideAdd );
             aMenuPane->SetItemDimmed( ECmManagerUiCmdCmRename,  hideRename );            
             aMenuPane->SetItemDimmed( ECmManagerUiCmdCmDelete,  hideDelete );    
@@ -1296,47 +1273,6 @@ void CCmDlg::EditConnectionMethodL()
     }
     
 // ---------------------------------------------------------------------------
-// CCmDlg::ShowPopupNote
-// ---------------------------------------------------------------------------
-//
-void CCmDlg::ShowPopupNoteL()
-    {
-    if ( iInfoPopupNoteController )
-        {
-        if ( iListbox->Model()->NumberOfItems() && !iPrioritising )
-            {
-            // Value is only shown for concrete bearer types - allow to leave
-            HBufC* bearer = NULL;
-            TRAPD( err, bearer = 
-                CurrentCML()->GetStringAttributeL( ECmBearerNamePopupNote ) );
-
-            if ( !err )
-                {
-                CleanupStack::PushL( bearer );
-                
-                HBufC* title = StringLoader::LoadLC( 
-                                    R_CMMANAGERUI_POPUP_TITLE_DATA_BEARER );
-
-                HBufC* noteText = HBufC::NewLC( title->Size() + 
-                                               1 + 
-                                               bearer->Size() );
-                noteText->Des().Append( *title );
-                noteText->Des().Append( KCmNewLine );
-                noteText->Des().Append( *bearer );        
-                iInfoPopupNoteController->SetTextL( *noteText );
-                iInfoPopupNoteController->ShowInfoPopupNote();
-                
-                CleanupStack::PopAndDestroy( 3, bearer );
-                }
-            else
-                {
-                iInfoPopupNoteController->HideInfoPopupNote();
-                }
-            }
-        }  
-    }
-
-// ---------------------------------------------------------------------------
 // CCmDlg::OfferKeyEventL
 // ---------------------------------------------------------------------------
 //
@@ -1376,12 +1312,7 @@ TKeyResponse CCmDlg::OfferKeyEventL( const TKeyEvent& aKeyEvent,
         }
     else
         {
-        retVal = iListbox->OfferKeyEventL(aKeyEvent, aType);
-        if ( aKeyEvent.iCode == EKeyUpArrow || 
-             aKeyEvent.iCode == EKeyDownArrow )
-            {
-            ShowPopupNoteL();
-            }            
+        retVal = iListbox->OfferKeyEventL(aKeyEvent, aType);       
         }
 
     return retVal;
@@ -1805,7 +1736,6 @@ void CCmDlg::FinishPriorizingL( TBool aOkPushed )
                                 iListbox->CurrentItemIndex());
             iCmDestinationImpl->UpdateL();
             HandleListboxDataChangeL();
-            ShowPopupNoteL();
             }
         }
      // Set the softkeys back    

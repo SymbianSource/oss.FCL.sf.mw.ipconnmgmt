@@ -22,9 +22,11 @@
 
 // INCLUDES
 #include <AknQueryDialog.h>
+#include "ExpiryTimerCallback.h"
 
 // FORWARD DECLARATIONS
 class CConnectionDialogsNotifBase;
+class CExpiryTimer;
 
 enum TDialogType
     {
@@ -38,7 +40,7 @@ enum TDialogType
 /**
  * Class implements a query dialog.
  */
-NONSHARABLE_CLASS( CWepWpaQueryDlg ) : public CAknTextQueryDialog
+NONSHARABLE_CLASS( CWepWpaQueryDlg ) : public CAknTextQueryDialog, public MExpiryTimerCallback
     {
 public:
     /**
@@ -65,7 +67,19 @@ public:
     */
     virtual ~CWepWpaQueryDlg();
     
-    TBool NeedToDismissQueryL(const TKeyEvent& aKeyEvent);    
+    /**
+    * from CCoeControl
+    * @param aKeyEvent Event to handled.
+    * @param aType Type of the key event. 
+    * @return Response code (EKeyWasConsumed, EKeyWasNotConsumed). 
+    */
+    TKeyResponse OfferKeyEventL( const TKeyEvent& aKeyEvent, 
+                                 TEventCode aType);
+    
+    /**
+     * Dialog expiration timeout callback
+     */
+    void HandleTimedOut();
 
 private:
 
@@ -86,6 +100,8 @@ private:
     CConnectionDialogsNotifBase* iNotif;  // Pointer to the Notifier
     TInt   iDialogType;
     TBool& iHex;
+    // Pointer for dialog expiration timer
+    CExpiryTimer* iExpiryTimer;
     };
 
 

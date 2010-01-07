@@ -18,7 +18,9 @@
 
 #include "ExpiryTimer.h"
 
-static const TInt KTimeout = 60000000;
+static const TInt KTimeout     = 60000000;
+static const TInt KShortTimeout = 1000000;
+
 // ---------------------------------------------------------------------------
 // NewL. Constructs and returns the class object.
 // ---------------------------------------------------------------------------
@@ -52,6 +54,12 @@ void CExpiryTimer::ConstructL()
 void CExpiryTimer::Start()
     {
     TTimeIntervalMicroSeconds32 timeout = KTimeout;
+    After( timeout );
+    }
+
+void CExpiryTimer::StartShort()
+    {
+    TTimeIntervalMicroSeconds32 timeout = KShortTimeout;
     After( timeout );
     }
 

@@ -61,6 +61,36 @@ const TUint32 KMaxIapID = 255;
 // Safety margin when checking disk space
 const TUint32 KBytesToWrite = 8000; 
 
+const TUint32 KEndOfArray = KMaxTUint;
+/**
+* This array lists all the bearerspecific attributes.
+* The bearerspecific attributes can be queried via both 
+* the manager interface's and connection method interface's ::Get functions.
+*/
+static const TUint32 KBearerSpecificAttributes[]=
+    {
+    /**
+    */
+    ECmCoverage,                        
+    ECmDefaultPriority,                        
+    ECmDestination,     
+    ECmBearerHasUi,   
+    ECmIPv6Supported,           
+    ECmDefaultUiPriority,
+    ECmBearerIcon,
+    ECmBearerAvailableIcon,
+    ECmBearerAvailableName,
+    ECmBearerSupportedName,
+    ECmBearerAvailableText,                        
+    ECmBearerNamePopupNote,
+    ECmCommsDBBearerType,   
+    ECmBearerSettingName,
+    ECmVirtual,
+    ECmExtensionLevel,
+    ECmAddToAvailableList,
+    KEndOfArray
+    };
+
 // -----------------------------------------------------------------------------
 // Test functions
 // -----------------------------------------------------------------------------
@@ -1593,6 +1623,11 @@ EXPORT_C TUint32 CCmManagerImpl::GetBearerInfoIntL( TUint32 aBearerType,
                                            TUint32 aAttribute ) const
     {
     LOGGER_ENTERFN( "CCmManagerImpl::GetBearerInfoIntL" );
+    if( !IsBearerSpecific( aAttribute ) )
+        {
+        User::Leave( KErrNotSupported );
+        }
+    
     for ( TInt i = 0; i < iPlugins->Count(); ++i )
         {
         if ( aBearerType == (*iPlugins)[i]->GetIntAttributeL( ECmBearerType ) )
@@ -1605,7 +1640,7 @@ EXPORT_C TUint32 CCmManagerImpl::GetBearerInfoIntL( TUint32 aBearerType,
     
     return 0;
     }
-    
+
 // -----------------------------------------------------------------------------
 // CCmManagerImpl::GetBearerInfoBoolL()
 // -----------------------------------------------------------------------------
@@ -1614,6 +1649,11 @@ EXPORT_C TBool CCmManagerImpl::GetBearerInfoBoolL( TUint32 aBearerType,
                                           TUint32 aAttribute ) const
     {
     LOGGER_ENTERFN( "CCmManagerImpl::GetBearerInfoBoolL" );
+    if( !IsBearerSpecific( aAttribute ) )
+        {
+        User::Leave( KErrNotSupported );
+        }
+        
     for ( TInt i = 0; i < iPlugins->Count(); ++i )
         {
         if ( aBearerType == (*iPlugins)[i]->GetIntAttributeL( ECmBearerType ) )
@@ -1635,6 +1675,11 @@ EXPORT_C HBufC* CCmManagerImpl::GetBearerInfoStringL( TUint32 aBearerType,
                                              TUint32 aAttribute ) const
     {
     LOGGER_ENTERFN( "CCmManagerImpl::GetBearerInfoStringL" );
+    if( !IsBearerSpecific( aAttribute ) )
+        {
+        User::Leave( KErrNotSupported );
+        }
+    
     for ( TInt i = 0; i < iPlugins->Count(); ++i )
         {
         if ( aBearerType == (*iPlugins)[i]->GetIntAttributeL( ECmBearerType ) )
@@ -1656,6 +1701,11 @@ EXPORT_C HBufC8* CCmManagerImpl::GetBearerInfoString8L( TUint32 aBearerType,
                                                TUint32 aAttribute ) const
     {
     LOGGER_ENTERFN( "CCmManagerImpl::GetBearerInfoStringL" );
+    if( !IsBearerSpecific( aAttribute ) )
+        {
+        User::Leave( KErrNotSupported );
+        }
+    
     for ( TInt i = 0; i < iPlugins->Count(); ++i )
         {
         if ( aBearerType == (*iPlugins)[i]->GetIntAttributeL( ECmBearerType ) )
@@ -2333,6 +2383,7 @@ void CCmManagerImpl::WriteDefConnL( const TCmDefConnValue& aDCSetting )
         {
         User::Leave( KErrNotSupported );
         }
+    
     if ( IsDefConnSupported() )
         {
         OpenTransactionLC();
@@ -2979,4 +3030,22 @@ TUint32 CCmManagerImpl::GetSnapTableIdL()
     CleanupStack::PopAndDestroy( db );
     
     return snapTableId;
+    }
+
+// -----------------------------------------------------------------------------
+// CCmManagerImpl::IsBearerSpecific()
+// -----------------------------------------------------------------------------
+//
+TBool CCmManagerImpl::IsBearerSpecific( TUint32 aAttribute ) const
+    {
+    TUint32 i = 0;
+    while( KBearerSpecificAttributes[i] != KEndOfArray )
+        {
+        if( KBearerSpecificAttributes[i] == aAttribute )
+            {
+            return ETrue;
+            }
+        i++;
+        }        
+    return EFalse;
     }

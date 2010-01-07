@@ -612,6 +612,16 @@ EXPORT_C void CmPluginBaseSettingsDlg::HandleListBoxEventL(
         }
     }
 
+// ---------------------------------------------------------------------------
+// CmPluginBaseSettingsDlg::OfferKeyEventL
+// ---------------------------------------------------------------------------
+//
+EXPORT_C TKeyResponse CmPluginBaseSettingsDlg::OfferKeyEventL( const TKeyEvent& aKeyEvent, 
+                                       TEventCode aType )    
+    {
+    return iListbox->OfferKeyEventL( aKeyEvent, aType );       
+    }
+
 //---------------------------------------------------------------------------
 // CmPluginBaseSettingsDlg::LoadResourceL
 //---------------------------------------------------------------------------
