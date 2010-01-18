@@ -317,40 +317,9 @@ void CConnectionMonitorUiDetailsContainer::OnEventL(
         {
         case EConnMonDeleteConnection:
             {
-            if ( aIndex == iConnectionIndex )
-                {
-                TUint count = iConnectionArray->MdcaCount();
-                switch ( count )
-                    {
-                    case 0:
-                        {
-                        iListBox->Model()->SetItemTextArray(
-                                           new (ELeave) CDesCArrayFlat( 1 ) );
-                        iListBox->Model()->SetOwnershipType(
-                                                          ELbmOwnsItemArray );
-                        iConnectionIndex = 0;
-                        iConnectionInfo = NULL;
-                        break;
-                        }
-                    case 1:
-                        {
-                        SetSelectedConnectionL( 0 );
-                        break;
-                        }
-                    default :
-                        {
-                        TInt index = iConnectionIndex < count ?
-                                                        iConnectionIndex :
-                                                        iConnectionIndex - 1;
-                        SetSelectedConnectionL( index );
-                        break;
-                        }
-                    }
-                iListBox->DrawNow();
-                iListBox->UpdateScrollBarsL();
-                }
-            break;
+            // Do nothing
             }
+            break;            
         case EConnMonCreateConnection:
             {
         CMUILOGGER_WRITE_F( "iConnectionInfo : %d", iConnectionInfo );
@@ -388,14 +357,13 @@ void CConnectionMonitorUiDetailsContainer::OnTimerEventL()
     if ( iConnectionArray->MdcaCount() )
        {
         iListBox->DrawNow();
-        iListBox->UpdateScrollBarsL();
+
         CMUILOGGER_WRITE_F( "CMUIDW GetStatus() before: %d", 
                             iConnectionInfo->GetStatus() );
         if ( iConnectionInfo->GetStatus() == EConnectionClosing )
             {
             CConnectionMonitorUiAppUi* tempApUi = 
                         CConnectionMonitorUiAppUi::Static();
-            tempApUi->StopTimer();
             iConnectionInfo->StatusChangedL();
             }
         CMUILOGGER_WRITE_F( "CMUIDW GetStatus() after: %d",
@@ -447,7 +415,8 @@ void CConnectionMonitorUiDetailsContainer::GetPanesL()
 //
 void CConnectionMonitorUiDetailsContainer::PushAndRefreshNaviPaneL()
     {
-    TUint countOfConnection = iConnectionArray->NumberOfActiveConnections();
+    TUint countOfConnection = iConnectionArray->MdcaCount();
+    
     CMUILOGGER_WRITE_F( "countOfConnection : %d", countOfConnection );
     
     if ( ( iConnectionIndex > countOfConnection ) && // spec. index update

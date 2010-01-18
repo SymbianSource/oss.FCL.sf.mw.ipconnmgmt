@@ -31,7 +31,7 @@
 // ---------------------------------------------------------
 //
 CConnectionMonitorUiDetailsView::CConnectionMonitorUiDetailsView( 
-                             const CConnectionArray* const aConnectionArray )
+                             CConnectionArray* const aConnectionArray )
     : CAknView(), 
       iConnectionArray( aConnectionArray ), 
       iViewRefreshState( EFalse )
@@ -93,6 +93,8 @@ void CConnectionMonitorUiDetailsView::HandleCommandL( TInt aCommand )
 //
 void CConnectionMonitorUiDetailsView::CloseViewL()
     {   
+    CMUILOGGER_ENTERFN( "CConnectionMonitorUiDetailsView::CloseViewL" );    
+    
     if ( GetViewRefreshState() )
         {
         // Now delete this view
@@ -101,6 +103,7 @@ void CConnectionMonitorUiDetailsView::CloseViewL()
         appUi->StartTimerL();
         SetViewRefreshState( EFalse );
         }
+    CMUILOGGER_LEAVEFN( "CConnectionMonitorUiDetailsView::CloseViewL" );
     }
 
 // ---------------------------------------------------------

@@ -96,8 +96,8 @@ const TMDBElementId KCDTIdDestNwAccessNwId          = 0x00040000;
 const CommsDat::TMDBElementId KCDTIdDefConnType         = 0x00120000;
 const CommsDat::TMDBElementId KCDTIdDefConnUid          = 0x00130000;
 const CommsDat::TMDBElementId KCDTIdUsageOfWlan         = 0x00150000;
-const CommsDat::TMDBElementId KCDTIdSeamlessnessHome    = 0x00170000;
-const CommsDat::TMDBElementId KCDTIdSeamlessnessVisitor = 0x00180000;
+const CommsDat::TMDBElementId KCDTIdCellularDataUsageHome    = 0x00170000;
+const CommsDat::TMDBElementId KCDTIdCellularDataUsageVisitor = 0x00180000;
 
 #endif      // TABLE_FIELDS_H
 

@@ -286,8 +286,6 @@ namespace S60MCprErrorRecoveryActivity
     /**
      * CS60ConnectionRecoveryActivity is the S60 version of the ErrorRecovery -activity
      * that is responsible to process connection errors whenever it happens.
-     *  
-     * -jl- TODO Either finalize or remove S60CConnectionRecoveryActivity after EC158(?) 
      */
     class CS60ConnectionRecoveryActivity : public S60MCprStates::CS60ErrorRecoveryActivity
         {
@@ -526,16 +524,28 @@ namespace S60MCprMobilityActivity
     DECLARE_SMELEMENT_FOOTER( TAwaitingMigrationRequestedOrRejectedOrCancel )
 
     /**
-     * STATE: Watis for application response.
-     * @return ETrue if Migration Accepted or Rejected. 
+     * STATE: Waits for application response.
+     * @return ETrue if Migration Accepted or Rejected or Start-up Error Ignored. 
      */
-    DECLARE_SMELEMENT_HEADER( TAwaitingMigrationAcceptedOrRejectedOrCancel, 
+    DECLARE_SMELEMENT_HEADER( TAwaitingMigrationAcceptedOrRejectedOrStartupErrorIgnoredOrCancel, 
                               MeshMachine::TState<TContext>, 
                               NetStateMachine::MState, 
                               TContext )
     virtual TBool Accept();
-    DECLARE_SMELEMENT_FOOTER( TAwaitingMigrationAcceptedOrRejectedOrCancel )
+    DECLARE_SMELEMENT_FOOTER( TAwaitingMigrationAcceptedOrRejectedOrStartupErrorIgnoredOrCancel )
 
+    /**
+     * STATE: Waits for IPCPR rejected response that ends the mobility handshake.
+     * @return ETrue if Rejected. 
+     */
+    DECLARE_SMELEMENT_HEADER( TAwaitingMigrationRejected, 
+                              MeshMachine::TState<TContext>, 
+                              NetStateMachine::MState, 
+                              TContext )
+    virtual TBool Accept();
+    DECLARE_SMELEMENT_FOOTER( TAwaitingMigrationRejected )
+    
+    
     /**
      * FORK/DECISION: Returns the KStartMobilityHandshake backwards or error
      * @return KStartMobilityHandshake backwards or error
@@ -563,14 +573,15 @@ namespace S60MCprMobilityActivity
      * 1. Application accepted, continue to send accept to policy server.
      * 2. Error
      * 3. Application rejected, continue to send reject to policy server.
+     * 4. Error process occured, consume the next rejected msg/accept msg.
      * @return TransitionTag of the selected transition.
      */
-    DECLARE_SMELEMENT_HEADER( TNoTagOrErrorTagOrApplicationRejected, 
+    DECLARE_SMELEMENT_HEADER( TNoTagOrErrorTagOrApplicationRejectedOrConsumeRejected, 
                               MeshMachine::TStateFork<TContext>, 
                               NetStateMachine::MStateFork, 
                               TContext )
     virtual TInt TransitionTag();
-    DECLARE_SMELEMENT_FOOTER( TNoTagOrErrorTagOrApplicationRejected )
+    DECLARE_SMELEMENT_FOOTER( TNoTagOrErrorTagOrApplicationRejectedOrConsumeRejected )
     
     /**
      * FORK/DECISION: Decides whether to wait MPM actions or report an error. 

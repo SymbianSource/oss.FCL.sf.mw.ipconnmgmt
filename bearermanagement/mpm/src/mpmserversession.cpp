@@ -838,31 +838,26 @@ should not be confirmed - False" )
         return EFalse;
         }
 
-    // Read global OCC seamlessness values from CommsDat's DefConn table
+    // Read global cellular data usage values from CommsDat's DefConn table
     genConnSettings = iMyServer.CommsDatAccess()->ReadGenConnSettingsL();
 
-    TUint32 currentSeamlessness( genConnSettings.iSeamlessnessHome );
+    TUint32 currentDataUsage( genConnSettings.iCellularDataUsageHome );
     
     if ( iMyServer.IsVisitorNetwork() )
         {
-        currentSeamlessness = genConnSettings.iSeamlessnessVisitor; 
+        currentDataUsage = genConnSettings.iCellularDataUsageVisitor; 
         }
 
-    if ( currentSeamlessness == ECmSeamlessnessShowprogress ||
-         currentSeamlessness == ECmSeamlessnessFullySeamless )
+    if ( currentDataUsage == ECmCellularDataUsageConfirm )
         {
-        MPMLOGSTRING( "CMPMServerSession::IsConfirmFirstL - False" )
-        isConfirmFirst = EFalse;
+        MPMLOGSTRING( "CMPMServerSession::IsConfirmFirstL - True" )
+        isConfirmFirst = ETrue;
         }
     else 
         {
-        // The currentSeamlessness value ECmSeamlessnessConfirmFirst 
-        // matches with need to display confirmation dialog.
-        // 
-        MPMLOGSTRING(
-            "CMPMServerSession::IsConfirmFirstL - True" )
-        isConfirmFirst = ETrue;
+        MPMLOGSTRING( "CMPMServerSession::IsConfirmFirstL - False" )
         }
+
     return isConfirmFirst;
     }
 
@@ -1106,7 +1101,7 @@ aError %d, aResponse %d, aReconnect %d",
                 //If reading of database failed we do not write back to the database to prevent random values
                 if (errorCode == KErrNone)
                     {
-                    genConnSettings.iSeamlessnessHome = ECmSeamlessnessShowprogress;        
+                    genConnSettings.iCellularDataUsageHome = ECmCellularDataUsageAutomatic;        
                     TRAP_IGNORE(MyServer().CommsDatAccess()->WriteGenConnSettingsL( genConnSettings )); 
                     }
                 } 
@@ -3544,7 +3539,7 @@ TBool CMPMServerSession::IsWlanOnlyL( TBool& aNewWlansAllowed )
 
     MPMLOGSTRING( "CMPMServerSession::IsWlanOnlyL")
 
-    // Read global OCC seamlessness values from CommsDat's DefConn table
+    // Read global cellular data usage values from CommsDat's DefConn table
     genConnSettings = iMyServer.CommsDatAccess()->ReadGenConnSettingsL();
 
     // Find out if new wlans can be prompted
@@ -3560,14 +3555,14 @@ TBool CMPMServerSession::IsWlanOnlyL( TBool& aNewWlansAllowed )
         }
         
     // Find out is only WLAN connection is allowed in current network
-    TUint32 currentSeamlessness( genConnSettings.iSeamlessnessHome );
+    TUint32 currentCellularDataUsage( genConnSettings.iCellularDataUsageHome );
     
     if ( iMyServer.IsVisitorNetwork() )
         {
-        currentSeamlessness = genConnSettings.iSeamlessnessVisitor;  
+        currentCellularDataUsage = genConnSettings.iCellularDataUsageVisitor;  
         }
     
-    if ( currentSeamlessness == ECmSeamlessnessDisabled )
+    if ( currentCellularDataUsage == ECmCellularDataUsageDisabled )
         {
         MPMLOGSTRING( "CMPMServerSession::IsWlanOnlyL: True" )
         return ETrue;

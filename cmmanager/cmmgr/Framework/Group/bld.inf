@@ -23,7 +23,9 @@ DEFAULT
 
 PRJ_EXPORTS
 // export localised loc file
-../loc/cmmanager.loc	MW_LAYER_LOC_EXPORT_PATH(cmmanager.loc)
+../loc/cmmanager.loc             MW_LAYER_LOC_EXPORT_PATH(cmmanager.loc)
+../conf/cmmanager.confml         MW_LAYER_CONFML(cmmanager.confml)
+../conf/cmmanager_10207376.crml  MW_LAYER_CRML(cmmanager_10207376.crml)
 
 PRJ_MMPFILES
 cmmanager.mmp

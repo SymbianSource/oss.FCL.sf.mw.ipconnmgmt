@@ -642,6 +642,15 @@ NONSHARABLE_CLASS( CConnMonIAP )
          * (weak signal, no WLAN connection, WLAN not supported... ).
          */
         TBool WlanRssGoodEnough();
+        
+        /**
+         * Gets the network roaming status.
+         * @since
+         * @param aNetworkStatus On return, contains the current network registration status.
+         * @return KErrNone if successfull, otherwise a system wide error code.
+         */
+        TInt GetNetworkRegistration_v2( TInt& aRegistration ) const;
+
 
     private: // New methods
         /**
@@ -740,14 +749,6 @@ NONSHARABLE_CLASS( CConnMonIAP )
          * @return KErrNone if successfull, otherwise a system wide error code.
          */
         TInt GetNetworkRegistration( TInt& aRegistration ) const;
-
-        /**
-         * Gets the network roaming status.
-         * @since
-         * @param aNetworkStatus On return, contains the current network registration status.
-         * @return KErrNone if successfull, otherwise a system wide error code.
-         */
-        TInt GetNetworkRegistration_v2( TInt& aRegistration ) const;
 
         /**
          * Gets the GSM signal strength.

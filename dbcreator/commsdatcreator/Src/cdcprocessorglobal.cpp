@@ -156,8 +156,8 @@ void CProcessorGlobal::ConstructL()
     // Create General connection settings struct and set the default values
     iGenConnSettings = new (ELeave) TCmGenConnSettings;
     iGenConnSettings->iUsageOfWlan = ECmUsageOfWlanKnown;
-    iGenConnSettings->iSeamlessnessHome = ECmSeamlessnessConfirmFirst;
-    iGenConnSettings->iSeamlessnessVisitor = ECmSeamlessnessConfirmFirst;
+    iGenConnSettings->iCellularDataUsageHome = ECmCellularDataUsageAutomatic;
+    iGenConnSettings->iCellularDataUsageVisitor = ECmCellularDataUsageConfirm;
 
     CLOG_WRITE( "Initialising FeatureManager\n" )   
     //checks if Wlan feature is supported
@@ -462,15 +462,15 @@ void CProcessorGlobal::ProcessTagL( TBool /*aFieldIDPresent*/ )
                 break;
                 }
                 
-            case ESeamlessnessHome:
+            case ECellularDataUsageHome:
                 {
-                SetGenConnSettingSeamlessnessHome( ptrTag );
+                SetGenConnSettingCellularDataUsageHome( ptrTag );
                 break;
                 }
                 
-            case ESeamlessnessVisitor:
+            case ECellularDataUsageVisitor:
                 {
-                SetGenConnSettingSeamlessnessVisitor( ptrTag );
+                SetGenConnSettingCellularDataUsageVisitor( ptrTag );
                 break;
                 }
                 
@@ -707,37 +707,37 @@ void CProcessorGlobal::SetGenConnSettingWlanUsage( HBufC16* aPtrTag )
     }
 
 // ---------------------------------------------------------
-// CProcessorGlobal::SetGenConnSettingSeamlessnessHome
+// CProcessorGlobal::SetGenConnSettingCellularDataUsageHome
 // ---------------------------------------------------------
 //
-void CProcessorGlobal::SetGenConnSettingSeamlessnessHome( HBufC16* aPtrTag )
+void CProcessorGlobal::SetGenConnSettingCellularDataUsageHome( HBufC16* aPtrTag )
     {
     if ( aPtrTag->CompareF( KStrAutomatic ) == 0 ) 
         {
-        iGenConnSettings->iSeamlessnessHome = ECmSeamlessnessShowprogress;
+        iGenConnSettings->iCellularDataUsageHome = ECmCellularDataUsageAutomatic;
         }
     else if ( iIsWlanS && aPtrTag->CompareF( KStrWlanOnly ) == 0 ) 
         {
         // This value can't be set if WLAN isn't supported
-        iGenConnSettings->iSeamlessnessHome = ECmSeamlessnessDisabled;
+        iGenConnSettings->iCellularDataUsageHome = ECmCellularDataUsageDisabled;
         }
     // else: Default value for the string is: "Confirm", set in ConstructL()
     }
 
 // ---------------------------------------------------------
-// CProcessorGlobal::SetGenConnSettingSeamlessnessVisitor
+// CProcessorGlobal::SetGenConnSettingCellularDataUsageVisitor
 // ---------------------------------------------------------
 //
-void CProcessorGlobal::SetGenConnSettingSeamlessnessVisitor( HBufC16* aPtrTag )
+void CProcessorGlobal::SetGenConnSettingCellularDataUsageVisitor( HBufC16* aPtrTag )
     {
     if ( aPtrTag->CompareF( KStrAutomatic ) == 0 ) 
         {
-        iGenConnSettings->iSeamlessnessVisitor = ECmSeamlessnessShowprogress;
+        iGenConnSettings->iCellularDataUsageVisitor = ECmCellularDataUsageAutomatic;
         }
     else if ( iIsWlanS && aPtrTag->CompareF( KStrWlanOnly ) == 0 ) 
         {
         // This value can't be set if WLAN isn't supported
-        iGenConnSettings->iSeamlessnessVisitor = ECmSeamlessnessDisabled;
+        iGenConnSettings->iCellularDataUsageVisitor = ECmCellularDataUsageDisabled;
         }
     // else: Default value for the string is: "Confirm", set in ConstructL()
     }

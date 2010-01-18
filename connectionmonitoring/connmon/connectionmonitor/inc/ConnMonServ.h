@@ -133,6 +133,7 @@ class TEvent;
 class TConnMonIapInfo;
 class TConnMonSNAPInfo;
 class TConnMonId;
+class CCellularDataUsageKeyUpdater;
 
 /**
 * CConnMonServer
@@ -326,6 +327,13 @@ public:
         {
         return iBearerGroupManager;
         }
+    
+    /**
+     * Gets a pointer to the iap module.
+     * @return A pointer to the iap module.
+     */
+    inline CCellularDataUsageKeyUpdater* CellularDataUsageKeyUpdater() 
+                     { return iCellularDataUsageKeyUpdater; }
 
 public:
     /**
@@ -367,7 +375,8 @@ private: // Data
     CConnMonCommsDatNotifier* iSnapTableNotifier;
     CConnMonCommsDatNotifier* iVirtualTableNotifier;
 
-    CConnMonBearerGroupManager* iBearerGroupManager;
+    CConnMonBearerGroupManager*   iBearerGroupManager;
+    CCellularDataUsageKeyUpdater* iCellularDataUsageKeyUpdater;
     };
 
 /**

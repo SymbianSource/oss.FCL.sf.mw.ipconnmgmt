@@ -505,9 +505,16 @@ void CMPMIapSelection::CompleteExplicitSnapConnectionL()
     ChooseBestIAPL( iChooseIapPref, availableIAPList, iNextBestExists );
     TUint32 validateIapId = iChooseIapPref.IapId();
     // Check if any suitable IAP's were found, if not then complete selection with error code
-    if (validateIapId == 0 )
+    if ( validateIapId == 0 )
         {
-        ChooseIapComplete( KErrNotFound, NULL );
+        if ( iChooseIapPref.ConnType() == TMpmConnPref::EConnTypeDefault )
+            {
+            ImplicitConnectionL();
+            }
+        else
+            {
+            ChooseIapComplete( KErrNotFound, NULL );
+            }
         CleanupStack::PopAndDestroy( &availableIAPList );
         return;
         }

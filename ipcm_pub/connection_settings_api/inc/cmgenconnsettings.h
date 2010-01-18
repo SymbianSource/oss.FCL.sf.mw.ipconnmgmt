@@ -18,29 +18,61 @@
 #define CMGENCONNSETTINGS_H
 
 
-// Usage types for new WLAN
+// Usage types for WLAN
 enum TCmUsageOfWlan
     {
+    // Known WLANs will be used, and they will be switched to
+    // if they become available during existing connections.
     ECmUsageOfWlanKnown,
-    ECmUsageOfWlanKnownAndNew, // default 
+    // Known and new WLANs will be used. 
+    ECmUsageOfWlanKnownAndNew, 
+    // WLANs will be used but they will not be switched to
+    // from existing connections.
     ECmUsageOfWlanManual   
     };
 
-// Seamlessness values
+// Cellular data usage values
+enum TCmCellularDataUsage
+    {
+    // Cellular data connection is not used automatically but a confirmation
+    // is requested from the user.
+    ECmCellularDataUsageConfirm,
+    // Cellular data connection is automatically used without querying
+    // permission from the user.
+    ECmCellularDataUsageAutomatic,
+    // Cellular data usage is disabled. Only WLAN will be used.
+    ECmCellularDataUsageDisabled
+    };
+
+// DEPRECATED enumeration which will be removed within few weeks.
+// DO NOT USE THESE VALUES.
+// Functionality related to these values is broken although it compiles.
 enum TCmSeamlessnessValue
         {
-        ECmSeamlessnessNotRoamedTo,   // IAP can be used in start, but not roamed to unless already active
-        ECmSeamlessnessConfirmFirst,  // Confirm first
-        ECmSeamlessnessShowprogress,  // Show progress
-        ECmSeamlessnessFullySeamless, // Same as previous
-        ECmSeamlessnessDisabled       // IAP blacklisted and not used at all
+        ECmSeamlessnessNotRoamedTo,   // DO NOT USE
+        ECmSeamlessnessConfirmFirst,  // DO NOT USE
+        ECmSeamlessnessShowprogress,  // DO NOT USE
+        ECmSeamlessnessFullySeamless, // DO NOT USE
+        ECmSeamlessnessDisabled       // DO NOT USE
         };
 
 // Table for connection settings other than default connection
 struct TCmGenConnSettings
     {
+    // WLAN usage.
     TCmUsageOfWlan         iUsageOfWlan;
+    // Cellular data usage in home country.
+    TCmCellularDataUsage   iCellularDataUsageHome;
+    // Cellular data usage abroad.
+    TCmCellularDataUsage   iCellularDataUsageVisitor;
+
+    // DEPRECATED variable that will be removed within few weeks.
+    // DO NOT USE THESE VARIABLES.
+    // Functionality related to this variable is broken although it compiles.
     TCmSeamlessnessValue   iSeamlessnessHome;
+    // DEPRECATED variable that will be removed within few weeks.
+    // DO NOT USE THESE VARIABLES.
+    // Functionality related to this variable is broken although it compiles.
     TCmSeamlessnessValue   iSeamlessnessVisitor;
     };
 

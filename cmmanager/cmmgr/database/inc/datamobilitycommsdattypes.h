@@ -456,8 +456,8 @@ NONSHARABLE_CLASS( CCDMIP6Record ) : public CommsDat::CCDRecordBase
 #define DEFCONN_TYPE _S("DefConnType")
 #define DEFCONN_UID _S("DefConnUId")
 #define USAGEOFWLAN _S("UsageOfWlan")
-#define SEAMLESSNESS_HOME _S("SeamlessnessHome")
-#define SEAMLESSNESS_VISITOR _S("SeamlessnessVisitor")
+#define CELLULAR_DATA_USAGE_HOME _S("CellularDataUsageHome")
+#define CELLULAR_DATA_USAGE_VISITOR _S("CellularDataUsageVisitor")
 
 NONSHARABLE_CLASS( CCDDefConnRecord ) : public CommsDat::CCDRecordBase
     {
@@ -476,8 +476,8 @@ NONSHARABLE_CLASS( CCDDefConnRecord ) : public CommsDat::CCDRecordBase
     CommsDat::CMDBField<TUint> iDefConnType;
     CommsDat::CMDBField<TUint> iDefConnUid;    
     CommsDat::CMDBField<TUint> iUsageOfWlan;
-    CommsDat::CMDBField<TUint> iSeamlessnessHome;
-    CommsDat::CMDBField<TUint> iSeamlessnessVisitor;
+    CommsDat::CMDBField<TUint> iCellularDataUsageHome;
+    CommsDat::CMDBField<TUint> iCellularDataUsageVisitor;
     
     private:
     

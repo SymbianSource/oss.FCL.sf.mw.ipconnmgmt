@@ -87,19 +87,19 @@ enum TDbCreatorGlobalSettings
     EWlanLastSocketActivityTimeout	= 0x0000001f,
     EWlanLastSessionClosedTimeout	= 0x00000020,
     EWlanLastSocketClosedTimeout	= 0x00000021,
-    EWlanBGScanInterval		= 0x00000022,
-    EWlanUseDefSettings		= 0x00000023,
-    EWlanLongRetry			= 0x00000024,
-    EWlanShortRetry			= 0x00000025,
-    EWlanRTS				= 0x00000026,
-    EWlanTxPowerLevel		= 0x00000027,
-    EWlanRadioMeasurements	= 0x00000028,
-    EWlanPowerMode			= 0x00000029,    
-    EDefaultAP				= 0x0000002a,
-    EUsageOfWlan            = 0x0000002b,
-    ESeamlessnessHome       = 0x0000002c,
-    ESeamlessnessVisitor    = 0x0000002d,
-    EUnused               	= 0x00010000
+    EWlanBGScanInterval		  = 0x00000022,
+    EWlanUseDefSettings		  = 0x00000023,
+    EWlanLongRetry			  = 0x00000024,
+    EWlanShortRetry			  = 0x00000025,
+    EWlanRTS				  = 0x00000026,
+    EWlanTxPowerLevel		  = 0x00000027,
+    EWlanRadioMeasurements	  = 0x00000028,
+    EWlanPowerMode			  = 0x00000029,    
+    EDefaultAP				  = 0x0000002a,
+    EUsageOfWlan              = 0x0000002b,
+    ECellularDataUsageHome    = 0x0000002c,
+    ECellularDataUsageVisitor = 0x0000002d,
+    EUnused               	  = 0x00010000
     };
     
     

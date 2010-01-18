@@ -2331,11 +2331,11 @@ void CCmManagerImpl::ReplaceDefConnRecordL( const TCmDefConnValue aDCSetting )
         TInt value = QUERY_INT_FIELD( defConnRecordSet->iRecords[0], KCDTIdUsageOfWlan );
         genConnSettings.iUsageOfWlan = TCmUsageOfWlan( value );
 
-        value = QUERY_INT_FIELD( defConnRecordSet->iRecords[0], KCDTIdSeamlessnessHome );
-        genConnSettings.iSeamlessnessHome = TCmSeamlessnessValue( value );
+        value = QUERY_INT_FIELD( defConnRecordSet->iRecords[0], KCDTIdCellularDataUsageHome );
+        genConnSettings.iCellularDataUsageHome = TCmCellularDataUsage( value );
 
-        value = QUERY_INT_FIELD( defConnRecordSet->iRecords[0], KCDTIdSeamlessnessVisitor );
-        genConnSettings.iSeamlessnessVisitor = TCmSeamlessnessValue( value );
+        value = QUERY_INT_FIELD( defConnRecordSet->iRecords[0], KCDTIdCellularDataUsageVisitor );
+        genConnSettings.iCellularDataUsageVisitor = TCmCellularDataUsage( value );
         }
 
     TInt typeVal = aDCSetting.iType;
@@ -2355,8 +2355,8 @@ void CCmManagerImpl::ReplaceDefConnRecordL( const TCmDefConnValue aDCSetting )
     dcRcd->SetRecordId( KCDNewRecordRequest );
 
     SET_INT_FIELD(dcRcd, KCDTIdUsageOfWlan, genConnSettings.iUsageOfWlan );
-    SET_INT_FIELD(dcRcd, KCDTIdSeamlessnessHome, genConnSettings.iSeamlessnessHome );
-    SET_INT_FIELD(dcRcd, KCDTIdSeamlessnessVisitor, genConnSettings.iSeamlessnessVisitor );
+    SET_INT_FIELD(dcRcd, KCDTIdCellularDataUsageHome, genConnSettings.iCellularDataUsageHome );
+    SET_INT_FIELD(dcRcd, KCDTIdCellularDataUsageVisitor, genConnSettings.iCellularDataUsageVisitor );
 
     CLOG_WRITE_FORMAT( "Set default connection type: [%d]", typeVal );
     SET_INT_FIELD(    dcRcd, 
@@ -2427,11 +2427,11 @@ void CCmManagerImpl::ReadGenConnSettingsL( TCmGenConnSettings& aGenConnSettings 
     TInt value = QUERY_INT_FIELD( defConnRecordSet->iRecords[0], KCDTIdUsageOfWlan );
     aGenConnSettings.iUsageOfWlan = TCmUsageOfWlan( value );
 
-    value = QUERY_INT_FIELD( defConnRecordSet->iRecords[0], KCDTIdSeamlessnessHome );
-    aGenConnSettings.iSeamlessnessHome = TCmSeamlessnessValue( value );
+    value = QUERY_INT_FIELD( defConnRecordSet->iRecords[0], KCDTIdCellularDataUsageHome );
+    aGenConnSettings.iCellularDataUsageHome = TCmCellularDataUsage( value );
 
-    value = QUERY_INT_FIELD( defConnRecordSet->iRecords[0], KCDTIdSeamlessnessVisitor );
-    aGenConnSettings.iSeamlessnessVisitor = TCmSeamlessnessValue( value );
+    value = QUERY_INT_FIELD( defConnRecordSet->iRecords[0], KCDTIdCellularDataUsageVisitor );
+    aGenConnSettings.iCellularDataUsageVisitor = TCmCellularDataUsage( value );
             
     CleanupStack::PopAndDestroy( defConnRecordSet );
     RollbackTransaction();
@@ -2467,8 +2467,8 @@ void CCmManagerImpl::ReplaceGenConnSettingsL( const TCmGenConnSettings& aGenConn
         }
     
     TInt usageOfNewWlan = aGenConnSettings.iUsageOfWlan;
-    TInt seamlessnessHome    = aGenConnSettings.iSeamlessnessHome;
-    TInt seamlessnessVisitor = aGenConnSettings.iSeamlessnessVisitor;
+    TInt cellularDataUsageHome    = aGenConnSettings.iCellularDataUsageHome;
+    TInt cellularDataUsageVisitor = aGenConnSettings.iCellularDataUsageVisitor;
     
     // Delete the old record
     for ( TInt i = 0; i < defConnRecordSet->iRecords.Count(); ++i )
@@ -2489,11 +2489,11 @@ void CCmManagerImpl::ReplaceGenConnSettingsL( const TCmGenConnSettings& aGenConn
     CLOG_WRITE_1( "Set wlan usage: [%d]", usageOfNewWlan );
     SET_INT_FIELD(dcRcd, KCDTIdUsageOfWlan, usageOfNewWlan );
 
-    CLOG_WRITE_1( "Set seamlessnessHome: [%d]", seamlessnessHome );
-    SET_INT_FIELD(dcRcd, KCDTIdSeamlessnessHome, seamlessnessHome );
+    CLOG_WRITE_1( "Set cellularDataUsageHome: [%d]", cellularDataUsageHome );
+    SET_INT_FIELD(dcRcd, KCDTIdCellularDataUsageHome, cellularDataUsageHome );
 
-    CLOG_WRITE_1( "Set seamlessnessVisitor: [%d]", seamlessnessVisitor );
-    SET_INT_FIELD(dcRcd, KCDTIdSeamlessnessVisitor, seamlessnessVisitor );
+    CLOG_WRITE_1( "Set cellularDataUsageVisitor: [%d]", cellularDataUsageVisitor );
+    SET_INT_FIELD(dcRcd, KCDTIdCellularDataUsageVisitor, cellularDataUsageVisitor );
 
     dcRcd->StoreL( Session() );    
     CleanupStack::PopAndDestroy( dcRcd );
@@ -2873,8 +2873,8 @@ void CCmManagerImpl::SetGenConnSettingsToDefault( TCmGenConnSettings& aGenConnSe
     LOGGER_ENTERFN( "CCmManagerImpl::SetGenConnSettingsToDefault" );	
     	
     aGenConnSettings.iUsageOfWlan = ECmUsageOfWlanKnown;
-    aGenConnSettings.iSeamlessnessHome    = ECmSeamlessnessConfirmFirst;
-    aGenConnSettings.iSeamlessnessVisitor = ECmSeamlessnessConfirmFirst;
+    aGenConnSettings.iCellularDataUsageHome    = ECmCellularDataUsageAutomatic;
+    aGenConnSettings.iCellularDataUsageVisitor = ECmCellularDataUsageConfirm;
     }
 
 

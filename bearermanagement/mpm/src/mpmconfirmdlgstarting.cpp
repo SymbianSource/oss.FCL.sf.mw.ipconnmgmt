@@ -262,7 +262,7 @@ void CMPMConfirmDlgStarting::UserSelectedConnectAutomatically()
         //If reading of database failed we do not write back to the database to prevent random values
         if (errorCode == KErrNone)
             {
-            genConnSettings.iSeamlessnessHome = ECmSeamlessnessShowprogress;        
+            genConnSettings.iCellularDataUsageHome = ECmCellularDataUsageAutomatic;        
             TRAP_IGNORE(iServer.CommsDatAccess()->WriteGenConnSettingsL( genConnSettings )); 
             }
         } 

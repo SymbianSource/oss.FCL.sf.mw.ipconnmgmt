@@ -50,7 +50,7 @@ class CConnectionMonitorUiDetailsView : public CAknView,
         * @param aConnectionArray array containing connection list
         */
         CConnectionMonitorUiDetailsView( 
-                              const CConnectionArray* const aConnectionArray );
+                               CConnectionArray* const aConnectionArray );
 
         /**
         * EPOC second phase constructor.
@@ -136,7 +136,7 @@ class CConnectionMonitorUiDetailsView : public CAknView,
         /**
         * Array contains connections
         */
-        const CConnectionArray* const           iConnectionArray; // Not Owned.
+        CConnectionArray* const           iConnectionArray; // Not Owned.
 
         /**
         * The index of selected connection

@@ -465,6 +465,15 @@ void CProcessErrorCb::PolicyResponse( PolicyRequest& aCompletedRequest )
          ( aCompletedRequest.iNeededAction == EIgnoreError ||
            aCompletedRequest.iNeededAction == EDoReselection ))
         {
+        // Send error recovery propagated msg to self. This way a potential mobility 
+        // handshake knows that there were a problem with migrated IAP.
+        // In case there isn't mobility active available this just results as stray msg
+        if ( aCompletedRequest.iNeededAction == EIgnoreError )
+            {
+            iNode.SelfInterface().PostMessage( iNode.Id(), 
+                    TCFS60MCPRMessage::TMPMStartupErrorIgnoredMsg().CRef() );
+            }
+        
         TCFS60MCPRMessage::TMPMProcessErrorCompletedMsg msg( (TInt)aCompletedRequest.iNeededAction );
         iLastRequestOriginator.ReplyTo( iNode.Id(), msg );
         iLastRequestOriginator.Close();
@@ -480,6 +489,8 @@ void CProcessErrorCb::PolicyResponse( PolicyRequest& aCompletedRequest )
             ASSERT( aCompletedRequest.iError != KErrNone );
             err = aCompletedRequest.iError != KErrNone ? aCompletedRequest.iError : KErrGeneral;
             }
+            
+        // Send error msg indicatating the processerror has been completed.
         TEBase::TError msg( TCFS60MCPRMessage::TMPMProcessErrorCompletedMsg::Id(), err );
         iLastRequestOriginator.ReplyTo( iNode.Id(), msg );
         iLastRequestOriginator.Close();

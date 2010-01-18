@@ -68,7 +68,11 @@ const TInt KWlanLastSessionClosedTimeout = 1;
 const TInt KWlanLastSocketClosedTimeout = -1;
 const TUint32 KEndOfArray = KMaxTUint;
 
-/// Modem bearer names for WLAN connection methods
+// Daemon manager name for Easy WLAN IAP
+_LIT( KHotspotDaemonManagerName, "NetCfgExtnHotSpot" );
+_LIT( KEasyWlanName, "Easy WLAN" );
+
+// Modem bearer names for WLAN connection methods
 _LIT( KModemBearerWLAN, "WLANBearer" );
 
 _LIT( KWlanFileIcons, "z:cmpluginwlan.mbm" );
@@ -2740,6 +2744,24 @@ void CCmPluginWlan::SetDaemonNameL()
             return;
     	    }
         delete daemonName;
+        }
+       
+    // check if Easy WLAN IAP since it has different config daemon
+    // manager name
+    HBufC* iapName = GetStringAttributeL( ECmName );
+    if ( iapName )
+        {
+        CleanupStack::PushL( iapName );
+        if ( iapName->Compare( KEasyWlanName ) == 0 )
+            {
+            SetStringAttributeL( ECmConfigDaemonManagerName, 
+                                  KHotspotDaemonManagerName );
+            SetStringAttributeL( ECmConfigDaemonName, 
+                                   KConfigDaemonName );
+            CleanupStack::PopAndDestroy( iapName );
+            return;
+            }
+        CleanupStack::PopAndDestroy( iapName );
         }
         
     // use DHCP if we can

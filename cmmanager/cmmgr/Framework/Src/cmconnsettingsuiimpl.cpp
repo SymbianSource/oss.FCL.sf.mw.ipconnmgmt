@@ -319,6 +319,13 @@ TBool CCmConnSettingsUiImpl::ShowConnSelectRadioPageL(
                 }
             }
     
+    if ( aTitleStringResource == R_CMMANAGERUI_DEFAULT_CONNECTION_TITLE )
+        {
+        // It is not allowed to choose Connection Methods 
+        // in Default connection -dialog.
+        //
+        iOpenDestination = EFalse;
+        }
     
     if ( UserSelectionDlgL( listIndex, items, aSelection, 
                             aTitleStringResource,

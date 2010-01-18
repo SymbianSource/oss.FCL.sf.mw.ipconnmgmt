@@ -97,8 +97,8 @@ START_ATTRIBUTE_TABLE( CCDDefConnRecord, 0, 0 )
 	X_REGISTER_ATTRIBUTE( CCDDefConnRecord,   iDefConnType,         TMDBNum )
 	X_REGISTER_ATTRIBUTE( CCDDefConnRecord,   iDefConnUid,          TMDBNum )
 	X_REGISTER_ATTRIBUTE( CCDDefConnRecord,   iUsageOfWlan,      TMDBNum )
-        X_REGISTER_ATTRIBUTE( CCDDefConnRecord,   iSeamlessnessHome,  TMDBNum )
-        X_REGISTER_ATTRIBUTE( CCDDefConnRecord,   iSeamlessnessVisitor,  TMDBNum )
+        X_REGISTER_ATTRIBUTE( CCDDefConnRecord,   iCellularDataUsageHome,  TMDBNum )
+        X_REGISTER_ATTRIBUTE( CCDDefConnRecord,   iCellularDataUsageVisitor,  TMDBNum )
     X_REGISTER_ATTRIBUTE( CCDRecordBase,      iRecordTag,           TMDBNum )
 	X_REGISTER_ATTRIBUTE( CCDRecordBase,      iRecordName,          TMDBText )
 END_ATTRIBUTE_TABLE()
@@ -110,8 +110,8 @@ const SRecordTypeInfo CCDDefConnRecord::iRecordInfo[]=
     	{ KCDTIdDefConnType,         EUint32,    ENoAttrs, DEFCONN_TYPE },
     	{ KCDTIdDefConnUid,          EUint32,    ENoAttrs, DEFCONN_UID },
     	{ KCDTIdUsageOfWlan,         EUint32,    ENoAttrs, USAGEOFWLAN },
-    	{ KCDTIdSeamlessnessHome,     EUint32,    ENoAttrs,   SEAMLESSNESS_HOME },
-        { KCDTIdSeamlessnessVisitor,  EUint32,    ENoAttrs,   SEAMLESSNESS_VISITOR },    	
+    	{ KCDTIdCellularDataUsageHome,     EUint32,    ENoAttrs,   CELLULAR_DATA_USAGE_HOME },
+        { KCDTIdCellularDataUsageVisitor,  EUint32,    ENoAttrs,   CELLULAR_DATA_USAGE_VISITOR },    	
 	    { 0, 0, ENoAttrs, KCDNull }
   	};
   	
@@ -129,10 +129,10 @@ EXPORT_C CCDDefConnRecord::CCDDefConnRecord( TMDBElementId aElementId )
                         | KCDTIdDefConnUid ),
       iUsageOfWlan( ( aElementId & KCDMaskShowRecordType ) 
                         | KCDTIdUsageOfWlan ),
-      iSeamlessnessHome( ( aElementId & KCDMaskShowRecordType ) 
-                        | KCDTIdSeamlessnessHome ),
-      iSeamlessnessVisitor( ( aElementId & KCDMaskShowRecordType ) 
-                        | KCDTIdSeamlessnessVisitor )
+      iCellularDataUsageHome( ( aElementId & KCDMaskShowRecordType ) 
+                        | KCDTIdCellularDataUsageHome ),
+      iCellularDataUsageVisitor( ( aElementId & KCDMaskShowRecordType ) 
+                        | KCDTIdCellularDataUsageVisitor )
     {};  	
 
 EXPORT_C TMDBElementId 
@@ -157,10 +157,10 @@ EXPORT_C TMDBElementId
                                 ENoAttrs,   DEFCONN_UID ),
         SGenericRecordTypeInfo( KCDTIdUsageOfWlan,  EUint32,    
                                 ENoAttrs,   USAGEOFWLAN ),
-        SGenericRecordTypeInfo( KCDTIdSeamlessnessHome,  EUint32,    
-                                ENoAttrs,   SEAMLESSNESS_HOME ),
-        SGenericRecordTypeInfo( KCDTIdSeamlessnessVisitor,  EUint32,    
-                                ENoAttrs,   SEAMLESSNESS_VISITOR ),
+        SGenericRecordTypeInfo( KCDTIdCellularDataUsageHome,  EUint32,    
+                                ENoAttrs,   CELLULAR_DATA_USAGE_HOME ),
+        SGenericRecordTypeInfo( KCDTIdCellularDataUsageVisitor,  EUint32,    
+                                ENoAttrs,   CELLULAR_DATA_USAGE_VISITOR ),
         SGenericRecordTypeInfo( 0, 0, ENoAttrs, KCDNull )
         };
 

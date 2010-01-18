@@ -140,23 +140,38 @@ namespace S60MCprMobilityActivity
 
 
     // -----------------------------------------------------------------------------
-    // S60MCprMobilityActivity::TAwaitingMigrationAcceptedOrRejectedOrCancel::Accept
+    // S60MCprMobilityActivity::TAwaitingMigrationAcceptedOrRejectedOrStartupErrorIgnoredOrCancel::Accept
     // -----------------------------------------------------------------------------
     //
-    DEFINE_SMELEMENT( TAwaitingMigrationAcceptedOrRejectedOrCancel, NetStateMachine::MState, TContext )
-    TBool TAwaitingMigrationAcceptedOrRejectedOrCancel::Accept()
+    DEFINE_SMELEMENT( TAwaitingMigrationAcceptedOrRejectedOrStartupErrorIgnoredOrCancel, NetStateMachine::MState, TContext )
+    TBool TAwaitingMigrationAcceptedOrRejectedOrStartupErrorIgnoredOrCancel::Accept()
         {
         if ( (iContext.iMessage.IsMessage<TCFMobilityProvider::TMigrationAccepted>()) ||
              (iContext.iMessage.IsMessage<TCFMobilityProvider::TMigrationRejected>()) ||
+             (iContext.iMessage.IsMessage<TCFS60MCPRMessage::TMPMStartupErrorIgnoredMsg>()) ||
              (iContext.iMessage.IsMessage<TEBase::TCancel>()) )
             {
-            S60MCPRLOGSTRING1("S60MCPR<%x>::TAwaitingMigrationAcceptedOrRejectedOrCancel::Accept()",(TInt*)&iContext.Node())
+            S60MCPRLOGSTRING1("S60MCPR<%x>::TAwaitingMigrationAcceptedOrRejectedOrStartupErrorIgnoredOrCancel::Accept()",(TInt*)&iContext.Node())
             return ETrue;
             }
         return EFalse;
         }
-
-
+    
+    // -----------------------------------------------------------------------------
+    // S60MCprMobilityActivity::TAwaitingMigrationRejected::Accept
+    // -----------------------------------------------------------------------------
+    //
+    DEFINE_SMELEMENT( TAwaitingMigrationRejected, NetStateMachine::MState, TContext )
+    TBool TAwaitingMigrationRejected::Accept()
+        {
+        if ( iContext.iMessage.IsMessage<TCFMobilityProvider::TMigrationRejected>() )
+            {
+            S60MCPRLOGSTRING1("S60MCPR<%x>::TAwaitingMigrationRejected::Accept()",(TInt*)&iContext.Node())
+            return ETrue;
+            }
+        return EFalse;
+        }
+    
     // -----------------------------------------------------------------------------
     // S60MCprMobilityActivity::TNoTagOrInformMigrationAvailableBackwardsOrErrorOrCancel::TransitionTag
     // -----------------------------------------------------------------------------
@@ -229,30 +244,35 @@ namespace S60MCprMobilityActivity
 
 
     // -----------------------------------------------------------------------------
-    // S60MCprMobilityActivity::TNoTagOrErrorTagOrApplicationRejected::TransitionTag
+    // S60MCprMobilityActivity::TNoTagOrErrorTagOrApplicationRejectedOrConsumeRejected::TransitionTag
     // -----------------------------------------------------------------------------
     //
-    DEFINE_SMELEMENT( TNoTagOrErrorTagOrApplicationRejected, NetStateMachine::MStateFork, TContext )
-    TBool TNoTagOrErrorTagOrApplicationRejected::TransitionTag()
+    DEFINE_SMELEMENT( TNoTagOrErrorTagOrApplicationRejectedOrConsumeRejected, NetStateMachine::MStateFork, TContext )
+    TBool TNoTagOrErrorTagOrApplicationRejectedOrConsumeRejected::TransitionTag()
         {
         if ( iContext.iNodeActivity->Error() )
             {
-            S60MCPRLOGSTRING1("S60MCPR<%x>::TNoTagOrErrorTagOrApplicationRejected::TransitionTag() KErrorTag",(TInt*)&iContext.Node())
+            S60MCPRLOGSTRING1("S60MCPR<%x>::TNoTagOrErrorTagOrApplicationRejectedOrConsumeRejected::TransitionTag() KErrorTag",(TInt*)&iContext.Node())
             return MeshMachine::KErrorTag | NetStateMachine::EForward;
             }
         if ( message_cast<TCFMobilityProvider::TMigrationAccepted>(&iContext.iMessage) )
             {
-            S60MCPRLOGSTRING1("S60MCPR<%x>::TNoTagOrErrorTagOrApplicationRejected::TransitionTag() KNoTag",(TInt*)&iContext.Node())
+            S60MCPRLOGSTRING1("S60MCPR<%x>::TNoTagOrErrorTagOrApplicationRejectedOrConsumeRejected::TransitionTag() KNoTag",(TInt*)&iContext.Node())
             return MeshMachine::KNoTag | NetStateMachine::EForward;
             }
         else if ( message_cast<TCFMobilityProvider::TMigrationRejected>(&iContext.iMessage) )
             {
-            S60MCPRLOGSTRING1("S60MCPR<%x>::TNoTagOrErrorTagOrApplicationRejected::TransitionTag() KApplicationRejectedMigration",(TInt*)&iContext.Node())
+            S60MCPRLOGSTRING1("S60MCPR<%x>::TNoTagOrErrorTagOrApplicationRejectedOrConsumeRejected::TransitionTag() KApplicationRejectedMigration",(TInt*)&iContext.Node())
             return S60MCprStates::KApplicationRejectedMigration | NetStateMachine::EForward; 
+            }
+        else if ( message_cast<TCFS60MCPRMessage::TMPMStartupErrorIgnoredMsg>(&iContext.iMessage) )
+            {
+            S60MCPRLOGSTRING1("S60MCPR<%x>::TNoTagOrErrorTagOrApplicationRejectedOrConsumeRejected::TransitionTag() KSwallowRejectedMsg",(TInt*)&iContext.Node())
+            return S60MCprStates::KConsumeRejectedMsg | NetStateMachine::EForward; 
             }
         else
             {
-            S60MCPRLOGSTRING1("S60MCPR<%x>::TNoTagOrErrorTagOrApplicationRejected::TransitionTag() KCancelTag",(TInt*)&iContext.Node())
+            S60MCPRLOGSTRING1("S60MCPR<%x>::TNoTagOrErrorTagOrApplicationRejectedOrConsumeRejected::TransitionTag() KCancelTag",(TInt*)&iContext.Node())
             return MeshMachine::KCancelTag | NetStateMachine::EForward;
             }
         }

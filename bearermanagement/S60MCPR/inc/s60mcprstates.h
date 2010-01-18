@@ -55,6 +55,7 @@ namespace S60MCprStates
     const TInt KWaitPolicyServerResponse = 11051;
     const TInt KInformMigrationAvailable = 11052;
     const TInt KSendInitialApplicationReject = 11053; 
+    const TInt KConsumeRejectedMsg = 11054;
     /**
      * Execution context
      */

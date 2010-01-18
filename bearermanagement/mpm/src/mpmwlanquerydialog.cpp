@@ -332,14 +332,39 @@ setting easy wlan as not selected" )
                 }
             else // WiFiProt::EWiFiNoAuto
                 {
-                MPMLOGSTRING( "CMPMWlanQueryDialog::RunL No Auto, starting WPA key query" )
-                iWlanQueryState = EWpaSettings;
-                iNotifier.StartNotifierAndGetResponse( iStatus, 
-                                                       KUidEasyWpaDlg, 
-                                                       iNotifWpaKey, 
-                                                       iNotifWpaKey );
-                SetActive();
-                return;
+                if( iNetworkPrefs().iSecMode == EWlanConnectionSecurityWep )
+                    {
+                    MPMLOGSTRING( "CMPMWlanQueryDialog::RunL: No WPS, starting WEP key query" );
+                    iWlanQueryState = EWepSettings;
+                    iNotifier.StartNotifierAndGetResponse( iStatus, 
+                            KUidEasyWepDlg, 
+                            iNotifWep, 
+                            iNotifWep );
+                    SetActive();
+                    return;
+                    }
+                else if ( iNetworkPrefs().iSecMode == EWlanConnectionSecurityWpaPsk )
+                    {
+                    MPMLOGSTRING( "CMPMWlanQueryDialog::RunL: No WPS, starting WPA key query" );
+                    iWlanQueryState = EWpaSettings;
+                    iNotifier.StartNotifierAndGetResponse( iStatus, 
+                            KUidEasyWpaDlg, 
+                            iNotifWpaKey, 
+                            iNotifWpaKey );
+                    SetActive();
+                    return;
+                    }
+                else if ( iNetworkPrefs().iSecMode == EWlanConnectionSecurityOpen )
+                    {
+                    MPMLOGSTRING( "CMPMWlanQueryDialog::RunL: No WPS, sec mode open" );
+					iStatus = KErrNone;
+                    }
+                else
+                    {
+                    MPMLOGSTRING2( "CMPMWlanQueryDialog::RunL: No WPS, unsupported sec mode %d", 
+                            iNetworkPrefs().iSecMode );
+                    iStatus = KErrNotSupported;
+                    }
                 }
             }
         }

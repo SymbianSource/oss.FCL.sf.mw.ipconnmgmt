@@ -261,23 +261,33 @@ void CSaeObserver::UpdateBearerNetworkStatusL( const TSAEConnectionType& connTyp
         User::WaitForRequest( status );
         LOG( Log::Printf( _L("+ DCL: Async call status==(%d)."), status.Int() ));
 
-        if ( (ntwStatus == EConnMonStatusNotAvailable) || (ntwStatus == EConnMonStatusUnattached) )
+        switch ( ntwStatus )
             {
-            LOG( Log::Printf( _L("DCL: GPRS ntwk is UnAttached." )));
-            iNetworkIsUnAttached = ETrue;
-            NotifyPubSub( KPSUidGprsStatus, EPSGprsUnattached );
+            case ENtwkStatusNotKnown:
+                LOG( Log::Printf( _L("DCL: Async request for GPRS ntwk status failed %d!"),
+                     status.Int() ));
+                break;
+                
+            case EConnMonStatusNotAvailable:
+            case EConnMonStatusUnattached:
+                LOG( Log::Printf( _L("DCL: GPRS ntwk is UnAttached." )));
+                iNetworkIsUnAttached = ETrue;
+                NotifyPubSub( KPSUidGprsStatus, EPSGprsUnattached );
+                break;
+                
+            case EConnMonStatusActive:
+                LOG( Log::Printf( _L("DCL: GPRS ntwk is Active." )));
+                iNetworkIsUnAttached = EFalse;
+                NotifyPubSub( KPSUidGprsStatus, EPSGprsContextActive );
+                break;
+                
+            case EConnMonStatusAttached:
+            default:
+                LOG( Log::Printf( _L("DCL: GPRS ntwk is Attached." )));
+                iNetworkIsUnAttached = EFalse;
+                NotifyPubSub( KPSUidGprsStatus, EPSGprsAttach );
             }
-        else if ( ntwStatus == ENtwkStatusNotKnown )
-            {
-            LOG( Log::Printf( _L("DCL: Async request for GPRS ntwk status failed %d!"),
-                 status.Int() ));
-            }
-        else
-            {
-            LOG( Log::Printf( _L("DCL: GPRS ntwk is Attached." )));
-            iNetworkIsUnAttached = EFalse;
-            NotifyPubSub( KPSUidGprsStatus, EPSGprsAttach );
-            }
+        
         }
     else if ( connType == ESAEWCDMAConnectionType )
         {
@@ -285,23 +295,33 @@ void CSaeObserver::UpdateBearerNetworkStatusL( const TSAEConnectionType& connTyp
         User::WaitForRequest( status );
         LOG( Log::Printf( _L("+ DCL: Async call status==(%d)."), status.Int() ));
 
-        if ( (ntwStatus == EConnMonStatusNotAvailable) || (ntwStatus == EConnMonStatusUnattached) )
+        switch ( ntwStatus )
             {
-            LOG( Log::Printf( _L("DCL: WCDMA ntwk is UnAttached." )));
-            iNetworkIsUnAttached = ETrue;
-            NotifyPubSub( KPSUidWcdmaStatus, EPSWcdmaUnattached );
+            case ENtwkStatusNotKnown:
+                LOG( Log::Printf( _L("DCL: Async request for WCDMA ntwk status failed %d!"),
+                     status.Int() ));
+                break;
+                
+            case EConnMonStatusNotAvailable:
+            case EConnMonStatusUnattached:
+                LOG( Log::Printf( _L("DCL: WCDMA ntwk is UnAttached." )));
+                iNetworkIsUnAttached = ETrue;
+                NotifyPubSub( KPSUidWcdmaStatus, EPSWcdmaUnattached);
+                break;
+                
+            case EConnMonStatusActive:
+                LOG( Log::Printf( _L("DCL: WCDMA ntwk is Active." )));
+                iNetworkIsUnAttached = EFalse;
+                NotifyPubSub( KPSUidWcdmaStatus, EPSWcdmaContextActive );
+                break;
+                
+            case EConnMonStatusAttached:
+            default:
+                LOG( Log::Printf( _L("DCL: WCDMA ntwk is Attached." )));
+                iNetworkIsUnAttached = EFalse;
+                NotifyPubSub( KPSUidWcdmaStatus, EPSWcdmaAttach );
             }
-        else if ( ntwStatus == ENtwkStatusNotKnown )
-            {
-            LOG( Log::Printf( _L("DCL: Async request for WCDMA ntwk status failed %d!"),
-                 status.Int() ));
-            }
-        else
-            {
-            LOG( Log::Printf( _L("DCL: WCDMA ntwk is Attached." )));
-            iNetworkIsUnAttached = EFalse;
-            NotifyPubSub( KPSUidWcdmaStatus, EPSWcdmaAttach );
-            }
+        
         }
     else
         {

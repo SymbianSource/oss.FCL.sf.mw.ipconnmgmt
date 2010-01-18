@@ -22,6 +22,7 @@
 #include <aknnotedialog.h>
 #include <AknUtils.h>
 #include <cmmanagerext.h>
+#include <NIFVAR.H>
 #include <ConnectionMonitorUi.rsg>
 #include "ConnectionMonitorUi.hrh"
 #include "ConnectionMonitorUiAppUi.h"
@@ -317,13 +318,11 @@ void CConnectionMonitorUiAppUi::EventL(
                 connectionInfo = ( *iConnectionArray )[index]; 
             
                 if ( iView->Id() == KDetailsViewId )
-                    {
-                    CConnectionMonitorUiDetailsView* view = (CConnectionMonitorUiDetailsView*) iView;
-                    if ( view->GetSelectedConnection() == ((TUint) index) )
-                        {
-                        view->CloseViewL();
-                        activateMainView = ETrue;
-                        }
+                    {               
+                        // Mark the connection as closed and refresh details view.
+                        // It will change the status there.
+                        connectionInfo->RefreshConnectionStatus( KConnectionClosed );
+                        connectionInfo->RefreshDetailsArrayL();                        
                     }
                 else // MainView
                     {
@@ -332,8 +331,10 @@ void CConnectionMonitorUiAppUi::EventL(
                         {
                         ShowConnectionSummaryInformationNoteL( connectionInfo );
                         }
-                    }
-                iConnectionArray->Delete( connectionId );
+                    // Mark the connection as closed. When the timer ticks the next
+                    // time the marked connection is deleted and removed from the main view.
+                    connectionInfo->RefreshConnectionStatus( KConnectionClosed );
+                    }                
                 CMUILOGGER_WRITE_F( "Deleted: %d", connectionId );
                 }
             break;
@@ -601,6 +602,28 @@ TInt CConnectionMonitorUiAppUi::Tick()
 //
 void CConnectionMonitorUiAppUi::OnTimerExpiredL()
     {
+    CMUILOGGER_WRITE_F( "MdcaCount: %d", iConnectionArray->MdcaCount());
+    // First check if there are connections that need to be deleted.
+    // The conditions for deletion are:
+    // 1. Connection status must be closed
+    // 2. Main view must be active (details view should be shown also for closed connections)
+    // 3. There must not be active request ongoing (otherwise deletion might cause crash)    
+    for(TUint i = 0; i < iConnectionArray->MdcaCount(); i++)
+       {
+       CMUILOGGER_WRITE_F( "i: %d", i );
+       CMUILOGGER_WRITE_F( "Status: %d", (*iConnectionArray)[i]->GetStatus() );
+       CMUILOGGER_WRITE_F( "active: %d", iActiveWrapper->IsActive() );
+       if( (*iConnectionArray)[i]->GetStatus() == EConnectionClosed 
+            && !iActiveWrapper->IsActive()
+            && iView->Id() != KDetailsViewId)
+           {
+           CMUILOGGER_WRITE_F( "Delete conn id: %d", (*iConnectionArray)[i]->GetConnectionId() );
+           iConnectionArray->Delete( (*iConnectionArray)[i]->GetConnectionId() );
+           i--;
+           }
+       }
+    
+    
     TInt count = iNewConnectionIdArray.Count();
     if ( count > 0 )
         {

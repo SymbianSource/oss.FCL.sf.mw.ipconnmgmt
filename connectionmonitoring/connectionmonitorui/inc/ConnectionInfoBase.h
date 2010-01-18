@@ -193,6 +193,13 @@ class CConnectionInfoBase : public CBase
         TConnectionStatus GetStatus() const;
 
         /**
+        * Refresh status of connection
+        * @param aConnectionStatus new status of connection
+        */
+        void RefreshConnectionStatus( 
+                                   const TInt aConnectionStatus );
+
+        /**
         * Gives back the name of connection 
         * @return the name of connection 
         */
@@ -259,13 +266,6 @@ class CConnectionInfoBase : public CBase
         * Refresh status of connection
         */
         void RefreshConnectionStatus();
-
-        /**
-        * Refresh status of connection
-        * @param aConnectionStatus new status of connection
-        */
-        void RefreshConnectionStatus( 
-                                   const TConnectionStatus aConnectionStatus );
 
         /**
         * Refresh amount of sent and received data of connection

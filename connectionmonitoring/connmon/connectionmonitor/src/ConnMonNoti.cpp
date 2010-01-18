@@ -28,6 +28,7 @@
 #include "ConnMonIAP.h"
 #include "ConnMonNoti.h"
 #include "ConnMonAvailabilityManager.h"
+#include "cellulardatausagekeyupdater.h"
 #include "log.h"
 
 // ============================ MEMBER FUNCTIONS ===============================
@@ -974,6 +975,11 @@ void CNetwRegistrationNotifier::RunL()
 
             // Store to compare next event correctly
             iEventInfo.iData = value;
+            
+            // Update KCurrentCellularDataUsage -key in Repository KCRUidCmManage.
+            // Key tells applications whether it is allowed to use packet data or not.
+            TRAP_IGNORE( iServer->CellularDataUsageKeyUpdater()->UpdateKeyL(
+                iServer->Iap()->CalculateNetworkRegistration_v2( iRegistration ) ); )
             }
         LOGIT("CNetwRegistrationNotifier::RunL triggered HandleAvailabilityChange()")
         iServer->AvailabilityManager()->HandleAvailabilityChange();

@@ -116,8 +116,8 @@ void CGSConnSettingsPluginModel::LoadSettingsL()
 
     //Print out loaded settings
     OstTrace1( TRACE_NORMAL, CSP_LOADSETTINGSL_USAGE_OF_NEW_WLAN_PARAM_TRACE, "iSettings.iUsageOfWlan=%d", iSettings.iUsageOfWlan );
-    OstTrace1( TRACE_NORMAL, CSP_LOADSETTINGSL_SEAMLESSNESS_VISITOR_PARAM_TRACE, "iSeamlessnessVisitor=%d", iSettings.iSeamlessnessVisitor );
-    OstTrace1( TRACE_NORMAL, CSP_LOADSETTINGSL_SEAMLESSNESS_HOME_PARAM_TRACE, "iSettings.iSeamlessnessHome=%d", iSettings.iSeamlessnessHome );
+    OstTrace1( TRACE_NORMAL, CSP_LOADSETTINGSL_CELLULAR_DATA_USAGE_VISITOR_PARAM_TRACE, "iSettings.iCellularDataUsageVisitor=%d", iSettings.iCellularDataUsageVisitor );
+    OstTrace1( TRACE_NORMAL, CSP_LOADSETTINGSL_CELLULAR_DATA_USAGE_HOME_PARAM_TRACE, "iSettings.iCellularDataUsageHome=%d", iSettings.iCellularDataUsageHome );
     }
 
 // ----------------------------------------------------------------------------
@@ -136,8 +136,8 @@ void CGSConnSettingsPluginModel::SaveSettingsL()
 
     //Print out saved settings
     OstTrace1( TRACE_NORMAL, CSP_SAVESETTINGSL_USAGE_OF_NEW_WLAN_PARAM_TRACE, "iSettings.iUsageOfWlan=%d", iSettings.iUsageOfWlan );
-    OstTrace1( TRACE_NORMAL, CSP_SAVESETTINGSL_SEAMLESSNESS_VISITOR_PARAM_TRACE, "iSeamlessnessVisitor=%d", iSettings.iSeamlessnessVisitor );
-    OstTrace1( TRACE_NORMAL, CSP_SAVESETTINGSL_SEAMLESSNESS_HOME_PARAM_TRACE, "iSettings.iSeamlessnessHome=%d", iSettings.iSeamlessnessHome );
+    OstTrace1( TRACE_NORMAL, CSP_SAVESETTINGSL_CELLULAR_DATA_USAGE_VISITOR_PARAM_TRACE, "iSettings.iCellularDataUsageVisitor=%d", iSettings.iCellularDataUsageVisitor );
+    OstTrace1( TRACE_NORMAL, CSP_SAVESETTINGSL_CELLULAR_DATA_USAGE_HOME_PARAM_TRACE, "iSettings.iCellularDataUsageHome=%d", iSettings.iCellularDataUsageHome );
     }
 
 // ----------------------------------------------------------------------------
@@ -178,19 +178,18 @@ TInt CGSConnSettingsPluginModel::DataUsageAbroad()
     TInt mappedValue = 0;
 
     //Map to correct index    
-    switch ( iSettings.iSeamlessnessVisitor )
+    switch ( iSettings.iCellularDataUsageVisitor )
         {
-        case ECmSeamlessnessShowprogress:
-        case ECmSeamlessnessFullySeamless:
-            mappedValue = EDataUsageAbroadAutomatic; //Automatic
+        case ECmCellularDataUsageAutomatic:
+            mappedValue = EDataUsageAbroadAutomatic; // Automatic
             break;
 
-        case ECmSeamlessnessConfirmFirst:
-            mappedValue = EDataUsageAbroadConfirm; //Confirm
+        case ECmCellularDataUsageConfirm:
+            mappedValue = EDataUsageAbroadConfirm; // Confirm
             break;
 
-        case ECmSeamlessnessDisabled:
-            mappedValue = EDataUsageAbroadWlanOnly; //Wlan only
+        case ECmCellularDataUsageDisabled:
+            mappedValue = EDataUsageAbroadWlanOnly; // Wlan only
             break;
 
         default:
@@ -210,19 +209,18 @@ TInt CGSConnSettingsPluginModel::DataUsageInHomeNw()
     TInt mappedValue = 0;
 
     //Map to correct index    
-    switch ( iSettings.iSeamlessnessHome )
+    switch ( iSettings.iCellularDataUsageHome )
         {
-        case ECmSeamlessnessShowprogress:
-        case ECmSeamlessnessFullySeamless:
-            mappedValue = EDataUsageHomeNwAutomatic; //Automatic
+        case ECmCellularDataUsageAutomatic:
+            mappedValue = EDataUsageHomeNwAutomatic; // Automatic
             break;
 
-        case ECmSeamlessnessConfirmFirst:
-            mappedValue = EDataUsageHomeNwConfirm; //Confirm
+        case ECmCellularDataUsageConfirm:
+            mappedValue = EDataUsageHomeNwConfirm; // Confirm
             break;
 
-        case ECmSeamlessnessDisabled:
-            mappedValue = EDataUsageHomeNwWlanOnly; //Wlan only
+        case ECmCellularDataUsageDisabled:
+            mappedValue = EDataUsageHomeNwWlanOnly; // Wlan only
             break;
 
         default:
@@ -266,14 +264,14 @@ void CGSConnSettingsPluginModel::SetDataUsageAbroad( TInt aValue )
     switch ( aValue )
         {
         case EDataUsageAbroadAutomatic:  //Automatic
-            iSettings.iSeamlessnessVisitor = ECmSeamlessnessShowprogress; 
+            iSettings.iCellularDataUsageVisitor = ECmCellularDataUsageAutomatic; 
             break;
         case EDataUsageAbroadConfirm: //Confirm
-            iSettings.iSeamlessnessVisitor = ECmSeamlessnessConfirmFirst;
+            iSettings.iCellularDataUsageVisitor = ECmCellularDataUsageConfirm;
             break;
 
         case EDataUsageAbroadWlanOnly: //Wlan only
-            iSettings.iSeamlessnessVisitor = ECmSeamlessnessDisabled;
+            iSettings.iCellularDataUsageVisitor = ECmCellularDataUsageDisabled;
             break;
                         
         default:
@@ -292,15 +290,15 @@ void CGSConnSettingsPluginModel::SetDataUsageInHomeNw( TInt aValue )
     switch ( aValue )
         {
         case EDataUsageHomeNwAutomatic: //Automatic
-            iSettings.iSeamlessnessHome = ECmSeamlessnessShowprogress; 
+            iSettings.iCellularDataUsageHome = ECmCellularDataUsageAutomatic; 
             break;
 
         case EDataUsageHomeNwConfirm: //Confirm
-            iSettings.iSeamlessnessHome = ECmSeamlessnessConfirmFirst;
+            iSettings.iCellularDataUsageHome = ECmCellularDataUsageConfirm;
             break;
 
         case EDataUsageHomeNwWlanOnly: //Wlan only
-            iSettings.iSeamlessnessHome = ECmSeamlessnessDisabled;
+            iSettings.iCellularDataUsageHome = ECmCellularDataUsageDisabled;
             break;
                         
         default:

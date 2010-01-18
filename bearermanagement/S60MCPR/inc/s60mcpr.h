@@ -62,6 +62,7 @@ class TCFS60MCPRMessage
             EMPMPreferredCarrierAvailableMsg,
             EMPMStartIAPNotificationMsg,
             EMPMErrorNotificationMsg,
+            EMPMStartupErrorIgnoredMsg,
             };
   public: 
     typedef Messages::TMessageSigVoid<EMPMReselectBestIAPCompletedMsg, TCFS60MCPRMessage::ERealmId>     TMPMReselectBestIAPCompletedMsg;
@@ -70,6 +71,7 @@ class TCFS60MCPRMessage
     typedef Messages::TMessageSigAny<EMPMPreferredCarrierAvailableMsg, TCFS60MCPRMessage::ERealmId>     TMPMPreferredCarrierAvailableMsg;
     typedef Messages::TMessageSigNumber<EMPMStartIAPNotificationMsg, TCFS60MCPRMessage::ERealmId>       TMPMStartIAPNotificationMsg;
     typedef Messages::TMessageSigNumber<EMPMErrorNotificationMsg, TCFS60MCPRMessage::ERealmId>          TMPMErrorNotificationMsg;
+    typedef Messages::TMessageSigVoid<EMPMStartupErrorIgnoredMsg, TCFS60MCPRMessage::ERealmId>          TMPMStartupErrorIgnoredMsg;
     };
 
 /**

@@ -216,13 +216,7 @@ TBool CConnectionInfoBase::IsSuspended() const
 //
 CDesCArrayFlat* CConnectionInfoBase::GetDetailsArray() const
     {
-    CDesCArrayFlat* array = NULL;
-    if ( ( iConnectionStatus == EConnectionSuspended ) ||
-         ( iConnectionStatus == EConnectionCreated ) )
-        {
-        array = iDetailsArray;
-        }
-    return array;
+    return iDetailsArray;
     }
 
 // ---------------------------------------------------------
@@ -301,7 +295,7 @@ void CConnectionInfoBase::RefreshConnectionStatus()
 // ---------------------------------------------------------
 //
 void CConnectionInfoBase::RefreshConnectionStatus(
-                                   const TConnectionStatus aConnectionStatus )
+                                   const TInt aConnectionStatus )
     {
     CMUILOGGER_ENTERFN( "RefreshConnectionStatus" );
     CMUILOGGER_WRITE_F( "RefreshConnectionStatus aConnectionStatus %d",
@@ -317,9 +311,8 @@ void CConnectionInfoBase::RefreshConnectionStatus(
         CMUILOGGER_WRITE("1");
         iConnectionStatus = EConnectionCreated;
         }
-    else if ( ( iConnectionStatus == EConnectionClosing ) &&
-              ( ( aConnectionStatus == KConnectionClosed ) ||
-                ( aConnectionStatus == KLinkLayerClosed ) ) ) 
+    else if ( ( aConnectionStatus == KConnectionClosed ) ||
+              ( aConnectionStatus == KLinkLayerClosed ) ) 
         {
         CMUILOGGER_WRITE("2");        
         iConnectionStatus = EConnectionClosed;

@@ -142,18 +142,18 @@ class CProcessorGlobal : public CProcessorBase
         void SetGenConnSettingWlanUsage( HBufC16* aPtrTag );
 
         /**
-        * Sets the "Seamlessness (cellular data usage) in home networks"
+        * Sets the "cellular data usage in home networks"
         * parameter in general connection settings.
         * @param aPtrTag string containing the parameter's value.
         */
-        void SetGenConnSettingSeamlessnessHome( HBufC16* aPtrTag );
+        void SetGenConnSettingCellularDataUsageHome( HBufC16* aPtrTag );
 
         /**
-        * Sets the "Seamlessness (cellular data usage) in visitor networks"
+        * Sets the "cellular data usage in visitor networks"
         * parameter in general connection settings.
         * @param aPtrTag string containing the parameter's value.
         */
-        void SetGenConnSettingSeamlessnessVisitor( HBufC16* aPtrTag );
+        void SetGenConnSettingCellularDataUsageVisitor( HBufC16* aPtrTag );
 
         // Stores the general connection settings, using CMM
         void SetGenConnSettingsL();

@@ -315,8 +315,8 @@ namespace S60MCprMobilityActivity
     // If the migration was acepted we loop again waiting for a new, preferred one
     NODEACTIVITY_ENTRY( KNoTag, 
                         CS60MobilityActivity::TInformMigrationCompleted, 
-                        S60MCprMobilityActivity::TAwaitingMigrationAcceptedOrRejectedOrCancel,
-                        S60MCprMobilityActivity::TNoTagOrErrorTagOrApplicationRejected ) //-jl- TODO cancel here?
+                        S60MCprMobilityActivity::TAwaitingMigrationAcceptedOrRejectedOrStartupErrorIgnoredOrCancel,
+                        S60MCprMobilityActivity::TNoTagOrErrorTagOrApplicationRejectedOrConsumeRejected )
     // Informs policy server that application has accepted the carrier
     THROUGH_NODEACTIVITY_ENTRY( KNoTag,
                                 CS60MobilityActivity::TSendApplicationAccept,
@@ -325,6 +325,12 @@ namespace S60MCprMobilityActivity
     THROUGH_NODEACTIVITY_ENTRY( S60MCprStates::KApplicationRejectedMigration,
                                 CS60MobilityActivity::TSendApplicationReject,
                                 TTag<S60MCprStates::KWaitPolicyServerResponse|NetStateMachine::EBackward> )
+    // Waits for Migration Rejected the carrier -msg and consumes it, because MPM doesn't need it.
+    // MPM already received the ProcessError which is enough.
+    NODEACTIVITY_ENTRY( S60MCprStates::KConsumeRejectedMsg,
+                        CS60MobilityActivity::TClearHandshakingFlag,
+                        S60MCprMobilityActivity::TAwaitingMigrationRejected,
+                        TTag<S60MCprStates::KWaitPolicyServerResponse|NetStateMachine::EBackward> )
     // On error, we do not terminate the activity.
     // We need to inform the client and propose a new handshake should the client wish to continue
 	// Shut down the layer, to release the rejected bearer

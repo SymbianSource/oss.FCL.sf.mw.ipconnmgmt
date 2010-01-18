@@ -33,6 +33,7 @@
 #include "ConnMonBearerWLAN.h"
 #include "ConnMonBearerGroupManager.h"
 #include "connmoncommsdatnotifier.h"
+#include "cellulardatausagekeyupdater.h"
 
 // ============================ LOCAL FUNCTIONS ===============================
 
@@ -318,7 +319,10 @@ void CConnMonServer::ConstructL()
     // Bearer group manager
     iBearerGroupManager = CConnMonBearerGroupManager::NewL();
     LOGIT("ConstructL: Bearer group manager constructed")
-
+    
+    iCellularDataUsageKeyUpdater = CCellularDataUsageKeyUpdater::NewL( this );
+    LOGIT("ConstructL: CCellularDataUsageKeyUpdater constructed")
+    
     // Identify ourselves and open for service
     StartL( KConnectionMonitorServerName );
 
@@ -368,6 +372,8 @@ CConnMonServer::~CConnMonServer()
 
     // Bearer Group Manager
     delete iBearerGroupManager;
+    
+    delete iCellularDataUsageKeyUpdater;
 
     FeatureManager::UnInitializeLib();
     }
