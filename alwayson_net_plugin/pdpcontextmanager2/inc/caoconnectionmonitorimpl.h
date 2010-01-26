@@ -304,6 +304,11 @@ private: // Data
      * Own: Bearer type
      */
     TInt iBearerValue;
+    
+    /**
+     * Own: Retry counter
+     */
+    TInt iCounter;
     };
 
 #endif /* CAOCONNECTIONMONITORIMPL_H */

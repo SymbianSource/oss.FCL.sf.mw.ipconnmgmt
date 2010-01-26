@@ -28,6 +28,7 @@
 
 #include "cellulardatausagekeyupdater.h"
 #include "ConnMonServ.h"
+#include "ConnMonAvailabilityManager.h"
 #include "ConnMonIap.h"
 #include "ConnMonDef.h"
 #include "log.h"
@@ -99,12 +100,15 @@ void CCellularDataUsageKeyUpdater::UpdateKeyL( const TInt aRegistration ) const
     if ( err == KErrNone )
         {
         TInt previous( 0 );
-        TInt err = cmRepository->Get( KCurrentCellularDataUsage, previous );
+        err = cmRepository->Get( KCurrentCellularDataUsage, previous );
            
         if ( err == KErrNone && ( value != previous ) )
             {
             cmRepository->Set( KCurrentCellularDataUsage, value );
-            LOGIT1("KCurrentCellularDataUsage set to <%d>", value)
+            LOGIT1("KCurrentCellularDataUsage set to %d", value)
+            
+            LOGIT("CCellularDataUsageKeyUpdater triggered HandleAvailabilityChange()")
+            iServer->AvailabilityManager()->HandleAvailabilityChange();
             }    
         delete cmRepository;    
         }

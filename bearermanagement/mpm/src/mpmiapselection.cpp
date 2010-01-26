@@ -117,33 +117,12 @@ void CMPMIapSelection::ChooseIapL( const TMpmConnPref& aChooseIapPref )
     
     iChooseIapPref = aChooseIapPref;
 
-    if ( iSession->IsWlanOnlyL( iNewWlansAllowed ) )
-        {
-        if ( iChooseIapPref.BearerSet() ==
-             TExtendedConnPref::EExtendedConnBearerUnknown )
-            {
-            // Force bearerset to WLAN if received bearerset was empty
-            iChooseIapPref.SetBearerSet(
-                TExtendedConnPref::EExtendedConnBearerWLAN );
-            }
-        else if ( iChooseIapPref.BearerSet() &
-                  TExtendedConnPref::EExtendedConnBearerWLAN )
-            {
-            // Force bearerset to WLAN only in case where wlan was included
-            // in the received bearerset.
-            iChooseIapPref.SetBearerSet(
-                TExtendedConnPref::EExtendedConnBearerWLAN );          
-            }
-        else
-            {
-            // If wlan was not included in received bearerset,
-            // complete selection with error code
-            ChooseIapComplete( KErrPermissionDenied,
-                               iSession->MyServer().UserConnPref() );
-            return; 
-            }
-        }
-    
+    // Update iNewWlansAllowed information.
+    // No need to filter away cellular iaps here based on UI's Allow Cellular Usage
+    // setting, since ConnMon checks the setting and reports only correct IAPs
+    // available for MPM.
+    iSession->IsWlanOnlyL( iNewWlansAllowed );
+
     // Always use stored connection info.
     // If stored information doesn't exist, a normal sequence is used.
     TUint32 snap( 0 );
@@ -382,31 +361,38 @@ void CMPMIapSelection::ExplicitConnectionL()
 
             // Check whether confirmation from user is needed for allowing cellular usage.
             // When application is starting an IAP confirmation is asked only when roaming.
-            if ( iSession->IsConfirmFirstL( validateIapId ) )
+            // This is skipped for VPN (= virtual) IAPs
+            if ( iSession->IsConfirmFirstL( validateIapId ) &&
+                 !( iSession->MyServer().CommsDatAccess()->IsVirtualIapL( validateIapId ) ))
                 {
-                // Check whether queries are disabled
-                if ( !( iChooseIapPref.NoteBehaviour() & TExtendedConnPref::ENoteBehaviourConnDisableQueries ) )
+                // Check if we are roaming and cellular data usage query has not yet been presented
+                // to the user in this country
+                if ( iSession->MyServer().RoamingWatcher()->RoamingStatus() == EMPMInternationalRoaming
+                    && iSession->MyServer().RoamingWatcher()->AskCellularDataUsageAbroad() == true )
                     {
-                    if ( iSession->MyServer().RoamingWatcher()->RoamingStatus() == EMPMInternationalRoaming )
+                    // Check whether queries are enabled
+                    if ( !( iChooseIapPref.NoteBehaviour() & TExtendedConnPref::ENoteBehaviourConnDisableQueries ) )
                         {
-                        // Check if cellular data usage query has already been presented to the user in this country
-                       if ( iSession->MyServer().RoamingWatcher()->AskCellularDataUsageAbroad() == true )
-                            {
-                            TConnectionId connId = iSession->ConnectionId();
+                        TConnectionId connId = iSession->ConnectionId();
                                                             
-                            // International roaming
-                            iConfirmDlgStarting = CMPMConfirmDlgStarting::NewL( 
-                                                  *this, 
-                                                  connId,
-                                                  snap, 
-                                                  validateIapId, 
-                                                  CMPMConfirmDlg::EConfirmDlgVisitorNetwork,
-                                                  iChooseIapPref,
-                                                  iSession->MyServer(),
-                                                  *iSession,
-                                                  EExplicitConnection );
-                            return;    
-                            }
+                        // International roaming
+                        iConfirmDlgStarting = CMPMConfirmDlgStarting::NewL( 
+                            *this, 
+                            connId,
+                            snap, 
+                            validateIapId, 
+                            CMPMConfirmDlg::EConfirmDlgVisitorNetwork,
+                            iChooseIapPref,
+                            iSession->MyServer(),
+                            *iSession,
+                            EExplicitConnection );
+                        return;    
+                        }
+                    else
+                        {
+                        // Queries disabled, connection must fail
+                        ChooseIapComplete( KErrPermissionDenied, &iChooseIapPref );
+                        return;
                         }
                     }
                 }
@@ -547,8 +533,10 @@ void CMPMIapSelection::CompleteExplicitSnapConnectionL()
     else
         {
         // Check whether confirmation from user is needed for allowing cellular usage
+		// This is skipped for VPN (= virtual) IAPs
         if ( ( iSession->IsConfirmFirstL( validateIapId ) ) && 
-             ( iSession->MyServer().CommsDatAccess()->CheckWlanL( validateIapId ) == ENotWlanIap ) )
+             ( iSession->MyServer().CommsDatAccess()->CheckWlanL( validateIapId ) == ENotWlanIap ) &&
+             !( iSession->MyServer().CommsDatAccess()->IsVirtualIapL( validateIapId ) ) )
             {
             // Check whether queries are disabled
             if ( !( iChooseIapPref.NoteBehaviour() & TExtendedConnPref::ENoteBehaviourConnDisableQueries ) )
@@ -957,31 +945,38 @@ void CMPMIapSelection::ImplicitConnectionWlanNoteL()
         {
         // Check whether confirmation from user is needed for allowing cellular usage.
         // When user is starting implicit IAP/SNAP confirmation is asked only when roaming.
-        if ( iSession->IsConfirmFirstL( iUserSelectionIapId ) )
+		// This is skipped for VPN (= virtual) IAPs
+        if ( iSession->IsConfirmFirstL( iUserSelectionIapId ) &&
+             !( iSession->MyServer().CommsDatAccess()->IsVirtualIapL( iUserSelectionIapId ) ) )
             {
-            // Check whether queries are disabled
-            if ( !( iChooseIapPref.NoteBehaviour() & TExtendedConnPref::ENoteBehaviourConnDisableQueries ) )
+            // Check if we are roaming and cellular data usage query has not yet been presented
+            // to the user in this country
+            if ( iSession->MyServer().RoamingWatcher()->RoamingStatus() == EMPMInternationalRoaming
+                && iSession->MyServer().RoamingWatcher()->AskCellularDataUsageAbroad() == true )
                 {
-                if ( iSession->MyServer().RoamingWatcher()->RoamingStatus() == EMPMInternationalRoaming )
+                // Check whether queries are enabled
+                if ( !( iChooseIapPref.NoteBehaviour() & TExtendedConnPref::ENoteBehaviourConnDisableQueries ) )
                     {
-                    // Check if cellular data usage query has already been presented to the user in this country
-                    if ( iSession->MyServer().RoamingWatcher()->AskCellularDataUsageAbroad() == true )
-                        {
-                        TConnectionId connId = iSession->ConnectionId();
+                    TConnectionId connId = iSession->ConnectionId();
                                                                     
-                        // International roaming
-                        iConfirmDlgStarting = CMPMConfirmDlgStarting::NewL( 
-                                              *this, 
-                                              connId,
-                                              iUserSelectionSnapId, 
-                                              iUserSelectionIapId, 
-                                              CMPMConfirmDlg::EConfirmDlgVisitorNetwork,
-                                              iChooseIapPref,
-                                              iSession->MyServer(),
-                                              *iSession,
-                                              EImplicitConnection );
-                        return;    
-                        }
+                    // International roaming
+                    iConfirmDlgStarting = CMPMConfirmDlgStarting::NewL( 
+                        *this, 
+                        connId,
+                        iUserSelectionSnapId, 
+                        iUserSelectionIapId, 
+                        CMPMConfirmDlg::EConfirmDlgVisitorNetwork,
+                        iChooseIapPref,
+                        iSession->MyServer(),
+                        *iSession,
+                        EImplicitConnection );
+                    return;    
+                    }
+                else
+                    {
+                    // Queries disabled, connection must fail
+                    ChooseIapComplete( KErrPermissionDenied, &iChooseIapPref );
+                    return;
                     }
                 }
             }

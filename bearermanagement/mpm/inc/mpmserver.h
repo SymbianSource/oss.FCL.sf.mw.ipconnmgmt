@@ -823,6 +823,16 @@ class CMPMServer : public CPolicyServer
         * @return Number of active connections
         */
         TInt NumberOfActiveConnections();
+
+        /**
+        * Returns server session instance that corresponds to given
+        * connection id.
+        * @since 5.2
+        * @param aConnId Id of the connection. The id must belong to an
+        *                existing server session.
+        * @return Server session instance
+        */
+        CMPMServerSession* GetServerSession( TConnectionId aConnId ) const;
         
     private:
 
@@ -852,15 +862,6 @@ class CMPMServer : public CPolicyServer
                                 TBool aCheckForBestIap,
                                 TMPMBearerType aDestinationBearerType );
         
-        /**
-        * Returns server session instance that corresponds to given
-        * connection id.
-        * @since 5.2
-        * @param aConnId Id of the connection. The id must belong to an
-        *                existing server session.
-        * @return Server session instance
-        */
-        CMPMServerSession* GetServerSession( TConnectionId aConnId ) const;
 
     private: // Data
         // Pointer to the ConnMonEvents object

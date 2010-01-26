@@ -18,6 +18,7 @@
 
 // INCLUDE FILES
 #include <mmtsy_names.h>
+#include <cmgenconnsettings.h>
 
 #include "caoserver.h"
 #include "caoconnectionmanager.h"
@@ -179,6 +180,7 @@ CAOServer::~CAOServer()
         delete iPointerStatePool;    
         }
     
+    delete iCenRepObserver;
     delete iGpds;
     delete iRAUManager;
     delete iTimer;
@@ -227,6 +229,8 @@ void CAOServer::ConstructL()
 #endif // __ALWAYS_ON_CUSTOM_API
     
     iGpds = CAOGpds::NewL( iCustomAPI );
+    	
+    iCenRepObserver = CAOCenRepObserver::NewL( *this );	
     
     InitStatePoolL();
         
@@ -935,6 +939,37 @@ void CAOServer::HandleSuccesfulRAUL( TRAUType /*aType*/ )
         }
     }
 
+// ---------------------------------------------------------------------------
+// CAOServer::CurrentCellularDataUsageChanged
+// ---------------------------------------------------------------------------
+//
+void CAOServer::CurrentCellularDataUsageChangedL( const TInt aValue )
+	  {
+    LOG_1( _L("CAOServer::CurrentCellularDataUsageChanged") );
+    LOG_2( _L("> Current state: %S"),
+        &StateToDesC( CurrentState()->StateName() ) );
+    
+    if ( aValue != ECmCellularDataUsageDisabled )
+        {
+        TAOState* newState = NULL;
+        	
+        if ( CurrentState()->StateName() == TAOState::EStateDisabled )
+            {
+            newState = iCurrentState->HandleEnableAlwaysOnL();
+            }
+        else
+            {
+            // Behaviour is the same as if unconnect timer had expired
+            iTimer->StopUnconnectTimer();
+            newState = iCurrentState->HandleUnconnectTimerExpiredL();
+
+            if( newState )
+                {
+                iCurrentState = newState;
+                }
+            }
+        }  	
+    }
 
 // ---------------------------------------------------------------------------
 // CAOServer::InitStatePoolL

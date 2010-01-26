@@ -60,6 +60,12 @@ public:
      * Sets available IAPs of this type as available in CommsDat cache
      */
     void FlagAvailableIaps() const;
+    
+private:
+    /**
+     * Reads KCurrentCellularDataUsage -key from Repository KCRUidCmManager
+     */
+    TInt CurrentCellularDataUsage() const;    
     };
 
 #endif // CONNMONBEARERGPRS_H

@@ -91,6 +91,16 @@ public:
      * @return TInt
      */
     virtual TInt LingerTimerValue( const TUint aIapId ) const = 0;
+    
+    /**
+     * Checks whether user allows cellular connections
+     * or not.
+     *
+     * @since 5.1
+     * @return ETrue if cellular connections are allowed,
+     *         EFalse otherwise.
+     */
+     virtual TBool IsCellularAllowedByUser() const = 0;
         
 protected:
 

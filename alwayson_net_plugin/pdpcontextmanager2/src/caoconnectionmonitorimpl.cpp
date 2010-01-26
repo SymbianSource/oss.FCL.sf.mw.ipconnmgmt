@@ -23,6 +23,7 @@
 #include "maoconnectionmonitorobserver.h"
 #include "caoasyncwrapper.h"
 
+
 // UNNAMED NAMESPACE FOR LOCAL DEFINITIONS
 namespace
     {
@@ -49,6 +50,9 @@ namespace
         }
 #endif
     }
+
+const TInt KRetryCounter = 10;
+
 
 // METHODS
 
@@ -224,10 +228,23 @@ void CAOConnectionMonitorImpl::NWRegStatusRunL( TInt aStatus )
         
     if ( aStatus == KErrNone )
         {
-        LOG_2( _L("> NW reg. status: %d"), iWNReg.iRegStatus );
-        iObserver.HandleNWRegistrationStatusChangedL( 
-            iWNRegPckg().iRegStatus );
-        }
+        LOG_2( _L("> Current iWNReg.iRegStatus: %d"), iWNReg.iRegStatus );
+	
+        if ( ( iWNReg.iRegStatus < iWNChangeReg.iRegStatus ) && 
+        	   ( iCounter < KRetryCounter ) )
+            {
+            iCounter++;	
+            LOG_2( _L("> Different from events iWNChangeReg.iRegStatusv: %d"), 
+                   iWNChangeReg.iRegStatus );	
+            iNWRegistrationStatus->IssueRequest();	
+            }
+        else
+            {
+            iCounter = 0;	
+            iObserver.HandleNWRegistrationStatusChangedL( 
+                iWNRegPckg().iRegStatus );	
+            }        
+        } 
     else
         {
         HandleError( aStatus );

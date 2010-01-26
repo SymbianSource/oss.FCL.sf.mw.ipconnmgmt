@@ -15,6 +15,10 @@
 *
 */
 
+#include <centralrepository.h>
+#include <cmmanagerkeys.h>
+#include <cmgenconnsettings.h>
+
 #include "ConnMonBearerGPRS.h"
 #include "connmoncommsdatcache.h"
 #include "ConnMonIAP.h"
@@ -45,43 +49,47 @@ TInt TConnMonBearerGPRS::GetAvailability( TBool& aAvailable ) const
     // Is bearer available
     TBool byCell( EFalse );
     TBool byPhone( EFalse );
-
-    // Find out if we are in 2G or in 3G - it is needed for calculating bearer availability
-    RMobilePhone::TMobilePhoneNetworkMode mode;
-    err = iConnMonIAP->MobilePhone()->GetCurrentMode( mode );
-
-    if ( KErrNone == err )
+ 
+    if ( CurrentCellularDataUsage() != ECmCellularDataUsageDisabled )
         {
-        switch ( mode )
-            {
-            case RMobilePhone::ENetworkModeGsm:
-            case RMobilePhone::ENetworkModeUnknown: // Emulator default
-                err = iConnMonIAP->GetBearerSupportInfo( EBearerIdGPRS, byCell, byPhone );
-                break;
-            case RMobilePhone::ENetworkModeWcdma:
-                err = iConnMonIAP->GetBearerSupportInfo( EBearerIdWCDMA, byCell, byPhone );
-                break;
-            default:
-                LOGEXITFN1("TConnMonBearerGPRS::GetAvailability()", err)
-                return err; // Return silently, report not available
-            }
+        // Find out if we are in 2G or in 3G - it is needed for calculating bearer availability
+        RMobilePhone::TMobilePhoneNetworkMode mode;
+        err = iConnMonIAP->MobilePhone()->GetCurrentMode( mode );
 
         if ( KErrNone == err )
             {
-            if ( byCell && byPhone )
+            switch ( mode )
                 {
-                aAvailable = ETrue;
+                case RMobilePhone::ENetworkModeGsm:
+                case RMobilePhone::ENetworkModeUnknown: // Emulator default
+                    err = iConnMonIAP->GetBearerSupportInfo( EBearerIdGPRS, byCell, byPhone );
+                    break;
+                case RMobilePhone::ENetworkModeWcdma:
+                    err = iConnMonIAP->GetBearerSupportInfo( EBearerIdWCDMA, byCell, byPhone );
+                    break;
+                default:
+                    LOGEXITFN1("TConnMonBearerGPRS::GetAvailability()", err)
+                    return err; // Return silently, report not available
+                }
+
+            if ( KErrNone == err )
+                {
+                if ( byCell && byPhone )
+                    {
+                    aAvailable = ETrue;
+                    }
                 }
             }
-        }
-
-    // Make GPRS available in wins
+        
+    
+        // Make GPRS available in wins
 #if defined(__WINSCW__)
-    LOGIT2("GetAvailability: Emulator override, true values were %d <%d>", aAvailable, err)
-    err = KErrNone;
-    aAvailable = ETrue;
+        LOGIT2("GetAvailability: Emulator override, true values were %d <%d>", aAvailable, err)
+        err = KErrNone;
+        aAvailable = ETrue;
 #endif
-
+        }
+    
     //LOGEXITFN1("TConnMonBearerGPRS::GetAvailability()", err)
     return err;
     }
@@ -123,4 +131,26 @@ void TConnMonBearerGPRS::FlagAvailableIaps() const
     LOGEXITFN("TConnMonBearerGPRS::FlagAvailableIaps()")
     }
 
+// ---------------------------------------------------------------------------
+// Read current cellular data usage setting from Central Repository
+// ---------------------------------------------------------------------------
+//
+TInt TConnMonBearerGPRS::CurrentCellularDataUsage() const
+    {
+    // Use default value if repository is not available
+    TInt value( ECmCellularDataUsageAutomatic );
+    CRepository* cmRepository = NULL;
+    
+    TRAPD( err, cmRepository = CRepository::NewL( KCRUidCmManager ) )
+    
+    if ( err == KErrNone )
+        {
+        err = cmRepository->Get( KCurrentCellularDataUsage, value );
+        LOGIT2("KCurrentCellularDataUsage from repository: %d error: <%d>", value, err )
+        }
+    
+    delete cmRepository;
+    return value;
+    }
+    
 // End-of-file

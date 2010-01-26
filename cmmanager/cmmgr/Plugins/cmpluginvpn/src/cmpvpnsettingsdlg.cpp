@@ -242,7 +242,17 @@ TBool CmPluginVpnSettingsDlg::ShowPopupSettingPageL( TUint32 aAttribute,
             }
         case ECmProxyPortNumber:
             {
-            retVal = ShowPopupPortNumSettingPageL( aAttribute );
+            HBufC* proxyName = iCmPluginBaseEng.GetStringAttributeL( ECmProxyServerName );
+            if( !proxyName )
+                {
+                break;
+                }
+            CleanupStack::PushL( proxyName );
+            if( proxyName->Length() )
+                { // Port number is allowed to set after proxy address is set.
+                retVal = ShowPopupPortNumSettingPageL( aAttribute );
+                }
+            CleanupStack::PopAndDestroy(); // proxyName
             break;
             }
         default:

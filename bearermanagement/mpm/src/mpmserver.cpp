@@ -1616,8 +1616,12 @@ void CMPMServer::UpdateActiveConnectionL( CMPMServerSession& aSession )
     // Use priority order vpn, wlan and packet
     for ( TInt index = 0; index < iActiveBMConns.Count(); index++ )
         {
+        CMPMServerSession* serverSession = GetServerSession(
+            iActiveBMConns[index].iConnInfo.iConnId );
+                     	
         // Do check only for active connections
-        if ( iActiveBMConns[index].iConnInfo.iState == EStarted )
+        if ( iActiveBMConns[index].iConnInfo.iState == EStarted &&
+        	   serverSession->ChooseBestIapCalled() )
             {
             TMPMBearerType bearerType = EMPMBearerTypeOther;
         
@@ -1726,7 +1730,11 @@ TInt CMPMServer::NumberOfActiveConnections()
     
     for ( TInt index = 0; index < iActiveBMConns.Count(); index++ )
         {
-        if ( iActiveBMConns[index].iConnInfo.iState == EStarted )
+        CMPMServerSession* serverSession = GetServerSession(
+             iActiveBMConns[index].iConnInfo.iConnId );
+
+        if ( iActiveBMConns[index].iConnInfo.iState == EStarted &&
+             serverSession->ChooseBestIapCalled() )
             {
             count++;
             }

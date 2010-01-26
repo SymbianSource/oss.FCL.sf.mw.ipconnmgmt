@@ -468,6 +468,18 @@ class CMPMCommsDatAccess : public CBase
         */
         TUint32 DestinationIdL( CMManager::TSnapPurpose aSnapPurpose );
         	
+        /**
+        * Finds the real IAP behind the virtual IAP.
+        * @since 3.1
+        * @param aVirtualIapId Given virtual Iap Id
+        * @param aRealIapId Real Iap Id
+        * @param aAvailableIAPList List of IAPs
+        * @param aSession Handle to session class
+        */
+        void FindRealIapL( const TUint32             aVirtualIapId,
+                           TUint32&                  aRealIapId, 
+                           const RAvailableIAPList&  aAvailableIAPList,
+                           CMPMServerSession&        aSession );
     private:
 
        /**
@@ -497,20 +509,7 @@ class CMPMCommsDatAccess : public CBase
         * @return ETrue WLAN IAP exists under the virtual IAP, 
         * otherwise EFalse.
         */
-        TBool WlanUnderVirtualL( const TUint32 aVirtualIapId, RArray<TUint>& aIapPath  );
-
-        /**
-        * Finds the real IAP behind the virtual IAP.
-        * @since 3.1
-        * @param aVirtualIapId Given virtual Iap Id
-        * @param aRealIapId Real Iap Id
-        * @param aAvailableIAPList List of IAPs
-        * @param aSession Handle to session class
-        */
-        void FindRealIapL( const TUint32             aVirtualIapId,
-                           TUint32&                  aRealIapId, 
-                           const RAvailableIAPList&  aAvailableIAPList,
-                           CMPMServerSession&        aSession );
+        TBool WlanUnderVirtualL( const TUint32 aVirtualIapId, RArray<TUint>& aIapPath  );        
 
        /**
         * loads linked record using element id.

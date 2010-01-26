@@ -20,6 +20,8 @@
 
 #include <e32base.h>
 #include <StringLoader.h>
+#include <in_sock.h>
+
 #include <cmpluginbaseeng.h>
 
 #include <cmpluginvpndef.h>
@@ -273,6 +275,15 @@ NONSHARABLE_CLASS(CCmPluginVpn) : public CCmPluginBaseEng
         *         or leaves with the error code KErrArgument 
         */                    
         TInt CheckValidityAndConvertDestinationIdL( TUint32 aDestinationId );
+        
+        /**
+        * Retrieves default APs from the Tier Record of given identifier.
+        * 
+        * @param aTierIdentifier identifier for tier record.
+        * @since S60 5.2
+        * @return an elementid id of the default AP record in tier record. 
+        */                    
+        const TMDBElementId DefaultAPRecordL( const TInt aTierIdentifier = KAfInet );
 
     public:                
         /**

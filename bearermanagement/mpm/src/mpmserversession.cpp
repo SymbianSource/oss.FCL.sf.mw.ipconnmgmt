@@ -3600,12 +3600,16 @@ void CMPMServerSession::RemoveIapsAccordingToBearerSetL( TConnMonIapInfo& aIapIn
         return;
         }
     
+    MPMLOGSTRING2( "CMPMServerSession::RemoveIapsAccordingToBearerSetL:\
+ bearerset=%d", iIapSelection->MpmConnPref().BearerSet() )
+    
     // Drop iaps not according to bearer set
     if ( iIapSelection->MpmConnPref().BearerSet() != 
          TExtendedConnPref::EExtendedConnBearerUnknown )
         {
         TInt index = 0;
         
+        // First filter away physical IAPs (WLAN, packet data...)
         while ( index != aIapInfo.iCount )
             {
             // Get bearer type
@@ -3629,8 +3633,18 @@ void CMPMServerSession::RemoveIapsAccordingToBearerSetL( TConnMonIapInfo& aIapIn
                 index++;
                 continue;
                 }
+            else if ( bearerType == EMPMBearerTypeVpn )
+                {
+                // Don't remove this VPN IAP on this round. 
+                // VPN IAPs are filtered after this.
+                index++;
+                continue;
+                }
             else
                 {
+                MPMLOGSTRING2( "CMPMServerSession::RemoveIapsAccordingToBearerSetL:\
+ Filtered IAP ID:%d", aIapInfo.iIap[index].iIapId );
+ 
                 // Remove this iap from the list
                 for ( TInt index2 = index; index2 < aIapInfo.iCount; index2++ )
                     {
@@ -3640,6 +3654,59 @@ void CMPMServerSession::RemoveIapsAccordingToBearerSetL( TConnMonIapInfo& aIapIn
                 aIapInfo.iCount--;
                 }
             }
+        // Next filter away the VPN IAPs from the remaining IAPs.
+        // VPN IAP should survive this filter only if it has at least
+        // one unfiltered physical IAP still available. If it does not
+        // then it cannot be used to establish connection and should 
+        // be filtered.
+        index = 0;
+        RAvailableIAPList availableIaps; 
+            
+        for ( TUint i = 0; i < aIapInfo.iCount; i++ )
+            {
+            availableIaps.AppendL( aIapInfo.iIap[i].iIapId );
+            }
+        
+        MPMLOGSTRING2( "CMPMServerSession::RemoveIapsAccordingToBearerSetL:\
+ Starting VPN IAP filtering (iap count: %d)", aIapInfo.iCount );
+        
+        while ( index != aIapInfo.iCount )
+            {
+            // Get bearer type
+            TMPMBearerType bearerType = EMPMBearerTypeOther;
+            TUint32 realIapId( 0 );
+            bearerType =
+                iMyServer.CommsDatAccess()->GetBearerTypeL ( aIapInfo.iIap[index].iIapId );
+            
+            if ( bearerType == EMPMBearerTypeVpn )
+                {
+                iMyServer.CommsDatAccess()->FindRealIapL( aIapInfo.iIap[index].iIapId, 
+                                                           realIapId, 
+                                                           availableIaps, 
+                                                           *this);
+                
+                MPMLOGSTRING3( "CMPMServerSession::RemoveIapsAccordingToBearerSetL:\
+VPN IAP id: %d, real IAP id: %d", aIapInfo.iIap[index].iIapId, realIapId );
+                
+                if ( realIapId != 0 )
+                    {
+                    // Actual physical IAP was found for this VPN IAP. Do not filter.
+                    index++;    
+                    continue;
+                    }                
+                MPMLOGSTRING2( "CMPMServerSession::RemoveIapsAccordingToBearerSetL:\
+Filtered away VPN IAP: %d", aIapInfo.iIap[index].iIapId );
+                
+                // Remove this iap from the list
+                for ( TInt index2 = index; index2 < aIapInfo.iCount; index2++ )
+                    {
+                    aIapInfo.iIap[index2].iIapId = aIapInfo.iIap[index2 + 1].iIapId;
+                    }
+                
+                aIapInfo.iCount--;                               
+                }
+            index++;
+            }        
         }
     }
 

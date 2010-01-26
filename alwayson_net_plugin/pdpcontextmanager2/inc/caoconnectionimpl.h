@@ -24,6 +24,7 @@
 #include <commdbconnpref.h>
 #include <es_sock.h>
 #include <commdb.h>
+#include <extendedconnpref.h>
 #include "maoconnectionmanager.h"
 
 // FORWARD DECLARATIONS
@@ -279,13 +280,11 @@ private: // Data
     TInternalState iState;
     
     /**
-     * Own: Access point settings
-     */
-    TCommDbConnPref iAccessPointSettings;
-    
-    /**
      * Own: Comms database
      */
     CCommsDatabase* iCommsDatabase;
+    
+    TConnPrefList*        iPrefsList;
+    TExtendedConnPref*    iExtPrefs;
     };
 #endif /* CAOCONNECTIONIMPL_H */

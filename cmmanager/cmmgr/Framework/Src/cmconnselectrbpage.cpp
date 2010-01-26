@@ -327,6 +327,7 @@ void CCMConnSelectRBPage::HandleListBoxEventL(CEikListBox* aListBox,
     	    	{
         		case EEventEnterKeyPressed:
         		case EEventItemDoubleClicked:
+        		case EEventItemSingleClicked:
 				case EEventItemClicked:        	
             		{
             		ProcessCommandL(ECmManagerUiCmdDestSelect);

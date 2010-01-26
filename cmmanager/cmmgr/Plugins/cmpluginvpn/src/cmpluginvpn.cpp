@@ -36,6 +36,9 @@
 #include <ConeResLoader.h>
 #include <bautils.h>
 
+#include <commsdattypesv1_1_partner.h>
+#include <commsdattypeinfov1_1_internal.h>
+
 #include "cmlogger.h"
 #include "cmmanagerimpl.h"
 #include "cmdestinationimpl.h"
@@ -463,6 +466,7 @@ void CCmPluginVpn::SetIntAttributeL( const TUint32 aAttribute,
             
             ServiceRecord().iServiceIAP = aValue;
             ServiceRecord().iServiceNetwork = 0;
+            ServiceRecord().iServiceSNAP = 0;
             iVirtualRecord->iNextLayerIAP = aValue;
             iVirtualRecord->iNextLayerSNAP = 0;            
             }
@@ -481,11 +485,13 @@ void CCmPluginVpn::SetIntAttributeL( const TUint32 aAttribute,
 
             TInt destinationId( 0 );
             destinationId = CheckValidityAndConvertDestinationIdL( aValue );
+            TMDBElementId defaultAP = DefaultAPRecordL();
             
-            ServiceRecord().iServiceIAP = 0;          
-            ServiceRecord().iServiceNetwork = destinationId - KCmDefaultDestinationAPTagId;
+            ServiceRecord().iServiceIAP = 0;
+            ServiceRecord().iServiceNetwork = 0;
+            ServiceRecord().iServiceSNAP = defaultAP;
             iVirtualRecord->iNextLayerIAP = 0;
-            iVirtualRecord->iNextLayerSNAP = destinationId;       
+            iVirtualRecord->iNextLayerSNAP = destinationId;
             }
             break;
 
@@ -898,6 +904,7 @@ void CCmPluginVpn::CreateNewServiceRecordL()
     ServiceRecord().iServicePolicy.SetL( KNullDesC );
     ServiceRecord().iServiceIAP = 0;
     ServiceRecord().iServiceNetwork = 0;
+    ServiceRecord().iServiceSNAP = 0;
 
     
     iProxyRecord->iPortNumber = KVpnProxyPortNumberDefault;
@@ -2045,6 +2052,39 @@ TInt CCmPluginVpn::CheckValidityAndConvertDestinationIdL( TUint32 aDestId )
          }
     
     return id;
+    }
+
+// --------------------------------------------------------------------------
+// CCmPluginVpn::DefaultAPRecordL
+// --------------------------------------------------------------------------
+//
+const TMDBElementId CCmPluginVpn::DefaultAPRecordL( const TInt aTierIdentifier )
+    {
+    LOGGER_ENTERFN( "CCmPluginVpn::DefaultAPRecordL" );
+    // Resolve the Default SNAP AP elementid 
+    //
+    CCDTierRecord* tierRecord = static_cast<CCDTierRecord *>(
+            CCDRecordBase::RecordFactoryL( KCDTIdTierRecord ) );
+    
+    CleanupStack::PushL( tierRecord );
+
+    // Find the correct tier table based on given identifier.
+    //
+    tierRecord->iRecordTag = aTierIdentifier;
+    if ( !tierRecord->FindL( Session() ) )
+        {
+        User::Leave( KErrCorrupt );
+        }
+    
+    // Find out the default AP for IP connections.
+    //
+    TMDBElementId defaultAP = tierRecord->iDefaultAccessPoint;
+
+    // Cleanup tier record.
+    //
+    CleanupStack::PopAndDestroy( tierRecord );
+        
+    return defaultAP;
     }
 
 // eof

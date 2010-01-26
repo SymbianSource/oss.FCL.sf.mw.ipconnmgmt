@@ -35,9 +35,6 @@ namespace
     // CONSTANTS
     _LIT( KPanicCat, "ConnectionImpl" );
     
-    // Default value that indicates that we do not want to prompt user for IAP
-    const TCommDbDialogPref KDlgPreference = ECommDbDialogPrefDoNotPrompt;
-    
     // DATA TYPES
     enum TPanicCode
         {
@@ -93,6 +90,9 @@ CAOConnectionImpl::~CAOConnectionImpl()
     
     delete iCommsDatabase;
     iConnection.Close();
+    
+    delete iExtPrefs;
+    delete iPrefsList;
     }
 
 
@@ -112,7 +112,7 @@ void CAOConnectionImpl::ActivateConnection()
     
     // Check IAP
     TUint iap = iSettings.AccessPointId();
-    if ( IsValidIAP( iap ) )
+    if ( IsValidIAP( iap ) && iSettings.IsCellularAllowedByUser() )
         {
         // Check that we really have RConnection handle opened
         TInt err = KErrNone;
@@ -123,14 +123,25 @@ void CAOConnectionImpl::ActivateConnection()
             }
     
         if( err == KErrNone )
-            {
-			// Set acces point settings
-			iAccessPointSettings.SetIapId( iap );
-			iAccessPointSettings.SetDialogPreference( KDlgPreference );
-        
-			// Start connection
-    		iConnection.Start( iAccessPointSettings, iStatus );
-			SetActive();
+            {    		
+            // Start as a silent connection
+            iExtPrefs->SetIapId( iap );
+            iExtPrefs->SetNoteBehaviour( TExtendedConnPref::ENoteBehaviourConnSilent );
+    		
+            // Clean iPrefsList and append new prefs
+            iPrefsList->Remove( 0 );
+            TRAPD( err, iPrefsList->AppendL( iExtPrefs ) )
+    		
+            if ( err == KErrNone )
+                {
+    		    iConnection.Start( *iPrefsList, iStatus );
+                SetActive();
+                }
+            else
+                {
+                LOG_1( _L("iPrefsList->AppendL( iExtPrefs ) FAILED") );
+                ActivateSelf( KErrNotSupported );
+                }
             }
         else
             {
@@ -267,6 +278,9 @@ void CAOConnectionImpl::ConstructL()
     
     User::LeaveIfError( iConnection.Open( *iSocketServ, KAfInet ) );
     iCommsDatabase = CCommsDatabase::NewL( EDatabaseTypeUnspecified );
+    
+    iExtPrefs = new (ELeave) TExtendedConnPref;
+    iPrefsList = TConnPrefList::NewL();
     }
 
 // ---------------------------------------------------------------------------

@@ -464,10 +464,14 @@ void CS60MetaConnectionProvider::StorePolicyNotification( TMpmNotification& aNot
     // Store PolicyNotification
     // This could happen if PolicyServer sends notification too early.
     //
+    S60MCPRLOGSTRING1("S60MCPR<%x>::StorePolicyNotification()",(TInt*)this);
     if ( iPendingNotification.Length() == 0 )
         {
-        ASSERT(Mem::Copy((TAny*)iPendingNotification.Ptr(), &aNotification, aNotification.Length()));
-        iPendingNotification.SetLength( aNotification.Length() );
+        S60MCPRLOGSTRING1("S60MCPR<%x>::StorePolicyNotification() iPendingNotification.Length() == 0",(TInt*)this);
+        Mem::Copy((TAny*)iPendingNotification.Ptr(), &aNotification, KMpmMessageLength);
+        S60MCPRLOGSTRING1("S60MCPR<%x>::StorePolicyNotification() Mem::Copy",(TInt*)this);
+        iPendingNotification.SetLength( KMpmMessageLength );
+        S60MCPRLOGSTRING1("S60MCPR<%x>::StorePolicyNotification() iPendingNotification.SetLength",(TInt*)this);
         }
 #ifdef _DEBUG
     else

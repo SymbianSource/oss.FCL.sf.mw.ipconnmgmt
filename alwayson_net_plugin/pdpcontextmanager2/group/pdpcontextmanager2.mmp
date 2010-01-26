@@ -51,6 +51,7 @@ SOURCE          caoraumanagerimpl.cpp
 SOURCE          caoconnectionmonitorimpl.cpp
 SOURCE          caoconnectionimpl.cpp
 SOURCE          linger.cpp
+SOURCE          cenrepobserver.cpp
 
 
 // Component specific internal headers 
@@ -81,6 +82,8 @@ LIBRARY         etel3rdparty.lib
 LIBRARY         etelmm.lib
 LIBRARY         CustomAPI.lib
 LIBRARY         etel.lib
+LIBRARY         extendedconnpref.lib
+LIBRARY         netmeta.lib
 #ifdef LOGGING_ENABLED
 #ifdef LOGGING_MODE_FILE
 LIBRARY         efsrv.lib

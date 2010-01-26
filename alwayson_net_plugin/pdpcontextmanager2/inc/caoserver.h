@@ -36,6 +36,7 @@
 #include "maoraumanagerobserver.h"
 #include "maogpdsobserver.h"
 #include "caoasyncwrapper.h"
+#include "cenrepobserver.h"
 
 // FORWARD DECLARATIONS
 class CAOConnectionManager;
@@ -43,6 +44,8 @@ class CAOTimer;
 class CAORAUManager;
 class CAOSettings;
 class CAOGpds;
+class CAOCenRepObserver;
+class MAOCenRepObserver;
 
 /**
 *  Always-On Server class.
@@ -57,7 +60,8 @@ NONSHARABLE_CLASS( CAOServer ):
     public MAOConnectionManagerObserver,
     public MAOTimerObserver,
     public MAOSettingsObserver,
-    public MAORAUManagerObserver
+    public MAORAUManagerObserver,
+    public MAOCenRepObserver
     {
 public:    // Constructors & destructors
 
@@ -402,6 +406,18 @@ private: // From base class MAORAUManagerObserver
      */
     void HandleSuccesfulRAUL( TRAUType aType );
     
+private: // From base class MAOCenRepObserver
+	
+	  /**
+     * From MAOCenRepObserver
+     * a notification when Central Repository key 
+     * KCRUidCmManager/ KCurrentCellularDataUsage changes.
+     *
+     * @since S60 5.1
+     * @param aValue New key value
+     */
+    void CurrentCellularDataUsageChangedL( const TInt aValue );
+    
     
 private: // Data
 
@@ -495,6 +511,12 @@ private: // Data
      * Own
      */ 
     CPeriodic* iAsyncSetup;
+    
+    /** 
+     * Central repository key watcher
+     * Own
+     */ 
+    CAOCenRepObserver* iCenRepObserver;
     };
 
 #endif //C_CAOSERVER_H

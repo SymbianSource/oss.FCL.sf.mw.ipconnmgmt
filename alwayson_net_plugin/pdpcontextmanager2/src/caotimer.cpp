@@ -210,7 +210,16 @@ TBool CAOTimer::UnconnectTimerDisabled() const
     {
     LOG_1( _L("CAOTimer::UnconnectTimerDisabled") );
     
-    return iSettings.UnconnectTimerValue() == 0;
+    if ( iSettings.IsCellularAllowedByUser() )
+        {
+        return iSettings.UnconnectTimerValue() == 0;
+        }
+    else
+        {
+        // There should be no retries because user
+        // does not allow cellular connections.
+        return ETrue;
+        }
     }
 
 // ---------------------------------------------------------------------------

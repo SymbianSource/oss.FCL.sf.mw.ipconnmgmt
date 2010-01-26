@@ -69,7 +69,7 @@ CChangeConnectionDlg::CChangeConnectionDlg( TInt aIndex,
 // Destructor
 CChangeConnectionDlg::~CChangeConnectionDlg()
     {
-    delete iExpiryTimer;
+    //delete iExpiryTimer;
     }
 
 
@@ -168,8 +168,9 @@ void CChangeConnectionDlg::PreLayoutDynInitL()
 
     SetIconsL();
     
-    iExpiryTimer = CExpiryTimer::NewL( *this );
-    iExpiryTimer->Start();
+    // Timer not in use due the unresolved crash
+    //iExpiryTimer = CExpiryTimer::NewL( *this );
+    //iExpiryTimer->Start();
     CLOG_LEAVEFN( "CChangeConnectionDlg::PreLayoutDynInitL " );  
     
     }

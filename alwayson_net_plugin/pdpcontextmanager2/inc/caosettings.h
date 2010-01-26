@@ -183,6 +183,16 @@ public: // From base class MAOSettings
      */
     TInt LingerTimerValue( const TUint aIapId ) const;
     
+    /**
+     * Checks whether user allows cellular connections
+     * or not.
+     *
+     * @since 5.1
+     * @return ETrue if cellular connections are allowed,
+     *         EFalse otherwise.
+     */
+    TBool IsCellularAllowedByUser() const;
+    
 private: // From base class MAOSettings
     
     /** 

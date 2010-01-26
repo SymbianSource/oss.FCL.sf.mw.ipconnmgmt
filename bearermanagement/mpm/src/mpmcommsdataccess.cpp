@@ -2736,8 +2736,13 @@ void CMPMCommsDatAccess::SelectActiveConnectionL ( const TUint32 aSnapId,
         
     for (TInt index = 0; index < aActiveBMConns.Count(); index++ )
         {
+        CMPMServerSession* serverSession = 
+            aSession.MyServer().GetServerSession(
+                aActiveBMConns[index].iConnInfo.iConnId );
+
         // Add only started iaps to array
-        if ( aActiveBMConns[index].iConnInfo.iState == EStarted )
+        if ( aActiveBMConns[index].iConnInfo.iState == EStarted &&
+             serverSession->ChooseBestIapCalled() )
             {
             activeIaps.AppendL ( aActiveBMConns[index].iConnInfo.iIapId );
             }

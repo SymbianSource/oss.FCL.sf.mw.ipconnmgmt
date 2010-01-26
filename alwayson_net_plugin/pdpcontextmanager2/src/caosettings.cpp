@@ -18,6 +18,9 @@
 
 // INCLUDE FILES
 #include <centralrepository.h>
+#include <cmmanagerkeys.h>
+#include <cmgenconnsettings.h>
+
 
 #include "caosettings.h"
 #include "logger.h"
@@ -566,6 +569,33 @@ void CAOSettings::UpdateSetting( TUint32 aId, TInt& aValue )
         // New value got, store it
         aValue = value;
         }
+    }
+
+// ---------------------------------------------------------------------------
+// CAOSettings::IsCellularAllowedByUser
+// ---------------------------------------------------------------------------
+//
+TBool CAOSettings::IsCellularAllowedByUser() const
+    {
+    TBool allowed( ETrue );
+    CRepository* repository = NULL;
+    
+    TRAP_IGNORE( repository = CRepository::NewL( KCRUidCmManager ) )
+
+    if ( repository )
+        {
+        TInt value( 0 );
+        TInt err = repository->Get( KCurrentCellularDataUsage, value );
+
+        if ( err == KErrNone && value == ECmCellularDataUsageDisabled )
+            {
+            // Cellular connection is not allowed by user
+            allowed = EFalse;
+            }    
+        }
+
+    delete repository;
+    return allowed;
     }
 
 // End of file
