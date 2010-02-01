@@ -28,6 +28,7 @@
 // FORWARD DECLARATIONS
 class MAOSettingsObserver;
 class CRepository;
+class MAOStateContext;
 
 // CONSTANTS
 
@@ -67,9 +68,11 @@ public:    // Constructors & destructors
      *
      * @since S60 v3.1
      * @param aObserver observer for setting changes
+     * @param aStateContext reference to MAOStateContext
      * @return pointer to the created CAOSettings object
      */
-    static CAOSettings* NewL( MAOSettingsObserver& aObserver );
+    static CAOSettings* NewL( MAOSettingsObserver& aObserver,
+                              MAOStateContext&     aStateContext );
 
     /**
      * Destructor
@@ -218,8 +221,10 @@ private: // New methods
      *
      * @since S60 v3.1
      * @param aObserver observer for setting changes
+     * @param aStateContext reference to MAOStateContext
      */
-    CAOSettings( MAOSettingsObserver& aObserver );
+    CAOSettings( MAOSettingsObserver& aObserver,
+                 MAOStateContext&     aStateContext );
 
     /**
      * Default Symbian 2nd-phase constructor
@@ -376,6 +381,11 @@ private: // Data
      * Array of iap id and linger interval pairs
      */
     RArray< TLingerSetting > iLingerSettings;
+    
+    /** 
+     * State context from CAOServer.
+     */
+    MAOStateContext& iStateContext;
     };
     
 #endif // C_CAOSETTINGS_H

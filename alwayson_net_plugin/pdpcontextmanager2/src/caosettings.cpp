@@ -26,6 +26,8 @@
 #include "logger.h"
 #include "maosettingsobserver.h"
 #include "pdpcontextmanagerinternalcrkeys.h"
+#include "maostatecontext.h"
+#include "maoconnectionmanager.h"
 
 // UNNAMED NAMESPACE FOR LOCAL DEFINITIONS
 namespace
@@ -68,11 +70,12 @@ namespace
 // CAOSettings::NewL
 // ---------------------------------------------------------------------------
 //
-CAOSettings* CAOSettings::NewL( MAOSettingsObserver& aObserver )
+CAOSettings* CAOSettings::NewL( MAOSettingsObserver& aObserver,
+                                MAOStateContext&     aStateContext )
     {
     LOG_1( _L("CAOSettings::NewL") );
     
-    CAOSettings* self = new( ELeave ) CAOSettings( aObserver );
+    CAOSettings* self = new( ELeave ) CAOSettings( aObserver, aStateContext );
     
     CleanupStack::PushL( self );
     self->ConstructL();
@@ -104,14 +107,16 @@ CAOSettings::~CAOSettings()
 // CAOSettings::CAOSettings
 // ---------------------------------------------------------------------------
 //
-CAOSettings::CAOSettings( MAOSettingsObserver& aObserver ):
+CAOSettings::CAOSettings( MAOSettingsObserver& aObserver,
+                          MAOStateContext&     aStateContext ):
     CActive( CActive::EPriorityStandard ),
     iObserver( aObserver ),
     iIAP( KDefaultIAPUid ),
     iRetryTimerValue( KDefaultRetryInterval ),
     iSupportedInHPLMN( EFalse ),
     iSupportedInVPLMN( EFalse ),
-    iLingerTimerValue( KLingerOff )
+    iLingerTimerValue( KLingerOff ),
+    iStateContext( aStateContext )
     {
     LOG_1( _L("CAOSettings::CAOSettings") );
     
@@ -587,13 +592,30 @@ TBool CAOSettings::IsCellularAllowedByUser() const
         TInt value( 0 );
         TInt err = repository->Get( KCurrentCellularDataUsage, value );
 
-        if ( err == KErrNone && value == ECmCellularDataUsageDisabled )
+        if ( err == KErrNone )
             {
-            // Cellular connection is not allowed by user
-            allowed = EFalse;
-            }    
+            if ( value == ECmCellularDataUsageDisabled )
+                {
+                // Cellular connection is not allowed by user
+                allowed = EFalse;
+                }
+            else
+                {
+                MAOConnectionManager::TNetworkType nwType =
+                    iStateContext.ConnectionManager().NetworkType();
+                
+                if ( ( nwType == MAOConnectionManager::EVPLMN ) && 
+                     ( value == ECmCellularDataUsageConfirm ) )
+                    {
+                    // Silent connection is not allowed (will fail)
+                    // in visitor network if user has chosen confirm option.
+                    allowed = EFalse;
+                    }
+                }
+            }
         }
-
+    LOG_2( _L("IsCellularAllowedByUser(): %d"), allowed );
+    
     delete repository;
     return allowed;
     }

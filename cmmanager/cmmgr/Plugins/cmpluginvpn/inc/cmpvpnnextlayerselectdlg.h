@@ -20,13 +20,10 @@
 #define CMPVPN_NEXT_LAYER_SELECT_DLG_H
 
 #include <e32base.h>
-#include <eikmobs.h>  // MEikMenuObserver
-#include <aknPopup.h> // CAknPopupList
+#include <aknlistquerydialog.h> // CAknListQueryDialog
 
 #include <ConeResLoader.h> // resource reader
 
-class CEikFormattedCellListBox;
-class CEikMenuBar;
 class CEikonEnv;
 class CCmPluginBaseEng;
 class CCmManagerImpl;
@@ -41,8 +38,7 @@ class CGulIcon;
  *
  *  @since S60 v3.2
  */
-NONSHARABLE_CLASS( CmPluginVpnNextLayerSelectDlg ) : public CAknPopupList, 
-                                                     public MEikMenuObserver
+NONSHARABLE_CLASS( CmPluginVpnNextLayerSelectDlg ) : public CAknListQueryDialog
     {
     public: // Constructors and destructor
     
@@ -56,7 +52,8 @@ NONSHARABLE_CLASS( CmPluginVpnNextLayerSelectDlg ) : public CAknPopupList,
         * Destructor.
         */
         virtual ~CmPluginVpnNextLayerSelectDlg();
-    
+
+
     private: // Constructor
     
         /**
@@ -65,30 +62,50 @@ NONSHARABLE_CLASS( CmPluginVpnNextLayerSelectDlg ) : public CAknPopupList,
         CmPluginVpnNextLayerSelectDlg( CCmPluginBaseEng& aCmPluginBaseEng,
                                        RArray<TUint32>& aBindableMethods,
                                        TBool& aSnapSelected,
-                                       TUint32& aNextLayerId );
+                                       TUint32& aNextLayerId,
+                                       TInt aDummyIndex );
         
         /**
         * Second phase constructor. Leaves on failure.
         */      
         void ConstructL();
-
-    public: // From MEikMenuObserver
+        
+    public: // new
+        
+        static TInt CancelAsynchronouslyL( TAny* aObject );
+                                             
+        
+    protected: // From CAknListQueryDialog
+    
+        /**
+        * @see CAknListQueryDialog
+        */
+        virtual void PreLayoutDynInitL();
         
         /**
-         * See base class
+        * @see CAknListQueryDialog
+        */
+        TBool OkToExitL( TInt aButtonId );
+
+    public: // From CAknListQueryDialog
+        
+        /**
+         * @see CAknListQueryDialog
          */
         void ProcessCommandL( TInt aCommandId );
-        
+              
         /**
-         * See base class
-         */
-        void SetEmphasis( CCoeControl* aMenuControl, TBool aEmphasis );
-        
-        /**
-         * See base class
+         * @see CAknListQueryDialog
          */
         void DynInitMenuPaneL( TInt aResourceId, CEikMenuPane* aMenuPane );
 
+        /**
+         * @see CAknListQueryDialog
+         */
+        void HandleListBoxEventL( CEikListBox* aListBox, 
+                                  TListBoxEvent aEventType );
+
+        
     public: // From CCoeControl
     
         /**
@@ -99,13 +116,7 @@ NONSHARABLE_CLASS( CmPluginVpnNextLayerSelectDlg ) : public CAknPopupList,
         * @param aContext the returned help context
         */
         void GetHelpContext( TCoeHelpContext& aContext ) const;
-        
-         /**
-        * From CCoeControl, makes control visible/invisible.
-        * @param aVisible ETrue if visible, EFalse if invisible.
-        */
-        void MakeVisible( TBool aVisible );
-        
+                
         /**
         * From CCoeControl
         *
@@ -116,38 +127,8 @@ NONSHARABLE_CLASS( CmPluginVpnNextLayerSelectDlg ) : public CAknPopupList,
         */
         TKeyResponse OfferKeyEventL( const TKeyEvent& aKeyEvent, 
                                      TEventCode aType );
-                                     
-        // From MEikListBoxObserver
-        void HandleListBoxEventL( CEikListBox* aListBox, 
-                                  TListBoxEvent aEventType );
-                                   
-    public: // new functions
-   
-        /**
-        * Display the Options menu
-        *
-        *
-        * @since S60 3.2
-        */
-        void DisplayMenuL();
-
-        /**
-        * Hide the Options menu.
-        *
-        *
-        * @since S60 3.2
-        */
-        void HideMenu();
-
-        /**
-        * Is the Options menu opened?
-        *
-        *
-        * @since S60 3.2
-        * @return ETrue if showing
-        */
-        TBool MenuShowing() const;
-        
+ 
+                                        
     private: // new functions
     
         /*
@@ -169,9 +150,7 @@ NONSHARABLE_CLASS( CmPluginVpnNextLayerSelectDlg ) : public CAknPopupList,
         HBufC* FormatListItemTextsLC( TInt aFirstLineResId,
                                       TInt aSecondLineResId,
                                       TInt aIconIndex );
-        
-        
-        
+                        
         /**
         */
         HBufC* FormatListItemTextsLC( TInt aFirstLineResId,
@@ -202,8 +181,6 @@ NONSHARABLE_CLASS( CmPluginVpnNextLayerSelectDlg ) : public CAknPopupList,
         TBool ShowCMSelectionDlgL( TUint32 aDestinationId, 
                                    TUint32& aCmId );
 
-        void InitialiseL();
-        
         void SetTextsAndIconsL();
         
         void AppendDestinationTextsL( CCmDestinationImpl& aDestination,
@@ -216,7 +193,7 @@ NONSHARABLE_CLASS( CmPluginVpnNextLayerSelectDlg ) : public CAknPopupList,
                                     
         void AppendEasyWlanL( CDesCArray& aItems,
                               CArrayPtr<CGulIcon>& aIcons );
-                           
+                                   
 
     private: // data members
   
@@ -224,17 +201,7 @@ NONSHARABLE_CLASS( CmPluginVpnNextLayerSelectDlg ) : public CAknPopupList,
          * Eikon environment
          */
         CEikonEnv& iMyEikonEnv;        
-  
-        /**
-         * Owned list box
-         */
-        CEikFormattedCellListBox* iMyListBox;
-        
-        /**
-         * Owned menu bar.
-         */
-        CEikMenuBar* iMenuBar;
-        
+       
         /**
          * base class not owned
          */
@@ -274,6 +241,12 @@ NONSHARABLE_CLASS( CmPluginVpnNextLayerSelectDlg ) : public CAknPopupList,
          * Flag to determine if there are uncategorised connection methods
          */
         TBool iUncatItems;
+        
+        /**
+         * One shot active object for asynchronous exiting with Cancel
+         */
+        CAsyncCallBack* iAsyncCancel; 
+        
         
     };
 #endif // CMPVPN_NEXT_LAYER_SELECT_DLG_H

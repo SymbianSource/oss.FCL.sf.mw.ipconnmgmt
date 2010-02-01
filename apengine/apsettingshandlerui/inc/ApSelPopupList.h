@@ -337,7 +337,6 @@ NONSHARABLE_CLASS( CApSelPopupList ) : public CAknRadioButtonSettingPage,
         TBool							iHelpSupported;
         TBool							iProtectionSupported;
         TBool                           iDoExit;
-        TInt                            iOldSelection;
     };
 
 #endif

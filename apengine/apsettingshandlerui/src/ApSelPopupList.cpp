@@ -527,7 +527,6 @@ void CApSelPopupList::SetSelectedL()
         }
     iList->SetCurrentItemIndexAndDraw( idx );
     SelectCurrentItemL();
-    iOldSelection = idx;
     
     APSETUILOGGER_LEAVEFN( EListbox,"SelPopupList::SetSelectedL")
     }
@@ -787,23 +786,9 @@ void CApSelPopupList::HandleListBoxEventL( CEikListBox* aListBox,
         {
         case EEventEnterKeyPressed:
         case EEventItemDoubleClicked:
+        case EEventItemSingleClicked:
             {
             ProcessCommandL( EApSelCmdSelect );
-            break;
-            }
-        case EEventItemSingleClicked:
-            // Second click to the same item makes the selection and closes the
-            // setting page, first click just moves the radio button mark.
-            {
-            if ( ListBoxControl()->CurrentItemIndex() == iOldSelection )
-                {
-                ProcessCommandL( EApSelCmdSelect );
-                }
-            else
-                {
-                CAknRadioButtonSettingPage::HandleListBoxEventL( aListBox, aEventType );
-                iOldSelection = ListBoxControl()->CurrentItemIndex();
-                }
             break;
             }
         case EEventEditingStarted:

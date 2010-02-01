@@ -194,13 +194,24 @@ void CGSConnSettingsPlugin::DoActivateL( const TVwsViewId& aPrevViewId,
 //
 void CGSConnSettingsPlugin::DoDeactivate()
     {
-    //Save current settings when we leave the view
-    //If function leaves it is trapped and ignored as there is nothing that we can do about it
-    if ( iModel )
-        {
-        TRAP_IGNORE(iModel->SaveSettingsL());
-        }    
     CGSBaseView::DoDeactivate();
+    }
+
+// ---------------------------------------------------------------------------
+// CGSConnSettingsPlugin:: HandleForegroundEventL
+//
+//
+// ---------------------------------------------------------------------------
+//
+void CGSConnSettingsPlugin::HandleForegroundEventL( TBool aForeground )
+    {
+    //Load saved settings from Connection Settings API
+    //If function leaves it is trapped and ignored as there is nothing that we can do about it
+    if ( iModel && aForeground )
+        {
+        TRAP_IGNORE( iModel->LoadSettingsL() );
+        UpdateListBoxL( EGSSettIdDataUsageHomeNw );
+        }
     }
 
 // ----------------------------------------------------------------------------
@@ -373,7 +384,7 @@ TUid CGSConnSettingsPlugin::UpperLevelViewUid()
 void CGSConnSettingsPlugin::GetHelpContext( TCoeHelpContext& aContext )
     {
     aContext.iMajor = KUidGS;
-    aContext.iContext = KCP_HLP_ADMINISTRATIVE_SETTINGS;
+    aContext.iContext = KHLP_OCC_CONN_SETTINGS;
     }
 
 // ---------------------------------------------------------------------------
@@ -466,6 +477,9 @@ void CGSConnSettingsPlugin::ShowUsageOfWlanSettingPageL()
             {
             iModel->SetUsageOfWlan( currentItem );
             UpdateListBoxL( EGSSettIdUsageOfWlan );
+            //Save current settings when the setting is changed
+            //If function leaves it is trapped and ignored as there is nothing that we can do about it
+            TRAP_IGNORE(iModel->SaveSettingsL());
             }
         }
 
@@ -509,6 +523,9 @@ void CGSConnSettingsPlugin::ShowDataUsageAbroadSettingPageL()
             {
             iModel->SetDataUsageAbroad( currentItem );
             UpdateListBoxL( EGSSettIdDataUsageAbroad );
+            //Save current settings when the setting is changed
+            //If function leaves it is trapped and ignored as there is nothing that we can do about it
+            TRAP_IGNORE(iModel->SaveSettingsL());
             }
         }
     CleanupStack::PopAndDestroy( items );
@@ -550,6 +567,9 @@ void CGSConnSettingsPlugin::ShowDataUsageInHomeNwSettingPageL()
             {
             iModel->SetDataUsageInHomeNw( currentItem );
             UpdateListBoxL(  EGSSettIdDataUsageHomeNw );
+            //Save current settings when the setting is changed
+            //If function leaves it is trapped and ignored as there is nothing that we can do about it
+            TRAP_IGNORE(iModel->SaveSettingsL());
             }
         }
     CleanupStack::PopAndDestroy( items );

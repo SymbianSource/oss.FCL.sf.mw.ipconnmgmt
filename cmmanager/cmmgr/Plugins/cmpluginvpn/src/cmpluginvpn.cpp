@@ -1177,7 +1177,7 @@ TBool CCmPluginVpn::ShowRealConnectionSelectionDlgL()
                                                          iBindableMethods,
                                                          snapSelected,
                                                          nextLayerId );
-    if ( dlg->ExecuteLD() )
+    if ( dlg->ExecuteLD( R_VPN_REAL_CM_SELECTION_LIST ) )
         {
         // Handle results
         retVal = ETrue;

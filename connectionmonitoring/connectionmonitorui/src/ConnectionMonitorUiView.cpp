@@ -173,6 +173,13 @@ void CConnectionMonitorUiView::DynInitMenuPaneL( TInt aResourceId,
                                                  CEikMenuPane* aMenuPane )
     {
     MEikMenuObserver::DynInitMenuPaneL( aResourceId, aMenuPane );
+    // This is a security measure to prevent menu pane updates when
+    // the main view is not active. This should not happen but
+    // just to be safe it is checked.
+    if ( !iContainer )
+        {
+        return;
+        }
     switch ( aResourceId )
         {
         case R_CONNECTIONMONITORUI_VIEW_MENU:

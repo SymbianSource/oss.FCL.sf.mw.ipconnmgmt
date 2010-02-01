@@ -75,6 +75,8 @@ LIBRARY ETELPCKT.lib    // coverage check
 
 LIBRARY eikcore.lib egul.lib
 LIBRARY eikctl.lib  cone.lib 
-LIBRARY fbscli.lib efsrv.lib 
+LIBRARY fbscli.lib efsrv.lib
+LIBRARY featmgr.lib
+LIBRARY centralrepository.lib 
 
 LIBRARY AknSkins.lib

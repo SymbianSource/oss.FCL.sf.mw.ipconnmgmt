@@ -92,6 +92,11 @@ class CGSConnSettingsPlugin : public CGSBaseView, public MGSPluginLoadObserver, 
         */
         void DoDeactivate();
         
+        /**
+        * See base class.
+        */
+        void HandleForegroundEventL( TBool aForeground );  
+
         
         /**
         * From MEikMenuObserver.

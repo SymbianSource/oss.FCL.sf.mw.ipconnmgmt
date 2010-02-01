@@ -449,7 +449,7 @@ TInt CGSConnSettingsPluginContainer::CurrentFeatureId( ) const
 void CGSConnSettingsPluginContainer::GetHelpContext( TCoeHelpContext& aContext ) const
     {
     aContext.iMajor = KUidGS;
-//    aContext.iContext = KCP_HLP_DISPLAY;
+    aContext.iContext = KHLP_OCC_CONN_SETTINGS;
     }
 
 // ---------------------------------------------------------------------------

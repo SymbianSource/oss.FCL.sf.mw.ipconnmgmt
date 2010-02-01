@@ -272,7 +272,6 @@ void CConnectionMonitorUiContainer::OnEventL(
 void CConnectionMonitorUiContainer::OnTimerEventL()
     {
     iListBox->DrawNow();
-    iListBox->UpdateScrollBarsL();
     PushAndRefreshNaviPaneL();
     }
 

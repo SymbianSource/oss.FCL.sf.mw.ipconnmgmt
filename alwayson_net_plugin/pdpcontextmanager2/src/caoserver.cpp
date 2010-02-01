@@ -214,7 +214,7 @@ void CAOServer::ConstructL()
     ConfigureCustomAPIL();
     
     // Create services
-    iSettings = CAOSettings::NewL( *this );
+    iSettings = CAOSettings::NewL( *this, *this );
     iConnectionManager = CAOConnectionManager::NewL( *this, *iSettings );
     iTimer = CAOTimer::NewL( *this, *iSettings );
 
@@ -970,7 +970,7 @@ void CAOServer::CurrentCellularDataUsageChangedL( const TInt aValue )
             }
         }  	
     }
-
+	
 // ---------------------------------------------------------------------------
 // CAOServer::InitStatePoolL
 // ---------------------------------------------------------------------------

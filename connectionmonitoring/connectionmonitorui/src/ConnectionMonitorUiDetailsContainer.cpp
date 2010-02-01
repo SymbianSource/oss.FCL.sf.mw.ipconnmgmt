@@ -46,7 +46,7 @@ void CConnectionMonitorUiDetailsContainer::ConstructL( const TRect& aRect,
     iListBox = new( ELeave ) CAknSingleHeadingStyleListBox;
     iListBox->SetContainerWindowL( *this );
     TInt flags = 0;
-    flags |= EAknListBoxViewerFlags;
+    flags |= EAknListBoxViewerFlags | EAknListBoxDisableItemSpecificMenu;
     iListBox->ConstructL( this, flags );
     iListBox->CreateScrollBarFrameL( ETrue );
     iListBox->ScrollBarFrame()->SetScrollBarVisibilityL(

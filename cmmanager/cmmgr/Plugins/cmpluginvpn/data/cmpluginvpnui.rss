@@ -224,10 +224,10 @@ RESOURCE CBA r_softkeys_options_cancel__select
 // r_vpn_real_cm_selection_list
 // real connection selection dialog with destination support
 // --------------------------------------------------------------------------
-RESOURCE DIALOG r_vpn_real_cm_selection_list
+RESOURCE AVKON_LIST_QUERY r_vpn_real_cm_selection_list
     {
     flags = EGeneralQueryFlags;
-    buttons = r_softkeys_options_cancel__select;
+    softkeys = r_softkeys_options_cancel__select;
     items =
         {
         AVKON_LIST_QUERY_DLG_LINE
@@ -237,6 +237,7 @@ RESOURCE DIALOG r_vpn_real_cm_selection_list
                 listtype = EAknCtDoubleLargeGraphicPopupMenuListBox;
                 listbox = AVKON_LIST_QUERY_LIST
                     {
+                    flags = EAknListBoxSelectionList;
                     };
                 heading = qtn_netw_conset_prmpt_vpn_real_connection;
                 };
@@ -299,11 +300,13 @@ RESOURCE MENU_PANE r_vpn_real_cm_selection_menu
 		    {
 		    command = ECmManagerUiCmdDestSelect; 
             txt = qtn_set_cmd_select;
+            flags = EEikMenuItemAction;
             }
         ,MENU_ITEM
             {
             command = ECmManagerUiCmdCMSelect;
             txt = qtn_netw_conset_options_select_method;
+            flags = EEikMenuItemSpecific;
             }
         ,MENU_ITEM
             {

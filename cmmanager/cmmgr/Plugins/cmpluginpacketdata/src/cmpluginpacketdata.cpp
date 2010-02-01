@@ -26,6 +26,10 @@
 #include <AknQueryDialog.h>
 #include <StringLoader.h>
 #include <cmmanager.rsg>
+#include <featmgr.h>                     // FeatureManager
+#include <centralrepository.h>           // CRepository 
+#include <CoreApplicationUIsSDKCRKeys.h> // KCRUidCoreApplicationUIs, 
+
 // User
 #include "cmpluginpacketdata.h"
 #include <cmpluginpacketdatadef.h>
@@ -217,14 +221,7 @@ static TBool SetPDPTypeL( CCmPluginBaseEng* aThis,
 // ======== MEMBER FUNCTIONS ========
 
 class CCmPDCoverageCheck : public CActive
-    {
-    enum EPacketCoverageState
-        {
-        EServiceStatus,
-        EPDPAttach,
-        EPDPDetach,                        
-        };
-        
+    {        
     public:
     
         CCmPDCoverageCheck();
@@ -236,15 +233,19 @@ class CCmPDCoverageCheck : public CActive
     
         virtual void DoCancel();
         virtual void RunL();
+        
+    private:
+
+        TBool IsPhoneOfflineL() const;     	        
 
     private:
 
-        TUint32                 iProgState;
         TBool                   iCoverage;
         CActiveSchedulerWait    iWait;    
         RTelServer              iServer;
         RPhone                  iPhone;
-        RPacketService          iService;        
+        RPacketService          iService;
+        RPacketService::TRegistrationStatus iNwRegStatus;        
     };
 
 // ----------------------------------------------------------------------------
@@ -284,37 +285,23 @@ void CCmPDCoverageCheck::DoCancel()
 //
 void CCmPDCoverageCheck::RunL()
     {
-    switch( iProgState )
+    if( !iStatus.Int() )
         {
-        case EPDPAttach:
+        CLOG_WRITE_1( "CCmPDCoverageCheck::RunL: iNwRegStatus: [%d]", iNwRegStatus );
+        	
+        if ( iNwRegStatus == RPacketService::ERegisteredOnHomeNetwork ||
+             iNwRegStatus == RPacketService::ERegisteredRoaming ||
+             iNwRegStatus == RPacketService::ENotRegisteredButAvailable )
             {
-            if( !iStatus.Int() )
-                // PDP context created -> there's a usable PD coverage.
-                {
-                iService.Detach( iStatus );
-                SetActive();
-
-                iCoverage = ETrue;
-                iProgState = EPDPDetach;
-                }
-            else
-                // something went wrong -> no coverage.
-                {
-                iWait.AsyncStop();
-                }
-            }
-            break;
-            
-        case EPDPDetach:
-            {
-            iWait.AsyncStop();
-            }
-            break;
-            
-        default:
-            {
-            User::Leave( KErrCorrupt );
-            }
+            iCoverage = ETrue;	
+            }	
+        iWait.AsyncStop();
+        }
+    else
+        // something went wrong -> no coverage.
+        {
+        CLOG_WRITE_1( "CCmPDCoverageCheck::RunL: FAILED: [%d]", iStatus.Int() );        	
+        iWait.AsyncStop();
         }
     }
     
@@ -324,49 +311,58 @@ void CCmPDCoverageCheck::RunL()
 //
 TBool CCmPDCoverageCheck::IsThereCoverageL()
     {
-    iProgState = EServiceStatus;
     iCoverage = EFalse;
     
-    User::LeaveIfError( iServer.Connect() );
-    CLOG_WRITE( "Server open" );
-    
-    RTelServer::TPhoneInfo info;
-    User::LeaveIfError( iServer.GetPhoneInfo( 0, info ) );
-    CLOG_WRITE( "Phone info ok" );
-    
-    User::LeaveIfError( iPhone.Open(iServer, info.iName ) );
-    CLOG_WRITE( "Phone open" );
-
-    User::LeaveIfError( iService.Open( iPhone ) );
-    CLOG_WRITE( "service ok" );
-
-    RPacketService::TStatus status;
-    User::LeaveIfError( iService.GetStatus( status ) );
-    if( status == RPacketService::EStatusAttached ||
-        status == RPacketService::EStatusActive || 
-        status == RPacketService::EStatusSuspended )
-        // Attached/active/suspened, so there's a coverage
+    if ( !IsPhoneOfflineL() )
         {
-        iCoverage = ETrue;
-        }
-    else if( status == RPacketService::EStatusUnattached )
-        {
-        iProgState = EPDPAttach;
-        iService.Attach( iStatus );
+        User::LeaveIfError( iServer.Connect() );
+        CLOG_WRITE( "Server open" );
+    
+        RTelServer::TPhoneInfo info;
+        User::LeaveIfError( iServer.GetPhoneInfo( 0, info ) );
+        CLOG_WRITE( "Phone info ok" );
+    
+        User::LeaveIfError( iPhone.Open(iServer, info.iName ) );
+        CLOG_WRITE( "Phone open" );
+
+        User::LeaveIfError( iService.Open( iPhone ) );
+        CLOG_WRITE( "service ok" );
+
+        iService.GetNtwkRegStatus( iStatus, iNwRegStatus );
         SetActive();
         iWait.Start();
+    
+        User::LeaveIfError( iStatus.Int() );  	
         }
-    else
-        {
-        CLOG_WRITE( "Unknown state" );
-        }
-        
-
-    User::LeaveIfError( iStatus.Int() );
     
     return iCoverage;
     }
 
+// ----------------------------------------------------------------------------
+// CCmPDCoverageCheck::IsPhoneOfflineL
+// ----------------------------------------------------------------------------
+//
+TBool CCmPDCoverageCheck::IsPhoneOfflineL() const
+    {
+    if ( FeatureManager::FeatureSupported( KFeatureIdOfflineMode ) )
+        {
+        CRepository* repository = CRepository::NewLC( KCRUidCoreApplicationUIs );
+        TInt connAllowed( ECoreAppUIsNetworkConnectionAllowed );
+        
+        repository->Get( KCoreAppUIsNetworkConnectionAllowed, connAllowed );
+        CleanupStack::PopAndDestroy( repository );
+        	 
+        if ( !connAllowed )
+            {
+            CLOG_WRITE( "Phone is in offline mode." );
+            return ETrue;
+            }
+        }
+        
+    CLOG_WRITE( "Phone is NOT in offline mode." );
+    return EFalse;
+    }
+    
 // ----------------------------------------------------------------------------
 // CCmPluginPacketData::NewOutgoingL
 // ----------------------------------------------------------------------------

@@ -114,7 +114,7 @@
 //w:
 //r: 5.2
 //
-#define qtn_occ_info_popup_wlan_usage_known "Known WLAN networks will be joined automatically."
+#define qtn_occ_info_popup_wlan_usage_known "Phone will automatically switch from cellular data connection to a known WLAN network when available."
 
 
 //d: Info popup note for "Manual" selection of "Join WLAN networks"
@@ -122,7 +122,7 @@
 //w:
 //r: 5.2
 //
-#define qtn_occ_info_popup_wlan_usage_manual "Phone will not join WLAN networks automatically. WLAN network can be taken into use via WLAN wizard."
+#define qtn_occ_info_popup_wlan_usage_manual "Phone will not switch from cellular data connection to a WLAN connection automatically. WLAN network can be taken into use via WLAN wizard."
 
 
 // End of File

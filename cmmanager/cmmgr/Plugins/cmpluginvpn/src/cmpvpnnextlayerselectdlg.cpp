@@ -60,7 +60,8 @@ CmPluginVpnNextLayerSelectDlg* CmPluginVpnNextLayerSelectDlg::NewL(
             new ( ELeave ) CmPluginVpnNextLayerSelectDlg( aCmPluginBaseEng,
                                                           aBindableMethods,
                                                           aSnapSelected,
-                                                          aNextLayerId );
+                                                          aNextLayerId,
+                                                          0 );
     CleanupStack::PushL( self );
     self->ConstructL();
     CleanupStack::Pop( self );
@@ -75,8 +76,10 @@ CmPluginVpnNextLayerSelectDlg::CmPluginVpnNextLayerSelectDlg(
                                         CCmPluginBaseEng& aCmPluginBaseEng,
                                         RArray<TUint32>& aBindableMethods,
                                         TBool& aSnapSelected,
-                                        TUint32& aNextLayerId )
-    : iMyEikonEnv( *CEikonEnv::Static() )
+                                        TUint32& aNextLayerId,
+                                        TInt aDummyIndex )
+    : CAknListQueryDialog( &aDummyIndex )
+    , iMyEikonEnv( *CEikonEnv::Static() )
     , iCmPluginBaseEng( aCmPluginBaseEng )
     , iSnapSelected( aSnapSelected )
     , iNextLayerId( aNextLayerId )
@@ -96,17 +99,13 @@ CmPluginVpnNextLayerSelectDlg::CmPluginVpnNextLayerSelectDlg(
 //
 CmPluginVpnNextLayerSelectDlg::~CmPluginVpnNextLayerSelectDlg()
     {
-    iResourceReader.Close();
-    
-    if ( iMenuBar )
+    if (  iAsyncCancel )
         {
-        HideMenu();
-        CEikonEnv::Static()->EikAppUi()->RemoveFromStack( iMenuBar );
-        delete iMenuBar;
-        iMenuBar = NULL;
+        delete  iAsyncCancel;
+        iAsyncCancel = NULL;
         }
-        
-    delete iMyListBox; iMyListBox = NULL;
+    
+    iResourceReader.Close();
     }
 
 // --------------------------------------------------------------------------
@@ -114,49 +113,72 @@ CmPluginVpnNextLayerSelectDlg::~CmPluginVpnNextLayerSelectDlg()
 // --------------------------------------------------------------------------
 //
 void CmPluginVpnNextLayerSelectDlg::ConstructL()
-    {
+    {    
     LoadResourceL( KPluginVPNResDirAndFileName );
-    InitialiseL();
-    SetTextsAndIconsL();
-    }
-    
-// --------------------------------------------------------------------------
-// CmPluginVpnNextLayerSelectDlg::InitialiseL
-// --------------------------------------------------------------------------
-// 
-void CmPluginVpnNextLayerSelectDlg::InitialiseL()
-    {
-    LOGGER_ENTERFN( "CmPluginVpnNextLayerSelectDlg::InitialiseL" );
     
     // get the EasyWlan id if it's supported
     if ( FeatureManager::FeatureSupported( KFeatureIdProtocolWlan ) )
         {
         iEasyWlanId = iCmManager.EasyWlanIdL();
+        }   
+    }
+
+// ---------------------------------------------------------------------------
+// CmPluginVpnNextLayerSelectDlg::CancelAsynchronouslyL
+// ---------------------------------------------------------------------------
+TInt CmPluginVpnNextLayerSelectDlg::CancelAsynchronouslyL( TAny* aObject )
+    {
+    CmPluginVpnNextLayerSelectDlg* myself =
+        static_cast< CmPluginVpnNextLayerSelectDlg* >( aObject );
+    
+    myself->TryExitL( EAknSoftkeyCancel );
+    return 0;
+    }
+    
+// ----------------------------------------------------------------------------
+// CmPluginVpnNextLayerSelectDlg::PreLayoutDynInitL
+// ----------------------------------------------------------------------------
+//
+void CmPluginVpnNextLayerSelectDlg::PreLayoutDynInitL()
+    {
+    CAknDialog::ConstructL( R_VPN_REAL_CM_SELECTION_MENUBAR );
+    
+    // Let the base class do its job first
+    CAknListQueryDialog::PreLayoutDynInitL();
+
+    SetTextsAndIconsL();
+    }
+
+// ----------------------------------------------------------------------------
+// CmPluginVpnNextLayerSelectDlg::OkToExitL
+// ----------------------------------------------------------------------------
+//
+TBool CmPluginVpnNextLayerSelectDlg::OkToExitL( TInt aButtonId )
+    {
+    TBool result = EFalse;
+    
+    if ( aButtonId == EAknSoftkeyDone  || aButtonId == EAknSoftkeyOk )
+        {
+        result = ETrue;
         }
+    else if ( aButtonId == EAknSoftkeySelect )
+        {
+        ProcessCommandL( ECmManagerUiCmdDestSelect );
+        }    
+    else if ( aButtonId == EAknSoftkeyOptions )
+        {
+        ProcessCommandL( EAknSoftkeyOptions );
+        }
+    else if ( aButtonId == EAknSoftkeyBack || aButtonId == EAknSoftkeyCancel )
+        {
+        result = ETrue;
+        }
+    else
+        {
     
-    // Listbox
-    iMyListBox = new ( ELeave ) CAknDoubleLargeGraphicPopupMenuStyleListBox;
-    
-    CAknPopupList::ConstructL( 
-                            iMyListBox, 
-                            R_SOFTKEYS_OPTIONS_CANCEL__SELECT, 
-                            AknPopupLayouts::EMenuDoubleLargeGraphicWindow );
-                               
-    TInt flags = 0;
-    iMyListBox->ConstructL( this, flags );
-    iMyListBox->CreateScrollBarFrameL( ETrue );
-    iMyListBox->ScrollBarFrame()->SetScrollBarVisibilityL( 
-                    CEikScrollBarFrame::EOff, CEikScrollBarFrame::EAuto );
-        
-    // Menu
-    CEikMenuBar* newMenuBar = new ( ELeave ) CEikMenuBar();
-    CleanupStack::PushL( newMenuBar );
-    newMenuBar->ConstructL( this, NULL, R_VPN_REAL_CM_SELECTION_MENUBAR );
-    iMyEikonEnv.EikAppUi()->AddToStackL( newMenuBar, 
-                                         ECoeStackPriorityMenu, 
-                                         ECoeStackFlagRefusesFocus );
-    iMenuBar = newMenuBar;
-    CleanupStack::Pop( newMenuBar ); // ownership taken by 'this'
+        }
+
+    return result;
     }
     
 // --------------------------------------------------------------------------
@@ -166,24 +188,20 @@ void CmPluginVpnNextLayerSelectDlg::InitialiseL()
 void CmPluginVpnNextLayerSelectDlg::SetTextsAndIconsL()
     {
     LOGGER_ENTERFN( "CmPluginVpnNextLayerSelectDlg::SetTextsAndIconsL" );
-    // Title
-    SetTitleL( *StringLoader::LoadLC( 
-                            R_QTN_NETW_CONSET_PRMPT_VPN_REAL_CONNECTION ) );
-    CleanupStack::PopAndDestroy(); // header
     
     // Item text array
     CDesCArray* itemArray =
                 new ( ELeave ) CDesCArrayFlat( KCmArrayMediumGranularity );
     CleanupStack::PushL( itemArray );
-    iMyListBox->Model()->SetItemTextArray( itemArray ); // ownership taken
-    iMyListBox->Model()->SetOwnershipType( ELbmOwnsItemArray );
+    SetItemTextArray( itemArray ); // ownership taken
+    SetOwnershipType( ELbmOwnsItemArray );
     CleanupStack::Pop( itemArray ); // as ownership is taken
                     
     // Icon array
     CArrayPtr<CGulIcon>* icons =
          new ( ELeave ) CArrayPtrFlat<CGulIcon>( KCmArrayMediumGranularity );
     CleanupStack::PushL( icons );
-    iMyListBox->ItemDrawer()->FormattedCellData()->SetIconArrayL( icons );
+    SetIconArrayL( icons );
     // ownership taken by SetIconArrayL!
     CleanupStack::Pop( icons ); // as ownership is taken
     
@@ -383,7 +401,7 @@ void CmPluginVpnNextLayerSelectDlg::DynInitMenuPaneL(
             {
             aMenuPane->DeleteMenuItem( EAknCmdHelp );		    
             }
-        TUint32 highlighted = iDestinations[ iListBox->CurrentItemIndex() ];
+        TUint32 highlighted = iDestinations[ ListBox()->CurrentItemIndex() ];
         
         switch ( highlighted )
             {
@@ -423,8 +441,8 @@ void CmPluginVpnNextLayerSelectDlg::ProcessCommandL( TInt aCommandId )
             break;
             }
         case ECmManagerUiCmdDestSelect:
-            {
-            TUint32 destId = iDestinations[ iListBox->CurrentItemIndex() ];
+            {            
+            TUint32 destId = iDestinations[ ListBox()->CurrentItemIndex() ];
             
             if ( destId != KDestItemUncategorized )
                 {
@@ -437,24 +455,44 @@ void CmPluginVpnNextLayerSelectDlg::ProcessCommandL( TInt aCommandId )
                     destId = iEasyWlanId;
                     }
                 iCmPluginBaseEng.SetIntAttributeL( attribute, destId );
-                AttemptExitL( ETrue );
+
+                // We cannot use TryExitL here, since if the pointer event
+                // handling is ongoing, i.e., we got here from this class's
+                // HandleListBoxEventL, there will be a KERN-EXEC 3 panic.
+                // Calling base class HandleListBoxEventL will exit the
+                // dialog asynchronously with return value ETrue.
+                CAknListQueryDialog::HandleListBoxEventL( ListBox(),
+                     EEventItemSingleClicked );
                 break;
                 }
+            
             // For uncategorised destinations, flow through to ECmManagerUiCmdCMSelect
             }
         case ECmManagerUiCmdCMSelect:
             {
             // select a connection method from the highlighted destination
-            TUint32 destId = iDestinations[ iListBox->CurrentItemIndex() ];
+            TUint32 destId = iDestinations[ ListBox()->CurrentItemIndex() ];
             TUint32 cmId (0);
             if ( ShowCMSelectionDlgL( destId, cmId ) )
                 {
                 iCmPluginBaseEng.SetIntAttributeL( ECmNextLayerIapId, cmId );
-                AttemptExitL( ETrue );
+                
+                // We cannot use TryExitL here, since if the pointer event
+                // handling is ongoing, i.e., we got here from this class's
+                // HandleListBoxEventL, there will be a KERN-EXEC 3 panic.
+                // Calling base class HandleListBoxEventL will exit the
+                // dialog asynchronously with return value ETrue.
+                CAknListQueryDialog::HandleListBoxEventL( ListBox(),
+                                     EEventItemSingleClicked );
                 }
             else
                 {
-                CancelPopup();
+                // We need to exit asynchronously, in case we ended up here
+                // from HandleListBoxEventL. The callback function will exit
+                // the dialog with return value EFalse.
+                TCallBack cb( CancelAsynchronouslyL, this );
+                iAsyncCancel = new( ELeave ) CAsyncCallBack( cb, CActive::EPriorityHigh );
+                iAsyncCancel->CallBack();
                 }
             break;
             }
@@ -466,12 +504,12 @@ void CmPluginVpnNextLayerSelectDlg::ProcessCommandL( TInt aCommandId )
             break;
         case EAknSoftkeyBack:
             {
-            CancelPopup();
+            TryExitL( EAknSoftkeyBack );
             break;
             } 
         default:
             {
-            CAknPopupList::ProcessCommandL( aCommandId );
+            CAknListQueryDialog::ProcessCommandL( aCommandId );
             break;
             }
         }
@@ -486,7 +524,7 @@ TKeyResponse CmPluginVpnNextLayerSelectDlg::OfferKeyEventL(
                                                 TEventCode aType )    
     {
     TKeyResponse retVal ( EKeyWasNotConsumed );
-    TUint highlighted = iDestinations[ iListBox->CurrentItemIndex() ];
+    TUint highlighted = iDestinations[ ListBox()->CurrentItemIndex() ];
     
     switch ( aKeyEvent.iScanCode )
         {
@@ -497,27 +535,27 @@ TKeyResponse CmPluginVpnNextLayerSelectDlg::OfferKeyEventL(
             // change the soft key to 'Open'
             if ( highlighted == KDestItemUncategorized )
                 {
-                ButtonGroupContainer()->SetCommandL( 
+                ButtonGroupContainer().SetCommandL( 
                                 ECmManagerUiCmdDestSelect, 
                                 *( StringLoader::LoadLC( R_QTN_MSK_OPEN ) ) 
                                                     );
-                ButtonGroupContainer()->DrawDeferred();
+                ButtonGroupContainer().DrawDeferred();
                 CleanupStack::PopAndDestroy();
                 }
             else
                 {
-                ButtonGroupContainer()->SetCommandL( 
+                ButtonGroupContainer().SetCommandL( 
                                ECmManagerUiCmdDestSelect, 
                                *( StringLoader::LoadLC( R_QTN_MSK_SELECT ) ) 
                                                     );
-                ButtonGroupContainer()->DrawDeferred();
+                ButtonGroupContainer().DrawDeferred();
                 CleanupStack::PopAndDestroy();
                 }
             break;
             }
         case EStdKeyNo:
             {
-            CancelPopup();
+            TryExitL( EAknSoftkeyCancel );
             return EKeyWasConsumed;
             }
         default:
@@ -526,28 +564,29 @@ TKeyResponse CmPluginVpnNextLayerSelectDlg::OfferKeyEventL(
             // change the soft key to 'Open'
             if ( highlighted == KDestItemUncategorized )
                 {
-                ButtonGroupContainer()->SetCommandL( 
+                ButtonGroupContainer().SetCommandL( 
                                 ECmManagerUiCmdDestSelect, 
                                 *( StringLoader::LoadLC( R_QTN_MSK_OPEN ) ) 
                                                     );
-                ButtonGroupContainer()->DrawDeferred();
+                ButtonGroupContainer().DrawDeferred();
                 CleanupStack::PopAndDestroy();
                 }
                 
             if ( aKeyEvent.iCode == EKeyEscape )
                 {
-                CancelPopup();
+                TryExitL( EAknSoftkeyCancel );
                 return EKeyWasConsumed;
                 }
             }
         }
-    retVal = iListBox->OfferKeyEventL( aKeyEvent, aType );
+    retVal = ListBox()->OfferKeyEventL( aKeyEvent, aType );
     
     return retVal;
     }
-    
+
+
 // ---------------------------------------------------------------------------
-// CDestDlg::HandleListBoxEventL
+// CmPluginVpnNextLayerSelectDlg::HandleListBoxEventL
 // ---------------------------------------------------------------------------
 void CmPluginVpnNextLayerSelectDlg::HandleListBoxEventL( CEikListBox* /*aListBox*/,
                                     TListBoxEvent aEventType )
@@ -555,9 +594,10 @@ void CmPluginVpnNextLayerSelectDlg::HandleListBoxEventL( CEikListBox* /*aListBox
     switch ( aEventType )
         {
         case EEventEnterKeyPressed:
-        case EEventItemDoubleClicked:
+        case EEventItemSingleClicked:
             {
-            ProcessCommandL(ECmManagerUiCmdDestSelect);
+            ProcessCommandL( ECmManagerUiCmdDestSelect );
+            
             break;
             }
         default:
@@ -567,27 +607,6 @@ void CmPluginVpnNextLayerSelectDlg::HandleListBoxEventL( CEikListBox* /*aListBox
         };
     }
 
-// --------------------------------------------------------------------------
-// CmPluginVpnNextLayerSelectDlg::SetEmphasis
-// --------------------------------------------------------------------------
-//
-void CmPluginVpnNextLayerSelectDlg::SetEmphasis( CCoeControl* aMenuControl, 
-                                                 TBool aEmphasis )
-    {
-	CEikAppUi* appUi = iMyEikonEnv.EikAppUi();
-	appUi->RemoveFromStack( aMenuControl );
-	
-	TRAP_IGNORE( appUi->AddToStackL ( 
-	                            aMenuControl, 
-                                aEmphasis ? ECoeStackPriorityDialog : 
-                                ECoeStackPriorityMenu ) );
-                                
-	appUi->UpdateStackedControlFlags( 
-	                            aMenuControl, 
-                                aEmphasis ? 0 : ECoeStackFlagRefusesFocus,
-                                ECoeStackFlagRefusesFocus );
-	appUi->HandleStackChanged();
-    }
     
 // --------------------------------------------------------------------------
 // CmPluginVpnNextLayerSelectDlg::LoadResourceL
@@ -753,12 +772,9 @@ TBool CmPluginVpnNextLayerSelectDlg::ShowCMSelectionDlgL(
     CleanupStack::PopAndDestroy();            
     CleanupStack::Pop( dlg );
 
-    MakeVisible( EFalse );
-
     TInt result = 0;
     TRAPD( err, result = dlg->ExecuteLD( CAknSettingPage::EUpdateWhenChanged ) );
 
-    MakeVisible( ETrue );
     User::LeaveIfError( err );
 
     if ( result )
@@ -774,32 +790,6 @@ TBool CmPluginVpnNextLayerSelectDlg::ShowCMSelectionDlgL(
     return retVal;
     }
     
-// --------------------------------------------------------------------------
-// CmPluginVpnNextLayerSelectDlg::DisplayMenuL
-// --------------------------------------------------------------------------
-//
-void CmPluginVpnNextLayerSelectDlg::DisplayMenuL()
-    {
-    iMenuBar->TryDisplayMenuBarL();
-    }
-
-// --------------------------------------------------------------------------
-// CmPluginVpnNextLayerSelectDlg::HideMenu
-// --------------------------------------------------------------------------
-//
-void CmPluginVpnNextLayerSelectDlg::HideMenu()
-    {
-    iMenuBar->StopDisplayingMenuBar();
-    }
-
-// --------------------------------------------------------------------------
-// CmPluginVpnNextLayerSelectDlg::MenuShowing
-// --------------------------------------------------------------------------
-//
-TBool CmPluginVpnNextLayerSelectDlg::MenuShowing() const
-    {
-    return iMenuBar->IsDisplayed();
-    }
 
 // --------------------------------------------------------------------------
 // CmPluginVpnNextLayerSelectDlg::GetHelpContext
@@ -811,19 +801,4 @@ void CmPluginVpnNextLayerSelectDlg::GetHelpContext(
     aContext.iMajor = KHelpUidPlugin;
     aContext.iContext = KSET_HLP_VPN_DEST_ASSOC_VIEW;
     }
-
-// --------------------------------------------------------------------------
-// CmPluginVpnNextLayerSelectDlg::MakeVisible
-// --------------------------------------------------------------------------
-//
-void CmPluginVpnNextLayerSelectDlg::MakeVisible( TBool aVisible )
-    {
-    CAknPopupList::MakeVisible( aVisible );
-
-    // Necessary implementation.
-    CAknPopupList::FadeBehindPopup( IsVisible() );
-    }
-
-
-
 
