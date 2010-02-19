@@ -52,7 +52,7 @@ EXPORTS
 	_ZN22CConnectionUiUtilities27CancelWlanPowerSaveTestNoteEv @ 51 NONAME
 	_ZN22CConnectionUiUtilities11EasyWapiDlgEP6TDes16 @ 52 NONAME
 	_ZN22CConnectionUiUtilities23ConfirmMethodUsageQueryER22TMsgQueryLinkedResultsiR14TRequestStatus @ 53 NONAME
-	_ZN22CConnectionUiUtilities26ConnectingViaDiscreetPopupERKmi @ 54 NONAME
+	_ZN22CConnectionUiUtilities26ConnectingViaDiscreetPopupERKm @ 54 NONAME
 	_ZN22CConnectionUiUtilities27NoWLANNetworksAvailableNoteEv @ 55 NONAME
 	_ZN22CConnectionUiUtilities28ConnectionErrorDiscreetPopupERKi @ 56 NONAME
 

@@ -23,7 +23,7 @@
 #include <e32base.h>
 #include <e32cmn.h>
 #include <metadatabase.h>
-#include <coneresloader.h>
+#include <ConeResLoader.h>
 #include <cmmanagerdef.h>
 #include <cmconnectionmethodext.h>
 #include <cmdefconnvalues.h>

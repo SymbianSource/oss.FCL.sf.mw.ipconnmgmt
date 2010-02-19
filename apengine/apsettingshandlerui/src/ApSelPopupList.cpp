@@ -21,7 +21,7 @@
 #include "APSettingsHandlerUIVariant.hrh"
 
 #include <ApListItem.h>
-#include <ApSetUI.rsg>
+#include <apsetui.rsg>
 #include <featmgr.h>
 
 #include <csxhelp/cp.hlp.hrh>

@@ -23,8 +23,8 @@
 
 // INCLUDES
 #include <e32base.h>
-#include <Metadatabase.h>
-#include <CommsDatTypesV1_1.h>
+#include <metadatabase.h>
+#include <commsdattypesv1_1.h>
 #include <cmmanagertablefields.h>
 
 // FORWARD DECLARATIONS

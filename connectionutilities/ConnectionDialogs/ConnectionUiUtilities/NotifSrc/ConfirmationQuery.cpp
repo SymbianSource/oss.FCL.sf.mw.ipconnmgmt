@@ -39,6 +39,7 @@ _LIT( KErrNullPointer, "NULL pointer" );
 //
 // ---------------------------------------------------------
 // CConfirmationQuery::CConfirmationQuery
+// HOME NETWORK
 // ---------------------------------------------------------
 //
 CConfirmationQuery::CConfirmationQuery( CConfirmationQueryNotif* aNotif )
@@ -47,8 +48,7 @@ CConfirmationQuery::CConfirmationQuery( CConfirmationQueryNotif* aNotif )
   iButtonGroupPreviouslyChanged( EFalse )
    {
    }
-    
-    
+
 // ---------------------------------------------------------
 // CConfirmationQuery::~CConfirmationQuery
 // ---------------------------------------------------------
@@ -59,8 +59,6 @@ CConfirmationQuery::~CConfirmationQuery()
                  CCoeEnv::Static()->AppUi() )->SuppressAppSwitching( EFalse );
     delete iExpiryTimer;
     }
-
-
 
 // ---------------------------------------------------------
 // CConfirmationQuery::OkToExitL
@@ -96,7 +94,6 @@ TBool CConfirmationQuery::OkToExitL( TInt aButtonId )
     return result;  
     }
     
-    
 // ---------------------------------------------------------
 // CConfirmationQuery::PreLayoutDynInitL()
 // ---------------------------------------------------------
@@ -111,7 +108,6 @@ void CConfirmationQuery::PreLayoutDynInitL()
     iExpiryTimer = CExpiryTimer::NewL( *this );
     iExpiryTimer->Start();
     }
-
 
 // ---------------------------------------------------------
 // CConfirmationQuery::TryExitL()
@@ -158,5 +154,118 @@ void CConfirmationQuery::HandleTimedOut()
     TRAP_IGNORE( TryExitL(EAknSoftkeyCancel) );
     }
 
+
+// ================= MEMBER FUNCTIONS =======================
+//
+// ---------------------------------------------------------
+// CConfirmationQueryVisitor::CConfirmationQueryVisitor
+// VISITOR NETWORK
+// ---------------------------------------------------------
+//
+CConfirmationQueryVisitor::CConfirmationQueryVisitor( 
+        CConfirmationQueryNotif* aNotif )
+    : 
+    iNotif( aNotif )
+    {
+    }
+    
+// ---------------------------------------------------------
+// CConfirmationQueryVisitor::~CConfirmationQueryVisitor
+// ---------------------------------------------------------
+//
+CConfirmationQueryVisitor::~CConfirmationQueryVisitor()
+    {
+    STATIC_CAST( CEikServAppUi*, 
+        CCoeEnv::Static()->AppUi() )->SuppressAppSwitching( EFalse );
+    delete iExpiryTimer;
+    }
+
+// ---------------------------------------------------------
+// CConfirmationQueryVisitor::OkToExitL
+// ---------------------------------------------------------
+//
+TBool CConfirmationQueryVisitor::OkToExitL( TInt aButtonId )
+    {
+    CLOG_ENTERFN( "CConfirmationQueryVisitor::OkToExitL" );
+    TBool result( EFalse );
+    TInt status = KErrCancel;
+    
+    if ( aButtonId == EAknSoftkeySelect || 
+         aButtonId == EAknSoftkeyDone || aButtonId == EAknSoftkeyOk )
+        {
+        iNotif->SetSelectedChoiceL( EMsgQueryThisTime );
+        result = ETrue;
+        status = KErrNone;
+        }
+    else if ( aButtonId == EAknSoftkeyCancel )
+        {
+        status = KErrCancel;
+        result = ETrue;
+        }
+
+    if ( result )
+        {
+        CLOG_WRITEF( _L( "aButtonId = %d" ), aButtonId );
+        if ( iNotif )
+            {
+            iNotif->CompleteL( status );
+            }
+        }
+
+    CLOG_LEAVEFN( "CConfirmationQueryVisitor::OkToExitL" );
+
+    return result;  
+    }
+    
+// ---------------------------------------------------------
+// CConfirmationQueryVisitor::PreLayoutDynInitL()
+// ---------------------------------------------------------
+//
+void CConfirmationQueryVisitor::PreLayoutDynInitL()
+    {      
+    CAknMessageQueryDialog::PreLayoutDynInitL();
+
+    STATIC_CAST( CEikServAppUi*, 
+                CCoeEnv::Static()->AppUi() )->SuppressAppSwitching( ETrue );
+
+    iExpiryTimer = CExpiryTimer::NewL( *this );
+    iExpiryTimer->Start();
+    }
+
+// ---------------------------------------------------------
+// CConfirmationQueryVisitor::TryExitL()
+// ---------------------------------------------------------
+//
+void CConfirmationQueryVisitor::TryExitL( TInt aButtonId )
+    {
+    CLOG_ENTERFN( "CConfirmationQueryVisitor::TryExitL" );
+    CAknMessageQueryDialog::TryExitL( aButtonId );
+    CLOG_LEAVEFN( "CConfirmationQueryVisitor::TryExitL" );
+    }
+
+// ---------------------------------------------------------
+// CConfirmationQueryVisitor::OfferKeyEventL
+// ---------------------------------------------------------
+//
+TKeyResponse CConfirmationQueryVisitor::OfferKeyEventL( const TKeyEvent& aKeyEvent, 
+                                                 TEventCode aType)
+    {
+    if( aType == EEventKey && aKeyEvent.iCode == EKeyPhoneSend )
+        {
+        // Let's not obscure the Dialer in the background
+        if ( iExpiryTimer )
+            {
+            iExpiryTimer->Cancel();
+            iExpiryTimer->StartShort();    
+            }
+        }
+    
+    return CAknMessageQueryDialog::OfferKeyEventL( aKeyEvent,aType ); 
+    } 
+
+void CConfirmationQueryVisitor::HandleTimedOut()
+    {
+    TRAP_IGNORE( TryExitL(EAknSoftkeyCancel) );
+    }
 
 // End of File

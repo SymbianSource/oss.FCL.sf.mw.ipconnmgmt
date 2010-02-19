@@ -112,9 +112,8 @@ NONSHARABLE_CLASS( CConnectionUiUtilities ) : public CBase
         * This method should only be used from the MPM in order to provide
         * a consistent popup behavior across the platform.
         * @param aIAPId The id of the access point.
-        * @param aConnectionActive is connection already active.
         */
-        IMPORT_C void ConnectingViaDiscreetPopup( const TUint32& aIAPId, TBool aConnectionAlreadyActive );
+        IMPORT_C void ConnectingViaDiscreetPopup( const TUint32& aIAPId );
 
         /**
         * Pops up a discreet popup indicating a connection error.

@@ -266,13 +266,6 @@ void CMPMConfirmDlgStarting::UserSelectedConnectAutomatically()
             TRAP_IGNORE(iServer.CommsDatAccess()->WriteGenConnSettingsL( genConnSettings )); 
             }
         } 
-    else
-        {
-        //In foreign country connect automatically is not stored in commsdat
-        //even user selected so. We just do not ask confirmation for the cellular
-        //connection again in this country:
-        iServer.RoamingWatcher()->SetAskCellularDataUsageAbroad( false );            
-        }
     
     TBool wlanNeeded( EFalse );
     TRAPD( err, wlanNeeded = iIapSelection.StartWlanQueryIfNeededL( iIAP ) )

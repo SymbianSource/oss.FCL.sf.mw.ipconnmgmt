@@ -23,7 +23,7 @@
 #include <ApListItemList.h>
 #include <ApListItem.h>
 #include <ApSelect.h>
-#include <ApSetUI.rsg>
+#include <apsetui.rsg>
 #include <VpnApEngine.h>
 #include <hlplch.h>
 #include <eikenv.h>

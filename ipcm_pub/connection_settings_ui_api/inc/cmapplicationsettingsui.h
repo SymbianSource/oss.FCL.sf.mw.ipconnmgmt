@@ -18,7 +18,7 @@
 #ifndef C_CMAPPLICATIONSETTINGSUI_H
 #define C_CMAPPLICATIONSETTINGSUI_H
 
-#include <E32def.h>
+#include <e32def.h>
 #include <e32base.h>
 
 class CCmConnSettingsUiImpl;

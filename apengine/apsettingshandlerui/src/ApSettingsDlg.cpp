@@ -41,7 +41,7 @@
 #include "ApSettingsLookups.h"
 #include "ApSettingsDlg.h"
 #include "ApSettingsModel.h"
-#include <ApSetUI.rsg>
+#include <apsetui.rsg>
 
 #include <csxhelp/cp.hlp.hrh>
 

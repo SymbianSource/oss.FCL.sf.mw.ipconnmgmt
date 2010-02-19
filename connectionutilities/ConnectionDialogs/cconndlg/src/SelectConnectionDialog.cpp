@@ -135,6 +135,15 @@ void CSelectConnectionDialog::PreLayoutDynInitL()
 
     STATIC_CAST( CEikServAppUi*, 
                 CCoeEnv::Static()->AppUi() )->SuppressAppSwitching( ETrue );
+    
+    // Hide Options button if single-click enabled
+    //
+    if ( static_cast< CAknAppUi* >( iCoeEnv->AppUi() )->IsSingleClickCompatible() )
+        {
+        CEikButtonGroupContainer* cba = CEikButtonGroupContainer::Current();
+        cba->MakeCommandVisible( EAknSoftkeyOptions, EFalse );
+        cba->DrawDeferred();
+        }
 
     iExpiryTimer = CExpiryTimer::NewL( *this );
     iExpiryTimer->Start();
@@ -177,17 +186,7 @@ TBool CSelectConnectionDialog::OkToExitL( TInt aButtonId )
         }
     else if ( aButtonId == EAknSoftkeyOptions )
         {
-        if ( !( ListBox()->View()->ItemDrawer()->Flags() 
-               & CListItemDrawer::EDisableHighlight ) )
-            {
-            DisplayMenuL();
-            }
-        else
-            {
-            ListBox()->View()->ItemDrawer()->ClearFlags(
-               CListItemDrawer::EDisableHighlight );
-            DrawNow();
-            }
+        DisplayMenuL();
         }
         
     if ( result )
@@ -447,6 +446,26 @@ TKeyResponse CSelectConnectionDialog::OfferKeyEventL(
         cba.DrawDeferred();
         }
 
+    // Show Options button if some listbox row gets highlighted
+    //
+    if ( static_cast< CAknAppUi* >( iCoeEnv->AppUi() )->IsSingleClickCompatible() )
+        {
+        CEikButtonGroupContainer* cba = CEikButtonGroupContainer::Current();
+
+        if ( ( ListBox()->View()->ItemDrawer()->Flags()
+               & CListItemDrawer::ESingleClickDisabledHighlight )
+              )
+            {
+            cba->MakeCommandVisible( EAknSoftkeyOptions, EFalse );
+            }
+        else
+            {
+            cba->MakeCommandVisible( EAknSoftkeyOptions, ETrue );
+            }
+
+        cba->DrawDeferred();
+        }
+    
     CLOG_LEAVEFN( "CSelectConnectionDialog::OfferKeyEventL" );  
 
     return result;

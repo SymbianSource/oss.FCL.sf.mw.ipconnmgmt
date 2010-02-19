@@ -58,8 +58,7 @@ CMPMRoamingWatcher::CMPMRoamingWatcher( RMobilePhone& aMobilePhone )
       iMobilePhone( aMobilePhone ),
       iRegistrationStatus( RMobilePhone::ERegistrationUnknown ),
       iRoamingStatus( EMPMRoamingStatusUnknown ),
-      iCurrentCountryCode( 0 ),
-      iAskCellularDataUsageAbroad( true )
+      iCurrentCountryCode( 0 )
     {
     MPMLOGSTRING( "CMPMRoamingWatcher::CMPMRoamingWatcher" )
     CActiveScheduler::Add( this );
@@ -188,7 +187,6 @@ TMPMRoamingStatus CMPMRoamingWatcher::MapRegistrationStatus( RMobilePhone::TMobi
         case RMobilePhone::ERegisteredOnHomeNetwork:
             {
             roamingStatus = EMPMHomenetwork;
-            iAskCellularDataUsageAbroad = false;
             break;
             }
             
@@ -221,11 +219,6 @@ TMPMRoamingStatus CMPMRoamingWatcher::MapRegistrationStatus( RMobilePhone::TMobi
                     else
                         {
                         roamingStatus = EMPMInternationalRoaming;
-                        //
-                        if ( iCurrentCountryCode != countryCode )
-                            {
-                            iAskCellularDataUsageAbroad = ETrue;
-                            }                        
                         }
                     iCurrentCountryCode = countryCode; 
                     }                
@@ -255,20 +248,6 @@ TMPMRoamingStatus CMPMRoamingWatcher::RoamingStatus() const
     MPMLOGSTRING2( "CMPMRoamingWatcher::RoamingStatus iRoamingStatus: %d", iRoamingStatus )
     return iRoamingStatus;
     }
-
-
-TBool CMPMRoamingWatcher::AskCellularDataUsageAbroad() const
-    {
-    MPMLOGSTRING2( "CMPMRoamingWatcher::AskCellularDataUsageAbroad iAskCellularDataUsageAbroad: %d", iAskCellularDataUsageAbroad )
-    return iAskCellularDataUsageAbroad;
-    }
-
-void CMPMRoamingWatcher::SetAskCellularDataUsageAbroad(TBool aAskUsage)
-    {
-    iAskCellularDataUsageAbroad = aAskUsage;
-    MPMLOGSTRING2( "CMPMRoamingWatcher::SetAskCellularDataUsageAbroad iAskCellularDataUsageAbroad: %d", iAskCellularDataUsageAbroad )
-    }
-
 
 // ========================== OTHER EXPORTED FUNCTIONS =========================
 // None.

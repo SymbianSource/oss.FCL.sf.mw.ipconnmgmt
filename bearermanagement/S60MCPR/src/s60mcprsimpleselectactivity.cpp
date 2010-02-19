@@ -155,12 +155,11 @@ namespace S60MCprSelectActivity
 
 		TSelectionPrefs prefs;
 
-		ESock::RConnPrefList::TIter<TConnCSRPref> iterCSR = node.ConnPrefList().getIter<TConnCSRPref>();
-		//There should be one and only one CSR pref
-		ASSERT(iterCSR[0] != NULL && iterCSR[1] == NULL);
-		TConnCSRPref* csrprefs = iterCSR[0];
-
-		prefs.SetSubSessionUniqueId(csrprefs->SubSessionUniqueId());
+        ESock::RConnPrefList::TIter<TConnCSRPref> iterCSR = node.ConnPrefList().getIter<TConnCSRPref>();
+        //There should be one and only one CSR pref
+        ASSERT(iterCSR[0] != NULL && iterCSR[1] == NULL);
+        TConnCSRPref* csrprefs = iterCSR[0];
+		prefs.SetSubSessionUniqueId(node.SubSessionUniqueId());
 		prefs.SetFlags(csrprefs->Flags());
 		prefs.SetScope(csrprefs->Scope());
 
@@ -172,7 +171,6 @@ namespace S60MCprSelectActivity
 		node.ConnPrefList().AppendL(nextAP);
 		CleanupStack::Pop();
 		/* END OF HACK */
-
 		
         // Attach. 399 attach shouldn't be visible here.
         if ( prefs.Scope()&TSelectionPrefs::ESelectFromExisting )
@@ -185,6 +183,7 @@ namespace S60MCprSelectActivity
         else
             {
             S60MCPRLOGSTRING1("S60MCPR<%x>::TSelectNextLayer::DoL() Start",(TInt*)&iContext.Node())
+
             TCommDbConnPref ippprefs;
             ippprefs.SetIapId( node.PolicyPrefs().IapId() );
             ippprefs.SetNetId( node.PolicyPrefs().NetId() );
@@ -296,11 +295,15 @@ namespace S60MCprSimpleSelectActivity
             }
 #endif //_DEBUG
 
+        TSelectionPrefs newPrefs;
+        newPrefs = node.SelectionPrefs();
+        newPrefs.SetSubSessionUniqueId( node.SubSessionUniqueId() );
+        
         // Attach. 399 attach shouldn't be visible here.
         if ( node.SelectionPrefs().Scope()&TSelectionPrefs::ESelectFromExisting )
             {
             S60MCPRLOGSTRING1("S60MCPR<%x>::TSelectNextLayer::DoL() Attach ",(TInt*)&iContext.Node())
-            TCFSelector::TSimpleSelect msg( node.SelectionPrefs() );
+            TCFSelector::TSimpleSelect msg( newPrefs );
             iContext.iNodeActivity->PostRequestTo( ac.iTierManager, msg );
             }
         // Start
@@ -312,8 +315,6 @@ namespace S60MCprSimpleSelectActivity
             ippprefs.SetNetId( node.PolicyPrefs().NetId() );
             //node.MapPolicyPrefsToConnPrefL( node.PolicyPrefs(), tmppref );
             // don't use reference we want to preserve the original TSelectionPrefs.
-            TSelectionPrefs newPrefs;
-            newPrefs = node.SelectionPrefs();
             newPrefs.SetPrefs( ippprefs );
             TCFSelector::TSimpleSelect msg(newPrefs);
             iContext.iNodeActivity->PostRequestTo(ac.iTierManager, msg);
@@ -349,16 +350,7 @@ namespace S60MCprSimpleSelectActivity
         CleanupStack::PushL( cb );
 
         // Resolve application uid.
-        TSubSessionUniqueId subSessionUniqueId = node.SelectionPrefs().SubSessionUniqueId();
-
-		if ( !node.ConnPrefList().Count() )
-			{
-            subSessionUniqueId = node.SelectionPrefs().SubSessionUniqueId();
-            }
-        else
-            {
-            subSessionUniqueId = node.SubSessionUniqueId();
-            }
+        TSubSessionUniqueId subSessionUniqueId = node.SubSessionUniqueId();
 
         TSecureId secureId( 0 );
         

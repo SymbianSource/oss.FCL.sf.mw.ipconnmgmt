@@ -82,6 +82,12 @@
 //r: 5.2
 #define qtn_occ_sett_data_usage_abroad_wlan_only "WLAN only"
 
+//d:Text in radio button list
+//l:list_set_graphic_pane_t1
+//w:
+//r: 5.2
+#define qtn_occ_sett_data_usage_abroad_disabled "Disabled"
+
 
 //d:Text of a list item in Connectivity Settings plugin main view's list
 //d:Item opens "Cellular data usage in home network" radio button setting page
@@ -108,6 +114,11 @@
 //r: 5.2
 #define qtn_occ_sett_data_usage_home_nw_wlan_only "WLAN only"
 
+//d:Text in radio button list
+//l:list_set_graphic_pane_t1
+//w:
+//r: 5.2
+#define qtn_occ_sett_data_usage_home_nw_disabled "Disabled"
 
 //d: Info popup note for "Known" selection of "Join WLAN networks"
 //l: popup_preview_text_window_t1/opt5

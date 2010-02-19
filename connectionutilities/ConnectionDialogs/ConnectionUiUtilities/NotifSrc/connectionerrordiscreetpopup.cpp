@@ -299,6 +299,8 @@ TInt CConnectionErrorDiscreetPopup::ResolveErrorCode(TInt& aText1,
 
         // Group 8
         case KErrPermissionDenied:
+            icon = EIconNone;  // Permission denied may come with any bearer.
+        // Fall through
         case KErrWlanPasswordExpired:
         case KErrWlanNoDialinPermissions:
         case KErrWlanAccountDisabled:

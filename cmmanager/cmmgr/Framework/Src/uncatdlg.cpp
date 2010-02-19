@@ -389,6 +389,36 @@ void CUncatDlg::ConstructCMArrayL( RArray<TUint32>& aCmIds )
     }
 
 // --------------------------------------------------------------------------
+// CCmDlg::ClearHiddenCMsFromArrayL
+// --------------------------------------------------------------------------
+//
+void CUncatDlg::ClearHiddenCMsFromArrayL( RArray<TUint32>& aCmIds )
+    {
+    TBool hidden( EFalse );
+    TInt err( KErrNone );
+    for ( TInt index = 0; index < aCmIds.Count(); index++ )
+        {
+        TUint recId = aCmIds[index];
+        TRAP( err, hidden = iCmManager->GetConnectionMethodInfoBoolL( recId, ECmHidden ) );
+        if ( err || hidden )
+            {
+            aCmIds.Remove( index );
+            index--;
+            // Remove the same item from iCmUncatItems array
+            for( TInt i = 0; i < iCmUncatItems.Count(); i++ )
+                {
+                if( iCmUncatItems[i].iCmId == recId )
+                    {
+                    iCmUncatItems.Remove( i );
+                    break;
+                    }
+                }
+            }
+        }
+    }
+
+
+// --------------------------------------------------------------------------
 // CUncatDlg::CleanupUncatArray
 // --------------------------------------------------------------------------
 //

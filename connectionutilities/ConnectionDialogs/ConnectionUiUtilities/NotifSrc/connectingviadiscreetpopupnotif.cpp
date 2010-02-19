@@ -60,7 +60,7 @@ void CConnectingViaDiscreetPopupNotif::StartL(const TDesC8& aBuffer,
     TPckgBuf<TConnUiConnectingViaDiscreetPopup> data;
     data.Copy(aBuffer);
 
-    iActiveNote->StartL( data().iIapId, data().iConnectionAlreadyActive );
+    iActiveNote->StartL( data().iIapId );
     iCancelled = EFalse;
     }
 

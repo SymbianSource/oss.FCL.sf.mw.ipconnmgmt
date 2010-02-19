@@ -122,19 +122,14 @@ void CConnectingViaDiscreetPopup::DoCancel()
 // CConnectingViaDiscreetPopup::StartL
 // ---------------------------------------------------------
 //
-void CConnectingViaDiscreetPopup::StartL(TUint32 aIapId,
-        TBool aConnectionAlreadyActive)
+void CConnectingViaDiscreetPopup::StartL( TUint32 aIapId )
     {
     Cancel(); // Cancel any request, just to be sure
     iBearerType = 0;
     delete iConnectionName;
     iConnectionName = NULL;
-
-    if (!aConnectionAlreadyActive)
-        {
-        iPopupFlags = KAknDiscreetPopupDurationLong;
-        }
-
+    iPopupFlags = KAknDiscreetPopupDurationLong;
+    
     RCmConnectionMethod plugin;
     CleanupClosePushL(plugin);
     if (aIapId)

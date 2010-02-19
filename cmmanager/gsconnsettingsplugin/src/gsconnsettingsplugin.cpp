@@ -28,11 +28,11 @@
 #include <gsconnsettingsplugin.mbg>
 
 // Includes from GS framework:
-#include <GSCommon.hrh>
-#include <GSFWViewUIDs.h>
-#include <GSPrivatePluginProviderIds.h>
-#include <GSTabHelper.h>
-#include <GSMainView.h>
+#include <gscommon.hrh>
+#include <gsfwviewuids.h>
+#include <gsprivatepluginproviderids.h>
+#include <gstabhelper.h>
+#include <gsmainview.h>
 
 #include <hlplch.h> // For HlpLauncher
 #include <featmgr.h>
@@ -115,7 +115,7 @@ void CGSConnSettingsPlugin::ConstructL()
     FeatureManager::InitializeLibL();
     iIsWlanSupported = FeatureManager::FeatureSupported( KFeatureIdProtocolWlan );
     // Unload FeatureManager
-    FeatureManager::UnInitializeLib();  
+    FeatureManager::UnInitializeLib();
     
     OpenLocalizedResourceFileL( KGSConnSettingsPluginResourceFileName,
                                 iResourceLoader ); 
@@ -456,35 +456,12 @@ TInt CGSConnSettingsPlugin::PluginProviderCategory() const
 //
 void CGSConnSettingsPlugin::ShowUsageOfWlanSettingPageL()
     {
-
-    CDesCArrayFlat* items = iCoeEnv->ReadDesC16ArrayResourceL(
-            R_USAGE_OF_WLAN_SETTING_PAGE_LBX );
-    CleanupStack::PushL( items );
-
-    TInt currentItem = iModel->UsageOfWlan();
-    TInt oldItem = currentItem;
-    
-    CGSConnSettingsSelectionDlg* dlg = CGSConnSettingsSelectionDlg::NewL(
-                                                R_USAGE_OF_WLAN_SETTING_PAGE,
-                                                currentItem,
-                                                items,
-                                                R_USAGE_OF_WLAN_INFO_POPUP_TEXTS );
-
-    if ( dlg->ExecuteLD( CAknSettingPage::EUpdateWhenChanged ) )
-        {
-
-        if( currentItem != oldItem )
-            {
-            iModel->SetUsageOfWlan( currentItem );
-            UpdateListBoxL( EGSSettIdUsageOfWlan );
-            //Save current settings when the setting is changed
-            //If function leaves it is trapped and ignored as there is nothing that we can do about it
-            TRAP_IGNORE(iModel->SaveSettingsL());
-            }
-        }
-
-    CleanupStack::PopAndDestroy( items );
-
+    TBool currentItem = (TBool)iModel->UsageOfWlan();
+    iModel->SetUsageOfWlan( !currentItem );
+    UpdateListBoxL( EGSSettIdUsageOfWlan );
+    //Save current settings when the setting is changed
+    //If function leaves it is trapped and ignored as there is nothing that we can do about it
+    TRAP_IGNORE(iModel->SaveSettingsL());
     }
 
 // ---------------------------------------------------------------------------
@@ -511,6 +488,14 @@ void CGSConnSettingsPlugin::ShowDataUsageAbroadSettingPageL()
     CleanupStack::PushL( items );
 
     TInt currentItem = iModel->DataUsageAbroad();
+    
+    // We may have to do in this way because EDataUsageAbroadDisabled is equal to 3
+    // and the actual index number should be 2 in this case
+    if( !iIsWlanSupported && currentItem == EDataUsageAbroadDisabled )
+        {
+        currentItem --;
+        }
+    
     TInt oldItem = currentItem;
 
     CAknSettingPage* dlg = new( ELeave ) CAknRadioButtonSettingPage(
@@ -555,6 +540,14 @@ void CGSConnSettingsPlugin::ShowDataUsageInHomeNwSettingPageL()
     CleanupStack::PushL( items );
 
     TInt currentItem = iModel->DataUsageInHomeNw();
+    
+    // We may have to do in this way because EDataUsageAbroadDisabled is equal to 3
+    // and the actual index number should be 2 in this case
+    if( !iIsWlanSupported && currentItem == EDataUsageAbroadDisabled )
+        {
+        currentItem --;
+        }
+    
     TInt oldItem = currentItem;
 
     CAknSettingPage* dlg = new( ELeave ) CAknRadioButtonSettingPage(

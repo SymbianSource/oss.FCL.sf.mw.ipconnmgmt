@@ -42,7 +42,7 @@
 #include "ApSelectorListBoxModel.h"
 #include "ApSettingsHandlerLogger.h"
 
-#include <ApSetUI.rsg>
+#include <apsetui.rsg>
 //  TEST ENDS
 
 

@@ -18,6 +18,7 @@
 
 // INCLUDE FILES
 
+#include <featmgr.h>
 #include "gsconnsettingsplugincontainer.h"
 #include "gsconnsettingspluginmodel.h"
 #include "cmmanager.h"
@@ -87,6 +88,9 @@ CGSConnSettingsPluginModel::CGSConnSettingsPluginModel()
 //
 void CGSConnSettingsPluginModel::ConstructL()
     {
+    FeatureManager::InitializeLibL();
+    iIsWlanSupported = FeatureManager::FeatureSupported( KFeatureIdProtocolWlan );
+    FeatureManager::UnInitializeLib();
     }
 
 
@@ -189,7 +193,14 @@ TInt CGSConnSettingsPluginModel::DataUsageAbroad()
             break;
 
         case ECmCellularDataUsageDisabled:
-            mappedValue = EDataUsageAbroadWlanOnly; // Wlan only
+            if( iIsWlanSupported )
+                {
+                mappedValue = EDataUsageAbroadWlanOnly; // Wlan only
+                }
+            else
+                {
+                mappedValue = EDataUsageAbroadDisabled; // Disabled when nowlan
+                }
             break;
 
         default:
@@ -220,7 +231,14 @@ TInt CGSConnSettingsPluginModel::DataUsageInHomeNw()
             break;
 
         case ECmCellularDataUsageDisabled:
-            mappedValue = EDataUsageHomeNwWlanOnly; // Wlan only
+            if( iIsWlanSupported )
+                {
+                mappedValue = EDataUsageHomeNwWlanOnly; // Wlan only
+                }
+            else
+                {
+                mappedValue = EDataUsageHomeNwDisabled; // Disabled when nowlan
+                }
             break;
 
         default:
@@ -271,6 +289,7 @@ void CGSConnSettingsPluginModel::SetDataUsageAbroad( TInt aValue )
             break;
 
         case EDataUsageAbroadWlanOnly: //Wlan only
+        case EDataUsageAbroadDisabled:
             iSettings.iCellularDataUsageVisitor = ECmCellularDataUsageDisabled;
             break;
                         
@@ -298,6 +317,7 @@ void CGSConnSettingsPluginModel::SetDataUsageInHomeNw( TInt aValue )
             break;
 
         case EDataUsageHomeNwWlanOnly: //Wlan only
+        case EDataUsageHomeNwDisabled:
             iSettings.iCellularDataUsageHome = ECmCellularDataUsageDisabled;
             break;
                         

@@ -32,7 +32,7 @@ Interface for receiving ConnMon events in MPM.
 #include <commsdat.h>
 #include <commsdat_partner.h>
 #endif
-#include <NIFVAR.H>
+#include <nifvar.h>
 #include "mpmserver.h"
 
 // FORWARD DECLARATIONS

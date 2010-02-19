@@ -15,7 +15,7 @@
 *
 */
 
-#include <NIFVAR.H>
+#include <nifvar.h>
 #include <e32svr.h>
 #include <PSVariables.h>
 

@@ -22,7 +22,7 @@
 #include <ApEngineConsts.h>
 
 #ifdef SYMBIAN_ENABLE_SPLIT_HEADERS
-#include <ProtectDb.h>
+#include <ProtectDB.h>
 #include <ProtectcpDb.h>
 #else
 #include <comms-infras/commdb/protection/protectdb.h>

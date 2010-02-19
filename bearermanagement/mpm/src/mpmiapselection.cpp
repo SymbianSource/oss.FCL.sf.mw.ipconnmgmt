@@ -117,12 +117,6 @@ void CMPMIapSelection::ChooseIapL( const TMpmConnPref& aChooseIapPref )
     
     iChooseIapPref = aChooseIapPref;
 
-    // Update iNewWlansAllowed information.
-    // No need to filter away cellular iaps here based on UI's Allow Cellular Usage
-    // setting, since ConnMon checks the setting and reports only correct IAPs
-    // available for MPM.
-    iSession->IsWlanOnlyL( iNewWlansAllowed );
-
     // Always use stored connection info.
     // If stored information doesn't exist, a normal sequence is used.
     TUint32 snap( 0 );
@@ -148,6 +142,9 @@ void CMPMIapSelection::ChooseIapL( const TMpmConnPref& aChooseIapPref )
     MPMLOGSTRING2( "CMPMIapSelection::ChooseIapL: IapID: %i",
             iChooseIapPref.IapId() )
     
+    // Update WLAN only information and whether new WLAN network usage is allowed.
+    TBool wlanOnly = iSession->IsWlanOnlyL( iNewWlansAllowed );
+    
     // Check if direct IAP connection is tried to make
     if ( iChooseIapPref.IapId() != 0 )
         { 
@@ -156,11 +153,10 @@ void CMPMIapSelection::ChooseIapL( const TMpmConnPref& aChooseIapPref )
 
         // Complete selection with error code if wlan only was set and cellular IAP other 
         // than MMS IAP was tried to access  
-        if ( ( iChooseIapPref.BearerSet() ==
-               TExtendedConnPref::EExtendedConnBearerWLAN ) && 
+        if ( wlanOnly && 
                 ( bearerType == EMPMBearerTypePacketData ) && 
                 ( iSession->IsMMSIap( iChooseIapPref.IapId() ) == EFalse ) ) 
-            {
+            {            
             ChooseIapComplete( KErrPermissionDenied, NULL );
             return;
             }
@@ -367,8 +363,7 @@ void CMPMIapSelection::ExplicitConnectionL()
                 {
                 // Check if we are roaming and cellular data usage query has not yet been presented
                 // to the user in this country
-                if ( iSession->MyServer().RoamingWatcher()->RoamingStatus() == EMPMInternationalRoaming
-                    && iSession->MyServer().RoamingWatcher()->AskCellularDataUsageAbroad() == true )
+                if ( iSession->MyServer().RoamingWatcher()->RoamingStatus() == EMPMInternationalRoaming )
                     {
                     // Check whether queries are enabled
                     if ( !( iChooseIapPref.NoteBehaviour() & TExtendedConnPref::ENoteBehaviourConnDisableQueries ) )
@@ -543,34 +538,17 @@ void CMPMIapSelection::CompleteExplicitSnapConnectionL()
                 {
                 if ( iSession->MyServer().RoamingWatcher()->RoamingStatus() == EMPMInternationalRoaming )
                     {
-                    // Check if cellular data usage query has already been presented to the user in this country
-                    if ( iSession->MyServer().RoamingWatcher()->AskCellularDataUsageAbroad() == true )
-                        {
-                        // International roaming
-                        iConfirmDlgStarting = CMPMConfirmDlgStarting::NewL( 
-                                *this, 
-                                connId,
-                                snap, 
-                                validateIapId, 
-                                CMPMConfirmDlg::EConfirmDlgVisitorNetwork,
-                                iChooseIapPref,
-                                iSession->MyServer(),
-                                *iSession,
-                                EExplicitConnection );
-                        }
-                    else
-                        {
-                        // If user has already been queried in this country just complete the IAP selection.
-    
-                        iSession->MyServer().AppendBMConnection( connId, 
-                                snap, 
-                                validateIapId, 
-                                EStarting,
-                                *iSession );
-    
-                        ChooseIapComplete( KErrNone, &iChooseIapPref );
-                        }
-    
+                    // International roaming
+                    iConfirmDlgStarting = CMPMConfirmDlgStarting::NewL( 
+                            *this, 
+                            connId,
+                            snap, 
+                            validateIapId, 
+                            CMPMConfirmDlg::EConfirmDlgVisitorNetwork,
+                            iChooseIapPref,
+                            iSession->MyServer(),
+                            *iSession,
+                            EExplicitConnection );    
                     }
                 else
                     {
@@ -753,17 +731,19 @@ void CMPMIapSelection::ChooseIapComplete(
         TBool connectionAlreadyActive =
             iSession->MyServer().CheckIfStarted( aPolicyPref->IapId() );
         CConnectionUiUtilities* connUiUtils = NULL;
-        TRAPD( popupError,
-               connUiUtils = CConnectionUiUtilities::NewL();
-               connUiUtils->ConnectingViaDiscreetPopup(
-                   aPolicyPref->IapId(),
-                   connectionAlreadyActive );
-               delete connUiUtils; );
-        if ( popupError && connUiUtils )
-            {
-            delete connUiUtils;
-            }
-        }
+        if ( !connectionAlreadyActive )
+        	{
+        	TRAPD( popupError,
+          	     connUiUtils = CConnectionUiUtilities::NewL();
+            	   connUiUtils->ConnectingViaDiscreetPopup(
+              	     aPolicyPref->IapId());
+               	delete connUiUtils; );
+        	if ( popupError && connUiUtils )
+          	  {
+            	delete connUiUtils;
+            	}
+        	}
+       }
     
     if( iWlanDialog )
         {
@@ -951,8 +931,7 @@ void CMPMIapSelection::ImplicitConnectionWlanNoteL()
             {
             // Check if we are roaming and cellular data usage query has not yet been presented
             // to the user in this country
-            if ( iSession->MyServer().RoamingWatcher()->RoamingStatus() == EMPMInternationalRoaming
-                && iSession->MyServer().RoamingWatcher()->AskCellularDataUsageAbroad() == true )
+            if ( iSession->MyServer().RoamingWatcher()->RoamingStatus() == EMPMInternationalRoaming )
                 {
                 // Check whether queries are enabled
                 if ( !( iChooseIapPref.NoteBehaviour() & TExtendedConnPref::ENoteBehaviourConnDisableQueries ) )

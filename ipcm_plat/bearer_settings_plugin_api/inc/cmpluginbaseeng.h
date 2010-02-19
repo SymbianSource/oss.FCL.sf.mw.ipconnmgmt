@@ -25,7 +25,7 @@
 #include <e32base.h>
 #include <ecom/ecom.h>        // For REComSession
 #include <metadatabase.h>
-#include <CommsDatTypesV1_1.h>
+#include <commsdattypesv1_1.h>
 
 #define IAP_ELEMENT_ID( iapRecId )  (KCDTIdIAPRecord | \
                                      KCDMaskShowFieldType | \

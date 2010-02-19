@@ -87,7 +87,6 @@ class TConnUiConnectingViaDiscreetPopup
     {
 public:
     TUint32   iIapId;
-    TBool iConnectionAlreadyActive;
     };
 
 #endif  // CONNECTIONUIUTILITIES_COMMON_H

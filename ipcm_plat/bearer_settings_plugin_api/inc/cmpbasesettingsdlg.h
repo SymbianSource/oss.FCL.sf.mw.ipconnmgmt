@@ -22,7 +22,7 @@
 #include <eiklbo.h>
 #include <aknlists.h>
 #include <AknDialog.h>
-#include <coneresloader.h>
+#include <ConeResLoader.h>
 #include <cmcommonconstants.h>
 #include <cmconnectionmethoddef.h>
 

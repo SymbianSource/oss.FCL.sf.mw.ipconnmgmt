@@ -22,7 +22,7 @@
 #include <aknnotedialog.h>
 #include <AknUtils.h>
 #include <cmmanagerext.h>
-#include <NIFVAR.H>
+#include <nifvar.h>
 #include <ConnectionMonitorUi.rsg>
 #include "ConnectionMonitorUi.hrh"
 #include "ConnectionMonitorUiAppUi.h"
@@ -354,8 +354,10 @@ void CConnectionMonitorUiAppUi::EventL(
                     break;
                     }
                 }
-            
-            if ( newConn )
+
+            index = iConnectionArray->GetArrayIndex( connectionId );
+
+            if ( newConn || ( index < 0 ) )
                 {
                 if ( connectionId > 0)
                     {
@@ -385,6 +387,11 @@ void CConnectionMonitorUiAppUi::EventL(
                     CleanupStack::PushL( connectionInfo );
                     iConnectionArray->AppendL( connectionInfo );
                     CleanupStack::Pop( connectionInfo );
+
+                    // Avkon: This is needed due to events' timing issues:
+                    CConnectionMonitorUiView* view =
+                            ( CConnectionMonitorUiView* )iView;
+                    view->HandleItemAdditionL();
                     }
                 }
             

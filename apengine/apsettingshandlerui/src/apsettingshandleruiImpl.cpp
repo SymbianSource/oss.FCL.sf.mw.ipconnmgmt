@@ -23,7 +23,7 @@
 
 #include <bautils.h>
 #include <StringLoader.h>
-#include <ApSetUI.rsg>
+#include <apsetui.rsg>
 #include <ActiveApDb.h>
 
 #include "ApsettingshandleruiImpl.h"

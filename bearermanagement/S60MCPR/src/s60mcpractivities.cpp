@@ -265,7 +265,7 @@ namespace S60MCprMobilityActivity
     // Clear handshake status and wait for preferred carrier or mobility API close.
     NODEACTIVITY_ENTRY( MobilityMCprStates::KStartMobilityHandshake, 
                         CS60MobilityActivity::TClearHandshakingFlag,
-                        CS60MobilityActivity::TAwaitingPreferredCarrierOrCancelOrRejected, // Ok. Error is fatal.
+                        CS60MobilityActivity::TAwaitingPreferredCarrierOrCancelOrRejectedOrErrorNotification, // Ok. Error is fatal.
                         S60MCprMobilityActivity::TInformMigrationAvailableOrCancelTag )
     // Application rejected active carrier
     THROUGH_NODEACTIVITY_ENTRY( S60MCprStates::KSendInitialApplicationReject, 

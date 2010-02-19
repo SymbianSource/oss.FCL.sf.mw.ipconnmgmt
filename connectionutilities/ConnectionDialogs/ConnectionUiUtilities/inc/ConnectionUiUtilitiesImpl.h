@@ -487,8 +487,7 @@ NONSHARABLE_CLASS( CConnectionUiUtilitiesImpl ) : public CBase
         * Discreet popup. Shows "Connecting via %U" discreet popup 
         * @param aIapId IAP id of the access point.
         */
-        void ConnectingViaDiscreetPopup( const TUint32& aIapId, 
-                                         TBool aConnectionAlreadyActive );
+        void ConnectingViaDiscreetPopup( const TUint32& aIapId );
 
         
         /**           

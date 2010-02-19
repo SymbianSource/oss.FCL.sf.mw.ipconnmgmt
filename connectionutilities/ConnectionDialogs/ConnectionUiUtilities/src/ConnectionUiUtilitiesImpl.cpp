@@ -1122,10 +1122,9 @@ void CConnectionUiUtilitiesImpl::NoWLANNetworksAvailableNote()
 // CConnectionUiUtilitiesImpl::ConnectingViaDiscreetPopup
 // ---------------------------------------------------------
 //
-void CConnectionUiUtilitiesImpl::ConnectingViaDiscreetPopup( const TUint32& aIapId, TBool aConnectionAlreadyActive )
+void CConnectionUiUtilitiesImpl::ConnectingViaDiscreetPopup( const TUint32& aIapId )
     { 
     iConnInfo().iIapId = aIapId;
-    iConnInfo().iConnectionAlreadyActive = aConnectionAlreadyActive;
     
     if ( !iActiveWrapper[ EConnectingViaDiscreetPopup ] )
         {

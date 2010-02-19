@@ -77,11 +77,6 @@ class CMPMRoamingWatcher : public CActive
         */
         TMPMRoamingStatus RoamingStatus() const;
         
-        TBool AskCellularDataUsageAbroad() const;
-        
-        void SetAskCellularDataUsageAbroad(TBool aAskUsage);
-        
-        
     protected: // Constructors and destructor
         	    
 	    /**
@@ -148,14 +143,6 @@ class CMPMRoamingWatcher : public CActive
         * Current country
         */
         RMobilePhone::TMobilePhoneNetworkCountryCode iCurrentCountryCode;
-        
-        /**
-         * This variable indicates wheather cellular data usage abroad must be confirmed from the user
-         * This variable is set to TRUE when roaming to visitor network happens and it is set to FALSE when
-         * Confirm Dialog is presented first time in current foreign country. It is also set to FALSE every
-         * time when mobile comes back to home network or moves to other foreign country
-         */
-        TBool iAskCellularDataUsageAbroad;
 	};
 
 #endif // MPMROAMINGWATCHER_H

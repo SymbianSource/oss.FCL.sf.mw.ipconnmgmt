@@ -20,8 +20,8 @@
 #define GSCONNSETTINGSPLUGIN_H
 
 // Includes
-#include <GSPluginLoader.h>
-#include <GSBaseView.h>
+#include <gspluginloader.h>
+#include <gsbaseview.h>
 #include "gsconnsettingsmskobserver.h"
 
 #include <aknview.h>
