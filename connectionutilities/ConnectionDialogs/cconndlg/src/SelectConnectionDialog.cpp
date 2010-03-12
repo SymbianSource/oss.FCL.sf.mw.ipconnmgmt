@@ -414,7 +414,12 @@ TKeyResponse CSelectConnectionDialog::OfferKeyEventL(
         }
 
     result = CAknListQueryDialog::OfferKeyEventL( aKeyEvent, aType );
-
+    
+    if ( iFromOkToExit )
+        {     
+        return result;
+        }
+    
     CLOG_WRITEF( _L ( "Returned from CAknListQueryDialog::OfferKeyEventL: %d" ), result );
 
     if ( aKeyEvent.iScanCode == EStdKeyDownArrow || 

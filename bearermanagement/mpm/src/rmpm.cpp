@@ -277,7 +277,7 @@ EXPORT_C void RMPM::ProcessError( TConnPref&           /*aConnPref*/,
                                   TRequestStatus&      /*aStatus*/ )
     {
     __ASSERT_ALWAYS( EFalse, Panic( KErrNotSupported ) );
-    //-jl- TODO remove this function from the API.
+    // TODO remove this function from the API.
     }
 
 // -----------------------------------------------------------------------------
@@ -324,7 +324,7 @@ EXPORT_C TInt RMPM::RegisterPrefIAPNotif( const TConnPref&     /*aConnPref*/,
                                           const TConnectionId  /*aConnId*/ )
     {
     __ASSERT_ALWAYS( EFalse, Panic( KErrNotSupported ) );
-    //-jl- TODO remove this function from the API.
+    // TODO remove this function from the API.
     return NULL;
     }
 

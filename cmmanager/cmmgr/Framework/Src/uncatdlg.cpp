@@ -226,6 +226,7 @@ void CUncatDlg::ProcessCommandL( TInt aCommandId )
                     {
                     TCmCommonUi::ShowNoteL( R_QTN_NETW_CONSET_INFO_UNCAT_EMPTY,
                                             TCmCommonUi::ECmInfoNote );
+                    iCmManager->WatcherUnRegister();       
                     TryExitL( KDialogUserBack );                                
                     }
                 }
@@ -295,6 +296,7 @@ void CUncatDlg::ProcessCommandL( TInt aCommandId )
                             {
                             TCmCommonUi::ShowNoteL( R_QTN_NETW_CONSET_INFO_UNCAT_EMPTY,
                                                     TCmCommonUi::ECmInfoNote );
+                            iCmManager->WatcherUnRegister();       
                             TryExitL( KDialogUserBack );                                
                             }
                         }

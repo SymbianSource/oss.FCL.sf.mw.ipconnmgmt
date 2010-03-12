@@ -113,13 +113,13 @@ void CMpmDataUsageWatcher::RunL()
     // Get the new value from central repository
     User::LeaveIfError( iRepository->Get( KCurrentCellularDataUsage,
             iCellularDataUsage ) );
-
+    
     // Stop cellular connections if the setting changes into Disabled
-    if (oldCellularDataUsage != ECmCellularDataUsageDisabled &&
-            iCellularDataUsage == ECmCellularDataUsageDisabled)
+    if ( oldCellularDataUsage != ECmCellularDataUsageDisabled &&
+         iCellularDataUsage == ECmCellularDataUsageDisabled &&
+         iServer->RoamingWatcher()->RoamingStatus() != EMPMRoamingStatusUnknown )
         {
-        // TODO: Uncomment this when trying to get stopping working.
-        // iServer->StopCellularConns();
+        iServer->StopCellularConns();
         }
     }
 

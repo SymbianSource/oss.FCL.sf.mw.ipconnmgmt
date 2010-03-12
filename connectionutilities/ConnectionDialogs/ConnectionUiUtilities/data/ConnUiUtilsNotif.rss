@@ -353,11 +353,6 @@ RESOURCE TBUF r_qtn_occ_connecting_discreet_popup_text1
     buf = qtn_occ_connecting_discreet_popup_text1;
     }
 
-RESOURCE TBUF r_qtn_occ_connecting_discreet_popup_text2
-    {
-    buf = qtn_occ_connecting_discreet_popup_text2;
-    }
-
 RESOURCE TBUF r_qtn_occ_connection_failed_discreet_popup_text1
     {
     buf = qtn_occ_connection_failed_discreet_popup_text1;

@@ -253,14 +253,6 @@
 //
 #define qtn_occ_connecting_discreet_popup_text1 "Connecting"
 
-//d:Text of discreet popup row 2 informing about the used IAP for the connection
-//l:popup_discreet_window_t2
-//w:
-//r:5.2
-//
-#define qtn_occ_connecting_discreet_popup_text2 "Via '%U'"
-
-
 //d:No WLAN networks are available at the moment - note
 //l:popup_discreet_window_t1/opt4
 //w:

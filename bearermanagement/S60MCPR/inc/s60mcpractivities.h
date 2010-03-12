@@ -601,7 +601,7 @@ namespace S60MCprMobilityActivity
      * 1. Continue with handshake to select new AP for MCPR.
      * 2. Return back to migration-phase with new preferred IAP.
      * 3. Close down the system in case of mobilityerror.
-     * @return  //TODO Cancel from IPCPR.
+     * @return
      */
     DECLARE_SMELEMENT_HEADER( TNoTagOrInformMigrationAvailableBackwardsOrErrorOrCancel, 
                               MeshMachine::TStateFork<TContext>, 
@@ -820,16 +820,6 @@ namespace S60MCprMobilityActivity
 
         private: // Member variables.
             
-            /**
-             * Pointer to IPProtocoMCPR which is currently active 
-             */
-            ESock::RMetaServiceProviderInterface* iCurrent;
-
-            /**
-             * Pointer to IPProtocoMCPR which is about to become the active. 
-             */
-            ESock::RMetaServiceProviderInterface* iPreferred;
-
             TUint iCurrentAssumedAPId;  // Current IAP Id
             TUint iPreferredAPId;       // New IAP Id system should roam to.
             TBool iIsUpgrade;           // If the active iPreferredAPId is upgrade to old one.

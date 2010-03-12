@@ -1922,6 +1922,12 @@ TBool CCmPluginWlan::ProceedWithManualL( TBool aAskNWModeAndSec,
             // Pre-shared - go to step 7
             // EAP        - go to step 8
             case EWlanConnectionExtentedSecurityMode802d1x:
+                TCmCommonUi::ShowNoteL( *( StringLoader::LoadLC( 
+                    R_QTN_NETW_CONSET_INFO_EAP_SETTINGS_DEFAULT ) ),
+                    TCmCommonUi::ECmInfoNote );
+                CleanupStack::PopAndDestroy();
+                break;
+                
             case EWlanConnectionExtentedSecurityModeWpa:
             case EWlanConnectionExtentedSecurityModeWpaPsk:
             case EWlanConnectionExtentedSecurityModeWpa2:

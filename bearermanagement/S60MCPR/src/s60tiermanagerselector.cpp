@@ -132,8 +132,8 @@ void CSimpleS60SelectorBase::SelectL( ISelectionNotify& aSelectionNotify )
             break;
             }
         }
-    // We do the default behavior. AP is only needed to get proper UIds for TM etc..
-    // TODO: change to use AP.
+    // We use default AP always. If some variation is needed in APs, then
+    // this must be changed to use specific APs instead of the default one.
     aSelectionNotify.SelectComplete( this, FindOrCreateProviderL( iDefaultAp ));
     aSelectionNotify.SelectComplete( this, NULL );
     }

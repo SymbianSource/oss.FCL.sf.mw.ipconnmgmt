@@ -54,7 +54,6 @@ void THandleMPMStatusChange::DoL()
               node.RequestPermissionToSendStarted() )
         {
         S60MCPRLOGSTRING2("S60MCPR<%x>::THandleMPMStatusChange::DoL() calling IAPConnectionStartedL IAP %d",(TInt*)&iContext.Node(),iapid)
-        // TODO use progress notification KLinkLayerOpen once Symbian provides them.
         node.Policy()->IAPConnectionStartedL( iapid );  // codescanner::leave
         }
     else if ( msg.iValue == TCFControlProvider::TDataClientStatusChange::EStopped &&
@@ -114,28 +113,46 @@ void TRequestReConnect::DoL() // codescanner::leave
     RNodeInterface* stoppingSP = NULL;
     RNodeInterface* startingSP = NULL;
 
-    // The one that will be started is the one MPM selected.
-    // Both must be present in the MCPR -plane.
+    // Get the MCPR
+    CS60MetaConnectionProvider& node = (CS60MetaConnectionProvider&)iContext.Node();
+    
+    // At this point MCPR has selected two active IPProtoMCPRs.
+    // The one that will be started is the one MPM selected and
+    // the one which doesn't match the policy preferences is the
+    // old selection and needs to be disconnected.
+    //
+    TUint32 newAP = node.PolicyPrefs().IapId();
+    ASSERT( newAP > 0 );
 
     // Choose Service Providers to work on
     TClientIter<TDefaultClientMatchPolicy> iter = 
         iContext.Node().GetClientIter<TDefaultClientMatchPolicy>(TClientType(TCFClientType::EServProvider));
-
-    RNodeInterface* itf = NULL;
-    for ( itf = iter++; ( itf != NULL && ( stoppingSP == NULL || startingSP == NULL ) ); itf = iter++ )
+    
+    RMetaServiceProviderInterface* itf = NULL;
+    //RNodeInterface* itf = NULL;
+    
+    for ( itf = (RMetaServiceProviderInterface*)iter++;
+             ( itf != NULL && ( stoppingSP == NULL || startingSP == NULL ) );
+             itf = (RMetaServiceProviderInterface*)iter++ )
         {
-        // Only one of the selected MCPRs can be EStarted.
-        //
-        if ( itf->Flags() & TCFClientType::EStarted )
+        if ( itf->Flags() & TCFClientType::EActive )
             {
-            stoppingSP = itf; //Our current started Service Provider.
-            itf->ClearFlags( TCFClientType::EActive );
-            }
-        // The other which is not EStarted must be EActive.
-        //
-        else if ( itf->Flags() & TCFClientType::EActive )
-            {
-            startingSP = itf; //And the new one to try next
+            // Select one that shall be stopped.
+            //
+            if ( itf->ProviderInfo().APId() != newAP )
+                {
+                stoppingSP = itf;
+                itf->ClearFlags( TCFClientType::EActive );
+                }
+            // Select one that shall be started
+            //
+            else if ( itf->ProviderInfo().APId() == newAP )
+                {
+                startingSP = itf;
+                itf->ClearFlags( TCFClientType::EActive );
+                }
+            // no else.
+            //
             }
         }
     // One must be started since this is already a reconnection
@@ -146,10 +163,6 @@ void TRequestReConnect::DoL() // codescanner::leave
         ASSERT( EFalse );
         User::Leave( KErrCorrupt );  // codescanner::leave
         }
-
-    //Sanity check.
-    //The new provider must not be started, there can be only one started at a time.
-    ASSERT( startingSP == NULL || ( startingSP->Flags() & TCFClientType::EStarted ) == 0 );
 
     //If there is no other Service Provider to try, return KErrNotFound
     if ( startingSP == NULL )

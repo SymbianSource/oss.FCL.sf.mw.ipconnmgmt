@@ -123,6 +123,7 @@ NONSHARABLE_CLASS( CCmWizard ) : public CBase,
         TBool iCheckConnDlgCancelled;
         
         CCmManagerImpl& iCmManager;     ///< Only a reference == not owned.
+        CActiveSchedulerWait    iWait;
     };
 
 #endif // T_TCMWIZARD_H

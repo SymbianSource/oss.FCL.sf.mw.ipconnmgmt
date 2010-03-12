@@ -32,8 +32,8 @@
 
 // CONSTANTS
 // WLAN Device Settings table - default settings
-const TUint32 KDefaultBGScanInterval    = 0;   // No background scan
-const TBool   KDefaultUseDefSettings    = ETrue;        
+const TUint32 KDefaultBGScanInterval    = -1;   // Automatic scan
+const TBool   KDefaultUseDefSettings    = EFalse;
 const TUint32 KDefaultLongRetry         = 4;
 const TUint32 KDefaultShortRetry        = 7;
 const TUint32 KDefaultRTS               = 2347;

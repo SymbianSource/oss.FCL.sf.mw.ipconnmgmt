@@ -341,16 +341,6 @@ namespace S60MCprMobilityActivity
         //in this implementation.
         __ASSERT_DEBUG(activity.iPreferredAPId, User::Panic(KS60MCprPanic, KPanicNoServiceProvider));
 
-        //Compute all this here to keep EvaluatePreference() as fast as possible
-        activity.iCurrent = static_cast<RMetaServiceProviderInterface*>(
-                iContext.Node().GetFirstClient<TDefaultClientMatchPolicy>(
-                        TClientType( TCFClientType::EServProvider, TCFClientType::EStarted )));
-
-        __ASSERT_DEBUG(activity.iCurrent, User::Panic(KS60MCprPanic, KPanicNoServiceProvider));
-/*  Not valid ASSERT
-        __ASSERT_DEBUG(activity.iCurrent->ProviderInfo().APId() == activity.iCurrentAssumedAPId, 
-                       User::Panic(KS60MCprPanic, KPanicInConsistentMCPRState));
-*/
         // Activity received the necessary information from the policy server earlier 
         // and now holds that information which we'll send to IPCPR.
         TCFMobilityControlClient::TMigrationNotification msg( activity.iCurrentAssumedAPId,
@@ -558,7 +548,7 @@ namespace S60MCprMobilityActivity
             S60MCPRLOGSTRING2("S60MCPR<%x>::TAwaitingPreferredCarrierOrCancelOrRejectedOrErrorNotification::Accept() TMPMErrorNotificationMsg %d",(TInt*)&iContext.Node(),msg->iValue)
             ASSERT( msg->iValue != KErrNone );
             activity.SetError( msg->iValue );
-            result = ETrue;
+            result = EFalse;
             }
 
         return result;

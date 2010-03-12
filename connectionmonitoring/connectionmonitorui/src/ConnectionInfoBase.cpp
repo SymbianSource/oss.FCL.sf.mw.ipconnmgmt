@@ -74,6 +74,7 @@ CConnectionInfoBase::CConnectionInfoBase(
                            CActiveWrapper* aActiveWrapper ) :
     iConnectionMonitor( aConnectionMonitor ), 
     iStartTime( NULL ),
+    iLastSpeedUpdate( 0 ),
     iDeletedFromCMUI( EFalse ),
     iActiveWrapper( aActiveWrapper )
     {
@@ -81,7 +82,6 @@ CConnectionInfoBase::CConnectionInfoBase(
     iConnectionStatus = EConnectionUninitialized;
     iConnectionId = aConnectionId;
     iConnectionBearerType = aConnectionBearerType;
-    iLastSpeedUpdate.UniversalTime();
     CMUILOGGER_WRITE( "CConnectionInfoBase constuctor - end " );
     }
 
@@ -422,6 +422,10 @@ void CConnectionInfoBase::RefreshSentReceivedDataL()
 void CConnectionInfoBase::RefreshTransferSpeedsL()
     {
     CMUILOGGER_ENTERFN( "CConnectionInfoBase::RefreshTransferSpeedsL" );
+    const TInt KUpdatingIntervalInMillisec = 500;
+    const TInt KStandardKilo = 1000;
+    const TInt KDataKilo = 1024;
+    
     TUint up = iUploaded;
     TUint down = iDownloaded;
 
@@ -429,11 +433,10 @@ void CConnectionInfoBase::RefreshTransferSpeedsL()
 
     TTime now;
     now.UniversalTime();
-
-    // 100 * 1/1000sec
-    const TUint KOnesec = 1000;
-    TUint diffTime = I64LOW( now.MicroSecondsFrom( iLastSpeedUpdate ).Int64() /
-                                                        TInt64( 1000 ) );
+    
+    // calculate time difference in milliseconds
+    TInt diffTime = I64INT( now.MicroSecondsFrom( iLastSpeedUpdate ).Int64() / 
+            TInt64( KStandardKilo ) );
 
     if ( iLastSpeedUpdate.Int64() == 0 )
         {
@@ -445,18 +448,23 @@ void CConnectionInfoBase::RefreshTransferSpeedsL()
         iDownSpeed.quot = 0;
         iDownSpeed.rem = 0;
         }
-    else if ( diffTime > 500 )
-        // at least 1/2sec passed
+    else if ( diffTime > KUpdatingIntervalInMillisec )         
         {
-        // bytes/sec
-        div_t upSpeed = div( ( iUploaded - up ) * KOnesec, diffTime );
-        div_t downSpeed = div( ( iDownloaded - down ) * KOnesec, diffTime );
+        // bytes/millisec
+        TInt upSpeed = ( iUploaded - up ) / diffTime;
+        TInt downSpeed = ( iDownloaded - down ) / diffTime;
+        
+        // bytes/sec       
+        upSpeed *= KStandardKilo;
+        downSpeed *= KStandardKilo;
+    
         // kbytes/sec
-        iUpSpeed = div( upSpeed.quot, 1024 );
-        iDownSpeed = div( downSpeed.quot, 1024 );
+        iUpSpeed = div( upSpeed, KDataKilo );
+        iDownSpeed = div( downSpeed, KDataKilo );
 
         iLastSpeedUpdate = now;
         }
+    
     CMUILOGGER_LEAVEFN( "CConnectionInfoBase::RefreshTransferSpeedsL" );
     }
 

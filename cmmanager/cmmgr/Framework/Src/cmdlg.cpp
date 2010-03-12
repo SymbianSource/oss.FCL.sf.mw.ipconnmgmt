@@ -198,9 +198,10 @@ void CCmDlg::DynInitMenuPaneL( TInt aResourceId,
                                         CEikMenuPane* aMenuPane )
     {
     CAknDialog::DynInitMenuPaneL( aResourceId, aMenuPane );        
+    
     if ( aResourceId == R_CM_MENU )
         {
-    	if (aResourceId == R_CM_MENU && !iCmManager->IsHelpOn())
+    	if ( !iCmManager->IsHelpOn() )
             {
             aMenuPane->DeleteMenuItem( EAknCmdHelp );		    
             }
@@ -243,18 +244,27 @@ void CCmDlg::DynInitMenuPaneL( TInt aResourceId,
                 hidePrioritise = ETrue;
                 }
             }
-     
-        // Show or hide menu items
-        if ( aResourceId == R_CM_MENU )
-            {            
-            aMenuPane->SetItemDimmed( ECmManagerUiCmdCmEdit,    hideEdit );
-            aMenuPane->SetItemDimmed( ECmManagerUiCmdCmAdd,     hideAdd );
-            aMenuPane->SetItemDimmed( ECmManagerUiCmdCmRename,  hideRename );            
-            aMenuPane->SetItemDimmed( ECmManagerUiCmdCmDelete,  hideDelete );    
-            aMenuPane->SetItemDimmed( ECmManagerUiCmdCmPrioritise, hidePrioritise );
-            aMenuPane->SetItemDimmed( ECmManagerUiCmdCmMoveToOtherDestination, hideMove );
-            aMenuPane->SetItemDimmed( ECmManagerUiCmdCmCopyToOtherDestination, hideCopy ); 
+ 
+        // All item specific options need to be dimmed if in prioritising view
+        if ( iPrioritising )
+            {
+            hideEdit = ETrue;
+            hideAdd = ETrue;
+            hideRename = ETrue;
+            hideDelete = ETrue;
+            hideCopy = ETrue;
+            hideMove = ETrue;
+            hidePrioritise = ETrue;           
             }
+
+        // Show or hide menu items
+        aMenuPane->SetItemDimmed( ECmManagerUiCmdCmEdit,    hideEdit );
+        aMenuPane->SetItemDimmed( ECmManagerUiCmdCmAdd,     hideAdd );
+        aMenuPane->SetItemDimmed( ECmManagerUiCmdCmRename,  hideRename );            
+        aMenuPane->SetItemDimmed( ECmManagerUiCmdCmDelete,  hideDelete );    
+        aMenuPane->SetItemDimmed( ECmManagerUiCmdCmPrioritise, hidePrioritise );
+        aMenuPane->SetItemDimmed( ECmManagerUiCmdCmMoveToOtherDestination, hideMove );
+        aMenuPane->SetItemDimmed( ECmManagerUiCmdCmCopyToOtherDestination, hideCopy ); 
         }   
     }
     
@@ -1229,7 +1239,12 @@ void CCmDlg::EditConnectionMethodL()
         {
         User::LeaveIfError( err );
         }
-        
+
+    if ( !cm )
+        {
+        return;
+        }
+
     // Must reload here in case another app changed the data (CurrentCML loads
     // only if not already loaded)   
     cm->ReLoadL();

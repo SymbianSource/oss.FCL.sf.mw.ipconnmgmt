@@ -283,7 +283,7 @@ NONSHARABLE_CLASS(CCmPluginVpn) : public CCmPluginBaseEng
         * @since S60 5.2
         * @return an elementid id of the default AP record in tier record. 
         */                    
-        const TMDBElementId DefaultAPRecordL( const TInt aTierIdentifier = KAfInet );
+        TMDBElementId DefaultAPRecordL( const TInt aTierIdentifier = KAfInet );
 
     public:                
         /**

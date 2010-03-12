@@ -298,6 +298,12 @@ void CCmWizard::DialogDismissedL( TInt aButtonId )
             iCheckConnDlgCancelled = ETrue;
             }
         }
+    
+    if ( iWait.IsStarted() )
+        {
+        iWait.AsyncStop();
+        }
+    iCheckConnDlg = NULL;
     }
 
 // ---------------------------------------------------------------------------
@@ -386,16 +392,21 @@ void CCmWizard::CheckForCmsL( RArray<TUint32>& aCoverageArray )
     if( !iCheckConnDlgCancelled )
         {
         CLOG_WRITE( "CCmWizard::CheckForCms, cancelling wait dlg" );
-        iCheckConnDlg->SetCallback( NULL );
         iCheckConnDlg->ProcessFinishedL();
+        
+        // Wait here in case wait note has not yet been dismissed.
+        // This happens in hw when Themes/effects is enabled.
+        if ( iCheckConnDlg != NULL )
+            {
+            iWait.Start();
+            }
         CLOG_WRITE( "CCmWizard::CheckForCms, wait dialog deleted" );
         }
     else
         {
         CLOG_WRITE( "CCmWizard::CheckForCms, wait dlg was already cancelled" );
         }
-    
-    
+
     // Set the member to NULL every case
     iCheckConnDlg = NULL;
     }

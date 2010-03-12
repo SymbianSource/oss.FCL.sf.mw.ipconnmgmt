@@ -667,7 +667,41 @@ TBool CCmPluginVpn::CanHandleIapIdL( CCDIAPRecord *aIapRecord ) const
     if( TPtrC(aIapRecord->iServiceType) == TPtrC(KCDTypeNameVPNService) ||
         TPtrC(aIapRecord->iBearerType) == TPtrC(KCDTypeNameVirtualBearer) )
         {
-        retVal = ETrue;
+        // Further comparision is to find exact info that the IAP can handle by this plugin
+        CMDBRecordSet<CCDVirtualBearerRecord>* bearersRS = 
+                new(ELeave) CMDBRecordSet<CCDVirtualBearerRecord>
+                                                   (KCDTIdVirtualBearerRecord);
+        CleanupStack::PushL( bearersRS );
+
+        CCDVirtualBearerRecord* bearerRecord = 
+                static_cast<CCDVirtualBearerRecord *>
+                    (CCDRecordBase::RecordFactoryL(KCDTIdVirtualBearerRecord));
+
+        CleanupStack::PushL( bearerRecord );
+    
+        // Find entries used "vpnconnagt.agt" as agent from Table VirtualBearer
+        bearerRecord->iBearerAgent.SetL( KVpnVirtualBearerAgent );
+    
+        bearersRS->iRecords.AppendL( bearerRecord );
+
+        CleanupStack::Pop( bearerRecord );
+        bearerRecord = NULL;
+        
+        if ( bearersRS->FindL( Session() ) )
+            {
+            TUint32 recordId = (*bearersRS)[0]->RecordId();
+            TPtrC bearerName( (*bearersRS)[0]->iRecordName.GetL() );
+        
+            // Further comparing record ID referred to by this VPN IAP with entry ID in table VirtualBearer
+            // And also comparing bear name with our expected one "vpnbearer"
+            if( recordId == aIapRecord->iBearer && bearerName 
+                == TPtrC( KVpnVirtualBearerName ) )
+                {
+                retVal = ETrue;
+                }
+            }
+        
+        CleanupStack::PopAndDestroy( bearersRS );
         }
 
     return retVal;
@@ -2058,7 +2092,7 @@ TInt CCmPluginVpn::CheckValidityAndConvertDestinationIdL( TUint32 aDestId )
 // CCmPluginVpn::DefaultAPRecordL
 // --------------------------------------------------------------------------
 //
-const TMDBElementId CCmPluginVpn::DefaultAPRecordL( const TInt aTierIdentifier )
+TMDBElementId CCmPluginVpn::DefaultAPRecordL( const TInt aTierIdentifier )
     {
     LOGGER_ENTERFN( "CCmPluginVpn::DefaultAPRecordL" );
     // Resolve the Default SNAP AP elementid 

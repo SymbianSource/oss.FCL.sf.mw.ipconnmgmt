@@ -185,13 +185,11 @@ void CConnectingViaDiscreetPopup::RunL()
         HBufC* stringText2 = NULL;
         if (iConnectionName)
             {
-            stringText2 = StringLoader::LoadLC(
-                    R_QTN_OCC_CONNECTING_DISCREET_POPUP_TEXT2,
-                    *iConnectionName);
+            stringText2 = iConnectionName;
             }
         else
             {
-            stringText2 = _L("''").AllocLC();
+            stringText2 = KNullDesC().AllocLC();
             }
 
         CAknDiscreetPopup::ShowGlobalPopupL(*stringText1, // first text row
@@ -205,7 +203,13 @@ void CConnectingViaDiscreetPopup::RunL()
                 NULL, // command observer
                 KDiscreetPopupUid, // application to be launched
                 KDiscreetPopupViewUid); // view to be activated
-        CleanupStack::PopAndDestroy(2);
+        
+        if (!iConnectionName)
+            {
+            CleanupStack::PopAndDestroy( stringText2 );
+            }
+        
+        CleanupStack::PopAndDestroy( stringText1 );
         }
 
     // Cleanup

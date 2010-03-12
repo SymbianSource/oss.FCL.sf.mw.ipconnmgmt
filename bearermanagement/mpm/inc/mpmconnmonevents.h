@@ -37,8 +37,6 @@ Interface for receiving ConnMon events in MPM.
 
 // FORWARD DECLARATIONS
 class CMPMConnMonReqs;
-class CWlanAvailability;
-class MWlanAvailability;
 
 // CONSTANTS
 
@@ -300,29 +298,7 @@ class CMPMConnMonEvents : public CBase, public MConnectionMonitorObserver
          * @since 5.1
          */
         void IapAvailabilityChange();
-
-        /**
-         * Asks WLAN bearer availability info from Connection monitor.
-         * @since 5.2
-         * @param aObserver pointer to the caller
-         */
-        void CheckWlanAvailabilityL( MWlanAvailability* aObserver );
-        
-        /**
-         * Cancels WLAN bearer availability check for an observer.
-         * @since 5.2
-         * @param aObserver pointer to the caller
-         */
-        void CancelCheckWlanWlanAvailability( MWlanAvailability* aObserver );
-    
-        /**
-         * Sets iWlanAvailability pointer to NULL because object has
-         * deleted itself.
-         * @since 5.2
-         */
-        void SetWlanAvailabilityPtrNull();
-
-        
+       
     public: // Functions from base classes
     
         /**
@@ -373,7 +349,6 @@ class CMPMConnMonEvents : public CBase, public MConnectionMonitorObserver
         void FilterAvailableIAPEvents( const TBool aVal ) { iFilterEvents = aVal; }
 #endif //_DEBUG
 
-       CWlanAvailability*               iWlanAvailability;
     };
 
 // -----------------------------------------------------------------------------

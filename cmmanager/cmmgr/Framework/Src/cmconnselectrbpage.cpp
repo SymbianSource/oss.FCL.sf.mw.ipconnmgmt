@@ -381,8 +381,8 @@ void CCMConnSelectRBPage::HandleListBoxEventL(CEikListBox* aListBox,
                     		Cba()->DrawNow();
                     		CleanupStack::PopAndDestroy( text );
                     		}
+                		CAknRadioButtonSettingPage::SelectCurrentItemL();
                 		}
-		            CAknRadioButtonSettingPage::HandleListBoxEventL(aListBox, aEventType);
                 	}
                 break;
                 

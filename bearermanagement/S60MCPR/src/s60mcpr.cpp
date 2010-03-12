@@ -398,11 +398,9 @@ void CS60MetaConnectionProvider::PolicyNotification( TMpmNotification& aNotifica
                     notification.iInfo.iIap == 0 )) 
                 {
                 S60MCPRLOGSTRING2("S60MCPR<%x>::PolicyNotification() EMPMStopIAPNotification IAP %d",(TInt*)this,notification.iInfo.iIap);
-
-                //TODO migrate to use MCPR's TStop and vertical msg down. Not supported at the moment.
-                /*PostToClients<TDefaultClientMatchPolicy>( TNodeCtxId( 0, Id() ),
-                                                          TCFServiceProvider::TStop( KErrCancel ).CRef(),
-                                                          TClientType( TCFClientType::EData) );*/
+                PostToClients<TDefaultClientMatchPolicy>( TNodeCtxId( 0, Id() ),
+                                                          TCFServiceProvider::TStop( KErrDisconnected ).CRef(),
+                                                          TClientType( TCFClientType::EServProvider) );
                 }
 #ifdef _DEBUG
             else
@@ -464,14 +462,11 @@ void CS60MetaConnectionProvider::StorePolicyNotification( TMpmNotification& aNot
     // Store PolicyNotification
     // This could happen if PolicyServer sends notification too early.
     //
-    S60MCPRLOGSTRING1("S60MCPR<%x>::StorePolicyNotification()",(TInt*)this);
     if ( iPendingNotification.Length() == 0 )
         {
         S60MCPRLOGSTRING1("S60MCPR<%x>::StorePolicyNotification() iPendingNotification.Length() == 0",(TInt*)this);
         Mem::Copy((TAny*)iPendingNotification.Ptr(), &aNotification, KMpmMessageLength);
-        S60MCPRLOGSTRING1("S60MCPR<%x>::StorePolicyNotification() Mem::Copy",(TInt*)this);
         iPendingNotification.SetLength( KMpmMessageLength );
-        S60MCPRLOGSTRING1("S60MCPR<%x>::StorePolicyNotification() iPendingNotification.SetLength",(TInt*)this);
         }
 #ifdef _DEBUG
     else

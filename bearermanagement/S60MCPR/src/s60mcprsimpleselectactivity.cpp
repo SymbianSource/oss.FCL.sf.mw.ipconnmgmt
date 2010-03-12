@@ -194,10 +194,6 @@ namespace S60MCprSelectActivity
             newPrefs.SetPrefs( ippprefs );
             TCFSelector::TSimpleSelect msg(newPrefs);
             iContext.iNodeActivity->PostRequestTo(ac.iTierManager, msg);
-
-            //TODO Clarify, if the SelectionChoices is actually needed...
-            //if (ac.SelectionChoices().Count() == 0)
-            //ac.SelectionChoices().Append(node.iIAPList[0]);
             }
         }
     }
@@ -318,10 +314,6 @@ namespace S60MCprSimpleSelectActivity
             newPrefs.SetPrefs( ippprefs );
             TCFSelector::TSimpleSelect msg(newPrefs);
             iContext.iNodeActivity->PostRequestTo(ac.iTierManager, msg);
-
-            //TODO Clarify, if the SelectionChoices is actually needed...
-            //if (ac.SelectionChoices().Count() == 0)
-            //ac.SelectionChoices().Append(node.iIAPList[0]);
             }
         }
 

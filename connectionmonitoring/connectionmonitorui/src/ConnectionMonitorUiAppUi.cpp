@@ -387,11 +387,14 @@ void CConnectionMonitorUiAppUi::EventL(
                     CleanupStack::PushL( connectionInfo );
                     iConnectionArray->AppendL( connectionInfo );
                     CleanupStack::Pop( connectionInfo );
-
-                    // Avkon: This is needed due to events' timing issues:
-                    CConnectionMonitorUiView* view =
-                            ( CConnectionMonitorUiView* )iView;
-                    view->HandleItemAdditionL();
+										
+                    if ( iView->Id() != KDetailsViewId )
+                        {
+                  	  	// Avkon: This is needed due to events' timing issues:
+                    		CConnectionMonitorUiView* view =
+                        	    ( CConnectionMonitorUiView* )iView;
+                    	view->HandleItemAdditionL();
+                    	}
                     }
                 }
             

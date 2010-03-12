@@ -84,13 +84,6 @@ CMPMIapSelection::~CMPMIapSelection()
     //
     StopDisplayingStartingDlg();
     
-    // Cancel WLAN availability check in case it is active
-    //
-    if ( iSession )
-        {
-    	  iSession->MyServer().Events()->CancelCheckWlanWlanAvailability( this );	
-        }	
-    
     delete iConfirmDlgStarting;
     delete iDialog;
     delete iWlanDialog;
@@ -419,16 +412,7 @@ void CMPMIapSelection::ExplicitConnectionL()
         if ( ( iChooseIapPref.BearerSet() & TExtendedConnPref::EExtendedConnBearerWLAN ) ||
              ( iChooseIapPref.BearerSet() == TExtendedConnPref::EExtendedConnBearerUnknown ) )
             {
-            if ( iNewWlansAllowed && 
-            	   ( iChooseIapPref.BearerSet() == 
-            	     TExtendedConnPref::EExtendedConnBearerWLAN ) )
-                {
-                // User allows only WLAN connections, check WLAN availability.
-                // A note will be shown if no WLANs are available.
-                //
-                iSession->MyServer().Events()->CheckWlanAvailabilityL( this );
-                }
-            else if( iCommsDatAccess->SnapContainsWlanL( snap, iapPath, KMPMNrWlansOne ) )
+            if( iCommsDatAccess->SnapContainsWlanL( snap, iapPath, KMPMNrWlansOne ) )
                 {
                 // Scan wlan networks. After that execution continues 
                 // in CompleteExplicitSnapConnectionL()
@@ -854,28 +838,12 @@ void CMPMIapSelection::HandleUserSelectionL( TBool aIsIap, TUint32 aId, TInt aEr
         TMpmConnPref userPref;
         iUserSelectionSnapId = iCommsDatAccess->MapNetIdtoSnapAPL( aId );
         userPref.SetSnapId( iUserSelectionSnapId );
+        userPref.SetIapId( 0 );
 
-        
-// Agreed that MPM will be migrated to SNAP TAG ID SNAPS.
-//        if ( iUserSelectionSnapId < 0x1000 )  // TODO: remove when connection dialog return valid SNAP TAG ID.
-//            {
-//            // legacy snaps ok
-//            userPref.SetNetId( aId );
-//            iUserSelectionSnapId = aId;
-//            }
-//        else
-//            {
-//            // 5.2 snaps, MPM uses internally legacy snaps. Convert back. -jl- TODO: use CommsDat mapping in future.
-//            userPref.SetNetId( aId - 3000 );
-//            iUserSelectionSnapId = aId - 3000;
-//            }
-        
         MPMLOGSTRING2(
                 "CMPMIapSelection::HandleUserSelectionL: Snap = %i selected by the User", 
                 iUserSelectionSnapId )
 
-//        userPref.SetNetId( aId );
-        userPref.SetIapId( 0 );
 
         ChooseBestIAPL( userPref, iStoredAvailableIaps );
         iUserSelectionIapId = userPref.IapId();
@@ -1319,62 +1287,6 @@ void CMPMIapSelection::SetConfirmDlgStartingPtrNull()
 CMPMServerSession* CMPMIapSelection::Session()
     {
     return iSession;
-    }
-
-// -----------------------------------------------------------------------------
-// CMPMIapSelection::TriggerInformationNote
-// -----------------------------------------------------------------------------
-//
-void CMPMIapSelection::TriggerInformationNoteL()
-    {
-    // ConnectioUiUtilities client side has a nonblocking active object 
-    // implementation
-    //
-    if ( !( iChooseIapPref.NoteBehaviour() &
-           TExtendedConnPref::ENoteBehaviourConnDisableNotes ) )
-        {           	
-        CConnectionUiUtilities* connUiUtils = CConnectionUiUtilities::NewL();        
-                            
-        connUiUtils->NoWLANNetworksAvailableNote();
-                            
-        delete connUiUtils;
-        }            
-    }
-
-// -----------------------------------------------------------------------------
-// CMPMIapSelection::WlanAvailabilityResponse
-// -----------------------------------------------------------------------------
-//
-void CMPMIapSelection::WlanAvailabilityResponse( const TInt  aError, 
-                                                 const TBool aResult )
-    {
-    if ( ( aError == KErrNone && aResult == EFalse )
-          || ( aError == KErrNotSupported ) )
-        {
-        // no WLANs are available and user allows only
-        // WLAN connections
-        TRAPD( err, TriggerInformationNoteL() );
-        
-        if ( err )
-            {
-            MPMLOGSTRING2( "TriggerInformationNoteL leaved %d", err )
-            }
-            
-        ChooseIapComplete( KErrNotFound, NULL );
-        }
-    else
-        {
-        // Some WLANs are available,
-        // or an error has occured while requesting available WLANs.
-        //
-        TRAPD( err, CompleteExplicitSnapConnectionL() );
-        
-        if ( err )
-            {
-            MPMLOGSTRING2( "CompleteExplicitSnapConnectionL leaved %d", err )
-            ChooseIapComplete( KErrCancel, NULL );
-            }
-        }
     }
 
 // -----------------------------------------------------------------------------

@@ -26,7 +26,6 @@ Get events from Connection Monitor.
 #include "mpmserver.h"
 #include "mpmserversession.h"
 #include "mpmlogger.h"
-#include "mpmwlanavailability.h"
 
 // ============================= LOCAL FUNCTIONS ===============================
 
@@ -68,8 +67,6 @@ CMPMConnMonEvents::~CMPMConnMonEvents()
     iConnMon.Close();
     iReqPtrs.ResetAndDestroy();
     iConnInfoArray.Close();
-    delete iWlanAvailability;
-    iWlanAvailability = NULL;
     }
 
 
@@ -695,53 +692,6 @@ TConnInfo::TConnInfo()
       iSSID(), 
       iConnType( EConnectionGeneric )
     {
-    }
-
-// -----------------------------------------------------------------------------
-// CMPMConnMonEvents::CheckWlanAvailabilityL
-// -----------------------------------------------------------------------------
-// 
-void CMPMConnMonEvents::CheckWlanAvailabilityL( MWlanAvailability* aObserver )
-    {
-    MPMLOGSTRING( "CMPMConnMonEvents::CheckWlanAvailabilityL" )
-    // Sanity check null pointer 
-    ASSERT( aObserver != NULL );
-
-    // Request for WLAN bearer availability info
-    //
-    if ( !iWlanAvailability )
-        {
-        iWlanAvailability = CWlanAvailability::NewL( this, iConnMon );
-        }
-    
-    iWlanAvailability->Start( aObserver );
-    }
-
-// -----------------------------------------------------------------------------
-// CMPMConnMonEvents::CancelCheckWlanWlanAvailability
-// -----------------------------------------------------------------------------
-//
-void CMPMConnMonEvents::CancelCheckWlanWlanAvailability( MWlanAvailability* aObserver )
-    {
-    MPMLOGSTRING( "CMPMConnMonEvents::CancelCheckWlanWlanAvailability" )
-    // Sanity check null pointer 
-    ASSERT( aObserver != NULL );
-
-    // Cancel WLAN bearer availability check for this observer
-    //
-    if ( iWlanAvailability )
-        {
-        iWlanAvailability->CancelObserver( aObserver );
-        }
-    }
-
-// -----------------------------------------------------------------------------
-// CMPMConnMonEvents::SetWlanAvailabilityPtrNull
-// -----------------------------------------------------------------------------
-//
-void CMPMConnMonEvents::SetWlanAvailabilityPtrNull()
-    {
-    iWlanAvailability = NULL;
     }
 
 //  End of File

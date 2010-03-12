@@ -445,6 +445,9 @@ while extracting TCommDbConnPref from TConnPref" )
     // 
     iAppUid = aMessage.Int2();
 
+    MPMLOGSTRING2( "CMPMServerSession::HandleServerChooseIapL: \
+Client UID = 0x%x", iAppUid )
+
     if ( !iIapSelection )
         {
         iIapSelection = CMPMIapSelection::NewL( iMyServer.CommsDatAccess(),

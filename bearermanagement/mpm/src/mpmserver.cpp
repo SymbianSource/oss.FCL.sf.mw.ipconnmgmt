@@ -25,6 +25,7 @@ Mobility Policy Manager server implementation.
 #include <etel3rdparty.h>                // Voice call notification
 #include <mmtsy_names.h>                 // KMmTsyModuleName
 #include <centralrepository.h>
+#include <es_sock_partner.h>
 
 #include "mpmserver.h"
 #include "mpmserversession.h"
@@ -2023,7 +2024,7 @@ void CMPMServer::NotifyDisconnectL( TInt aConnIndex,
     
                         MPMLOGSTRING2( "CMPMServer::NotifyDisconnectL: \
 Disconnected Connection Id = 0x%x", iSessions[sIndex]->ConnectionId() )
-                        iSessions[sIndex]->ClientErrorNotificationL( KErrDisconnected );
+                        iSessions[sIndex]->ClientErrorNotificationL( KErrForceDisconnected );
                         }
                     }
                 }
