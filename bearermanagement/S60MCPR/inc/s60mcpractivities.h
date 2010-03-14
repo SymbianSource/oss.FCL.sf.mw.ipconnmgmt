@@ -767,12 +767,12 @@ namespace S60MCprMobilityActivity
              * STATE: Waits for preferred carrier message.
              * @return ETrue if preferred carrier notification is received.
              */
-            DECLARE_SMELEMENT_HEADER( TAwaitingPreferredCarrierOrCancelOrRejected, 
+            DECLARE_SMELEMENT_HEADER( TAwaitingPreferredCarrierOrCancelOrRejectedOrErrorNotification, 
                                       MeshMachine::TState<TContext>, 
                                       NetStateMachine::MState, 
                                       CS60MobilityActivity::TContext)
             virtual TBool Accept();
-            DECLARE_SMELEMENT_FOOTER( TAwaitingPreferredCarrierOrCancelOrRejected )
+            DECLARE_SMELEMENT_FOOTER( TAwaitingPreferredCarrierOrCancelOrRejectedOrErrorNotification )
             
             /**
              * FORK/DECISION: Decides what happens after IPCPR responds to migration offer.

@@ -21,7 +21,7 @@
 // System includes
 #include <cmconnectionmethod.h>
 #include <cmmanagerdef.h>
-#include <E32def.h>
+#include <e32def.h>
 #include <e32base.h>
 #include <metadatabase.h>
 

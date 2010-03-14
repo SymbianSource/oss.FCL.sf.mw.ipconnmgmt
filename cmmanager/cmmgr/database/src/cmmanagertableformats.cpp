@@ -133,7 +133,10 @@ EXPORT_C CCDDefConnRecord::CCDDefConnRecord( TMDBElementId aElementId )
                         | KCDTIdCellularDataUsageHome ),
       iCellularDataUsageVisitor( ( aElementId & KCDMaskShowRecordType ) 
                         | KCDTIdCellularDataUsageVisitor )
-    {};  	
+    {
+    iCellularDataUsageHome.SetAttributes(ECDProtectedWrite);
+    iCellularDataUsageVisitor.SetAttributes(ECDProtectedWrite);
+    };  	
 
 EXPORT_C TMDBElementId 
     CCDDefConnRecord::TableIdL( CMDBSession& aSession )

@@ -19,7 +19,7 @@
 
 // INCLUDE FILES
 #include <stdlib.h>
-#include <NIFVAR.H>
+#include <nifvar.h>
 #include <StringLoader.h>
 #include <ConnectionMonitorUi.rsg>
 #include <avkon.rsg>

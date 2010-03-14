@@ -16,7 +16,7 @@
 */
 
 // INCLUDE FILES
-#include <NIFVAR.H>
+#include <nifvar.h>
 #include "caoconnectionmonitorimpl.h"
 #include "maosettings.h"
 #include "logger.h"

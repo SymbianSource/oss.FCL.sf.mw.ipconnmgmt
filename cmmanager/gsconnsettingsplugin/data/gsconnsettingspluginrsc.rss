@@ -323,22 +323,6 @@ RESOURCE ARRAY r_conn_settings_lbx_txt_nowlan
 
 //----------------------------------------------------
 //    
-// r_usage_of_new_wlan_setting_page
-// Resource for "Join new WLAN networks" setting page.
-//
-//----------------------------------------------------
-//
-RESOURCE AVKON_SETTING_PAGE r_usage_of_wlan_setting_page
-    {
-    number = EAknSettingPageNoOrdinalDisplayed; 
-    label = qtn_occ_sett_usage_of_wlan;
-    softkey_resource = R_AVKON_SOFTKEYS_OK_CANCEL__OK;
-    type = EAknSetListBox;
-    editor_resource_id = r_setting_listbox;
-    }
-
-//----------------------------------------------------
-//    
 // r_usage_of_new_wlan_setting_page_lbx
 // Resource for "Join new WLAN networks" listbox items
 //
@@ -419,6 +403,10 @@ RESOURCE ARRAY r_data_usage_abroad_setting_page_lbx_nowlan
         LBUF
             {
             txt = qtn_occ_sett_data_usage_abroad_confirm;
+            },
+        LBUF
+            {
+            txt = qtn_occ_sett_data_usage_abroad_disabled;
             }
         };
     }
@@ -483,6 +471,10 @@ RESOURCE ARRAY r_data_usage_home_nw_setting_page_lbx_nowlan
         LBUF
             {
             txt = qtn_occ_sett_data_usage_home_nw_confirm;
+            },
+        LBUF
+            {
+            txt = qtn_occ_sett_data_usage_home_nw_disabled;
             }
         };
     }
@@ -519,21 +511,5 @@ RESOURCE TBUF r_gs_conn_settings_msk_label_change
 // -----------------------------------------------------------------------------
 //
 RESOURCE TBUF r_gs_conn_settings_rsk_label_exit { buf = text_softkey_exit; }
-
-
-RESOURCE ARRAY r_usage_of_wlan_info_popup_texts
-    {
-    items =
-        {
-        LBUF
-            {
-            txt = qtn_occ_info_popup_wlan_usage_known;
-            },
-        LBUF
-            {
-            txt = qtn_occ_info_popup_wlan_usage_manual;
-            }
-        };
-    }
 
 // End of file

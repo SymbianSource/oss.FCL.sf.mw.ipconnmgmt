@@ -29,7 +29,7 @@
 #include "ApNetSelPopupList.h"
 #include "ApNetSelectorListBoxModel.h"
 #include "ApSettingsModel.h"
-#include <ApSetUI.rsg>
+#include <apsetui.rsg>
 #include "ApsettingshandleruiImpl.h"
 
 

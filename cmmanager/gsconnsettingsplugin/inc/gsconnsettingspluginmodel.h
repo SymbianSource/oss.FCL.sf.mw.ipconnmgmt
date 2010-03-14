@@ -130,6 +130,11 @@ NONSHARABLE_CLASS( CGSConnSettingsPluginModel ): public CBase
         */
         TCmGenConnSettings iSettings;
         
+        /**
+         * Flag is set when wlan is supported
+         */
+        TBool iIsWlanSupported;
+        
     };
 
 #endif //GSCONNSETTINGSPLUGINMODEL_H

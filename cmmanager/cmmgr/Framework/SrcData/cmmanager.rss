@@ -565,6 +565,7 @@ RESOURCE DIALOG r_dest_dialog
             {
             type = KDestListboxType;
             id = KDestListboxId;
+            itemflags = EEikDlgItemTakesEnterKey;
             control= LISTBOX { flags = EAknListBoxSelectionList;};
             }
         };
@@ -715,6 +716,7 @@ RESOURCE DIALOG r_cm_dialog
             {
             type = KCmListboxType;
             id = KCmListboxId;
+            itemflags = EEikDlgItemTakesEnterKey;
             control= LISTBOX { flags = EAknListBoxSelectionList;};
             }
         };

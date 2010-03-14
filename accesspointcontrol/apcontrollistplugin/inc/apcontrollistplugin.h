@@ -21,7 +21,7 @@
 
 // System includes
 #include <eikclb.h>
-#include <GSPluginInterface.h>
+#include <gsplugininterface.h>
 #include <ConeResLoader.h>
 
 // This UID is used for both the view UID and the ECOM plugin implementation UID.

@@ -416,6 +416,15 @@ void CConnectionMonitorUiView::ConnectionKeyObserver() const
         }
 	}
 
+// ---------------------------------------------------------
+// CConnectionMonitorUiView::HandleItemAdditionL
+// ---------------------------------------------------------
+//
+void CConnectionMonitorUiView::HandleItemAdditionL()
+    {
+    iContainer->ListBox()->HandleItemAdditionL();
+    }
+
     
 
 // End of File

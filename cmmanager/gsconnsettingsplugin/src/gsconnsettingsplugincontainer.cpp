@@ -26,8 +26,8 @@
 
 #include <aknlists.h>
 #include <csxhelp/cp.hlp.hrh>
-#include <GSFWViewUIDs.h>     // for KUidGS
-#include <GSListbox.h>
+#include <gsfwviewuids.h>     // for KUidGS
+#include <gslistbox.h>
 
 
 // EXTERNAL DATA STRUCTURES
@@ -143,7 +143,9 @@ CGSConnSettingsPluginContainer::CGSConnSettingsPluginContainer(
         MGSConnSettingsMskObserver& aMskObserver )
         : iMskObserver( aMskObserver )
     {
+    FeatureManager::InitializeLibL();
     iIsWlanSupported = FeatureManager::FeatureSupported( KFeatureIdProtocolWlan );
+    FeatureManager::UnInitializeLib();
     }
 
 void CGSConnSettingsPluginContainer::SetPluginArray ( 
@@ -311,6 +313,13 @@ void CGSConnSettingsPluginContainer::MakeDataUsageAbroadItemL()
 {
     TInt currValue = iModel->DataUsageAbroad();
     
+    // We may have to do in this way because EDataUsageAbroadDisabled is equal to 3
+    // and the actual index number should be 2 in this case
+    if( !iIsWlanSupported && currValue == EDataUsageAbroadDisabled )
+        {
+        currValue --;
+        }
+    
     AppendListItemL( Index( EGSSettIdDataUsageAbroad ),
         iListItems->operator[]( Index( EGSSettIdDataUsageAbroad ) ),
         ( *iDataUsageAbroadItems )[currValue] );
@@ -325,6 +334,13 @@ void CGSConnSettingsPluginContainer::MakeDataUsageAbroadItemL()
 void CGSConnSettingsPluginContainer::MakeDataUsageHomeNwItemL()
 {
     TInt currValue = iModel->DataUsageInHomeNw();
+    
+    // We may have to do in this way because EDataUsageAbroadDisabled is equal to 3
+    // and the actual index number should be 2 in this case
+    if( !iIsWlanSupported && currValue == EDataUsageAbroadDisabled )
+        {
+        currValue --;
+        }
     
     AppendListItemL( Index( EGSSettIdDataUsageHomeNw ),
         iListItems->operator[]( Index( EGSSettIdDataUsageHomeNw ) ),

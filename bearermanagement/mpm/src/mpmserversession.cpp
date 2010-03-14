@@ -933,22 +933,13 @@ void CMPMServerSession::HandleServerApplicationMigratesToCarrierL(
                 {
                 if ( MyServer().RoamingWatcher()->RoamingStatus() == EMPMInternationalRoaming )
                     {
-                    //Check if cellular data usage query has already been presented to the user in this country
-                    if ( MyServer().RoamingWatcher()->AskCellularDataUsageAbroad() == true )
-                        {
-                        //International roaming
-                        iConfirmDlgRoaming = CMPMConfirmDlgRoaming::NewL( 
-                                *this, 
-                                snapId, 
-                                iMigrateIap, 
-                                CMPMConfirmDlg::EConfirmDlgVisitorNetwork, 
-                                reconnect );
-                        }
-                    else
-                        {
-                        //Handle like user would have answered "Connect this time" to dialog
-                        RoamingConfirmationCompletedL( KErrNone, EMsgQueryThisTime, reconnect );
-                        }
+                    //International roaming
+                    iConfirmDlgRoaming = CMPMConfirmDlgRoaming::NewL( 
+                            *this, 
+                            snapId, 
+                            iMigrateIap, 
+                            CMPMConfirmDlg::EConfirmDlgVisitorNetwork, 
+                            reconnect );
                     }
                 else
                     {
@@ -1105,13 +1096,6 @@ aError %d, aResponse %d, aReconnect %d",
                     TRAP_IGNORE(MyServer().CommsDatAccess()->WriteGenConnSettingsL( genConnSettings )); 
                     }
                 } 
-            else
-                {
-                //In foreign country connect automatically is not stored in commsdat
-                //even user selected so. We just do not ask confirmation for the cellular
-                //connection again in this country:
-                MyServer().RoamingWatcher()->SetAskCellularDataUsageAbroad( false );            
-                }
             }
         
         //user selected connect this time
@@ -2841,15 +2825,17 @@ No notification requested" )
         {
         TBool connectionAlreadyActive = iMyServer.CheckIfStarted( aIapId );
         CConnectionUiUtilities* connUiUtils = NULL;
-        TRAPD( popupError,
-               connUiUtils = CConnectionUiUtilities::NewL();
-               connUiUtils->ConnectingViaDiscreetPopup(
-                   aIapId,
-                   connectionAlreadyActive );
-               delete connUiUtils; );
-        if ( popupError && connUiUtils )
+        if (!connectionAlreadyActive )
             {
-            delete connUiUtils;
+            TRAPD( popupError,
+                   connUiUtils = CConnectionUiUtilities::NewL();
+                   connUiUtils->ConnectingViaDiscreetPopup(
+                   			        aIapId );
+                   delete connUiUtils; );
+            if ( popupError && connUiUtils )
+                {
+                delete connUiUtils;
+                }
             }
         }
 

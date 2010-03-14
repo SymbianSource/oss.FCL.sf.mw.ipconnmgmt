@@ -56,7 +56,7 @@ public:
     /**
      * StartL Function for making the initial request
      */
-    void StartL(TUint32 aIapId, TBool aConnectionAlreadyActive);
+    void StartL(TUint32 aIapId );
 
 private:
     /**

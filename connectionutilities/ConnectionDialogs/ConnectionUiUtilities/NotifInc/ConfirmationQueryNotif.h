@@ -30,6 +30,7 @@
 
 // FORWARD DECLARATIONS
 class CConfirmationQuery;
+class CConfirmationQueryVisitor;
 class CRoamingInfo;
 
 /**
@@ -115,10 +116,18 @@ NONSHARABLE_CLASS( CConfirmationQueryNotif )
          */  
         static TInt LaunchDialogL( TAny* aObject );
         
+        /**
+         * Callback is called to launch dialog asynchronously
+         * @param  aObject Pointer to notifier object.
+         * return  Error code
+         */  
+        static TInt LaunchDialogVisitorL( TAny* aObject );
+        
     private:
         TBool iTryNextBest;
         TUint32 iConnMethod;
-        CConfirmationQuery* iDialog;   // Pointer to the dialog
+        CConfirmationQuery*        iDialog;         // Home network dialog
+        CConfirmationQueryVisitor* iDialogVisitor;  // Visitor network dialog
         TBool iIsVisitorNetwork;
         TMsgQueryLinkedResults iChoice;
         TConnUiUiDestConnMethodNoteId iNoteInfo;

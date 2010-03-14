@@ -312,7 +312,7 @@
 //w:
 //r:5.2
 //
-#define qtn_occ_detail_cs_data_foreign_nw    "Connect to Internet in this country using cellular data? Data costs may increase considerably."
+#define qtn_occ_detail_cs_data_foreign_nw    "Connect to Internet using cellular data? Phone is outside of home network, and data costs may increase considerably.\nTo allow connecting automatically, adjust the Connection settings."
 
 //d:Option for connection query in foreign network.
 //l:list_single_pane_t1_cp2
@@ -436,5 +436,12 @@
 //r:5.2
 //
 #define qtn_occ_config_failed_discreet_popup_text1 "Configuration failed"
+
+//d:Softkey used to confirm the query
+//l:control_pane_t1/opt7
+//w:
+//r:5.2
+//
+#define qtn_netw_conset_softkey_connect             "Connect"
 
 // End of File

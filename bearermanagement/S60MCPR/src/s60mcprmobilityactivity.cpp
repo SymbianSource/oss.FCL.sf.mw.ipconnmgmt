@@ -500,12 +500,12 @@ namespace S60MCprMobilityActivity
 		}
 	
     // -----------------------------------------------------------------------------
-    // CS60MobilityActivity::TAwaitingPreferredCarrierOrCancelOrRejected::Accept
+    // CS60MobilityActivity::TAwaitingPreferredCarrierOrCancelOrRejectedOrErrorNotification::Accept
     // -----------------------------------------------------------------------------
     //
-    DEFINE_SMELEMENT( CS60MobilityActivity::TAwaitingPreferredCarrierOrCancelOrRejected, 
+    DEFINE_SMELEMENT( CS60MobilityActivity::TAwaitingPreferredCarrierOrCancelOrRejectedOrErrorNotification, 
                       NetStateMachine::MState, TContext )
-    TBool CS60MobilityActivity::TAwaitingPreferredCarrierOrCancelOrRejected::Accept()
+    TBool CS60MobilityActivity::TAwaitingPreferredCarrierOrCancelOrRejectedOrErrorNotification::Accept()
         {
         TBool result( EFalse );
         
@@ -518,7 +518,7 @@ namespace S60MCprMobilityActivity
 
             TMpmNotificationPrefIAPAvailable* notif = (TMpmNotificationPrefIAPAvailable*)msg->iPtr;
 
-            S60MCPRLOGSTRING4("S60MCPR<%x>::TAwaitingPreferredCarrierOrCancelOrRejected::Accept() TMPMPreferredCarrierAvailableMsg %d -> %d upgrade=%d",
+            S60MCPRLOGSTRING4("S60MCPR<%x>::TAwaitingPreferredCarrierOrCancelOrRejectedOrErrorNotification::Accept() TMPMPreferredCarrierAvailableMsg %d -> %d upgrade=%d",
                        (TInt*)&iContext.Node(), notif->iOldIapId, notif->iNewIapId, notif->iIsUpgrade)
             // notif must be there.
             ASSERT(notif);
@@ -538,16 +538,26 @@ namespace S60MCprMobilityActivity
             }
         else if ( iContext.iMessage.IsMessage<TEBase::TCancel>() )
             {
-            S60MCPRLOGSTRING1("S60MCPR<%x>::TAwaitingPreferredCarrierOrCancelOrRejected::Accept() TCancel", 
+            S60MCPRLOGSTRING1("S60MCPR<%x>::TAwaitingPreferredCarrierOrCancelOrRejectedOrErrorNotification::Accept() TCancel", 
                     (TInt*)&iContext.Node())
             
             result = ETrue;
             }
         else if ( iContext.iMessage.IsMessage<TCFMobilityProvider::TMigrationRejected>() )
             {
-            S60MCPRLOGSTRING1("S60MCPR<%x>::TAwaitingPreferredCarrierOrCancelOrRejected::Accept() TMigrationRejected", 
+            S60MCPRLOGSTRING1("S60MCPR<%x>::TAwaitingPreferredCarrierOrCancelOrRejectedOrErrorNotification::Accept() TMigrationRejected", 
                     (TInt*)&iContext.Node())
             
+            result = ETrue;
+            }
+        else if ( iContext.iMessage.IsMessage<TCFS60MCPRMessage::TMPMErrorNotificationMsg>() )
+            {
+            CS60MobilityActivity& activity = static_cast<CS60MobilityActivity&>(*iContext.iNodeActivity);
+            TCFS60MCPRMessage::TMPMErrorNotificationMsg* msg = 
+                message_cast<TCFS60MCPRMessage::TMPMErrorNotificationMsg>( &iContext.iMessage );
+            S60MCPRLOGSTRING2("S60MCPR<%x>::TAwaitingPreferredCarrierOrCancelOrRejectedOrErrorNotification::Accept() TMPMErrorNotificationMsg %d",(TInt*)&iContext.Node(),msg->iValue)
+            ASSERT( msg->iValue != KErrNone );
+            activity.SetError( msg->iValue );
             result = ETrue;
             }
 

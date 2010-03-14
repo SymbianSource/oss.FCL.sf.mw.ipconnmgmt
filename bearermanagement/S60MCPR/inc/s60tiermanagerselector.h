@@ -60,6 +60,7 @@ private:
     ESock::CMetaConnectionProviderBase* FindOrCreateProviderL( TUint aAccessPoint );
 private:
     TUint32 iDefaultAp;    
+    TSubSessionUniqueId iSubSessionUniqueId;    
     };
 
 #endif // S60IPTIERMANAGERSELECTOR_H

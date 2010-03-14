@@ -50,7 +50,8 @@ enum {
 enum {
     EDataUsageAbroadAutomatic = 0,
     EDataUsageAbroadConfirm = 1,
-    EDataUsageAbroadWlanOnly = 2
+    EDataUsageAbroadWlanOnly = 2,
+    EDataUsageAbroadDisabled = 3
     };
 
 //Indexes for data usage in home NW values
@@ -59,7 +60,8 @@ enum {
 enum {
     EDataUsageHomeNwAutomatic = 0,
     EDataUsageHomeNwConfirm = 1,
-    EDataUsageHomeNwWlanOnly = 2
+    EDataUsageHomeNwWlanOnly = 2,
+    EDataUsageHomeNwDisabled = 3
     };
 
 #endif //  GSCONNECTIVITYSETTINGSPLUGIN_HRH

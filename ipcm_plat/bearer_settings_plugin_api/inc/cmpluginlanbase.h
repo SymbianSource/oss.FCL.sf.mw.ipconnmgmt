@@ -23,7 +23,7 @@
 #include <e32base.h>
 #include <eikdoc.h>
 #include <apparc.h>
-#include <CommsDatTypesV1_1.h>
+#include <commsdattypesv1_1.h>
 #ifdef SYMBIAN_ENABLE_SPLIT_HEADERS
 #include <commsdat_partner.h>
 #endif

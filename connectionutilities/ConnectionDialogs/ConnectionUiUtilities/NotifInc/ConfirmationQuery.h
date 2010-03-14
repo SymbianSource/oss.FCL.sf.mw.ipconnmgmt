@@ -30,7 +30,7 @@ class CExpiryTimer;
 // CLASS DECLARATIONS
 
 /**
- * Class implements a query dialog.
+ * Class implements a query dialog in home network.
  */
 NONSHARABLE_CLASS( CConfirmationQuery ) : public CAknListQueryDialog, public MExpiryTimerCallback
     {
@@ -100,6 +100,72 @@ NONSHARABLE_CLASS( CConfirmationQuery ) : public CAknListQueryDialog, public MEx
         // For base class, unused.
         TInt iDummy;
 		
+        // Pointer for dialog expiration timer
+        CExpiryTimer* iExpiryTimer;
+    };
+
+
+/**
+ * Class implements a query dialog in visitor network.
+ */
+NONSHARABLE_CLASS( CConfirmationQueryVisitor ) : public CAknMessageQueryDialog, public MExpiryTimerCallback
+    {
+    public:
+        /**
+        * Constructor the CConfirmationQuery class
+        * @param aNotif notifier pointer
+        * @param aNameOfConnMethod 
+        * @param aUIId    
+        * @return -
+        */
+        CConfirmationQueryVisitor( CConfirmationQueryNotif* aNotif );
+
+        /**
+        * Exit function the CConfirmationQuery
+        * @param aButtonId 
+        * @return TBool exit or no
+        */
+        virtual TBool OkToExitL( TInt aButtonId );
+    
+        /**
+        * Dialog expiration timeout callback
+        */
+        void HandleTimedOut();
+        
+        /**
+        * Destructor
+        */
+        virtual ~CConfirmationQueryVisitor();     
+
+        /**
+        * Tries to exit the dialog when the specified button is pressed, if this 
+        * button should exit the dialog.
+        *
+        * See @c OkToExitL() to determine which buttons can exit the dialog.
+        * 
+        * This will fail if user exit is prevented by the 
+        * @c EEikDialogFlagNoUserExit flag. If the @c EEikDialogFlagNotifyEsc flag
+        * is not set and the dialog has been cancelled it immediately deletes 
+        * itself.
+        * 
+        * @param aButtonId The id of the pressed button.
+        */
+        void TryExitL( TInt aButtonId );
+        
+        TKeyResponse OfferKeyEventL( const TKeyEvent& aKeyEvent, 
+                                     TEventCode aType);
+        
+
+    private:
+        /**
+        * PreLayoutDynInitL
+        * @param    -
+        */
+        virtual void PreLayoutDynInitL();    
+
+    private:
+        CConfirmationQueryNotif* iNotif;  // Pointer to the Notifier, not owned
+                
         // Pointer for dialog expiration timer
         CExpiryTimer* iExpiryTimer;
     };

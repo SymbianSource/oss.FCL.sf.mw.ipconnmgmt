@@ -32,7 +32,7 @@
 #include <cmdestination.h>
 #include <ConnectionUiUtilities.h>
 #include <datamobilitycommsdattypes.h>
-
+#include <ctsydomainpskeys.h>
 
 using namespace CMManager;
 
@@ -109,6 +109,24 @@ void CConfirmationQueryNotif::StartL( const TDesC8& aBuffer,
            }    
         }
     
+    // Check if emergency call is ongoing. If it is then do not display the dialog.    
+    TInt err( KErrNone );
+    TInt state( 0 );
+
+    err = RProperty::Get(
+            KPSUidCtsyEmergencyCallInfo,
+            KCTSYEmergencyCallInfo,
+            state );
+    
+    if ( err == KErrNone && state )
+        {
+        // Emergency call is active. Cancel connection. 
+        CLOG_WRITE( "CConfirmationQueryNotif::StartL: Emergency call is active!" );
+        aMessage.WriteL( aReplySlot, TPckg<TMsgQueryLinkedResults>( EMsgQueryCancelled ) );
+        aMessage.Complete( KErrNone );
+        return;
+        }
+    
     iChoice = EMsgQueryCancelled; 
     TPckgBuf<TConnUiUiDestConnMethodNoteId> input;
     input.Copy( aBuffer );
@@ -117,14 +135,24 @@ void CConfirmationQueryNotif::StartL( const TDesC8& aBuffer,
     iReplySlot = aReplySlot;
     iMessage = aMessage;
     iCancelled = EFalse;
-    
-    TCallBack cb( LaunchDialogL, this );
-    
-    if ( !iLaunchDialogAsync )
+
+    if ( iLaunchDialogAsync )
         {
-        iLaunchDialogAsync = new( ELeave ) CAsyncCallBack( cb, CActive::EPriorityHigh );    
+        delete iLaunchDialogAsync;
+        iLaunchDialogAsync = NULL;
         }
     
+    if ( iNoteInfo.iNoteId == EConfirmMethodUsageQueryInHomeNetwork )
+        {
+        TCallBack cb( LaunchDialogL, this );
+        iLaunchDialogAsync = new( ELeave ) CAsyncCallBack( cb, CActive::EPriorityHigh );    
+        }
+    else
+        {
+        TCallBack cb( LaunchDialogVisitorL, this );
+        iLaunchDialogAsync = new( ELeave ) CAsyncCallBack( cb, CActive::EPriorityHigh );    
+        }
+
     iLaunchDialogAsync->CallBack();
     }
 
@@ -144,8 +172,17 @@ void CConfirmationQueryNotif::Cancel()
             iMessage.Complete( KErrCancel );
             }
         
-        delete iDialog;
-        iDialog = NULL;
+        if ( iDialog )
+            {
+            delete iDialog;
+            iDialog = NULL;
+            }
+        
+        if ( iDialogVisitor )
+            {
+            delete iDialog;
+            iDialog = NULL;
+            }
         }
     
     CLOG_LEAVEFN( "CConfirmationQueryNotif::Cancel" );
@@ -210,27 +247,14 @@ TInt CConfirmationQueryNotif::LaunchDialogL( TAny* aObject )
     automatic = StringLoader::LoadLC( R_QTN_OCC_LIST_CS_DATA_HOME_NW_AUTOMATIC );
     thisTime = StringLoader::LoadLC( R_QTN_OCC_LIST_CS_DATA_HOME_NW_THIS_TIME );
                                 
-    if ( myself->iNoteInfo.iNoteId == EConfirmMethodUsageQueryInHomeNetwork ) 
-        {
-        heading = StringLoader::LoadLC( R_QTN_OCC_PRMPT_CS_DATA_HOME_NW );
-        messageBase = StringLoader::LoadLC( R_QTN_OCC_DETAIL_CS_DATA_HOME_NW );
-        // the order of the query options depends on the location
-        choices.Append(EMsgQueryAutomatically);
-        choices.Append(EMsgQueryThisTime);
-        array->AppendL( *automatic );
-        array->AppendL( *thisTime );
-        } 
-    else 
-        {
-        heading = StringLoader::LoadLC( R_QTN_OCC_PRMPT_CS_DATA_FOREIGN_NW );
-        messageBase = StringLoader::LoadLC( R_QTN_OCC_DETAIL_CS_DATA_FOREIGN_NW );
-        // the order of the query options depends on the location
-        choices.Append(EMsgQueryThisTime);
-        choices.Append(EMsgQueryAutomatically);
-        array->AppendL( *thisTime );
-        array->AppendL( *automatic );
-        }              
-
+    heading = StringLoader::LoadLC( R_QTN_OCC_PRMPT_CS_DATA_HOME_NW );
+    messageBase = StringLoader::LoadLC( R_QTN_OCC_DETAIL_CS_DATA_HOME_NW );
+    // the order of the query options depends on the location
+    choices.Append(EMsgQueryAutomatically);
+    choices.Append(EMsgQueryThisTime);
+    array->AppendL( *automatic );
+    array->AppendL( *thisTime );
+ 
     // Set the dialog heading and message text
     myself->iDialog->Heading()->SetTextL(*heading);
     myself->iDialog->MessageBox()->SetMessageTextL(messageBase);
@@ -251,6 +275,52 @@ TInt CConfirmationQueryNotif::LaunchDialogL( TAny* aObject )
                                  
     CLOG_LEAVEFN( "CConfirmationQueryNotif::LaunchDialogL" );
     return 0;   
+    }
+
+// ---------------------------------------------------------
+// TInt CConfirmationQueryNotif::LaunchDialogVisitorL()
+// ---------------------------------------------------------
+//
+TInt CConfirmationQueryNotif::LaunchDialogVisitorL( TAny* aObject )
+    {
+    CLOG_ENTERFN( "CCConfirmationQueryNotif::LaunchDialogVisitorL" );
+    CConfirmationQueryNotif* myself =
+                            static_cast<CConfirmationQueryNotif*>( aObject );
+
+    myself->iDialogVisitor = new ( ELeave ) CConfirmationQueryVisitor( myself );
+    myself->iDialogVisitor->PrepareLC( R_VISITOR_QUERY );
+
+    HBufC* heading  = NULL;
+    HBufC* message  = NULL;
+    TInt resourceId = R_QTN_OCC_DETAIL_CS_DATA_FOREIGN_NW;
+    heading         = StringLoader::LoadLC( 
+                      R_QTN_OCC_PRMPT_CS_DATA_FOREIGN_NW );
+
+    CDesCArrayFlat* strings = new( ELeave ) CDesCArrayFlat( 2 );
+    CleanupStack::PushL( strings );
+
+    HBufC* messageBase = StringLoader::LoadL( resourceId, *strings );
+    CleanupStack::PopAndDestroy( strings );
+
+    CleanupStack::PushL( messageBase );
+    TInt lenMsg = messageBase->Des().Length();
+
+    message = HBufC::NewL( lenMsg );
+    TPtr messagePtr = message->Des();
+    messagePtr.Append( messageBase->Des() ); 
+
+    CleanupStack::PopAndDestroy( messageBase );
+
+    CleanupStack::PushL( message );
+    myself->iDialogVisitor->SetMessageTextL( *message );
+    CleanupStack::PopAndDestroy( message );
+
+    myself->iDialogVisitor->QueryHeading()->SetTextL( *heading );
+    CleanupStack::PopAndDestroy( heading );
+
+    myself->iDialogVisitor->RunLD();
+    CLOG_LEAVEFN( "CConfirmationQueryNotif::LaunchDialogVisitorL" );
+    return 0;
     }
 
 // End of File

@@ -97,6 +97,8 @@ void CSimpleS60SelectorBase::SelectL( ISelectionNotify& aSelectionNotify )
     //Legacy Attach -case handling is in NetMCPR and IPProtoTM
     // 399 Attach is not supported
     const TConnPref& prefs = iSelectionPrefs.Prefs();
+    iSubSessionUniqueId = iSelectionPrefs.SubSessionUniqueId();
+    
     switch ( prefs.ExtensionId() )
         {
         case TConnPref::EConnPrefCommDbMulti:
@@ -164,6 +166,7 @@ CMetaConnectionProviderBase* CSimpleS60SelectorBase::FindOrCreateProviderL( TUin
     
     // Provision selection preferences to S60 NetMCPR.
     prov->SetSelectionPrefs( iSelectionPrefs );
+    prov->SetSubSessionUniqueId( iSubSessionUniqueId );
 
     // Change the provider info so that this provider is never found by other selections
     const TProviderInfo& pi = provider->ProviderInfo();

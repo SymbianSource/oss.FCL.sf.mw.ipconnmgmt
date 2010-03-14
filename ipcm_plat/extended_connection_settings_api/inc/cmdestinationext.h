@@ -19,7 +19,7 @@
 #define DESTINATIONEXT_H
 
 // System includes
-#include <E32def.h>
+#include <e32def.h>
 #include <e32base.h>
 #include <metadatabase.h>
 #include <cmmanagerdef.h>

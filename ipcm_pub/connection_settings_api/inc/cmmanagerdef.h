@@ -19,7 +19,7 @@
 #define CMMANAGERDEF_H
 
 // System includes
-#include <E32def.h>
+#include <e32def.h>
 #include <e32std.h>
            
 namespace CMManager

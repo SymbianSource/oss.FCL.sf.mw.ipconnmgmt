@@ -18,7 +18,7 @@
 #ifndef C_CMSETTINGSUI_H
 #define C_CMSETTINGSUI_H
 
-#include <E32def.h>
+#include <e32def.h>
 #include <e32base.h>
 
 class CCmSettingsUiImpl;

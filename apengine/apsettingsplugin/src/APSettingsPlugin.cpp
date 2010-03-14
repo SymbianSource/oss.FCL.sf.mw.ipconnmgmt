@@ -32,7 +32,7 @@
 #include <ApSettingsPluginRsc.rsg>
 #include <data_caging_path_literals.hrh>
 #include <apsettingsplugin.mbg>
-#include <SettingsInternalCRKeys.h>
+#include <settingsinternalcrkeys.h>
 #include <centralrepository.h>
 
 

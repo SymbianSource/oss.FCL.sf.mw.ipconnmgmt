@@ -90,7 +90,13 @@ class CConnectionMonitorUiView : public CAknView, public MEikListBoxObserver
         * Observe the connection stat and set the right Soft Keys.
         */
         void ConnectionKeyObserver() const;
-        
+
+        /**
+        * Workaround for Avkon event sequence problem, occuring when
+        * connection list has been added elements.
+        */
+        void HandleItemAdditionL();
+
     protected: 
         /**
         * from MEikListBoxObserver    

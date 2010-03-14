@@ -608,10 +608,9 @@ EXPORT_C TBool CConnectionUiUtilities::SearchWLANNetwork(
 // ---------------------------------------------------------
 //
 EXPORT_C void CConnectionUiUtilities::ConnectingViaDiscreetPopup( 
-        const TUint32& aIapId,
-        TBool aConnectionAlreadyActive )
+        const TUint32& aIapId )
     {
-    iImpl->ConnectingViaDiscreetPopup( aIapId, aConnectionAlreadyActive );
+    iImpl->ConnectingViaDiscreetPopup( aIapId );
     } 
 
 // ---------------------------------------------------------

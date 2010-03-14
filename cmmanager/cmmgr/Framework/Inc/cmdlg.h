@@ -187,6 +187,11 @@ NONSHARABLE_CLASS( CCmDlg ) : public CAknDialog
         
         virtual void ConstructCMArrayL( RArray<TUint32>& aCmIds );
 
+        /**
+         * Remove hidden Connection Methods from the Array
+         */
+        virtual void ClearHiddenCMsFromArrayL( RArray<TUint32>& aCmIds );
+                
     public:
         /**
          * From base class MCmdExec
@@ -214,11 +219,7 @@ NONSHARABLE_CLASS( CCmDlg ) : public CAknDialog
          * Reorder connection methods according to underlying connection in case of vpn
          */
         void ReOrderCMsL();
-        
-        /**
-         * Remove hidden Connection Methods from the Array
-         */
-        void ClearHiddenCMsFromArrayL( RArray<TUint32>& aCmIds );
+               
         
         /**
          * Get a proper index in list for priority

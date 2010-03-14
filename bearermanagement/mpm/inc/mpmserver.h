@@ -37,6 +37,7 @@ Mobility Policy Manager server class definitions.
 
 class CMPMCommsDatAccess;
 class CMpmCsIdWatcher;
+class CMpmDataUsageWatcher;
 
 // CONSTANTS
 _LIT( KMPMPanicCategory, "Mobility Policy Manager Server" );
@@ -834,6 +835,12 @@ class CMPMServer : public CPolicyServer
         */
         CMPMServerSession* GetServerSession( TConnectionId aConnId ) const;
         
+        /**
+        * Stops cellular connections, except MMS
+        * @since 5.2
+        */
+        void StopCellularConns();
+
     private:
 
         /**
@@ -937,6 +944,11 @@ class CMPMServer : public CPolicyServer
          * Own.
          */
         CMpmCsIdWatcher* iMpmCsIdWatcher;
+
+        /**
+         * Handle to another central repository watcher
+         */
+        CMpmDataUsageWatcher* iMpmDataUsageWatcher;
 
         // Iap id of the active connection
         TUint32 iActiveIapId;

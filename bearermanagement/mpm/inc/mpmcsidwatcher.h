@@ -18,6 +18,9 @@
 #ifndef MPMCSIDWATCHER_H
 #define MPMCSIDWATCHER_H
 
+//  INCLUDES
+#include <e32base.h>
+
 class CRepository;
 
 /**

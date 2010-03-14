@@ -33,6 +33,7 @@
 #include "connmontelnoti.h"
 #include "ConnMonBearerNotifier.h"
 #include "log.h"
+#include "cellulardatausagekeyupdater.h"
 
 // ============================ MEMBER FUNCTIONS ===============================
 
@@ -2007,8 +2008,15 @@ void CConnMonIAP::ListenL()
             iNetwRegistrationNotifier = CNetwRegistrationNotifier::NewL( iServer, iMobilePhone );
             }
         if ( !iNetwRegistrationNotifier->IsActive() )
-            {
+            {            
             iNetwRegistrationNotifier->Receive(); // (re)start listening
+            
+            // We might have missed the network registration notification before 
+            // we started listening for notifications here. Update the 
+            // network registration information.            
+            TInt registration( ENetworkRegistrationExtNotAvailable );                
+            User::LeaveIfError( GetNetworkRegistration_v2( registration ) );
+            iServer->CellularDataUsageKeyUpdater()->UpdateKeyL( registration );            
             }
 
         // Bearer change (GPRS/Edge GPRS) status events

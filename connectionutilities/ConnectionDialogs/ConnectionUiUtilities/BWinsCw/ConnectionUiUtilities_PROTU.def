@@ -51,6 +51,6 @@ EXPORTS
 	?EasyWapiDlg@CConnectionUiUtilities@@QAEHPAVTDes16@@@Z @ 50 NONAME ; int CConnectionUiUtilities::EasyWapiDlg(class TDes16 *)
 	?NoWLANNetworksAvailableNote@CConnectionUiUtilities@@QAEXXZ @ 51 NONAME ; void CConnectionUiUtilities::NoWLANNetworksAvailableNote(void)
 	?ConfirmMethodUsageQuery@CConnectionUiUtilities@@QAEXAAW4TMsgQueryLinkedResults@@HAAVTRequestStatus@@@Z @ 52 NONAME ; void CConnectionUiUtilities::ConfirmMethodUsageQuery(enum TMsgQueryLinkedResults &, int, class TRequestStatus &)
-	?ConnectingViaDiscreetPopup@CConnectionUiUtilities@@QAEXABKH@Z @ 53 NONAME ; void CConnectionUiUtilities::ConnectingViaDiscreetPopup(unsigned long const &, int)
+	?ConnectingViaDiscreetPopup@CConnectionUiUtilities@@QAEXABK@Z @ 53 NONAME ; void CConnectionUiUtilities::ConnectingViaDiscreetPopup(unsigned long const &)
 	?ConnectionErrorDiscreetPopup@CConnectionUiUtilities@@QAEXABH@Z @ 54 NONAME ; void CConnectionUiUtilities::ConnectionErrorDiscreetPopup(int const &)
 
