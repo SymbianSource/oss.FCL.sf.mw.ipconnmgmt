@@ -180,7 +180,28 @@ void TRequestReConnect::DoL() // codescanner::leave
                                                                 startingSP->RecipientId()).CRef() );
     }
 
+// -----------------------------------------------------------------------------
+// TRequestReConnectToCurrentSP::DoL
+// -----------------------------------------------------------------------------
+//
+DEFINE_SMELEMENT( TRequestReConnectToCurrentSP, NetStateMachine::MStateTransition, TContext )
+void TRequestReConnectToCurrentSP::DoL() // codescanner::leave
+    {
+    __ASSERT_DEBUG(iContext.iNodeActivity, User::Panic(KS60MCprPanic, KPanicNoActivity));
+    S60MCPRLOGSTRING1("S60MCPR<%x>::TRequestReConnectToCurrentSP::DoL()",(TInt*)&iContext.Node())
+    RNodeInterface* currentSP = iContext.Node().ServiceProvider();
 
+    // There MUST be a service provider
+    __ASSERT_DEBUG( currentSP != NULL, User::Panic(KS60MCprPanic, KPanicNoServiceProvider));
+    
+    // Diagnostic - there must be a data client or we cannot be here
+    __ASSERT_DEBUG(iContext.Node().GetFirstClient<TDefaultClientMatchPolicy>(TClientType(TCFClientType::EData)),
+                   User::Panic(KS60MCprPanic, KPanicNoDataClient));    
+    
+    iContext.iNodeActivity->PostRequestTo( iContext.NodeId(),
+                                           TCFMcpr::TReConnect( currentSP->RecipientId(), 
+                                                                currentSP->RecipientId()).CRef() );
+    }
 // -----------------------------------------------------------------------------
 // TProcessError::DoL
 // -----------------------------------------------------------------------------

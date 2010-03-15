@@ -166,7 +166,13 @@ TKeyResponse CCmDestinationIconDialog::OfferKeyEventL(
                 keyEvent.iScanCode = aKeyEvent.iScanCode;
                 keyEvent.iModifiers = aKeyEvent.iModifiers;
                 keyEvent.iRepeats = aKeyEvent.iRepeats;
-                return CEikDialog::OfferKeyEventL( keyEvent, aModifiers );
+
+                TKeyResponse res( CEikDialog::OfferKeyEventL( keyEvent, aModifiers ) );
+                // It seems Avkon doesn't continue to call OkToExitL after this OfferKeyEventL.
+                // So, we may have to positively exit by calling TryExitL so that user's selected
+                // Icon will be return back to caller (i.e., CDestDlg).
+                TryExitL( EAknSoftkeyOk );
+                return res;
                 }
                 
             default:

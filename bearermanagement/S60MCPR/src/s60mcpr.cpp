@@ -300,31 +300,21 @@ void CS60MetaConnectionProvider::PolicyNotification( TMpmNotification& aNotifica
 
             //HandlePreferredIAPAvailable( const_cast<TMpmNotificationPrefIAPAvailable&>( notification ) );
 
-            // Check if the TPrefIAPNotifInfo contains new or old IAP. 
-            //
-            if ( ServiceProvider() &&
-                 ((RMetaServiceProviderInterface*)ServiceProvider())->ProviderInfo().APId() != notification.iNewIapId )
-                {
-                S60MCPRLOGSTRING2("S60MCPR<%x>::PolicyNotification() EMPMPreferredIAPAvailable IAP %d",(TInt*)this,notification.iNewIapId);
+            S60MCPRLOGSTRING2("S60MCPR<%x>::PolicyNotification() EMPMPreferredIAPAvailable IAP %d",(TInt*)this,notification.iNewIapId);
 
-                // Store PolicyNotification
-                // This could happen if PolicyServer sends notification too early.
-                //
-                StorePolicyNotification( aNotification );
-                
-                // Send preferred carrier message into meshmachine.
-                //
-                RNodeInterface ni;
-                ni.OpenPostMessageClose( NodeId(), 
-                                         NodeId(), 
-                                         TCFS60MCPRMessage::TMPMPreferredCarrierAvailableMsg( (TAny*)&notification ).CRef() );
-                }
-#ifdef _DEBUG
-            else
-                {
-                S60MCPRLOGSTRING2("S60MCPR<%x>::PolicyNotification() EMPMPreferredIAPAvailable SAME IAP %d",(TInt*)this,notification.iNewIapId );
-                }
-#endif
+
+            // Store PolicyNotification
+            // This could happen if PolicyServer sends notification too early.
+            //
+            StorePolicyNotification( aNotification );
+            
+            // Send preferred carrier message into meshmachine.
+            //
+            RNodeInterface ni;
+            ni.OpenPostMessageClose( NodeId(), 
+                                     NodeId(), 
+                                     TCFS60MCPRMessage::TMPMPreferredCarrierAvailableMsg( (TAny*)&notification ).CRef() );
+
             break;
             }
         case EMPMMobilityErrorNotification:

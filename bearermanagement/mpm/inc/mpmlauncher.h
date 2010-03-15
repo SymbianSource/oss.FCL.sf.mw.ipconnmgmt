@@ -26,6 +26,9 @@ Mobility Policy Manager server laucher for the client.
 //  INCLUDES
 #include <e32std.h>
 
+// CONSTANTS
+_LIT( KMPMLauncherSemaphore, "MPMLauncherSemaphore" );
+
 // CLASS DECLARATION
 /**
 *  Mobility Policy Manager server laucher for client.

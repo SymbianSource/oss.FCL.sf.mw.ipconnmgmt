@@ -56,6 +56,9 @@ namespace S60MCprStates
     const TInt KInformMigrationAvailable = 11052;
     const TInt KSendInitialApplicationReject = 11053; 
     const TInt KConsumeRejectedMsg = 11054;
+    const TInt KInformMigrationCompleted = 11055;
+    const TInt KRequestReConnectToCurrentSP = 11056;
+    
     /**
      * Execution context
      */
@@ -104,6 +107,17 @@ namespace S60MCprStates
     virtual void DoL();
     DECLARE_SMELEMENT_FOOTER( TRequestReConnect )
 
+    /**
+     * TRANSITION/ACTION: Starts ReConnect -activity to current service provider
+     */
+    DECLARE_SMELEMENT_HEADER( TRequestReConnectToCurrentSP, 
+                              MeshMachine::TStateTransition<TContext>, 
+                              NetStateMachine::MStateTransition, 
+                              TContext )
+    virtual void DoL();
+    DECLARE_SMELEMENT_FOOTER( TRequestReConnectToCurrentSP )
+    
+    
     /**
      * TRANSITION/ACTION: Requests Policy Server to process the error.
      * The error is taken from the error context or activity error in that order.

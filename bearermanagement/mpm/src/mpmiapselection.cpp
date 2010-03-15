@@ -154,6 +154,17 @@ void CMPMIapSelection::ChooseIapL( const TMpmConnPref& aChooseIapPref )
             return;
             }
         }
+    
+    if  ( iChooseIapPref.ConnSelectionDialog() )
+        {
+        // Complete selection with error code if wlan only was set and bearer set as cellular 
+        if ( wlanOnly && 
+             iChooseIapPref.BearerSet() == TExtendedConnPref::EExtendedConnBearerCellular ) 
+            {            
+            ChooseIapComplete( KErrPermissionDenied, NULL );
+            return;
+            }
+        }
         
     MPMLOGSTRING2( "CMPMIapSelection::ChooseIapL:\
  connection type %d", iChooseIapPref.ConnType() )

@@ -289,34 +289,31 @@ namespace S60MCprMobilityActivity
                         S60MCprMobilityActivity::TDoNothingOrReSendPendingNotification,
                         CS60MobilityActivity::TAwaitingPreferredCarrierOrStartIAPNotificationOrErrorNotificationOrCancel, // Ok. Error is fatal
                         S60MCprMobilityActivity::TNoTagOrInformMigrationAvailableBackwardsOrErrorOrCancel )
+    
     // Select the next layer MCPR.
     NODEACTIVITY_ENTRY( KNoTag, 
                         MCprStates::TSelectNextLayer,
                         MCprStates::TAwaitingSelectNextLayerCompleted, // Ok. Error is fatal.
-                        MeshMachine::TNoTagOrErrorTag )
-                        //S60MCprStates::TAwaitingSelectNextLayerCompletedOrError, // Not required Error is fatal. MPM should only give valid IAPs.
-                        //MeshMachine::TNoTagOrErrorTag )// Not required Error is fatal. MPM should only give valid IAPs.
+                        CS60MobilityActivity::TNoTagOrRequestReConnectToCurrentSPOrErrorTag )              
+                        
     // For the moment it is sufficient to use the re-connect activity, in the future we may want to
     // customise the behavior, for example start the new layer before rebinding it, etc.
     NODEACTIVITY_ENTRY( KNoTag, 
                         S60MCprStates::TRequestReConnect,
                         MCprStates::TAwaitingReConnectCompleteOrError,  // Ok. Error is fatal.
-                        MeshMachine::TNoTagOrErrorTag ) //Own error handling MPM must be informed when error happens.
-    // Select or activation failed, Ask MPM to decide if it it possible/sensible to ignore the error and continue.
-    // EDoReselect return will fall into EIgnoreError branch. MPM shouldn't return Reselect in this case.
-    // And if it does, then the use of startiapnotification in mobility scenarios should be
-    // removed and only reselect should be used.
-    /* Not required. PolicyServer should only give valid IAPs.
-    NODEACTIVITY_ENTRY( KErrorTag,
-                        S60MCprStates::TProcessError,
-                        S60MCprStates::TAwaitingProcessErrorCompleteOrError,  
-                        S60MCprMobilityActivity::TWaitPolicyServerResponseBackwardOrErrorTag )
-                        */
+                        S60MCprMobilityActivity::TInformMigrationCompletedOrError ) //Own error handling MPM must be informed when error happens.
+
+    NODEACTIVITY_ENTRY( S60MCprStates::KRequestReConnectToCurrentSP,
+                        S60MCprStates::TRequestReConnectToCurrentSP,
+                        MCprStates::TAwaitingReConnectCompleteOrError,
+                        S60MCprMobilityActivity::TInformMigrationCompletedOrError )
+                        
     // If the migration was acepted we loop again waiting for a new, preferred one
-    NODEACTIVITY_ENTRY( KNoTag, 
+    NODEACTIVITY_ENTRY( S60MCprStates::KInformMigrationCompleted, 
                         CS60MobilityActivity::TInformMigrationCompleted, 
                         S60MCprMobilityActivity::TAwaitingMigrationAcceptedOrRejectedOrStartupErrorIgnoredOrCancel,
                         S60MCprMobilityActivity::TNoTagOrErrorTagOrApplicationRejectedOrConsumeRejected )
+
     // Informs policy server that application has accepted the carrier
     THROUGH_NODEACTIVITY_ENTRY( KNoTag,
                                 CS60MobilityActivity::TSendApplicationAccept,

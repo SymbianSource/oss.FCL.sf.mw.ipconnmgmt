@@ -70,7 +70,7 @@ const TInt  KBEARERTYPE = 2;
 
 
 // LOCAL CONSTANTS AND MACROS
-
+#define VPN_SERVICE_SNAP    _S("HomeSNAP")
 
 // LOCAL FUNCTION PROTOTYPES
 
@@ -856,9 +856,39 @@ TInt CApSelect::DoUpdateL()
                     CApUtils* util = CApUtils::NewLC( *iDb );
                     for ( i = 0; i < count; i++ )
                         {
-                        // get home wap id first
-                        pos = PosInArray( ipiapid, 
-                                          vpnArray->At( i ).iHomeIapId );
+                        if ( vpnArray->At( i ).iHomeIapId != 0 )
+                            {
+                            // get home wap id first
+                            pos = PosInArray( ipiapid, 
+                                             vpnArray->At( i ).iHomeIapId );
+                            
+                            }
+                        else if ( vpnArray->At( i ).iHomeSnapId != 0 )
+                            {
+                            // VPN IAP points to a SNAP. Just mark it available.
+                            pos = PosInArray( iapArrays[KVPN][1], vpnArray->At( i ).iVpnIapId );
+                            if ( pos != KErrNotFound )
+                                { // now get VPN IAP ID
+                                TUint32 tempvpniapid = iapArrays[KVPN][0]->At( pos );
+                                TUint32 tempvpnwapid ( 0 );
+                                TRAP( err, tempvpnwapid = 
+                                        util->WapIdFromIapIdL( 
+                                                tempvpniapid ) );
+                                                    
+                                item = CApListItem::NewLC
+                                    (
+                                    EIspTypeInternetAndWAP,
+                                    tempvpnwapid,
+                                    *vpnArray->At( i ).iName,                                   
+                                    EApBearerTypeAllBearers
+                                    );
+                                item->SetVpnFlag( ETrue );
+                                iApList->AppendL( item );
+                                CleanupStack::Pop( item );
+                                continue;
+                                }                                                          
+                            }                                                                                                              
+                        
                         TInt foundpos( KErrNotFound );
                         if ( pos!= KErrNotFound )
                             { // now we have the index in the
@@ -2216,7 +2246,8 @@ void CApSelect::GetVpnValuesL( CCommsDbTableView* aTable,
         if ( err != KErrNotFound )
             {
             TUint32 tempvpn( 0 );
-            TUint32 temphome( 0 );
+            TUint32 temphomeiap( 0 );
+            TUint32 temphomesnap( 0 );
             HBufC*  tempname = NULL;
             TVpnData data;
             TBool goon( ETrue );
@@ -2226,10 +2257,20 @@ void CApSelect::GetVpnValuesL( CCommsDbTableView* aTable,
                                             tempvpn );
                 if ( ( err == KErrNone ) && ( tempvpn ) )
                     {
+                    // First try to check if VPN IAP uses another IAP directly
                     err = ApCommons::ReadUintL( aTable, 
-                                                TPtrC(VPN_SERVICE_IAP),
-                                                temphome );
-                    if ( ( err == KErrNone ) && ( temphome ) )
+                                                TPtrC(VPN_SERVICE_IAP),                                                
+                                                temphomeiap );
+                    
+                    if ( (err != KErrNone ) || ( !tempvpn ) )
+                        {
+                        // IAP field was empty. VPN IAP must point to SNAP.
+                        err = ApCommons::ReadUintL( aTable, 
+                                TPtrC(VPN_SERVICE_SNAP),                                                
+                                temphomesnap );                                                         
+                        }
+                    
+                    if ( ( err == KErrNone ) && ( temphomeiap || temphomesnap ) )
                         {
                         // now get the name
 
@@ -2238,7 +2279,16 @@ void CApSelect::GetVpnValuesL( CCommsDbTableView* aTable,
                                                           TPtrC(COMMDB_NAME) );
                         
                         // everything is O.K., we can add the item
-                        data.iHomeIapId = temphome;
+                        if ( temphomesnap )
+                            {
+                            data.iHomeSnapId = temphomesnap;
+                            data.iHomeIapId = 0;
+                            }
+                        else
+                            {
+                            data.iHomeSnapId = 0;
+                            data.iHomeIapId = temphomeiap;                            
+                            }                       
                         data.iVpnIapId = tempvpn;
                         data.iName = tempname;
                         aVpnArray->AppendL( data ); // array owns it...

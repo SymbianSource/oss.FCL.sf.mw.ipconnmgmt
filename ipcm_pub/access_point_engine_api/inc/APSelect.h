@@ -65,6 +65,7 @@ typedef struct
     {
     TUint32     iVpnIapId;
     TUint32     iHomeIapId;
+    TUint32     iHomeSnapId;
     HBufC *     iName;
     }TVpnData;
 

@@ -86,7 +86,9 @@ void CMPMPolicyRequests::RequestDelete()
 //
 CMPMPolicyRequests::CMPMPolicyRequests() :
                                     CActive( EPriorityStandard ),
-                                    iCommitedToDeleteItself( EFalse )
+                                    iCommitedToDeleteItself( EFalse ),
+                                    iReconnectTimerRunning( EFalse ),
+                                    iReconnectTimeout( KMPMInitialReconnectTimeout )
     {
     S60MCPRLOGSTRING1( "S60MCPR::CMPMPolicyRequests<%x>::CMPMPolicyRequests()", this )
     CActiveScheduler::Add( this );
@@ -128,6 +130,12 @@ CMPMPolicyRequests::~CMPMPolicyRequests()
         {
         S60MCPRLOGSTRING1( "S60MCPR::CMPMPolicyRequests<%x>::~CMPMPolicyRequests() closing MPM session", this )
         iMpm.Close();
+        }
+    
+    if ( iReconnectTimerRunning )
+        {
+        Cancel();
+        iReconnectTimer.Close();
         }
     }
 
@@ -458,8 +466,6 @@ void CMPMPolicyRequests::IssueDeleteRequest()
 //
 void CMPMPolicyRequests::IssueRequest()
     {
-    //__ASSERT_ALWAYS(IsActive() || iPolicyRequests.Count() > 0,User::Panic(KNetMCprPanic, KPanicInvalidCActiveUsage));
-
     // If we have a pending request, back off.
     //
     if ( IsActive() || iPolicyRequests.Count() == 0 )
@@ -621,10 +627,22 @@ void CMPMPolicyRequests::RunL()
     {
     S60MCPRLOGSTRING2( "S60MCPR::CMPMPolicyRequests<%x>::RunL() iStatus %d", this, iStatus.Int() )
 
-    // If there's a request waiting and is now completed
-    //
-    if ( iPolicyRequests.Count() > 0 && !iCommitedToDeleteItself)
+    // At first, check if this is a timer activity
+    if ( iReconnectTimerRunning )
         {
+        // iMpm.Connect() failed at least once. Timeout has expired, try again.
+#ifdef _DEBUG    
+        TBool isConnected = iMpm.Connected();
+        __ASSERT_DEBUG( !isConnected,  User::Panic( KS60MCprPanic, KErrGeneral ) );
+#endif
+        iReconnectTimerRunning = EFalse;
+        iReconnectTimer.Close();
+        iMpm.Connect( iStatus );
+        SetActive();
+        } 
+    else if ( iPolicyRequests.Count() > 0 && !iCommitedToDeleteItself)
+        {
+        // there's a request waiting and is now completed
         S60MCPRLOGSTRING1( "S60MCPR::CMPMPolicyRequests<%x>::RunL() Standard processing", this )
         PolicyRequest& policydata = iPolicyRequests[0];
         // Process the response
@@ -635,9 +653,9 @@ void CMPMPolicyRequests::RunL()
                 {
                 if ( iStatus.Int() != KErrNone )
                     {
-                    //-jl- MPM connection failed, set MPM connection required again.
+                    // MPM connection failed, set MPM connection required again.
                     iMpm.Close();
-                    //-jl- Go to RunError
+                    // Go to RunError
                     User::Leave( iStatus.Int() );
                     }
                 else
@@ -755,9 +773,16 @@ void CMPMPolicyRequests::RunL()
 //
 void CMPMPolicyRequests::DoCancel()
     {
-    // Not allowed! Cancel() may cause deadlock!
     _LIT( KPanicMsg, "CMPMPolicyRequests::DoCancel" );
-    User::Panic( KPanicMsg, KErrNotSupported );
+    if ( iReconnectTimerRunning )
+        {
+        iReconnectTimer.Cancel();
+        }
+    else
+        {
+        // Not allowed! Cancel() may cause deadlock!
+        User::Panic( KPanicMsg, KErrNotSupported );
+        }
     }
 
 
@@ -769,20 +794,33 @@ TInt CMPMPolicyRequests::RunError( TInt aError )
     {
     S60MCPRLOGSTRING1( "S60MCPR::CMPMPolicyRequests<%x>::RunError()", this )
     // Connect has failed, cleanup and deliver errors
-    TInt count = iPolicyRequests.Count();
-    for ( TInt i = 0; i < count; i++ )
+    if ( aError != KErrServerBusy || iReconnectTimeout >= KMPMMaxReconnectTimeout )
         {
-        if ( iPolicyRequests[i].iUser )
+        TInt count = iPolicyRequests.Count();
+        for ( TInt i = 0; i < count; i++ )
             {
-            S60MCPRLOGSTRING2( "S60MCPR::CMPMPolicyRequests<%x>::RunError() Sending error %d in PolicyResponse", this, aError )
-            iPolicyRequests[i].iStatus = aError;
-            iPolicyRequests[i].iUser->PolicyResponse( iPolicyRequests[i] );
+            if ( iPolicyRequests[i].iUser )
+                {
+                S60MCPRLOGSTRING2( "S60MCPR::CMPMPolicyRequests<%x>::RunError() Sending error %d in PolicyResponse", this, aError )
+                iPolicyRequests[i].iStatus = aError;
+                iPolicyRequests[i].iUser->PolicyResponse( iPolicyRequests[i] );
+                }
+            
+            // Delete prefs
+            iPolicyRequests[i].Cleanup();
             }
-        
-        // Delete prefs
-        iPolicyRequests[i].Cleanup();
+        iPolicyRequests.Reset();
         }
-    iPolicyRequests.Reset();
+    else
+        {
+        // KErrServerBusy received, try reconnecting after a brief pause
+        iReconnectTimeout *= KMPMReconnectTimeoutMultiplier;
+        TTimeIntervalMicroSeconds32 timeout( iReconnectTimeout );
+        iReconnectTimer.CreateLocal();
+        iReconnectTimer.After( iStatus, timeout );
+        iReconnectTimerRunning = ETrue;
+        SetActive();
+        }
 
     return KErrNone;
     }
@@ -884,6 +922,5 @@ void CMPMPolicyRequests::CreatePolicyRequestL( TPolicyServerOperations aRequestC
     // Submit it.
     IssueRequest();
     }
-
 
 // End of file
