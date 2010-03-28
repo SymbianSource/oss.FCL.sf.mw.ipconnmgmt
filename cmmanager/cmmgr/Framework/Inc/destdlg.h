@@ -94,7 +94,7 @@ NONSHARABLE_CLASS( CDestDlg ) : public CAknDialog
         /**
          * From base class MCmdExec
          */
-        void CDestDlg::HandleLeaveError( TInt aError );
+        void HandleLeaveError( TInt aError );
 
     public: // From CCoeControl
     
@@ -188,7 +188,7 @@ NONSHARABLE_CLASS( CDestDlg ) : public CAknDialog
         /**
         * Sets the text of the middle soft key by the text resource. 
         */
-        void CDestDlg::SetMskL( TInt aResourceId );
+        void SetMskL( TInt aResourceId );
         
         /**
         * Shows the 'Default set to:' note.

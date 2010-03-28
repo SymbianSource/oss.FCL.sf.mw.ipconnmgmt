@@ -712,7 +712,7 @@ NONSHARABLE_CLASS( CCmManagerImpl ) : public CBase
         * @return array of SNAP records
         */
         CommsDat::CMDBRecordSet<CCDDataMobilitySelectionPolicyRecord>* 
-                    CCmManagerImpl::AllSNAPRecordsL( TUint32 aSnapElementId );
+                    AllSNAPRecordsL( TUint32 aSnapElementId );
         
     public:
     

@@ -79,7 +79,7 @@ NONSHARABLE_STRUCT( TCmDCSettingSelection ) //extended with Ask Once
     // TCmDCSettingSelection::operator==
     // -----------------------------------------------------------------------------
     //
-    inline TBool TCmDCSettingSelection::operator==( TCmDCSettingSelection& aDCSettingSelection ) const
+    inline TBool operator==( TCmDCSettingSelection& aDCSettingSelection ) const
         {
         return ( (iResult == aDCSettingSelection.iResult) && ( iId == aDCSettingSelection.iId ) );
         };
@@ -88,7 +88,7 @@ NONSHARABLE_STRUCT( TCmDCSettingSelection ) //extended with Ask Once
     // TCmDCSettingSelection::operator!=
     // -----------------------------------------------------------------------------
     //
-    inline TBool TCmDCSettingSelection::operator!=( TCmDCSettingSelection& aDCSettingSelection ) const
+    inline TBool operator!=( TCmDCSettingSelection& aDCSettingSelection ) const
         {
         return (!( (iResult == aDCSettingSelection.iResult) && ( iId == aDCSettingSelection.iId ) ));
         };    
@@ -96,7 +96,7 @@ NONSHARABLE_STRUCT( TCmDCSettingSelection ) //extended with Ask Once
     // TCmDCSettingSelection::ConvertToDefConn
     // -----------------------------------------------------------------------------
     //
-    inline TCmDefConnValue TCmDCSettingSelection::ConvertToDefConn( ) const
+    inline TCmDefConnValue ConvertToDefConn( ) const
         {
         TCmDefConnValue defConnValue;
         defConnValue.iType = ECmDefConnAlwaysAsk;

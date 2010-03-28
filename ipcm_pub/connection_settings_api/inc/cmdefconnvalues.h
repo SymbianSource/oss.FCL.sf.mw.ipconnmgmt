@@ -56,7 +56,7 @@ struct TCmDefConnValue
     // TCmDefConnValue::operator==
     // -----------------------------------------------------------------------------
     //
-    inline TBool TCmDefConnValue::operator==( TCmDefConnValue& aDCSettingSelection ) const
+    inline TBool operator==( TCmDefConnValue& aDCSettingSelection ) const
         {
         return ( (iType == aDCSettingSelection.iType) && ( iId == aDCSettingSelection.iId ) );
         };
@@ -65,7 +65,7 @@ struct TCmDefConnValue
     // TCmDefConnValue::operator!=
     // -----------------------------------------------------------------------------
     //
-    inline TBool TCmDefConnValue::operator!=( TCmDefConnValue& aDCSettingSelection ) const
+    inline TBool operator!=( TCmDefConnValue& aDCSettingSelection ) const
         {
         return (!( (iType == aDCSettingSelection.iType) && ( iId == aDCSettingSelection.iId ) ));
         };     
