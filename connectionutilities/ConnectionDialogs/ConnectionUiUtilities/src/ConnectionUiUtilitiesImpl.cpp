@@ -1044,29 +1044,7 @@ void CConnectionUiUtilitiesImpl::CancelConnectedViaConnMethodNote()
     {
     iNotif.CancelConnectedViaConnMethodNote();
     }
-    
-    
-// ---------------------------------------------------------
-// CConnectionUiUtilitiesImpl::WlanPowerSaveTestNote
-// ---------------------------------------------------------
-//
-void CConnectionUiUtilitiesImpl::WlanPowerSaveTestNote( 
-                                                    TBool&          aDisable,
-                                                    TRequestStatus& aStatus )
-    {
-    iNotif.WlanPowerSaveTestNote( aDisable, aStatus );
-    }
 
-        
-// ---------------------------------------------------------
-// CConnectionUiUtilitiesImpl::CancelWlanPowerSaveTestNote
-// ---------------------------------------------------------
-//
-void CConnectionUiUtilitiesImpl::CancelWlanPowerSaveTestNote()
-    {
-    iNotif.CancelWlanPowerSaveTestNote();
-    }
-    
 // ---------------------------------------------------------    
 // CConnectionUiUtilitiesImpl::EasyWapiDlg
 // ---------------------------------------------------------

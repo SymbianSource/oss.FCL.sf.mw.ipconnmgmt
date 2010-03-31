@@ -104,8 +104,8 @@ void CConnectionMonitorUiContainer::ConstructL( TInt aSelectedItem, const TRect&
     iListBox->Model()->SetOwnershipType( ELbmDoesNotOwnItemArray );
     
     TInt actCount = iConnectionArray->MdcaCount() - 1;
-	
-	if ( actCount > KErrNotFound )
+    
+    if ( actCount > KErrNotFound )
 		{
 		iListBox->SetCurrentItemIndex( aSelectedItem > actCount ? actCount : aSelectedItem );	    
 		}
@@ -123,7 +123,8 @@ void CConnectionMonitorUiContainer::ConstructL( TInt aSelectedItem, const TRect&
     SetRect( aRect );    
     ActivateL();
 
-    isWlanSupported = FeatureManager::FeatureSupported( KFeatureIdProtocolWlan ); 
+    isWlanSupported = FeatureManager::FeatureSupported( KFeatureIdProtocolWlan );
+    iOldConnectionCount = iConnectionArray->MdcaCount();
 
     CMUILOGGER_LEAVEFN( "CConnectionMonitorUiContainer::ConstructL" );
     }
@@ -272,6 +273,14 @@ void CConnectionMonitorUiContainer::OnEventL(
 void CConnectionMonitorUiContainer::OnTimerEventL()
     {
     iListBox->DrawNow();
+    //Update the scrollbar only if connection count has changed
+    //
+    TInt iNewConnectionCount = iConnectionArray->MdcaCount();
+    if ( iOldConnectionCount != iNewConnectionCount )
+        {
+        iListBox->UpdateScrollBarsL();
+        }
+    iOldConnectionCount = iNewConnectionCount;
     PushAndRefreshNaviPaneL();
     }
 

@@ -23,7 +23,7 @@
 
 #ifdef SYMBIAN_ENABLE_SPLIT_HEADERS
 #include <ProtectDB.h>
-#include <ProtectcpDb.h>
+#include <protectcpdb.h>
 #else
 #include <comms-infras/commdb/protection/protectdb.h>
 #include <comms-infras/commdb/protection/protectcpdb.h>

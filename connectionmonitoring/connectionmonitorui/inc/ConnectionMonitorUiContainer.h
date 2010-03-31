@@ -175,7 +175,7 @@ class CConnectionMonitorUiContainer : public CCoeControl,
         RConnectionMonitor* iMonitor;   
 
         /**
-        * Contins connections info
+        * Contains connections info
         */
         CConnectionArray* const iConnectionArray;
 
@@ -200,6 +200,11 @@ class CConnectionMonitorUiContainer : public CCoeControl,
         * The active object for info. refreshing. NOT Owned.
         */
         CActiveWrapper* iActiveWrapper;
+        
+        /**
+        * Connection count
+        */
+        TInt iOldConnectionCount;
     };
 
 #endif // CONNECTIONMONITORUICONTAINER_H

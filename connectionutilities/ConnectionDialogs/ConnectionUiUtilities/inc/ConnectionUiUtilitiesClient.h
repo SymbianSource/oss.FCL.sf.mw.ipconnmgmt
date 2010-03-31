@@ -195,19 +195,6 @@ class RConnectionUiUtilitiesSession : public RSessionBase
         void CancelConnectedViaConnMethodNote();
         
         /**
-        * This note is displayed when power-save feature of the WLAN station 
-        * is incompatible and thus battery consumption of the mobile will increase.
-        * @param aDisable ETrue if user wants to disable this note in the future.
-        * @param aStatus Status object of notifier.
-        */
-        void WlanPowerSaveTestNote( TBool& aDisable, TRequestStatus& aStatus );
-        
-        /**
-        * Cancel WlanPowerSaveTestNote notifier.
-        */
-        void CancelWlanPowerSaveTestNote();
-        
-        /**
         * Notifier. Prompts WAPI-PSK.
         * Shows a data query, "Enter pre-shared key for WLAN" 
         * @param aKey Key entered by user

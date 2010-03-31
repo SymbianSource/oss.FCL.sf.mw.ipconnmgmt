@@ -138,6 +138,9 @@ CMPMServerSession::~CMPMServerSession()
 User connection deactivated" )
         }   
 
+    // Clean up the blacklist table 
+    iMyServer.HandleServerUnblackListIap( iConnId, 0 );
+    
     // Make sure the connection is removed from server's information array.
     iMyServer.RemoveBMConnection( iConnId, *this );
     }
@@ -706,18 +709,12 @@ void CMPMServerSession::HandleServerIapConnectionStartedL(
 
     iMyServer.AppendBMIAPConnectionL( startedIap, startedId, *this );
 
-    // Unblacklist all IAPs related to the connection error 
-    // when connection has started.
-    // 
-    iMyServer.HandleServerUnblackListIap( startedId, ETemporary );
-
     // Complete the message as soon as possible to avoid latency in BM
     // 
     aMessage.Complete( KErrNone );
     
     IapSelectionL()->ConnectionStarted();
     }
-
 
 // -----------------------------------------------------------------------------
 // CMPMServerSession::HandleServerIapConnectionStopped
@@ -825,7 +822,7 @@ TBool CMPMServerSession::IsConfirmFirstL( const TUint32 aIapId )
     // check whether a started connection exists which already 
     // uses this IAP. If so, it won't need to be confirmed again
     // 
-    if( iMyServer.CheckIfStarted( aIapId ) )
+    if( iMyServer.CheckIfStarted( aIapId, iConnId ) )
         {
         MPMLOGSTRING(
         "CMPMServerSession::IsConfirmFirstL - IAP already started, \
@@ -2658,8 +2655,8 @@ No notification requested" )
         // Required notifications must go through whenever MPM decides
         // to initiate them.
         //
-        if( ( iStoredIapInfo.HoldPrefIapNotif() && aCaller == EConnMon )  ||
-                ( state == ERoaming && aCaller == EConnMon ) )
+        if( ( aCaller == EConnMon || aCaller == EConnMonEvent ) && 
+                ( iStoredIapInfo.HoldPrefIapNotif() || state == ERoaming) )
             {
             MPMLOGSTRING( "CMPMServerSession::PrefIAPNotificationL - \
 Mobility ongoing, notification will be handled later" )
@@ -2701,7 +2698,8 @@ registered for notifications" )
         tempMpmConnPref.SetSnapId( snap );
         IapSelectionL()->ChooseBestIAPL( tempMpmConnPref, availableIAPList );
         validateIapId = tempMpmConnPref.IapId();
-        if ( ( validateIapId == 0 ) && ( aCaller == EConnMon ) )
+        if ( ( validateIapId == 0 ) 
+                && ( aCaller == EConnMon || aCaller == EConnMonEvent ) )
             {
             // Since Connection Monitor is the only component which 
             // is unaware of Connection Id and SNAP, it can't send 
@@ -2711,8 +2709,19 @@ registered for notifications" )
             // All the other components take responsibility of 
             // sending the error notification. 
             // 
-            TRAP_IGNORE( ErrorNotificationL( KErrNotFound,
-                                             EMPMMobilityErrorNotification ) )
+            // Do not send the error if this call came from ConnMon Event.
+            // This will prevent unnecessary mobility errors.
+            // For example if there is two WLAN networks in Internet destination
+            // and we get weak indication for the one to which we are connected.
+            // Then connmon signals us with IAPAvailabilityChange which results
+            // to no available IAPs. We should not report error in that case.
+            if ( aCaller == EConnMon )
+                {
+                TRAP_IGNORE( ErrorNotificationL( KErrNotFound,
+                                             EMPMMobilityErrorNotification ) );
+                }
+            CleanupStack::PopAndDestroy( &availableIAPList );
+            return;                                                                   
             }
 
         TUint32 retNetId = 0;
@@ -2826,7 +2835,7 @@ No notification requested" )
     if ( !( iIapSelection->MpmConnPref().NoteBehaviour() &
             TExtendedConnPref::ENoteBehaviourConnDisableNotes) )
         {
-        TBool connectionAlreadyActive = iMyServer.CheckIfStarted( aIapId );
+        TBool connectionAlreadyActive = iMyServer.CheckIfStarted( aIapId, iConnId );
         CConnectionUiUtilities* connUiUtils = NULL;
         if (!connectionAlreadyActive )
             {

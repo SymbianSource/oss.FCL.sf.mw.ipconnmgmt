@@ -331,9 +331,11 @@ void CConnectionMonitorUiAppUi::EventL(
                         {
                         ShowConnectionSummaryInformationNoteL( connectionInfo );
                         }
-                    // Mark the connection as closed. When the timer ticks the next
-                    // time the marked connection is deleted and removed from the main view.
+                    // Mark the connection as closed and update the status text. 
+                    // When the timer ticks the next time the marked connection 
+                    // is deleted and removed from the main view.
                     connectionInfo->RefreshConnectionStatus( KConnectionClosed );
+                    connectionInfo->RefreshConnectionListBoxItemTextL();
                     }                
                 CMUILOGGER_WRITE_F( "Deleted: %d", connectionId );
                 }

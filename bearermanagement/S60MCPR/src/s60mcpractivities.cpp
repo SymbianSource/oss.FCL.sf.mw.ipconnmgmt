@@ -266,7 +266,7 @@ namespace S60MCprMobilityActivity
     NODEACTIVITY_ENTRY( MobilityMCprStates::KStartMobilityHandshake, 
                         CS60MobilityActivity::TClearHandshakingFlag,
                         CS60MobilityActivity::TAwaitingPreferredCarrierOrCancelOrRejectedOrErrorNotification, // Ok. Error is fatal.
-                        S60MCprMobilityActivity::TInformMigrationAvailableOrCancelTag )
+                        S60MCprMobilityActivity::TInformMigrationAvailableOrErrorOrCancelTag )
     // Application rejected active carrier
     THROUGH_NODEACTIVITY_ENTRY( S60MCprStates::KSendInitialApplicationReject, 
                                 S60MCprMobilityActivity::TSendInitialApplicationReject, 

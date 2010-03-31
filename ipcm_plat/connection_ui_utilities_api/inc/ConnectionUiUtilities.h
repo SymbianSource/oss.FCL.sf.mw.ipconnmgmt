@@ -495,19 +495,7 @@ NONSHARABLE_CLASS( CConnectionUiUtilities ) : public CBase
         */
         IMPORT_C void OffLineWlanNote( TRequestStatus& aStatus );
         
-        /**
-        * Notifier that displays "Power save test" information note.
-        * @param aDisable On completion, contains ETrue if user wants to disable
-        *                 the note in the future. EFalse otherwise. 
-        * @param aStatus KErrNone if successful, a system-wide error code if not.
-        */
-        IMPORT_C void WlanPowerSaveTestNote( TBool&          aDisable,
-                                             TRequestStatus& aStatus );
-        
-        /**
-        * Cancel WlanPowerSaveTestNote notifier.
-        */
-        IMPORT_C void CancelWlanPowerSaveTestNote();
+
         
         /**
         * Notifier. Shows a data query prompting for WAPI pre-shared key. 

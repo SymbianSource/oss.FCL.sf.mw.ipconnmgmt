@@ -342,7 +342,7 @@ ConnMon request completed with error code = %i", iStatus.Int() )
                         MPMLOGSTRING( "CMPMConnMonReqs::RunL: iWlanScanCallback EWlanScanCallbackGenerateEvent" )
                         // Generate event only if not 
                         //
-                        iParent.IapAvailabilityChange();
+                        iParent.IapAvailabilityChange( EConnMon );
                         }
                     }
                 // check which callback function to use

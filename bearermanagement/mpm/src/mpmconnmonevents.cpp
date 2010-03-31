@@ -461,7 +461,7 @@ TBool CMPMConnMonEvents::ActiveWlanConnection( TWlanSsid&   aSSID,
 // CMPMConnMonEvents::IapAvailabilityChange
 // -----------------------------------------------------------------------------
 // 
-void CMPMConnMonEvents::IapAvailabilityChange()
+void CMPMConnMonEvents::IapAvailabilityChange( const TPrefIAPNotifCaller aCaller )
     {
     if ( ( iAvailableIAPs.Count() > 0 ) && 
          !DiscardAvailabilityNotification() )
@@ -475,7 +475,7 @@ void CMPMConnMonEvents::IapAvailabilityChange()
         // or Connection Monitor CConnMonEventHandler::RunL() 
         // will also leave, which will make mpmserver.exe CRASH.
         // 
-        TRAP_IGNORE( iMyServer.NotifyBMPrefIapL( iAvailableIAPs ) )
+        TRAP_IGNORE( iMyServer.NotifyBMPrefIapL( iAvailableIAPs, aCaller ) )
         }
     else
         {
@@ -534,7 +534,7 @@ void CMPMConnMonEvents::EventL( const CConnMonEventBase& aConnMonEvent )
 
             iAvailableIAPs = eventIap->IapAvailability();
             UpdateIAPRefreshTime();
-            IapAvailabilityChange();
+            IapAvailabilityChange( EConnMonEvent );
             
             TRAPD( err, iMyServer.UpdateSessionConnectionDlgL() )
             if( err != KErrNone )

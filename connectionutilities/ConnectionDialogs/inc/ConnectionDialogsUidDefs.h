@@ -90,9 +90,6 @@ const TUid KUidConfirmationQuery = { 0x10281BAF };
 // ID of two info notes
 const TUid KUidConnectViaNote = { 0x10281BB0 };
 
-// ID of WLAN Power Save Test query
-const TUid KUidWlanPowerSaveTestNote = { 0x101F6D4F };
-
 // ID of Easy Wapi dialog
 const TUid KUidEasyWapiDlg = { 0x101F6D51 };
 

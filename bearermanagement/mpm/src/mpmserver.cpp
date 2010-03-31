@@ -110,6 +110,7 @@ void CMPMServer::ConstructL()
     // The RTelServer::Connect() might not always work with the first trial,
     // because of a coding error related to using semaphores in the method.
     TInt err( KErrNotReady );
+    err = iTelServer.Connect();
     TInt a = 0;
     while( a < KPhoneRetryCount && err != KErrNone )
         {
@@ -703,9 +704,11 @@ void CMPMServer::GetConnectionState( const TConnectionId    aConnId,
 // CMPMServer::CheckIfStarted
 // -----------------------------------------------------------------------------
 //
-TBool CMPMServer::CheckIfStarted( const TUint32 aIapId )
+TBool CMPMServer::CheckIfStarted( const TUint32 aIapId , 
+                                  const TConnectionId aConnId )
     {
-    MPMLOGSTRING2( "CMPMServer::CheckIfStarted - aIapId = %i", aIapId )
+    MPMLOGSTRING3( "CMPMServer::CheckIfStarted - aIapId = %i, aConnId = 0x%x", 
+                  aIapId, aConnId )
 
     TConnectionState state( EIdle );
     TBool stopLoop( EFalse );
@@ -714,9 +717,10 @@ TBool CMPMServer::CheckIfStarted( const TUint32 aIapId )
     // 
     for ( TInt i = 0; ( ( i < iActiveBMConns.Count() ) && !stopLoop ); i++ )
         {
-        // Check if IAP Id matches
+        // Check if IAP Id matches; exclude matching with own connection
         // 
-        if ( iActiveBMConns[i].iConnInfo.iIapId == aIapId )
+        if ( iActiveBMConns[i].iConnInfo.iIapId == aIapId && 
+             iActiveBMConns[i].iConnInfo.iConnId != aConnId)
             {
             state = iActiveBMConns[i].iConnInfo.iState;  
 
@@ -759,8 +763,12 @@ TBool CMPMServer::CheckIfStarted( const TUint32 aIapId )
             }
         }
 #endif // _DEBUG
-
-    if ( state == EStarted )
+        
+    //Return true incase the matching connection is in EStarting state also because
+    //sometimes when connections are started simultaneously (for same iapID) 
+    //the first connection may still be in EStarting state. 
+    //
+    if ( state == EStarted || state == EStarting )
         {
         return ETrue;
         }
@@ -974,7 +982,8 @@ void CMPMServer::RemoveSession( const CMPMServerSession* aSession )
 // CMPMServer::NotifyBMPrefIapL
 // -----------------------------------------------------------------------------
 //
-void CMPMServer::NotifyBMPrefIapL( const TConnMonIapInfo& aIapInfo )
+void CMPMServer::NotifyBMPrefIapL( const TConnMonIapInfo& aIapInfo, 
+                                   const TPrefIAPNotifCaller aCaller )
     {
     MPMLOGSTRING2( "CMPMServer::NotifyBMPrefIapL - IAPs count: %d", 
         aIapInfo.iCount)
@@ -1003,7 +1012,7 @@ void CMPMServer::NotifyBMPrefIapL( const TConnMonIapInfo& aIapInfo )
     for ( TInt i = 0; i < iSessions.Count(); i++ )
         {
         iapInfo = iSessions[i]->GetAvailableIAPs( );
-        iSessions[i]->PrefIAPNotificationL( iapInfo, EConnMon );
+        iSessions[i]->PrefIAPNotificationL( iapInfo, aCaller );
         }
 
     // If a session is displaying connection selection dialog 
@@ -1152,57 +1161,6 @@ TInt CMPMServer::HandleServerUnblackListIap(
         return KErrNotFound;
         }
     }
-
-
-// -----------------------------------------------------------------------------
-// CMPMServer::HandleServerUnblackListIap
-// -----------------------------------------------------------------------------
-//
-TInt CMPMServer::HandleServerUnblackListIap( 
-    const TConnectionId aConnId,
-    TBlacklistCategory  aCategory )
-    {
-    MPMLOGSTRING3( "CMPMServer::HandleServerUnblackListIap -\
- aConnId = 0x%x, aCategory = %i", aConnId, aCategory )
-
-    TInt i;
-    TBool found = EFalse;
-
-    found = FindBlacklistedConnIndex( aConnId, i );
-    if ( found )
-        {
-        // found blacklisted Connection Id
-        TMPMBlackListConnId connIdInfo = iBlackListIdList[i];
-        iBlackListIdList.Remove( i ); // remove from the list 
-
-        found = EFalse;
-        for (TInt j = 0; j < connIdInfo.Count(); j++)
-            {
-            if ( connIdInfo.Category( j ) == aCategory ) 
-                {
-                // found and remove blacklisted iap
-                connIdInfo.Remove( j ); 
-                if ( connIdInfo.Count() == 0 )
-                    {
-                    return KErrNone;
-                    }
-
-                // reinsert connIdInfo at the beginning to reflect activeness
-                iBlackListIdList.Insert( connIdInfo, 0 ); 
-                return KErrNone;
-                }
-            }
-        // nothing found and reinsert at the beginning 
-        // connIdInfo to reflect activeness
-        iBlackListIdList.Insert( connIdInfo, 0 ); 
-        return KErrNotFound;
-        }
-    else
-        {
-        return KErrNotFound;
-        }
-    }
-
 
 // -----------------------------------------------------------------------------
 // CMPMServer::HandleServerUnblackListIap

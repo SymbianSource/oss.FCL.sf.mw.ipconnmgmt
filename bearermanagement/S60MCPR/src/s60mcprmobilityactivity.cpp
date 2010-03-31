@@ -238,23 +238,29 @@ namespace S60MCprMobilityActivity
     // S60MCprMobilityActivity::TInformMigrationAvailableOrCancelTag::TransitionTag
     // -----------------------------------------------------------------------------
     //
-    DEFINE_SMELEMENT( TInformMigrationAvailableOrCancelTag, NetStateMachine::MStateFork, TContext )
-    TBool TInformMigrationAvailableOrCancelTag::TransitionTag()
-        {
-        if ( iContext.iMessage.IsMessage<TEBase::TCancel>() )
+    DEFINE_SMELEMENT( TInformMigrationAvailableOrErrorOrCancelTag, NetStateMachine::MStateFork, TContext )
+    TBool TInformMigrationAvailableOrErrorOrCancelTag::TransitionTag()
+        {        
+        if ( iContext.iNodeActivity->Error() )
             {
-            S60MCPRLOGSTRING1("S60MCPR<%x>::TInformMigrationAvailableOrCancelTag::TransitionTag() KCancelTag",(TInt*)&iContext.Node())
+            S60MCPRLOGSTRING1("S60MCPR<%x>::TInformMigrationAvailableOrErrorOrCancelTag::TransitionTag() KErrorTag",(TInt*)&iContext.Node())
+            return MeshMachine::KErrorTag | NetStateMachine::EForward;
+            }
+
+        else if ( iContext.iMessage.IsMessage<TEBase::TCancel>() )
+            {
+            S60MCPRLOGSTRING1("S60MCPR<%x>::TInformMigrationAvailableOrErrorOrCancelTag::TransitionTag() KCancelTag",(TInt*)&iContext.Node())
             return KCancelTag | NetStateMachine::EForward;
             }
         else if ( iContext.iMessage.IsMessage<TCFMobilityProvider::TMigrationRejected>() )
             {
-            S60MCPRLOGSTRING1("S60MCPR<%x>::TInformMigrationAvailableOrCancelTag::TransitionTag() KSendInitialApplicationReject",
+            S60MCPRLOGSTRING1("S60MCPR<%x>::TInformMigrationAvailableOrErrorOrCancelTag::TransitionTag() KSendInitialApplicationReject",
                     (TInt*)&iContext.Node())
             return S60MCprStates::KSendInitialApplicationReject | NetStateMachine::EForward;
             }
         else
             {
-            S60MCPRLOGSTRING1("S60MCPR<%x>::TInformMigrationAvailableOrCancelTag::TransitionTag() KInformMigrationAvailable",(TInt*)&iContext.Node())
+            S60MCPRLOGSTRING1("S60MCPR<%x>::TInformMigrationAvailableOrErrorOrCancelTag::TransitionTag() KInformMigrationAvailable",(TInt*)&iContext.Node())
             return S60MCprStates::KInformMigrationAvailable | NetStateMachine::EForward;
             }
         }
@@ -565,7 +571,7 @@ namespace S60MCprMobilityActivity
             S60MCPRLOGSTRING2("S60MCPR<%x>::TAwaitingPreferredCarrierOrCancelOrRejectedOrErrorNotification::Accept() TMPMErrorNotificationMsg %d",(TInt*)&iContext.Node(),msg->iValue)
             ASSERT( msg->iValue != KErrNone );
             activity.SetError( msg->iValue );
-            result = EFalse;
+            result = ETrue;
             }
 
         return result;

@@ -5058,7 +5058,7 @@ HBufC* CApAccessPointItem::RemoveInvalidPhoneCharsLC( const TDesC16& aInText )
         {
         //TText ch = aInText[i];
         TChar ch = aInText[i];
-        if ( ( ch == 'p' ) || ( ch == 'P' ) || ( ch == 'W' ) || ( ch == 'W' )
+        if ( ( ch == 'p' ) || ( ch == 'P' ) || ( ch == 'w' ) || ( ch == 'W' )
             || ( ch == '+' ) || ( ch == '0' ) || ( ch == '1' ) || ( ch == '2' )
             || ( ch == '3' ) || ( ch == '4' ) || ( ch == '5' ) || ( ch == '6' )
             || ( ch == '7' ) || ( ch == '8' ) || ( ch == '9' ) || ( ch == '*' )

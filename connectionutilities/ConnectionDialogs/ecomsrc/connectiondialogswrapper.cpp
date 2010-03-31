@@ -172,11 +172,6 @@ _LIT( KWiFiProtSetupPluginName , "wifiprotplugin.dll" );
                                                         KMyPriority ) );
                                                         
     // WLAN wrappers
-                                                        
-    subjects->AppendL( new( ELeave ) CAknNotifierWrapperLight( *master,
-                                            KUidWlanPowerSaveTestNote,
-                                            KUidWlanPowerSaveTestNote,
-                                            KMyPriority ) );
                                             
     subjects->AppendL( new( ELeave ) CAknNotifierWrapperLight( *master,
                                             KUidEasyWapiDlg,

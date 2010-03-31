@@ -296,8 +296,9 @@ class CMPMConnMonEvents : public CBase, public MConnectionMonitorObserver
         /**
          * Creates preferred carrier available notification when needed.
          * @since 5.1
+         * @param aCaller Identifies the calling context
          */
-        void IapAvailabilityChange();
+        void IapAvailabilityChange( const TPrefIAPNotifCaller aCaller );
        
     public: // Functions from base classes
     

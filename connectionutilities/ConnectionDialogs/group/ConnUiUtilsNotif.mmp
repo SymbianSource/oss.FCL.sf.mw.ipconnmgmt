@@ -70,8 +70,6 @@ SOURCE      ConfirmationQueryNotif.cpp
 SOURCE      ActiveConnectViaNote.cpp
 SOURCE      ConnectViaNoteNotif.cpp
 SOURCE      NoteDlgSuppressingSwitch.cpp
-SOURCE      wlanpowersavetest.cpp
-SOURCE      wlanpowersavetestnotif.cpp
 SOURCE      easywapidlgnotif.cpp
 SOURCE      nowlannetworksavailablenotif.cpp
 SOURCE      connectingviadiscreetpopup.cpp

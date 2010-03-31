@@ -560,12 +560,12 @@ namespace S60MCprMobilityActivity
     /**
      * FORK/DECISION: Decides if needs cancel or not.
      */
-    DECLARE_SMELEMENT_HEADER( TInformMigrationAvailableOrCancelTag, 
+    DECLARE_SMELEMENT_HEADER( TInformMigrationAvailableOrErrorOrCancelTag, 
                               MeshMachine::TStateFork<TContext>, 
                               NetStateMachine::MStateFork, 
                               TContext )
     virtual TInt TransitionTag();
-    DECLARE_SMELEMENT_FOOTER( TInformMigrationAvailableOrCancelTag )
+    DECLARE_SMELEMENT_FOOTER( TInformMigrationAvailableOrErrorOrCancelTag )
 
     /**
      * FORK/DECISION: Decides what happens after IPCPR application completes the 

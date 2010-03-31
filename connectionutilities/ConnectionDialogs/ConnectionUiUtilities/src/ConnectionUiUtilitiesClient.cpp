@@ -453,45 +453,6 @@ void RConnectionUiUtilitiesSession::CancelConnectedViaConnMethodNote()
     }
 
 // ---------------------------------------------------------
-// RConnectionUiUtilitiesSession::CWlanPowerSaveTestNote
-// ---------------------------------------------------------
-//
-void RConnectionUiUtilitiesSession::WlanPowerSaveTestNote( 
-                                                    TBool&          aDisable,
-                                                    TRequestStatus& aStatus )
-    {
-    CLOG_ENTERFN( "RConnectionUiUtilitiesSession::WlanPowerSaveTestNote" );
-
-    ::new( &iBool ) TPckg< TBool >( aDisable );
-
-    if ( iNotifier )
-        {
-        iNotifier->StartNotifierAndGetResponse( aStatus, 
-                                                KUidWlanPowerSaveTestNote,
-                                                KNullDesC8(),
-                                                iBool );
-        }
-
-    CLOG_LEAVEFN( "RConnectionUiUtilitiesSession::WlanPowerSaveTestNote" );
-    }
-    
-// ---------------------------------------------------------
-// RConnectionUiUtilitiesSession::CancelWlanPowerSaveTestNote
-// ---------------------------------------------------------
-//
-void RConnectionUiUtilitiesSession::CancelWlanPowerSaveTestNote()
-    {
-    CLOG_ENTERFN( "RConnectionUiUtilitiesSession::CancelWlanPowerSaveTestNote" );
-
-    if ( iNotifier )
-        {
-        iNotifier->CancelNotifier( KUidWlanPowerSaveTestNote );
-        }
-
-    CLOG_LEAVEFN( "RConnectionUiUtilitiesSession::CancelWlanPowerSaveTestNote" );
-    }
-
-// ---------------------------------------------------------
 // RConnectionUiUtilitiesSession::EasyWapiDlg()
 // ---------------------------------------------------------
 //

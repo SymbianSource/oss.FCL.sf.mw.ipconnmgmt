@@ -41,7 +41,7 @@ EXPORTS
 	?EasyWpaDlg@CConnectionUiUtilities@@QAEXAAVTRequestStatus@@PAVTDes16@@@Z @ 40 NONAME ; void CConnectionUiUtilities::EasyWpaDlg(class TRequestStatus &, class TDes16 *)
 	?SearchWLANNetwork@CConnectionUiUtilities@@QAEHAAV?$TBuf8@$0CA@@@AAW4TWlanConnectionMode@@AAW4TWlanConnectionExtentedSecurityMode@@@Z @ 41 NONAME ; int CConnectionUiUtilities::SearchWLANNetwork(class TBuf8<32> &, enum TWlanConnectionMode &, enum TWlanConnectionExtentedSecurityMode &)
 	?SearchWLANNetworkAsync@CConnectionUiUtilities@@QAEXAAVTRequestStatus@@AAV?$TBuf8@$0CA@@@AAW4TWlanConnectionMode@@AAW4TWlanConnectionExtentedSecurityMode@@@Z @ 42 NONAME ; void CConnectionUiUtilities::SearchWLANNetworkAsync(class TRequestStatus &, class TBuf8<32> &, enum TWlanConnectionMode &, enum TWlanConnectionExtentedSecurityMode &)
-	?CancelWlanPowerSaveTestNote@CConnectionUiUtilities@@QAEXXZ @ 43 NONAME ; void CConnectionUiUtilities::CancelWlanPowerSaveTestNote(void)
-	?WlanPowerSaveTestNote@CConnectionUiUtilities@@QAEXAAHAAVTRequestStatus@@@Z @ 44 NONAME ; void CConnectionUiUtilities::WlanPowerSaveTestNote(int &, class TRequestStatus &)
+	?CancelWlanPowerSaveTestNote@CConnectionUiUtilities@@QAEXXZ @ 43 NONAME ABSENT ; void CConnectionUiUtilities::CancelWlanPowerSaveTestNote(void)
+	?WlanPowerSaveTestNote@CConnectionUiUtilities@@QAEXAAHAAVTRequestStatus@@@Z @ 44 NONAME ABSENT ; void CConnectionUiUtilities::WlanPowerSaveTestNote(int &, class TRequestStatus &)
 	?EasyWapiDlg@CConnectionUiUtilities@@QAEHPAVTDes16@@@Z @ 45 NONAME ; int CConnectionUiUtilities::EasyWapiDlg(class TDes16 *)
 

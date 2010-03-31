@@ -28,7 +28,6 @@
 #include "WLANNetworkUnavailableNoteNotif.h"
 #include "ConfirmationQueryNotif.h"
 #include "ConnectViaNoteNotif.h"
-#include "wlanpowersavetestnotif.h"
 #include "easywapidlgnotif.h"
 #include "nowlannetworksavailablenotif.h"
 #include "connectingviadiscreetpopupnotif.h"
@@ -120,11 +119,6 @@ LOCAL_C void CreateNotifiersL(
     CleanupStack::Pop( serNotify );     
     
     serNotify = CConnectViaNoteNotif::NewL( resourceFileResponsible );
-    CleanupStack::PushL( serNotify );
-    aNotifiers->AppendL( serNotify );
-    CleanupStack::Pop( serNotify );     
-  
-    serNotify = CWlanPowerSaveQueryNotif::NewL( resourceFileResponsible );
     CleanupStack::PushL( serNotify );
     aNotifiers->AppendL( serNotify );
     CleanupStack::Pop( serNotify );

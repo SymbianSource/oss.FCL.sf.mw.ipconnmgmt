@@ -724,9 +724,11 @@ void CMPMIapSelection::ChooseIapComplete(
            TExtendedConnPref::ENoteBehaviourConnDisableNotes ) )
         {
         TBool connectionAlreadyActive =
-            iSession->MyServer().CheckIfStarted( aPolicyPref->IapId() );
+            iSession->MyServer().CheckIfStarted( aPolicyPref->IapId(), 
+                                                 iSession->ConnectionId() );
         CConnectionUiUtilities* connUiUtils = NULL;
-        if ( !connectionAlreadyActive )
+        if ( !connectionAlreadyActive &&
+        	   ( iSession->IsMMSIap( aPolicyPref->IapId() ) == EFalse ) )
         	{
         	TRAPD( popupError,
           	     connUiUtils = CConnectionUiUtilities::NewL();
@@ -877,7 +879,13 @@ void CMPMIapSelection::HandleUserSelectionL( TBool aIsIap, TUint32 aId, TInt aEr
     delete iDialog;
     iDialog = NULL;
     
-    ImplicitConnectionL();
+    // Dialog is deleted. Letting a function leave here would panic the whole MPM.
+    //
+    TRAPD( err, ImplicitConnectionL() );
+    if( err != KErrNone )
+        {
+        ChooseIapComplete( err, &iChooseIapPref );
+        }
     }
     
 // -----------------------------------------------------------------------------

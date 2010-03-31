@@ -490,26 +490,6 @@ EXPORT_C void CConnectionUiUtilities::OffLineWlanNote(
     }
     
 // ---------------------------------------------------------
-// CConnectionUiUtilities::WlanPowerSaveTestNote
-// ---------------------------------------------------------
-//
-EXPORT_C void CConnectionUiUtilities::WlanPowerSaveTestNote(
-                                               TBool&          aDisable,
-                                               TRequestStatus& aStatus )
-    {
-    iImpl->WlanPowerSaveTestNote( aDisable, aStatus );
-    }
-
-// ---------------------------------------------------------
-// CConnectionUiUtilities::CancelWlanPowerSaveTestNote
-// ---------------------------------------------------------
-//
-EXPORT_C void CConnectionUiUtilities::CancelWlanPowerSaveTestNote()
-    {
-    iImpl->CancelWlanPowerSaveTestNote();
-    }
-
-// ---------------------------------------------------------
 // CConnectionUiUtilities::EasyWapiDlg
 // ---------------------------------------------------------
 //
