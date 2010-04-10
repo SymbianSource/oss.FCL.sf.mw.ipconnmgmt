@@ -328,4 +328,4 @@ private:
     };
 
 
-#endif __EXTENDEDCONNPREF_H__
+#endif // __EXTENDEDCONNPREF_H__
