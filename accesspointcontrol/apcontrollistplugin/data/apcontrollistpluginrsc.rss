@@ -130,34 +130,6 @@ RESOURCE TBUF r_qtn_acl_network_provided_apn
     }
 
 //----------------------------------------------------
-//
-//    r_qtn_acl_conf_nwp_apn_added
-//
-//
-//----------------------------------------------------
-//
-RESOURCE TBUF r_qtn_acl_conf_nwp_apn_added                         
-    { 
-    buf = qtn_acl_conf_nw_provided_apn_added; 
-    }
-
-//----------------------------------------------------
-//   
-//    r_qtn_acl_conf_apn_added 
-//
-//----------------------------------------------------
-//
-RESOURCE TBUF r_qtn_acl_conf_apn_added { buf = qtn_acl_conf_apn_added ; }
-
-//----------------------------------------------------
-//   
-//    r_qtn_acl_conf_apn_removed 
-//
-//----------------------------------------------------
-//
-RESOURCE TBUF r_qtn_acl_conf_apn_removed { buf = qtn_acl_conf_apn_removed ; }
-
-//----------------------------------------------------
 //   
 //    r_qtn_acl_conf_control_activated 
 //

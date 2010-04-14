@@ -135,7 +135,6 @@ CMPMWlanQueryDialog::~CMPMWlanQueryDialog()
         {
         MPMLOGSTRING( "CMPMWlanQueryDialog::~CMPMWlanQueryDialog starts new dialog" )
         dlg->OfferInformation( iWlanIapId, 
-                               iIapSelection.OfflineNoteResponse(),
                                iStatus.Int() );
         // In destructor we cannot let the query leave
         TRAPD( err, dlg->StartWlanQueryL(); )
@@ -195,7 +194,8 @@ void CMPMWlanQueryDialog::RunL()
         {
         if( iStatus.Int() == KErrNone )
             {
-            iIapSelection.SetOfflineNoteResponse( EOfflineResponseYes );
+            iIapSelection.Session()->MyServer().SetOfflineWlanQueryResponse(
+                    EOfflineResponseYes );
             if( iIapSelection.Session()->MyServer().CommsDatAccess()->CheckEasyWLanL( iWlanIapId ) )
                 {
                 MPMLOGSTRING( "CMPMWlanQueryDialog::RunL starting wlan network query" )
@@ -205,7 +205,8 @@ void CMPMWlanQueryDialog::RunL()
             }
         else if ( iStatus.Int() == KErrCancel )
             {
-            iIapSelection.SetOfflineNoteResponse( EOfflineResponseNo );
+            iIapSelection.Session()->MyServer().SetOfflineWlanQueryResponse(
+                    EOfflineResponseNo );
             MPMLOGSTRING2( "CMPMWlanQueryDialog::RunL offline query returned %d", 
                            iStatus.Int() )
             }
@@ -462,19 +463,12 @@ void CMPMWlanQueryDialog::StartWlanQueryL()
     MPMLOGSTRING2( "CMPMWlanQueryDialog::StartWlanQuery noteBehaviour = %d", noteBehaviour )
     
     if( !emergencyCallEstablished && 
-        iIapSelection.Session()->IsPhoneOfflineL() && 
+        iIapSelection.Session()->MyServer().IsPhoneOffline() && 
         !activeWlanIap && 
-        iIapSelection.OfflineNoteResponse() != EOfflineResponseYes &&
+        iIapSelection.Session()->MyServer().OfflineWlanQueryResponse() != EOfflineResponseYes &&
         iOverrideStatus == KErrNone )
         {
-        // if user has already refused offline note complete immediately
-        //
-        if ( iIapSelection.OfflineNoteResponse() == EOfflineResponseNo )
-            {
-            MPMLOGSTRING( "CMPMWlanQueryDialog::StartWlanQuery user has already refused offline" )
-            iIapSelection.UserWlanSelectionDoneL( KErrCancel, iWlanIapId );
-            }
-        else if ( noteBehaviour & TExtendedConnPref::ENoteBehaviourConnDisableQueries )
+        if ( noteBehaviour & TExtendedConnPref::ENoteBehaviourConnDisableQueries )
             {
             MPMLOGSTRING( "CMPMWlanQueryDialog::StartWlanQuery offline note query not shown due to disabled queries" )
             iIapSelection.UserWlanSelectionDoneL( KErrPermissionDenied, iWlanIapId );
@@ -529,8 +523,7 @@ void CMPMWlanQueryDialog::StartWlanQueryL()
 // -----------------------------------------------------------------------------
 //
 void CMPMWlanQueryDialog::OfferInformation(
-                TUint32 aWlanIapId, 
-                TOfflineNoteResponse aOfflineStatus,
+                TUint32 aWlanIapId,
                 TInt aDialogStatus )
     {
     TBool isEasyWlan( EFalse );
@@ -551,12 +544,13 @@ void CMPMWlanQueryDialog::OfferInformation(
         iWlanIapId      = aWlanIapId;
         iOverrideStatus = aDialogStatus;
         }
-    if ( aOfflineStatus != EOfflineResponseUndefined )
+    TOfflineWlanQueryResponse offlineResponse =
+            iIapSelection.Session()->MyServer().OfflineWlanQueryResponse();
+    if ( offlineResponse != EOfflineResponseUndefined )
         {
         MPMLOGSTRING3( "CMPMWlanQueryDialog<0x%x>::OfferInformation: offline response %d",
                        iIapSelection.Session()->ConnectionId(),
-                       aOfflineStatus ) 
-        iIapSelection.SetOfflineNoteResponse( aOfflineStatus );        
+                       offlineResponse )
         iOverrideStatus = aDialogStatus;
         }
 

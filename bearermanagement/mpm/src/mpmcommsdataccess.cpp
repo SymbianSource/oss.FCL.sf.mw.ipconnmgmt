@@ -2325,7 +2325,26 @@ aVirtualIapId is not virtual, return as aRealIapId" )
 
             TMpmConnPref tempMpmConnPref;
             tempMpmConnPref.SetSnapId( snap );
-            aSession.IapSelectionL()->ChooseBestIAPL( tempMpmConnPref, aAvailableIAPList );
+            
+            // Ensure that there will be no infinite loops by dropping
+            // this virtual iap out from the list of available iaps.
+            // E.g. next layer SNAP could be the same as current SNAP.
+            RAvailableIAPList tempList;
+            CleanupClosePushL( tempList );
+              
+            for( TInt i=0; i < aAvailableIAPList.Count(); i++ )
+                {
+                // drop this virtual iap out from the list of
+                // available iaps to prevent from infinitely looping
+                //	
+                if ( aAvailableIAPList[i] != aVirtualIapId )
+                    {
+                    tempList.Append( aAvailableIAPList[i] );
+                    }
+                }
+            aSession.IapSelectionL()->ChooseBestIAPL( tempMpmConnPref, tempList );
+            CleanupStack::PopAndDestroy( &tempList );
+            
             aRealIapId = tempMpmConnPref.IapId();
             }
         else if ( virtualNext->iNextLayerIAP != 0 )
@@ -2344,10 +2363,18 @@ aVirtualIapId is not virtual, return as aRealIapId" )
                 MPMLOGSTRING(
                     "CMPMCommsDatAccess::FindRealIapL: Call FindRealIapL" )
 
-                FindRealIapL( iap2->RecordId(), 
-                              aRealIapId, 
-                              aAvailableIAPList,
-                              aSession );
+                if ( aVirtualIapId != virtualNext->iNextLayerIAP )
+                    {
+                    FindRealIapL( iap2->RecordId(), 
+                                  aRealIapId, 
+                                  aAvailableIAPList,
+                                  aSession );
+                    }
+                else
+                    {
+                    aRealIapId = 0;
+                    MPMLOGSTRING( "CMPMCommsDatAccess::FindRealIapL: Virtual iap points to itself" )
+                    }
                 }
             else
                 {
@@ -2672,7 +2699,8 @@ void CMPMCommsDatAccess::BuildWlanArrayL(CMDBSession& aDb,
 // -----------------------------------------------------------------------------
 //
 TBool CMPMCommsDatAccess::AreActiveIapsInSameSnapL ( RArray<TActiveBMConn>& aActiveBMConns,
-                                                     TUint32& aSnapId )
+                                                     TUint32& aSnapId,
+                                                     CMPMServer& aServer )
     {
     MPMLOGSTRING( "CMPMCommsDatAccess::AreActiveIapsInSameSnapL" )
     TBool same = ETrue;
@@ -2682,8 +2710,12 @@ TBool CMPMCommsDatAccess::AreActiveIapsInSameSnapL ( RArray<TActiveBMConn>& aAct
     // Go through all active connections
     for (TInt index = 0; index < aActiveBMConns.Count(); index++ )
         {
+        CMPMServerSession* serverSession = aServer.GetServerSession(
+                aActiveBMConns[index].iConnInfo.iConnId );
+    
         // Do check only for active connections
-        if ( aActiveBMConns[index].iConnInfo.iState != EStarted )
+        if ( aActiveBMConns[index].iConnInfo.iState != EStarted ||
+             !serverSession->ChooseBestIapCalled())
             {
             continue;
             }
@@ -2693,8 +2725,8 @@ TBool CMPMCommsDatAccess::AreActiveIapsInSameSnapL ( RArray<TActiveBMConn>& aAct
             {
             prevSnapId = snapId;
             // Get destination id for the iap
-            snapId = GetSnapIdL( aActiveBMConns[index].iConnInfo.iIapId );
-                        
+            snapId = aActiveBMConns[index].iConnInfo.iSnap;
+            
             // Check if previous iap's destination is different
             if ( ( ( prevSnapId != snapId ) && prevSnapId && snapId ) ||
                  !snapId )
@@ -2774,7 +2806,10 @@ Remove deactived IAP = %i", iapIds[k].iIapId )
         }
 
     // Determine the actual priorities for IAPs
-    DeterminePrioritiesL( iapIds, activeIaps, aSession );
+    if( iapIds.Count() > 1 )
+        {
+        DeterminePrioritiesL( iapIds, activeIaps, aSession );
+        }
 
     // Check if a matching available IAP is found.
     if( iapIds.Count() )

@@ -107,7 +107,7 @@ CCmDlg::CCmDlg( CCmManagerImpl* aCmManager, TUint32 aDestUid,
     , iCmManager( aCmManager )
     , iDestUid ( aDestUid )
     , iPrioritising ( EFalse )
-    , iExitReason( KDialogUserBack )
+    , iExitReason( KDialogUserExit )
     , iEscapeArrived( EFalse )
     , iExitduringProcessing( EFalse )
     , iBackduringProcessing( EFalse )
@@ -136,7 +136,10 @@ CCmDlg::~CCmDlg()
         // set old text back, if we have it...
         if ( iOldTitleText )
             {
-            TRAP_IGNORE( iTitlePane->SetTextL( *iOldTitleText ) );
+            if ( iExitReason == KDialogUserBack )
+                {
+                TRAP_IGNORE( iTitlePane->SetTextL( *iOldTitleText ) );
+                }
             delete iOldTitleText; iOldTitleText = NULL;
             }
         }    
@@ -446,6 +449,7 @@ TBool CCmDlg::OkToExitL( TInt aButtonId )
         case EAknSoftkeyBack:
             {
             iCmManager->WatcherUnRegister();
+            iExitReason = KDialogUserBack;
             
             if ( !iProcessing )
                 {
@@ -632,7 +636,13 @@ void CCmDlg::ProcessCommandL( TInt aCommandId )
             
         case ECmManagerUiCmdCmUserExit:
             {
-            iExitReason = KDialogUserExit;
+            if (!iProcessing)
+                {
+                *iSelected = 0;
+                iExitReason = KDialogUserExit;
+                TryExitL( iExitReason );
+                }
+            break;
             }
             
         case EAknSoftkeyBack:
@@ -640,6 +650,7 @@ void CCmDlg::ProcessCommandL( TInt aCommandId )
             if (!iProcessing)
                 {
                 *iSelected = 0;
+                iExitReason = KDialogUserBack;
                 TryExitL( iExitReason );
                 }
             break;
@@ -840,6 +851,7 @@ void CCmDlg::DeleteCurrentCmL( )
                     iDestDlg->ShowDefaultConnectionNoteL( oldConn );
                     }
                 HandleListboxDataChangeL();
+                iListbox->HandleItemRemovalL();
                 }
                 break;
 
@@ -1979,6 +1991,7 @@ void CCmDlg::CommsDatChangesL()
         if( !iCmManager->DestinationStillExistedL( iCmDestinationImpl ) )
             {
             iCmManager->WatcherUnRegister();
+            iExitReason = KDialogUserBack;
             TryExitL( iExitReason );
             return;
             }

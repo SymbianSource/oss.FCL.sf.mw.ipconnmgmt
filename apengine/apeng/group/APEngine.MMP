@@ -63,10 +63,6 @@ SYSTEMINCLUDE		../../../inc
 //Macro to /epoc32 headers
 MW_LAYER_SYSTEMINCLUDE
 
-#ifdef SYMBIAN_ENABLE_SPLIT_HEADERS
-SYSTEMINCLUDE ../../../../../os/commsfw/commsconfig/commsdatabaseshim/commdbshim/ProtectedDB
-#endif
-
 LIBRARY     commdb.lib 
 LIBRARY     euser.lib
 LIBRARY     efsrv.lib

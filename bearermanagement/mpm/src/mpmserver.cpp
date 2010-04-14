@@ -26,6 +26,7 @@ Mobility Policy Manager server implementation.
 #include <mmtsy_names.h>                 // KMmTsyModuleName
 #include <centralrepository.h>
 #include <es_sock_partner.h>
+#include <CoreApplicationUIsSDKCRKeys.h>
 
 #include "mpmserver.h"
 #include "mpmserversession.h"
@@ -44,6 +45,7 @@ Mobility Policy Manager server implementation.
 #include "mpmcsidwatcher.h"
 #include "mpmdatausagewatcher.h"
 #include "mpmpropertydef.h"
+#include "mpmofflinewatcher.h"
 
 // ============================= LOCAL FUNCTIONS ===============================
 
@@ -91,7 +93,8 @@ CMPMServer::CMPMServer()
       iWlanQueryQueue( NULL ),
       iConnectDialogQueue( NULL ),
       iDefaultConnection( NULL ), 
-      iConnectionCounter( 0 )
+      iConnectionCounter( 0 ),
+      iOfflineMode( ECoreAppUIsNetworkConnectionAllowed )
     {
     }
 
@@ -175,8 +178,6 @@ void CMPMServer::ConstructL()
     iMpmCsIdWatcher->StartL();
 
     // Create another central repository watcher and start it
-    // TODO: Trapped, because currently it may fatally leave in HW.
-    // (Possibly because of the capability updates of data usage watcher's CR-keys.)
     TRAPD( duwErr, iMpmDataUsageWatcher = CMpmDataUsageWatcher::NewL( this ) );
     if (duwErr == KErrNone)
         {
@@ -186,6 +187,18 @@ void CMPMServer::ConstructL()
         {
         iMpmDataUsageWatcher = NULL;
         MPMLOGSTRING( "CMPMServer::ConstructL: CMpmDataUsageWatcher::NewL() failed!" )
+        }
+
+    // Create another central repository watcher and start it
+    TRAPD( owErr, iMpmOfflineWatcher = CMpmOfflineWatcher::NewL( this ) );
+    if (owErr == KErrNone)
+        {
+        iMpmOfflineWatcher->StartL();
+        }
+    else
+        {
+        iMpmOfflineWatcher = NULL;
+        MPMLOGSTRING( "CMPMServer::ConstructL: CMpmOfflineWatcher::NewL() failed!" )
         }
 
     // Define P&S keys (snap & iap) for the user connection
@@ -345,7 +358,9 @@ CMPMServer::~CMPMServer()
     delete iMpmCsIdWatcher;    
     
     delete iMpmDataUsageWatcher;    
-    
+
+    delete iMpmOfflineWatcher;    
+
     iDedicatedClients.Close();
 
     delete iCommsDatAccess;    
@@ -446,18 +461,9 @@ void CMPMServer::AppendBMConnection( const TConnectionId aConnId,
             }
         }
 
-    if ( aState == EStarted )
+    if ( aState == EStarted && aSession.ChooseBestIapCalled() )
         {
-        TInt ret = KErrNone;
-        
-        TRAP ( ret, UpdateActiveConnectionL( aSession ) );
-        
-        if ( ret != KErrNone )
-            {
-            iActiveBearerType = EMPMBearerTypeNone;
-            iActiveIapId = 0;
-            iActiveSnapId = 0;            
-            }
+        UpdateActiveConnection( aSession );
         }
 
 #ifdef _DEBUG
@@ -512,15 +518,9 @@ void CMPMServer::ResetBMConnection( const TConnectionId aConnId,
         iActiveBMConns[index1].iConnInfo.iState = EIdle;
         
         // Change state of P&S keys if needed
-        TInt ret = KErrNone;
-        
-        TRAP ( ret, UpdateActiveConnectionL( aSession ) );
-        
-        if ( ret != KErrNone )
+        if ( aSession.ChooseBestIapCalled() )
             {
-            iActiveBearerType = EMPMBearerTypeNone;
-            iActiveIapId = 0;
-            iActiveSnapId = 0;            
+            UpdateActiveConnection( aSession );
             }
         }
 #ifdef _DEBUG
@@ -560,15 +560,9 @@ void CMPMServer::RemoveBMConnection( const TConnectionId aConnId,
             iActiveBMConns.Remove( i );
 
             // Update active connection
-            TInt ret = KErrNone;
-        
-            TRAP ( ret, UpdateActiveConnectionL( aSession ) );
-        
-            if ( ret != KErrNone )
+            if ( aSession.ChooseBestIapCalled() )
                 {
-                iActiveBearerType = EMPMBearerTypeNone;
-                iActiveIapId = 0;
-                iActiveSnapId = 0;            
+                UpdateActiveConnection( aSession );
                 }
             }
         }
@@ -857,15 +851,9 @@ void CMPMServer::AppendBMIAPConnectionL( const TUint32       aIapId,
             }
         }
 
-    TInt ret = KErrNone;
-        
-    TRAP ( ret, UpdateActiveConnectionL( aSession ) );
-        
-    if ( ret != KErrNone )
+    if ( aSession.ChooseBestIapCalled() )
         {
-        iActiveBearerType = EMPMBearerTypeNone;
-        iActiveIapId = 0;
-        iActiveSnapId = 0;            
+        UpdateActiveConnection( aSession );
         }
 
 #ifdef _DEBUG
@@ -930,15 +918,9 @@ void CMPMServer::RemoveBMIAPConnection( const TUint32       aIapId,
                 }
             
             // Update active connection
-            TInt ret = KErrNone;
-        
-            TRAP ( ret, UpdateActiveConnectionL( aSession ) );
-        
-            if ( ret != KErrNone )
+            if ( aSession.ChooseBestIapCalled() )
                 {
-                iActiveBearerType = EMPMBearerTypeNone;
-                iActiveIapId = 0;
-                iActiveSnapId = 0;            
+                UpdateActiveConnection( aSession );
                 }
             }
         }
@@ -1530,22 +1512,39 @@ void CMPMServer::AppendWlanQueryQueueL( CMPMWlanQueryDialog* aDlg )
 //
 void CMPMServer::StopConnections( TInt aIapId )
     {
+    MPMLOGSTRING2( "CMPMServer::StopConnections aIapId = %d", aIapId )
     for (TInt index = 0; index < iSessions.Count(); index++)
         {
-/*        if (iSessions[index]->UserConnection())
-            continue;
-  */          
+        CMPMServerSession* session = iSessions[index];
         // Stop connection
         if ( aIapId == 0 )
             {
-            iSessions[index]->StopConnection();
+            session->StopConnection();
             }
-        else
+        else if ( GetBMIap( session->ConnectionId() ) == aIapId )
             {
-            TRAP_IGNORE( iSessions[index]->StopIAPNotificationL( aIapId ));
-            }
-        
+            TRAP_IGNORE( session->StopIAPNotificationL( aIapId ));
+            }     
         }
+    }
+
+// -----------------------------------------------------------------------------
+// CMPMServer::UpdateActiveConnection
+// -----------------------------------------------------------------------------
+//
+void CMPMServer::UpdateActiveConnection( CMPMServerSession& aSession )
+    {
+    // Update active connection
+    TInt ret = KErrNone;
+            
+    TRAP ( ret, UpdateActiveConnectionL( aSession ) );
+            
+    if ( ret != KErrNone )
+        {
+        iActiveBearerType = EMPMBearerTypeNone;
+        iActiveIapId = 0;
+        iActiveSnapId = 0;            
+        }   
     }
 
 // -----------------------------------------------------------------------------
@@ -1555,9 +1554,13 @@ void CMPMServer::StopConnections( TInt aIapId )
 void CMPMServer::UpdateActiveConnectionL( CMPMServerSession& aSession )
     {
     MPMLOGSTRING( "CMPMServer::UpdateActiveConnectionL" )
-    TUint32 snapId;
 
-    if ( !NumberOfActiveConnections() )
+    TBool keysUpToDate( ETrue );
+    
+    // number of active iaps
+    TInt numberOfActive = NumberOfActiveConnections( keysUpToDate );
+    
+    if ( numberOfActive == 0 )
         {
         // If no active connections then just reset keys and publish
         iActiveBearerType = EMPMBearerTypeNone;
@@ -1566,29 +1569,43 @@ void CMPMServer::UpdateActiveConnectionL( CMPMServerSession& aSession )
         PublishActiveConnection();
         return;
         }
-
-    // Check if all active connections are in same snap
-    if ( CommsDatAccess()->AreActiveIapsInSameSnapL(
-         iActiveBMConns, snapId ) )
+        
+    if ( keysUpToDate )
         {
-        // Select active connection according to priority
-        CommsDatAccess()->SelectActiveConnectionL (
-            snapId,
-            iActiveBMConns,
-            iActiveIapId,
-            iActiveSnapId,
-            iActiveBearerType,
-            aSession );
+        MPMLOGSTRING( "CMPMServer::UpdateActiveConnectionL: already up-to-date" )
+        return;   
+        }
 
-        PublishActiveConnection();
-        return;
+    if ( numberOfActive > 1 )
+        {
+        // Check if all active connections are in same snap
+        TUint32 snapId;
+
+        if ( CommsDatAccess()->AreActiveIapsInSameSnapL(
+             iActiveBMConns, snapId, *this ) )
+            {
+            MPMLOGSTRING( "CMPMServer::UpdateActiveConnectionL: Active iaps are in one SNAP" )
+            // Select active connection according to priority
+            CommsDatAccess()->SelectActiveConnectionL (
+                snapId,
+                iActiveBMConns,
+                iActiveIapId,
+                iActiveSnapId,
+                iActiveBearerType,
+                aSession );
+
+            PublishActiveConnection();
+            return;
+            }
+        
+        MPMLOGSTRING( "CMPMServer::UpdateActiveConnectionL: Active iaps are in different SNAPs" )
         }
 
     // Reset active connections
     iActiveBearerType = EMPMBearerTypeNone;
     iActiveIapId = 0;
     iActiveSnapId = 0;
-            
+                
     // Active connections locating in different snaps
     // Use priority order vpn, wlan and packet
     for ( TInt index = 0; index < iActiveBMConns.Count(); index++ )
@@ -1602,10 +1619,11 @@ void CMPMServer::UpdateActiveConnectionL( CMPMServerSession& aSession )
             {
             TMPMBearerType bearerType = EMPMBearerTypeOther;
         
-            if ( iDedicatedClients.Find( iActiveBMConns[index].iConnInfo.iAppUid ) == 
-                 KErrNone )
+            TInt ret = iDedicatedClients.Find( iActiveBMConns[index].iConnInfo.iAppUid );
+            if ( ret != KErrNotFound )
                 {
                 // Skip dedicated client
+                MPMLOGSTRING2( "Skip dedicated client = %d", iActiveBMConns[index].iConnInfo.iAppUid )
                 continue;
                 }
 
@@ -1632,9 +1650,8 @@ void CMPMServer::UpdateActiveConnectionL( CMPMServerSession& aSession )
                 iActiveSnapId = iActiveBMConns[index].iConnInfo.iSnap;
                 }
             }
-
-        PublishActiveConnection();  
         }
+    PublishActiveConnection();
     }
 
 // -----------------------------------------------------------------------------
@@ -1697,13 +1714,18 @@ void CMPMServer::PublishActiveConnection()
 
 // -----------------------------------------------------------------------------
 // CMPMServer::NumberOfActiveConnections
+// Returns number of active iaps.
 // -----------------------------------------------------------------------------
 //
-TInt CMPMServer::NumberOfActiveConnections()
+TInt CMPMServer::NumberOfActiveConnections( TBool& aKeysUpToDate )
     {
     MPMLOGSTRING( "CMPMServer::NumberOfActiveConnections" )
     
+    aKeysUpToDate = ETrue; 
     TInt count( 0 );
+    RArray<TUint32> activeIaps;
+    
+    activeIaps.Reset();
     
     for ( TInt index = 0; index < iActiveBMConns.Count(); index++ )
         {
@@ -1713,9 +1735,24 @@ TInt CMPMServer::NumberOfActiveConnections()
         if ( iActiveBMConns[index].iConnInfo.iState == EStarted &&
              serverSession->ChooseBestIapCalled() )
             {
-            count++;
+            TInt ret = activeIaps.Find( iActiveBMConns[index].iConnInfo.iIapId );
+ 
+            if ( ret == KErrNotFound )
+                {        
+                activeIaps.Append ( iActiveBMConns[index].iConnInfo.iIapId ); 
+                count++;
+                }
+            
+            if ( iActiveIapId != iActiveBMConns[index].iConnInfo.iIapId )
+                 {
+                 // iap that is different from current active iap was found
+                 aKeysUpToDate = EFalse;
+                 }
             }
         }
+    
+    activeIaps.Close();
+    MPMLOGSTRING2( "CMPMServer::NumberOfActiveConnections: count = %d", count )
     
     return count;
     }
@@ -2081,6 +2118,75 @@ void CMPMServer::StopCellularConns()
             }
         }
     stoppedIaps.Close();
+    }
+
+// ---------------------------------------------------------------------------
+// CMPMServer::UpdateOfflineMode
+// Offline watcher listens the offline mode and calls this when it's changed.
+// ---------------------------------------------------------------------------
+//
+void CMPMServer::UpdateOfflineMode( TInt newModeValue )
+    {
+    MPMLOGSTRING2( "CMPMServer::UpdateOfflineMode: Value %d", newModeValue )
+
+    iOfflineMode = newModeValue;
+
+    if ( iOfflineMode == ECoreAppUIsNetworkConnectionAllowed )
+        {
+        // Offline mode finished, reset the QueryResponse variable.
+        iOfflineWlanQueryResponse = EOfflineResponseUndefined;
+        }
+    }
+
+// ---------------------------------------------------------------------------
+// CMPMServer::IsPhoneOffline
+// Returns the current offline mode.
+// ---------------------------------------------------------------------------
+//
+TBool CMPMServer::IsPhoneOffline()
+    {
+    MPMLOGSTRING( "CMPMServer::IsPhoneOffline" )
+
+    TBool retval = EFalse;
+    if ( iOfflineMode == ECoreAppUIsNetworkConnectionNotAllowed)
+        {
+        retval = ETrue;
+        MPMLOGSTRING( "CMPMServer::IsPhoneOffline: Yes." )
+        }
+    return retval;
+    }
+
+// ---------------------------------------------------------------------------
+// CMPMServer::OfflineWlanQueryResponse
+// Tells the "Use WLAN in offline mode" query's response during the
+// current offline mode session.
+// ---------------------------------------------------------------------------
+//
+TOfflineWlanQueryResponse CMPMServer::OfflineWlanQueryResponse()
+    {
+    MPMLOGSTRING( "CMPMServer::OfflineWlanQueryResponse" )
+
+#ifndef _PLATFORM_SIMULATOR_
+    MPMLOGSTRING2( "CMPMServer::IsOfflineWlanQueryAccepted: %d", iOfflineWlanQueryResponse )
+    return iOfflineWlanQueryResponse;
+#else
+    // Platsim simulates WLAN and offline-mode. To ease automated testing,
+    // offline connection confirmation is not asked in Platsim-variant
+    MPMLOGSTRING( "CMPMServer::OfflineWlanQueryResponse: yes for Platsim" )
+    return EOfflineResponseYes;
+#endif
+    }
+
+// ---------------------------------------------------------------------------
+// CMPMServer::SetOfflineWlanQueryResponse
+// Called when the "Use WLAN in offline mode" note has been responded.
+// ---------------------------------------------------------------------------
+//
+void CMPMServer::SetOfflineWlanQueryResponse( TOfflineWlanQueryResponse aResponse)
+    {
+    MPMLOGSTRING( "CMPMServer::SetOfflineWlanQueryResponse" )
+
+    iOfflineWlanQueryResponse = aResponse;
     }
 
 // -----------------------------------------------------------------------------

@@ -359,10 +359,12 @@ class CMPMCommsDatAccess : public CBase
         * @param aActiveBMConns Array of active connections.
         * @param aSnapId Destination where connections are located is returned
         *                to this parameter.
+        * @param aServer Handle to server class.
         * @return ETrue if all active connections are in same snap.
         */
         TBool AreActiveIapsInSameSnapL ( RArray<TActiveBMConn>& aActiveBMConns,
-                                         TUint32& aSnapId );
+                                         TUint32& aSnapId,
+                                         CMPMServer& aServer );
 
        /**
         * Select active connection according to snap priorities.

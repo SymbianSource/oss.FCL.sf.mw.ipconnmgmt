@@ -233,10 +233,6 @@ TInt CCmWizard::CreateConnectionMethodL
 
                 HBufC* destName = targetDest->NameLC();
     
-                TCmCommonUi::ShowNoteL( R_CMWIZARD_NEW_METHOD_ADDED,
-                                        *destName,
-                                        TCmCommonUi::ECmOkNote );
-    
                 CleanupStack::PopAndDestroy( destName );
     
                 // Here's a tricky one: if 'aTargetDestination' was NULL, then

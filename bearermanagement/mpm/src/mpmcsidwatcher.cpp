@@ -29,16 +29,20 @@
 CMpmCsIdWatcher::CMpmCsIdWatcher()
     : CActive( EPriorityStandard )
     {
+    MPMLOGSTRING( "CMpmCsIdWatcher::CMpmCsIdWatcher" )
+            
     CActiveScheduler::Add( this );    
     }
 
 
 // ---------------------------------------------------------------------------
-// Creates central repositor object
+// Creates central repository object
 // ---------------------------------------------------------------------------
 //
 void CMpmCsIdWatcher::ConstructL()
     {
+    MPMLOGSTRING( "CMpmCsIdWatcher::ConstructL" )
+
     iRepository = CRepository::NewL( KMpmOccCenRepUid );
 
     // Check whether user connection is supported
@@ -56,6 +60,8 @@ void CMpmCsIdWatcher::ConstructL()
 //
 CMpmCsIdWatcher* CMpmCsIdWatcher::NewL()
     {
+    MPMLOGSTRING( "CMpmCsIdWatcher::NewL" )
+
     CMpmCsIdWatcher* self = new( ELeave ) CMpmCsIdWatcher();
     CleanupStack::PushL( self );
     self->ConstructL();
@@ -68,7 +74,9 @@ CMpmCsIdWatcher* CMpmCsIdWatcher::NewL()
 // ---------------------------------------------------------------------------
 //
 CMpmCsIdWatcher::~CMpmCsIdWatcher()
-    {    
+    {
+    MPMLOGSTRING( "CMpmCsIdWatcher::~CMpmCsIdWatcher" )
+
     Cancel();
     delete iRepository;
     }
@@ -79,13 +87,13 @@ CMpmCsIdWatcher::~CMpmCsIdWatcher()
 //
 void CMpmCsIdWatcher::StartL()
     {
-    // Request notification
-    User::LeaveIfError( iRepository->NotifyRequest( KMpmConnectScreenId,
-                        iStatus ));
-    SetActive();
+    MPMLOGSTRING( "CMpmCsIdWatcher::StartL" )
+            
+    // Get the initial Connect screen ID from repository.
+    User::LeaveIfError( GetConnectScreenId() );
 
-    // Get value from central repository
-    User::LeaveIfError(iRepository->Get(KMpmConnectScreenId, iConnectScreenId));
+    // Request for notifications.
+    User::LeaveIfError( RequestNotifications() );
     }
 
 // ---------------------------------------------------------------------------
@@ -94,6 +102,8 @@ void CMpmCsIdWatcher::StartL()
 //
 TUint32 CMpmCsIdWatcher::ConnectScreenId() const
     {
+    MPMLOGSTRING( "CMpmCsIdWatcher::ConnectScreenId" )
+
     if ( iUserConnectionSupported )
         {
         // Return real value if user connection is supported
@@ -113,26 +123,30 @@ TUint32 CMpmCsIdWatcher::ConnectScreenId() const
 //
 void CMpmCsIdWatcher::RunL()
     {
-    // Leave if error
-    User::LeaveIfError( iStatus.Int() );
+    MPMLOGSTRING( "CMpmCsIdWatcher::RunL" )
 
-    // Request new notification
-    User::LeaveIfError( iRepository->NotifyRequest( KMpmConnectScreenId,
-        iStatus ));
-    SetActive();
-    
-    // Get value from central repository
-    iRepository->Get( KMpmConnectScreenId, iConnectScreenId );
-    }
+    if ( iStatus.Int() < KErrNone )
+        {
+        MPMLOGSTRING2("Status: 0x%08X", iStatus.Int())
+        iErrorCounter++;
+        if ( iErrorCounter > KMpmCsIdWatcherCenRepErrorThreshold )
+            {
+            MPMLOGSTRING2("Over %d consecutive errors, stopping notifications permanently.",
+                    KMpmCsIdWatcherCenRepErrorThreshold)
+            return;
+            }
+        // Else: Error occured but counter not expired. Proceed.
+        }
+    else
+        {
+        // Notification is received ok => Reset the counter.
+        iErrorCounter = 0;
 
-// ---------------------------------------------------------------------------
-// From class CActive.
-// Nothing to do over here
-// ---------------------------------------------------------------------------
-//
-TInt CMpmCsIdWatcher::RunError( TInt /*aError*/ )
-    {
-    return KErrNone;
+        // Get value from central repository
+        GetConnectScreenId();
+        }
+
+    RequestNotifications();
     }
 
 // ---------------------------------------------------------------------------
@@ -142,6 +156,44 @@ TInt CMpmCsIdWatcher::RunError( TInt /*aError*/ )
 //
 void CMpmCsIdWatcher::DoCancel()
     {
+    MPMLOGSTRING( "CMpmCsIdWatcher::DoCancel" )
     iRepository->NotifyCancel( KMpmConnectScreenId );
     }
 
+// ---------------------------------------------------------------------------
+// Request notifications.
+// ---------------------------------------------------------------------------
+//
+TInt CMpmCsIdWatcher::RequestNotifications()
+    {
+    MPMLOGSTRING( "CMpmCsIdWatcher::RequestNotifications" )
+
+    TInt err = iRepository->NotifyRequest( KMpmConnectScreenId, iStatus );
+        
+    if ( err == KErrNone )
+        {
+        SetActive();
+        }
+    else
+        {
+        MPMLOGSTRING2( "CMpmCsIdWatcher::RequestNotifications, ERROR: %d", err )
+        }
+    return err;
+    }
+
+// ---------------------------------------------------------------------------
+// Get current repository key value.
+// ---------------------------------------------------------------------------
+//
+TInt CMpmCsIdWatcher::GetConnectScreenId()
+    {
+    MPMLOGSTRING( "CMpmCsIdWatcher::GetConnectScreenId" )
+
+    TInt err = iRepository->Get( KMpmConnectScreenId, iConnectScreenId );
+        
+    if ( err != KErrNone )
+        {
+        MPMLOGSTRING2( "CMpmCsIdWatcher::GetConnectScreenId, ERROR: %d", err )
+        }
+    return err;
+    }

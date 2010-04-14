@@ -11,27 +11,27 @@
  *
  * Contributors:
  *
- * Description: Listen cellular data usage key changes in central repository.
+ * Description: Listens central repository for offline mode changes.
  *
  */
 
 #include <e32base.h>
 #include <centralrepository.h>
-#include <cmmanagerkeys.h>
-#include <cmgenconnsettings.h>
+#include <CoreApplicationUIsSDKCRKeys.h>
+#include <featmgr.h>
 
 #include "mpmlogger.h"
 #include "mpmserver.h"
-#include "mpmdatausagewatcher.h"
+#include "mpmofflinewatcher.h"
 
 // ---------------------------------------------------------------------------
 // Default C++ constructor.
 // ---------------------------------------------------------------------------
 //
-CMpmDataUsageWatcher::CMpmDataUsageWatcher( CMPMServer* aServer ) :
+CMpmOfflineWatcher::CMpmOfflineWatcher( CMPMServer* aServer ) :
     CActive( EPriorityStandard ), iServer( aServer )
     {
-    MPMLOGSTRING( "CMpmDataUsageWatcher::CMpmDataUsageWatcher" )
+    MPMLOGSTRING( "CMpmOfflineWatcher::CMpmOfflineWatcher" )
 
     CActiveScheduler::Add( this );
     }
@@ -40,22 +40,29 @@ CMpmDataUsageWatcher::CMpmDataUsageWatcher( CMPMServer* aServer ) :
 // Symbian 2nd phase constructor. Creates a central repository object.
 // ---------------------------------------------------------------------------
 //
-void CMpmDataUsageWatcher::ConstructL()
+void CMpmOfflineWatcher::ConstructL()
     {
-    MPMLOGSTRING( "CMpmDataUsageWatcher::ConstructL" )
+    MPMLOGSTRING( "CMpmOfflineWatcher::ConstructL" )
 
-    iRepository = CRepository::NewL( KCRUidCmManager );
+    FeatureManager::InitializeLibL();
+    // If feature isn't supported, then no watching, but return in StartL().
+    iOfflineFeatureSupported = FeatureManager::FeatureSupported( 
+                               KFeatureIdOfflineMode );
+    FeatureManager::UnInitializeLib();
+
+        
+    iRepository = CRepository::NewL( KCRUidCoreApplicationUIs );
     }
 
 // ---------------------------------------------------------------------------
 // Creates a new object by calling the two-phased constructor.
 // ---------------------------------------------------------------------------
 //
-CMpmDataUsageWatcher* CMpmDataUsageWatcher::NewL( CMPMServer* aServer )
+CMpmOfflineWatcher* CMpmOfflineWatcher::NewL( CMPMServer* aServer )
     {
-    MPMLOGSTRING( "CMpmDataUsageWatcher::NewL" )
+    MPMLOGSTRING( "CMpmOfflineWatcher::NewL" )
 
-    CMpmDataUsageWatcher* self = new( ELeave ) CMpmDataUsageWatcher( aServer );
+    CMpmOfflineWatcher* self = new( ELeave ) CMpmOfflineWatcher( aServer );
     CleanupStack::PushL( self );
     self->ConstructL();
     CleanupStack::Pop( self );
@@ -66,9 +73,9 @@ CMpmDataUsageWatcher* CMpmDataUsageWatcher::NewL( CMPMServer* aServer )
 // Destructor.
 // ---------------------------------------------------------------------------
 //
-CMpmDataUsageWatcher::~CMpmDataUsageWatcher()
+CMpmOfflineWatcher::~CMpmOfflineWatcher()
     {
-    MPMLOGSTRING( "CMpmDataUsageWatcher::~CMpmDataUsageWatcher" )
+    MPMLOGSTRING( "CMpmOfflineWatcher::~CMpmOfflineWatcher" )
 
     Cancel();
     delete iRepository;
@@ -78,13 +85,19 @@ CMpmDataUsageWatcher::~CMpmDataUsageWatcher()
 // Order notification from changes.
 // ---------------------------------------------------------------------------
 //
-void CMpmDataUsageWatcher::StartL()
+void CMpmOfflineWatcher::StartL()
     {
-    MPMLOGSTRING( "CMpmDataUsageWatcher::StartL" )
+    MPMLOGSTRING( "CMpmOfflineWatcher::StartL" )
+            
+    if ( !iOfflineFeatureSupported )
+        {
+        return;
+        }
 
     // Get the initial data usage value from repository.
-    User::LeaveIfError( GetCurrentDataUsageValue() );
-
+    User::LeaveIfError( GetCurrentOfflineValue() );
+    iServer->UpdateOfflineMode( iOfflineMode );
+    
     // Request notifications.
     User::LeaveIfError( RequestNotifications() );
     }
@@ -94,18 +107,18 @@ void CMpmDataUsageWatcher::StartL()
 // Event is received when there is a change in central repository key.
 // ---------------------------------------------------------------------------
 //
-void CMpmDataUsageWatcher::RunL()
+void CMpmOfflineWatcher::RunL()
     {
-    MPMLOGSTRING( "CMpmDataUsageWatcher::RunL" )
+    MPMLOGSTRING( "CMpmOfflineWatcher::RunL" )
 
     if ( iStatus.Int() < KErrNone )
         {
         MPMLOGSTRING2("Status: 0x%08X", iStatus.Int())
         iErrorCounter++;
-        if ( iErrorCounter > KMpmDataUsageWatcherCenRepErrorThreshold )
+        if ( iErrorCounter > KMpmOfflineWatcherCenRepErrorThreshold )
             {
             MPMLOGSTRING2("Over %d consecutive errors, stopping notifications permanently.",
-                    KMpmDataUsageWatcherCenRepErrorThreshold)
+                    KMpmOfflineWatcherCenRepErrorThreshold)
             return;
             }
         // Else: Error occured but counter not expired. Proceed.
@@ -115,18 +128,13 @@ void CMpmDataUsageWatcher::RunL()
         // Notification is received ok => Reset the counter.
         iErrorCounter = 0;
 
-        // Get the new Cellular data usage setting value from central repository.
-        TInt oldCellularDataUsage = iCellularDataUsage;
-
-        if ( GetCurrentDataUsageValue() == KErrNone )
+        // Check if mode has changed (it should).
+        TInt oldMode = iOfflineMode;
+        
+        TInt err = GetCurrentOfflineValue();
+        if ( err == KErrNone && oldMode != iOfflineMode )
             {
-            // Stop cellular connections if the setting changes into Disabled.
-            if ( oldCellularDataUsage != ECmCellularDataUsageDisabled &&
-                    iCellularDataUsage == ECmCellularDataUsageDisabled &&
-                    iServer->RoamingWatcher()->RoamingStatus() != EMPMRoamingStatusUnknown )
-                {
-                iServer->StopCellularConns();
-                }
+            iServer->UpdateOfflineMode( iOfflineMode );
             }
         }
     
@@ -135,25 +143,25 @@ void CMpmDataUsageWatcher::RunL()
 
 // ---------------------------------------------------------------------------
 // From class CActive.
-// Cancel outstanding request.
+// Cancel the outstanding request.
 // ---------------------------------------------------------------------------
 //
-void CMpmDataUsageWatcher::DoCancel()
+void CMpmOfflineWatcher::DoCancel()
     {
-    MPMLOGSTRING( "CMpmDataUsageWatcher::DoCancel" )
+    MPMLOGSTRING( "CMpmOfflineWatcher::DoCancel" )
 
-    iRepository->NotifyCancel( KCurrentCellularDataUsage );
+    iRepository->NotifyCancel( KCoreAppUIsNetworkConnectionAllowed );
     }
 
 // ---------------------------------------------------------------------------
-// Request notifications.
+// Request for notifications.
 // ---------------------------------------------------------------------------
 //
-TInt CMpmDataUsageWatcher::RequestNotifications()
+TInt CMpmOfflineWatcher::RequestNotifications()
     {
-    MPMLOGSTRING( "CMpmDataUsageWatcher::RequestNotifications" )
+    MPMLOGSTRING( "CMpmOfflineWatcher::RequestNotifications" )
 
-    TInt err = iRepository->NotifyRequest( KCurrentCellularDataUsage, iStatus );
+    TInt err = iRepository->NotifyRequest( KCoreAppUIsNetworkConnectionAllowed, iStatus );
         
     if ( err == KErrNone )
         {
@@ -161,24 +169,25 @@ TInt CMpmDataUsageWatcher::RequestNotifications()
         }
     else
         {
-        MPMLOGSTRING2( "CMpmDataUsageWatcher::RequestNotifications, ERROR: %d", err )
+        // MPM's offline mode watching wouldn't recover... 
+        MPMLOGSTRING2( "CMpmOfflineWatcher::RequestNotifications, ERROR: %d", err )
         }
     return err;
     }
 
 // ---------------------------------------------------------------------------
-// Get current repository key value.
+// Get the current repository key value.
 // ---------------------------------------------------------------------------
 //
-TInt CMpmDataUsageWatcher::GetCurrentDataUsageValue()
+TInt CMpmOfflineWatcher::GetCurrentOfflineValue()
     {
-    MPMLOGSTRING( "CMpmDataUsageWatcher::GetCurrentDataUsageValue" )
+    MPMLOGSTRING( "CMpmOfflineWatcher::GetCurrentOfflineValue" )
 
-    TInt err = iRepository->Get( KCurrentCellularDataUsage, iCellularDataUsage );
+    TInt err = iRepository->Get( KCoreAppUIsNetworkConnectionAllowed, iOfflineMode );
         
     if ( err != KErrNone )
         {
-        MPMLOGSTRING2( "CMpmDataUsageWatcher::GetCurrentDataUsageValue, ERROR: %d", err )
+        MPMLOGSTRING2( "CMpmOfflineWatcher::GetCurrentOfflineValue, ERROR: %d", err )
         }
     return err;
     }

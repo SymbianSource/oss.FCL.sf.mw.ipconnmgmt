@@ -272,12 +272,6 @@ RESOURCE TBUF r_cmwizard_select_conn_method
 RESOURCE TBUF r_cmwizard_select_destination_description
     { buf = qtn_netw_conset_detail_add_to_destination; }
 
-RESOURCE TBUF r_cmwizard_new_method_added
-    { buf = qtn_netw_conset_conf_new_method_added; }
-
-RESOURCE TBUF r_cmwizard_new_dest_added
-    { buf = qtn_netw_conset_conf_new_dest_added; }
-
 RESOURCE TBUF r_cmwizard_no_destination
     { buf = qtn_netw_conset_info_no_destinations; }
     

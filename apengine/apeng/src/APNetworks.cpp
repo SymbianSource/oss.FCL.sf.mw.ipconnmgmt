@@ -25,11 +25,7 @@
 #include <ApNetworkItemList.h>
 #include <ApEngineConsts.h>
 
-#ifdef SYMBIAN_ENABLE_SPLIT_HEADERS
-#include <ProtectDB.h>
-#else
 #include <comms-infras/commdb/protection/protectdb.h>
-#endif
 
 #include "ApNetworks.h"
 #include "ApEngineLogger.h"

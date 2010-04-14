@@ -289,13 +289,6 @@ class CMPMServerSession : public CSession2
         void ClientErrorNotificationL( TInt aError );
 
         /**
-        * Checks if phone is in offline mode or not.
-        * @since 3.1
-        * @return ETrue if phone is in offline mode, otherwise EFalse.
-        */
-        TBool IsPhoneOfflineL() const;
-
-        /**
         * Returns the list of available IAPs, where the blacklisted IAPs 
         * have already been removed.
         * @since 3.2
@@ -807,9 +800,9 @@ class CMPMServerSession : public CSession2
         * @param aValidatedIap Iap validated by MPM for roaming
         * @return ETrue if necessary, otherwise EFalse.
         */
-        TBool CheckNotifNeed( const TUint32       aCurrentIap,
-                              const TUint32       aLastNotifiedIap,
-                              const TUint32       aValidatedIap );
+        TBool CheckNotifNeedL( const TUint32       aCurrentIap,
+                               const TUint32       aLastNotifiedIap,
+                               const TUint32       aValidatedIap );
 
         /**
         * Returns the list of unavailable IAPs.
@@ -959,6 +952,11 @@ class CMPMServerSession : public CSession2
         // Set when this session is user connection
 		//
         TBool iUserConnection;
+        
+        // Set when disconnect dialog is shown to avoid 
+        // showing duplicate cellulara data usage dialog
+        //
+        TBool iDisconnectDialogShown;
     };
 
 #include "mpmserversession.inl"

@@ -55,6 +55,7 @@ SOURCE            mpmiapselection.cpp
 SOURCE            mpmcsidwatcher.cpp
 SOURCE            mpmdialogbase.cpp
 SOURCE            mpmdatausagewatcher.cpp
+SOURCE            mpmofflinewatcher.cpp
 
 USERINCLUDE       ../inc
 

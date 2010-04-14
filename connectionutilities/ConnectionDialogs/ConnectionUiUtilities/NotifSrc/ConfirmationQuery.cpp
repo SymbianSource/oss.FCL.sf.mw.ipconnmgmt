@@ -58,6 +58,7 @@ CConfirmationQuery::~CConfirmationQuery()
     STATIC_CAST( CEikServAppUi*, 
                  CCoeEnv::Static()->AppUi() )->SuppressAppSwitching( EFalse );
     delete iExpiryTimer;
+    iChoiceIds.Close();
     }
 
 // ---------------------------------------------------------

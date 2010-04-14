@@ -120,10 +120,14 @@ CDestDlg::~CDestDlg()
         }
     if ( iTitlePane )
         {
-        // set old text back, if we have it...
+        // set old text back, if we have it and if we are going back to
+        // Connectivity Settings view
         if ( iOldTitleText )
             {
-            TRAP_IGNORE( iTitlePane->SetTextL( *iOldTitleText ) );
+            if ( iExitReason == KDialogUserBack )
+                {
+                TRAP_IGNORE( iTitlePane->SetTextL( *iOldTitleText ) );
+                }
             delete iOldTitleText;
             }
         }
@@ -365,9 +369,13 @@ void CDestDlg::ProcessCommandL( TInt aCommandId )
             {
             CLOG_WRITE( "CDestDlg::ProcessCommandL command: exit");
             iExitReason = KDialogUserExit;
+            iCmManagerImpl->WatcherUnRegister();
+            TryExitL( iExitReason );
+            break;            
             }
         case EAknSoftkeyBack:
             {
+            iExitReason = KDialogUserBack;
             iCmManagerImpl->WatcherUnRegister();
             TryExitL( iExitReason );
             break;
@@ -403,8 +411,7 @@ void CDestDlg::ProcessCommandL( TInt aCommandId )
                 }
             if ( iConnSettingsImpl->RunDefaultConnecitonRBPageL( selection ) )
                 {
-                defConnValue = selection.ConvertToDefConn();
-                ShowDefaultSetNoteL( defConnValue );
+                defConnValue = selection.ConvertToDefConn();                
                 
                 iCmManagerImpl->WriteDefConnL( defConnValue );
                 HandleListboxDataChangeL();
@@ -611,6 +618,7 @@ TBool CDestDlg::OkToExitL( TInt aButtonId )
             if (!iProcessing)
                 {
                 *iExiting = EFalse;
+                iExitReason = KDialogUserBack;
                 retval = ETrue;                
                 }
             break;
@@ -1077,11 +1085,7 @@ void CDestDlg::AddDestinationL()
                         }                    
 
                     iListbox->HandleItemAdditionL();
-
-                    TCmCommonUi::ShowNoteL( R_CMWIZARD_NEW_DEST_ADDED,
-                                            destName,
-                                            TCmCommonUi::ECmOkNote );
-                    
+               
                     // Sets the mittle soft key text to "Open"                        
                     SetMskL( R_QTN_MSK_OPEN );
                                             

@@ -38,6 +38,7 @@ Mobility Policy Manager server class definitions.
 class CMPMCommsDatAccess;
 class CMpmCsIdWatcher;
 class CMpmDataUsageWatcher;
+class CMpmOfflineWatcher;
 
 // CONSTANTS
 _LIT( KMPMPanicCategory, "Mobility Policy Manager Server" );
@@ -165,6 +166,13 @@ enum TMPMBearerType
     EMPMBearerTypePacketData,
     // Something else than previous ones
     EMPMBearerTypeOther
+    };
+
+enum TOfflineWlanQueryResponse
+    {
+    EOfflineResponseUndefined,
+    EOfflineResponseYes,
+    EOfflineResponseNo
     };
 
 // FUNCTION PROTOTYPES
@@ -792,6 +800,14 @@ class CMPMServer : public CPolicyServer
         inline CMpmCsIdWatcher* CsIdWatcher();
 
         /**
+         * Change state of the P&S keys according to active connection.
+         * Non-leaving version. Resets variables in case error happens.
+         * @since 5.2         
+         * @param aSession Handle to session used by connection.
+        */
+        void UpdateActiveConnection( CMPMServerSession& aSession );
+        
+        /**
         * Change state of the P&S keys according to active connection.
         * @since 5.0
         * @param aSession Handle to session used by connection.
@@ -813,11 +829,12 @@ class CMPMServer : public CPolicyServer
         void PublishActiveConnection();
         
         /**
-        * Returns number of active connections.
+        * Returns number of active iaps.
         * @since 5.0
+        * @param aKeysUpToDate Tells whether P&S keys are valid or not.
         * @return Number of active connections
         */
-        TInt NumberOfActiveConnections();
+        TInt NumberOfActiveConnections( TBool& aKeysUpToDate );
 
         /**
         * Returns server session instance that corresponds to given
@@ -834,6 +851,30 @@ class CMPMServer : public CPolicyServer
         * @since 5.2
         */
         void StopCellularConns();
+
+        /**
+        * Offline mode watcher updates the mode variable stored by MPM server.
+        * @since 5.2
+        */
+        void UpdateOfflineMode( TInt newModeValue );
+
+        /**
+        * Returns true if the phone is in offline mode.
+        * @since 5.2
+        */
+        TBool IsPhoneOffline();
+
+        /**
+        * Tells the "Use WLAN in offline mode" query response.
+        * @since 5.2
+        */
+        TOfflineWlanQueryResponse OfflineWlanQueryResponse();
+
+        /**
+        * Called when the "Use WLAN in offline mode" query has been responded.
+        * @since 5.2
+        */
+        void SetOfflineWlanQueryResponse( TOfflineWlanQueryResponse aResponse);
 
     private:
 
@@ -940,9 +981,14 @@ class CMPMServer : public CPolicyServer
         CMpmCsIdWatcher* iMpmCsIdWatcher;
 
         /**
-         * Handle to another central repository watcher
+         * Handle to central repository watcher
          */
         CMpmDataUsageWatcher* iMpmDataUsageWatcher;
+
+        /**
+         * Handle to central repository watcher
+         */
+        CMpmOfflineWatcher* iMpmOfflineWatcher;
 
         // Iap id of the active connection
         TUint32 iActiveIapId;
@@ -958,6 +1004,12 @@ class CMPMServer : public CPolicyServer
 
         // Used for commsdat related functionalities
         CMPMCommsDatAccess* iCommsDatAccess;
+        
+        // Offline mode.
+        TInt iOfflineMode;
+        
+        // Is WLAN usage already accepted in this offline session.
+        TOfflineWlanQueryResponse iOfflineWlanQueryResponse;
     };
 
 #include "mpmserver.inl"

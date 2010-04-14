@@ -94,7 +94,7 @@
 //w:
 //r:3.0
 //
-#define qtn_offline_activate_wlan               "Do you want to create a WLAN connection in Off-line mode?"
+#define qtn_offline_activate_wlan               "Allow WLAN connections during this offline session?"
 
 //d: Wait note text during collection of access points
 //l: popup_note_wait_window

@@ -267,7 +267,6 @@ void CAPControlListAPIWrapper::RunL()
 		if (tptrc.Length())
 			{
 	    	iPlugin.Container()->AddToListBoxL(tptrc);        
-			iPlugin.ShowConfirmNoteAPNL(R_QTN_ACL_CONF_APN_ADDED, tptrc);
 			}
 		else
 			{
@@ -276,7 +275,6 @@ void CAPControlListAPIWrapper::RunL()
 			TPtrC itemPtr(buf->Des());
 			iPlugin.Container()->AddToListBoxL(itemPtr);			
 			CleanupStack::PopAndDestroy( buf );
-			iPlugin.ShowConfirmNoteL(R_QTN_ACL_CONF_NWP_APN_ADDED);
 			}
 	    break; 	        
 	    } 
@@ -287,8 +285,7 @@ void CAPControlListAPIWrapper::RunL()
 	    break; 
 	case ERemoveAPN: 
 		iRequest = ENoRequest;	
-		CLOG( ( ESelector, 0, _L( "ERemoveAPN OK" ) ) );
-		iPlugin.ShowConfirmNoteL(R_QTN_ACL_CONF_APN_REMOVED);	
+		CLOG( ( ESelector, 0, _L( "ERemoveAPN OK" ) ) );		
 		iPlugin.Container()->RemoveFromListBoxL();    			
 	    break; 
 	case EActivateACLSecurity:

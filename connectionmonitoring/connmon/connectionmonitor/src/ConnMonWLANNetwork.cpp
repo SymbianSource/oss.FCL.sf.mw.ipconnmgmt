@@ -123,8 +123,10 @@ EXPORT_C TConnMonWLANNetwork TConnMonWLANNetwork::FromPtrC( const TPtrC& aPtrC )
         {
         buf.Append( aPtrC[len+EBufBase+i] );
         }
-
-    return TConnMonWLANNetwork( name, connectionMode, signalStrength, securityMode, buf );
+    TConnMonWLANNetwork connMonWLANNetwork = TConnMonWLANNetwork( name, 
+            connectionMode, signalStrength, securityMode, buf );
+    buf.Close();
+    return connMonWLANNetwork;
     }
 
 // End-of-file

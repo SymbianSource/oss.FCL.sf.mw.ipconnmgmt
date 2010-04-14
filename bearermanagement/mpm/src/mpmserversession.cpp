@@ -25,7 +25,6 @@ Mobility Policy Manager server session implementation.
 #include <gsmerror.h>     // KErrPacketDataTsyMaxPdpContextsReached 
 #include <etelpckt.h>     // KErrUmtsMaxNumOfContextExceededByNetwork
 #include <bldvariant.hrh>                // For feature flags
-#include <featmgr.h>                     // FeatureManager
 #include <centralrepository.h>           // CRepository 
 #include <CoreApplicationUIsSDKCRKeys.h> // KCRUidCoreApplicationUIs, 
                                          // KCoreAppUIsNetworkConnectionAllowed
@@ -76,7 +75,8 @@ CMPMServerSession::CMPMServerSession(CMPMServer& aServer)
       iConfirmDlgRoaming( NULL ),
       iStoredIapInfo(),
       iIapSelection( NULL ),
-      iMigrateState( EMigrateNone )
+      iMigrateState( EMigrateNone ),
+      iDisconnectDialogShown( EFalse )
     {
     }
 
@@ -94,12 +94,6 @@ void CMPMServerSession::ConstructL()
             *const_cast<CMPMServer*>( &iMyServer ), *this ));
         }
 
-    FeatureManager::InitializeLibL();
-    iOfflineFeatureSupported = FeatureManager::FeatureSupported( 
-                                   KFeatureIdOfflineMode );
- 
-     FeatureManager::UnInitializeLib();
-                                       
     // Append session pointer to server
     // 
     iMyServer.AppendSessionL( this );
@@ -712,8 +706,6 @@ void CMPMServerSession::HandleServerIapConnectionStartedL(
     // Complete the message as soon as possible to avoid latency in BM
     // 
     aMessage.Complete( KErrNone );
-    
-    IapSelectionL()->ConnectionStarted();
     }
 
 // -----------------------------------------------------------------------------
@@ -852,6 +844,21 @@ should not be confirmed - False" )
         {
         MPMLOGSTRING( "CMPMServerSession::IsConfirmFirstL - True" )
         isConfirmFirst = ETrue;
+
+        // iDisconnectDialogShown is set when disconnect dialog is shown.
+        // Before the disconnect dialog is shown, data usage confirmation
+        // dialog is already shown for the new PDP context. If you choose
+        // to disconnect the active PDP context then data usage dialog is
+        // shown again for the new context. So, set isConfirmFirst to
+        // False to avoid duplicate cellular confirm dialog
+        //
+        if ( iDisconnectDialogShown )
+            {
+            MPMLOGSTRING( "CMPMServerSession::IsConfirmFirstL  - False; Data \
+confirmation dialog already shown this IAP" )
+            isConfirmFirst = EFalse;
+            iDisconnectDialogShown = EFalse;
+            }
         }
     else 
         {
@@ -1419,8 +1426,11 @@ Warning: ChooseBestIap has not been called yet" )
         }
 
     // Show error popup if it's allowed per client request
+    // Don't show the pop up if error code is for disconnect dialog
+    //
     if ( !( iIapSelection->MpmConnPref().NoteBehaviour() &
-            TExtendedConnPref::ENoteBehaviourConnDisableNotes ) )
+            TExtendedConnPref::ENoteBehaviourConnDisableNotes ) &&
+         !DisconnectDlgErrorCode( error ) )
         {
         CConnectionUiUtilities* connUiUtils = NULL;
         TRAPD( popupCreateError, connUiUtils = CConnectionUiUtilities::NewL() );
@@ -1499,6 +1509,7 @@ Warning: ChooseBestIap has not been called yet" )
             iDisconnectDlg = CMPMDisconnectDlg::NewL( *const_cast<CMPMServerSession*>(this),
                                                       error,
                                                       *MyServer().DisconnectQueue() );
+            iDisconnectDialogShown = ETrue;
             return;
             }
         else
@@ -1860,13 +1871,13 @@ void CMPMServerSession::HandleServerSortSNAPL( const RMessage2& aMessage )
         // Store message for later usage.
     iServerSortSNAPMessage = aMessage;
 
-    TUint32 aSeconds = static_cast<TUint32>( iServerSortSNAPMessage.Int2() );
+    TUint32 seconds = static_cast<TUint32>( iServerSortSNAPMessage.Int2() );
     
     // To display up to date information the WLAN scan should be done first
     iMyServer.Events()->ScanWLANNetworksL( this, 
                                            ConnectionId(), 
                                            EWlanScanCallbackSortSnap, 
-                                           aSeconds );
+                                           seconds );
     }
     
 // -----------------------------------------------------------------------------
@@ -2665,16 +2676,9 @@ Mobility ongoing, notification will be handled later" )
             }
         }
 
-    TInt err(0);
     TInt currentIap = MyServer().GetBMIap( iConnId );
-    MPMLOGSTRING4( "CMPMServerSession::PrefIAPNotificationL - \
-current iap %d, last notified %d, err %d ", currentIap, iLastNotifiedIap, err )
-    if( err != KErrNone )
-        {
-        MPMLOGSTRING( "CMPMServerSession::PrefIAPNotificationL: Connection is not \
-registered for notifications" )
-        return;
-        }
+    MPMLOGSTRING3( "CMPMServerSession::PrefIAPNotificationL - \
+current iap %d, last notified %d ", currentIap, iLastNotifiedIap )
         
     TBool iapTypeLanOrWlan( EFalse );
     RAvailableIAPList  availableIAPList;
@@ -2731,9 +2735,9 @@ registered for notifications" )
                                        iapTypeLanOrWlan,
                                        *this );
         
-        if ( CheckNotifNeed( currentIap,
-                             iLastNotifiedIap,
-                             validateIapId ) )
+        if ( CheckNotifNeedL( currentIap,
+                              iLastNotifiedIap,
+                              validateIapId ) )
             {
             MPMLOGSTRING2( "CMPMServerSession::PrefIAPNotificationL: \
 Sending pref iap notification connId: 0x%x", iConnId )
@@ -2797,7 +2801,7 @@ Send preferred IAP notification" )
         // 
     else 
         {
-        err = availableIAPList.Find( oldIapId );
+        TInt err = availableIAPList.Find( oldIapId );
         if( err == KErrNotFound )
             {
             MPMLOGSTRING2( "CMPMServerSession::PrefIAPNotificationL: \
@@ -2975,35 +2979,6 @@ No notification requested" )
     }
 
 // -----------------------------------------------------------------------------
-// CMPMServerSession::IsPhoneOfflineL
-// 
-// Checks if phone is in offline mode or not.
-// Return ETrue if phone is in offline mode.
-// Return EFalse if phone is not in offline mode.
-// -----------------------------------------------------------------------------
-//
-TBool CMPMServerSession::IsPhoneOfflineL() const
-    {
-    MPMLOGSTRING( "CMPMServerSession::IsPhoneOfflineL" )
-    if ( iOfflineFeatureSupported )
-        {
-        CRepository* repository = CRepository::NewLC(KCRUidCoreApplicationUIs);
-        TInt connAllowed = ECoreAppUIsNetworkConnectionAllowed;
-        repository->Get( KCoreAppUIsNetworkConnectionAllowed, connAllowed );
-        CleanupStack::PopAndDestroy( repository ); 
-        if ( !connAllowed )
-            {
-            MPMLOGSTRING(
-                "CMPMServerSession::IsPhoneOfflineL Phone is in offline mode" )
-            return ETrue;
-            }
-        }
-    MPMLOGSTRING(
-        "CMPMServerSession::IsPhoneOfflineL Phone is not in offline mode" )
-    return EFalse;
-    }
-
-// -----------------------------------------------------------------------------
 // CMPMServerSession::AvailableUnblacklistedIapsL
 // -----------------------------------------------------------------------------
 //
@@ -3159,12 +3134,12 @@ TBool CMPMServerSession::IsUpgrade(
     }
 
 // -----------------------------------------------------------------------------
-// CMPMServerSession::CheckNotifNeed
+// CMPMServerSession::CheckNotifNeedL
 // -----------------------------------------------------------------------------
 //
-TBool CMPMServerSession::CheckNotifNeed( const TUint32       aCurrentIap,
-                                         const TUint32       aLastNotifiedIap,
-                                         const TUint32       aValidatedIap )
+TBool CMPMServerSession::CheckNotifNeedL( const TUint32       aCurrentIap,
+                                          const TUint32       aLastNotifiedIap,
+                                          const TUint32       aValidatedIap )
     {
     TBool retValue( EFalse );
 
@@ -3183,8 +3158,19 @@ TBool CMPMServerSession::CheckNotifNeed( const TUint32       aCurrentIap,
             }
         else
             {
-            MPMLOGSTRING( "CMPMServerSession::CheckNotifNeed: notif needed" )
-            retValue = ETrue;
+            TCmUsageOfWlan usageOfWlan = MyServer().CommsDatAccess()->ForcedRoamingL();
+            
+            if ( usageOfWlan == ECmUsageOfWlanManual &&
+                 MyServer().CommsDatAccess()->CheckWlanL( aValidatedIap ) != ENotWlanIap  )
+                {
+                MPMLOGSTRING( "CMPMServerSession::CheckNotifNeed: WLAN IAP, Switch to WLAN is Manual, no need to send notification" )
+                retValue = EFalse;
+                }
+            else
+                {
+                MPMLOGSTRING( "CMPMServerSession::CheckNotifNeed: notif needed" )
+                retValue = ETrue;             
+                }
             }
        }
     else
@@ -3579,7 +3565,7 @@ TBool CMPMServerSession::IsWlanOnlyL( TBool& aNewWlansAllowed )
 TBool CMPMServerSession::ForcedRoaming()
     {
     TBool forcedRoaming( EFalse );
-    if ( iIapSelection != NULL )
+    if ( iIapSelection )
         {
         forcedRoaming = iIapSelection->MpmConnPref().ForcedRoaming();
         }
@@ -3659,7 +3645,8 @@ void CMPMServerSession::RemoveIapsAccordingToBearerSetL( TConnMonIapInfo& aIapIn
         // be filtered.
         index = 0;
         RAvailableIAPList availableIaps; 
-            
+        CleanupClosePushL( availableIaps );
+		
         for ( TUint i = 0; i < aIapInfo.iCount; i++ )
             {
             availableIaps.AppendL( aIapInfo.iIap[i].iIapId );
@@ -3704,7 +3691,8 @@ Filtered away VPN IAP: %d", aIapInfo.iIap[index].iIapId );
                 aIapInfo.iCount--;                               
                 }
             index++;
-            }        
+            }
+        CleanupStack::PopAndDestroy( &availableIaps );
         }
     }
 

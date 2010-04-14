@@ -376,6 +376,14 @@ private:
      * Second phase construction.
      */
     void ConstructL();
+    
+    /*
+     * Converts WLAN's security modes into ConnMon's.
+     * @since 5.2
+     * @param scanInfo Wlan scan info
+     * @return Connection monitor's security mode (TConnMonSecurityMode).
+     */
+    TUint ConvertWlan2ConnMonExtSecMode(CWlanScanInfo* scanInfo);
 
 private: // Data
     // Pointer to server module

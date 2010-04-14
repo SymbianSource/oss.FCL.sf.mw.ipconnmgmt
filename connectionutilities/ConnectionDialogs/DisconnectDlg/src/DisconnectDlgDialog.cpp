@@ -222,19 +222,17 @@ TBool CDisconnectDlgDialog::OkToExitL( TInt aButtonId )
         TInt result = iConnModel->EndConnection( toBeClosedItem );
         iDisconnectDialogUi->iDialogRun = EFalse;
         if ( result )
-            {
-            TInt resId = R_QTN_CMON_INFO_CONN_ALREADY_END;
+            {            
             if( KNullUnit == result )
                 {
                 result = KErrNone;
                 }
             else
-                {
-                resId = R_QTN_NETW_INFO_DISCONNECT_FAILED;
+                {               
+                iConnModel->InfoNoteL( R_QTN_NETW_INFO_DISCONNECT_FAILED );
                 result = KErrGeneral;
                 }
-
-            iConnModel->InfoNoteL( resId );
+            
             iDisconnectDialogUi->CompleteL( result );
             }
         }

@@ -619,7 +619,21 @@ EXPORT_C void CmPluginBaseSettingsDlg::HandleListBoxEventL(
 EXPORT_C TKeyResponse CmPluginBaseSettingsDlg::OfferKeyEventL( const TKeyEvent& aKeyEvent, 
                                        TEventCode aType )    
     {
-    return iListbox->OfferKeyEventL( aKeyEvent, aType );       
+    TKeyResponse retVal ( EKeyWasNotConsumed );
+    switch( aKeyEvent.iCode )
+        {
+        // Add processing for case EKeyEscape to support status pane event in IAP-related editing 
+        // views (Dlg view, AdvDlg view and IPv4 and IPv6 views and so on)
+        case EKeyEscape:
+            TryExitL( iExitReason );
+            retVal = EKeyWasConsumed;
+            break;
+        default:
+            retVal = iListbox->OfferKeyEventL( aKeyEvent, aType ); 
+            break;
+        }
+        
+    return retVal;
     }
 
 //---------------------------------------------------------------------------

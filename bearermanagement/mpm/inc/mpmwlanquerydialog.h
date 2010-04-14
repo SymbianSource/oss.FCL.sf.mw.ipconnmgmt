@@ -25,7 +25,8 @@
 #include <wifiprotuiclient.h>
 #include <wifiprotreturn.h>
 
-#include "mpmiapselection.h" // for TOfflineNoteResponse
+#include "mpmcommsdataccess.h"
+
 
 // ID of Easy Wep dialog
 const TUid KUidEasyWepDlg = { 0x101FD673 };
@@ -135,12 +136,10 @@ private:
          * Used if there are several dialogs queued.
          *
          * @param aWlanIapId     Selected WLAN IAP
-         * @param aOfflineStatus Offline note response
          * @param aDialogStatus  Status of the dialog when destroyed.
          * @since 3.2
          */
         void OfferInformation( TUint32 aWlanIapId, 
-                               TOfflineNoteResponse aOfflineStatus,
                                TInt aDialogStatus );
 
         CMPMWlanQueryDialog( CMPMIapSelection&  aSession,

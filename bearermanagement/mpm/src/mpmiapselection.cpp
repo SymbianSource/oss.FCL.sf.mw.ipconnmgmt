@@ -43,7 +43,6 @@ CMPMIapSelection::CMPMIapSelection( CMPMCommsDatAccess*  aCommsDatAccess,
       iUserSelectionIapId( 0 ),
       iUserSelectionSnapId( 0 ),
       iImplicitState( EImplicitStart ),
-      iOfflineNoteResponse( EOfflineResponseUndefined ),
       iIsRoaming( EFalse ),
       iNewWlansAllowed ( EFalse )
     {
@@ -344,7 +343,7 @@ void CMPMIapSelection::ExplicitConnectionL()
         // KErrGprsOfflineMode should be returned instead of KErrNone.
         // 
         
-        if ( !iapTypeLanOrWlan && iSession->IsPhoneOfflineL() )
+        if ( !iapTypeLanOrWlan && iSession->MyServer().IsPhoneOffline() )
             {
             ChooseIapComplete( KErrGprsOfflineMode, &iChooseIapPref );
             }
@@ -512,7 +511,7 @@ void CMPMIapSelection::CompleteExplicitSnapConnectionL()
         {
         ChooseIapComplete( KErrGprsServicesNotAllowed, NULL );
         }
-    else if ( !iapTypeLanOrWlan && iSession->IsPhoneOfflineL() )
+    else if ( !iapTypeLanOrWlan && iSession->MyServer().IsPhoneOffline() )
         {
         // In case offline mode is enabled, only LAN or WLAN is allowed.
         // If some other bearer has been requested, then error code 
@@ -952,43 +951,6 @@ void CMPMIapSelection::ImplicitConnectionWlanNoteL()
     }
 
 // -----------------------------------------------------------------------------
-// CMPMIapSelection::OfflineNoteResponse
-// -----------------------------------------------------------------------------
-//
-TOfflineNoteResponse CMPMIapSelection::OfflineNoteResponse()
-    {
-#ifndef _PLATFORM_SIMULATOR_
-    MPMLOGSTRING2( "CMPMIapSelection::OfflineNoteResponse: %d",
-                   iOfflineNoteResponse )
-    return iOfflineNoteResponse;
-#else
-    // Platsim simulates WLAN and offline-mode. To ease automated testing,
-    // offline connection confirmation is not asked in Platsim-variant
-    MPMLOGSTRING( "CMPMIapSelection::OfflineNoteResponse: yes for Platsim" )
-    return EOfflineResponseYes;
-#endif
-    }
-
-// -----------------------------------------------------------------------------
-// CMPMIapSelection::ConnectionStarted
-// -----------------------------------------------------------------------------
-//
-void CMPMIapSelection::ConnectionStarted()
-    {
-    MPMLOGSTRING( "CMPMIapSelection::ConnectionStarted: reset offline response" )
-    SetOfflineNoteResponse( EOfflineResponseUndefined );
-    }
-    
-// -----------------------------------------------------------------------------
-// CMPMIapSelection::SetOfflineNoteShown
-// -----------------------------------------------------------------------------
-//
-void CMPMIapSelection::SetOfflineNoteResponse( TOfflineNoteResponse aResponse )
-    {
-    MPMLOGSTRING2( "CMPMIapSelection::SetOfflineNoteResponse %d ", aResponse )
-    iOfflineNoteResponse = aResponse;
-    }
-// -----------------------------------------------------------------------------
 // CMPMIapSelection::CompleteImplicitConnectionL
 // -----------------------------------------------------------------------------
 //
@@ -1003,7 +965,7 @@ void CMPMIapSelection::CompleteImplicitConnectionL()
                                    iapTypeLanOrWlan,
                                    *iSession );
                                    
-    if ( !iapTypeLanOrWlan && iSession->IsPhoneOfflineL() )
+    if ( !iapTypeLanOrWlan && iSession->MyServer().IsPhoneOffline() )
         {
         MPMLOGSTRING2( "CMPMIapSelection::CompleteImplicitConnectionL: Completing with code = %i",
                 KErrGprsOfflineMode )

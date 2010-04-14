@@ -358,18 +358,6 @@ void CConnectionModel::SelectedConnectionClosedL()
     // the connection is succesfully closed
     CConnectionInfo* info = iConnArray->At( iClosingConnectionIndex );
 
-    TPtrC iap = info->GetIapNameL();
-    TInt bearerType = info->GetBearerType();
-
-    if( bearerType < EBearerExternalCSD )
-        {
-        InfoNoteL( R_QTN_NETW_CONF_CONN_DISCONNECTED, &iap );
-        }
-    else
-        {
-        InfoNoteL( R_QTN_NETW_CONF_MODEM_CONN_DISCONNECTED );
-        }
-
     CLOG_LEAVEFN("CConnectionModel::SelectedConnectionClosedL");    
     }
 

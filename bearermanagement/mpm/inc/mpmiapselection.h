@@ -28,13 +28,6 @@ class CMPMWlanQueryDialog;
 class CMPMConfirmDlgStarting;
 class TMpmConnPref;
 
-enum TOfflineNoteResponse
-    {
-    EOfflineResponseUndefined,
-    EOfflineResponseYes,
-    EOfflineResponseNo
-    };
-
 /**
  * Handles IAP selection. MPM Server session
  * uses the class to select the best available 
@@ -218,27 +211,6 @@ public:
     void HandleUserSelectionL( TBool aIsIap, TUint32 aId, TInt aError  );
 
     /**
-     * Returns the stored user response to the offline note
-     * @since 3.2
-     */
-    TOfflineNoteResponse OfflineNoteResponse();
-
-    /**
-     * Stores the user response to the offline note
-     * @since 3.2
-     * @param aResponse Offline note response
-     */
-    void SetOfflineNoteResponse( TOfflineNoteResponse aResponse );
-
-    /**
-     * Iap selection is notified that conenction is started. 
-     * Offline note response is reseted.
-     *
-     * @since 3.2
-     */
-    void ConnectionStarted();
-
-    /**
      * Get original MPM connection preferences
      * @since 5.2
      */
@@ -355,11 +327,6 @@ private:
 
     // State of impilict connection start
     TImplicitConnectionState iImplicitState;
-
-    // Offline note response for the connection. 
-    // Offline note must be displayed only once 
-    // during the connection (not for each wlan iap of a snap).
-    TOfflineNoteResponse iOfflineNoteResponse;
 
     // True if connection is roaming (set when displaying offline note)
     TBool iIsRoaming;

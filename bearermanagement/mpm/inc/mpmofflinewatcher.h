@@ -11,12 +11,12 @@
 *
 * Contributors:
 *
-* Description: Listen cellular data usage key changes in central repository.
+* Description: Listens for offline mode changes in central repository.
 *
 */
 
-#ifndef MPMDATAUSAGEWATCHER_H
-#define MPMDATAUSAGEWATCHER_H
+#ifndef MPMOFFLINEWATCHER_H
+#define MPMOFFLINEWATCHER_H
 
 //  INCLUDES
 #include <e32base.h>
@@ -25,14 +25,14 @@ class CRepository;
 class CMPMServer;
 
 // Stop after this many consecutive central repository errors.
-const TInt KMpmDataUsageWatcherCenRepErrorThreshold = 80;
+const TInt KMpmOfflineWatcherCenRepErrorThreshold = 80;
 
 /**
  *  Class for accessing central repository.
- *  Follows KCurrentCellularDataUsage key in central repository.
+ *  Follows KCoreAppUIsNetworkConnectionAllowed key in central repository.
  *  @since 5.2
  */
-class CMpmDataUsageWatcher : public CActive
+class CMpmOfflineWatcher : public CActive
     {
 
 public:
@@ -40,12 +40,12 @@ public:
     /**
     * New for calling the two-phased constructor.
     */
-    static CMpmDataUsageWatcher* NewL( CMPMServer* aServer );
+    static CMpmOfflineWatcher* NewL( CMPMServer* aServer );
 
     /**
     * Destructor.
     */
-    virtual ~CMpmDataUsageWatcher();
+    virtual ~CMpmOfflineWatcher();
 
     /**
      * Start to listen for events.
@@ -67,7 +67,7 @@ private:
     /**
     * C++ default constructor.
     */
-    CMpmDataUsageWatcher( CMPMServer* aServer );
+    CMpmOfflineWatcher( CMPMServer* aServer );
 
     /**
     * Symbian 2nd phase constructor.
@@ -80,12 +80,17 @@ private:
     TInt RequestNotifications();
     
     /**
-    * Get current cellular data usage value.
+    * Get current offline mode value.
     */
-    TInt GetCurrentDataUsageValue();
+    TInt GetCurrentOfflineValue();
 
 
 private: // data
+
+    /**
+     * Is offline feature supported.
+     */
+    TBool iOfflineFeatureSupported;
 
     /**
      * Central repository handle.
@@ -94,9 +99,9 @@ private: // data
     CRepository* iRepository;
 
     /**
-     * Data usage value.
+     * Offline mode activity value.
      */
-    TInt iCellularDataUsage;     // type: TCmCellularDataUsage
+    TInt iOfflineMode;     // type: TCoreAppUIsNetworkConnectionAllowed
 
     /**
      * Pointer to the MPM Server object.
@@ -111,4 +116,4 @@ private: // data
 
     };
 
-#endif // MPMDATAUSAGEWATCHER_H
+#endif // MPMOFFLINEWATCHER_H
