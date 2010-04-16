@@ -300,31 +300,21 @@ void CS60MetaConnectionProvider::PolicyNotification( TMpmNotification& aNotifica
 
             //HandlePreferredIAPAvailable( const_cast<TMpmNotificationPrefIAPAvailable&>( notification ) );
 
-            // Check if the TPrefIAPNotifInfo contains new or old IAP. 
-            //
-            if ( ServiceProvider() &&
-                 ((RMetaServiceProviderInterface*)ServiceProvider())->ProviderInfo().APId() != notification.iNewIapId )
-                {
-                S60MCPRLOGSTRING2("S60MCPR<%x>::PolicyNotification() EMPMPreferredIAPAvailable IAP %d",(TInt*)this,notification.iNewIapId);
+            S60MCPRLOGSTRING2("S60MCPR<%x>::PolicyNotification() EMPMPreferredIAPAvailable IAP %d",(TInt*)this,notification.iNewIapId);
 
-                // Store PolicyNotification
-                // This could happen if PolicyServer sends notification too early.
-                //
-                StorePolicyNotification( aNotification );
-                
-                // Send preferred carrier message into meshmachine.
-                //
-                RNodeInterface ni;
-                ni.OpenPostMessageClose( NodeId(), 
-                                         NodeId(), 
-                                         TCFS60MCPRMessage::TMPMPreferredCarrierAvailableMsg( (TAny*)&notification ).CRef() );
-                }
-#ifdef _DEBUG
-            else
-                {
-                S60MCPRLOGSTRING2("S60MCPR<%x>::PolicyNotification() EMPMPreferredIAPAvailable SAME IAP %d",(TInt*)this,notification.iNewIapId );
-                }
-#endif
+
+            // Store PolicyNotification
+            // This could happen if PolicyServer sends notification too early.
+            //
+            StorePolicyNotification( aNotification );
+            
+            // Send preferred carrier message into meshmachine.
+            //
+            RNodeInterface ni;
+            ni.OpenPostMessageClose( NodeId(), 
+                                     NodeId(), 
+                                     TCFS60MCPRMessage::TMPMPreferredCarrierAvailableMsg( (TAny*)&notification ).CRef() );
+
             break;
             }
         case EMPMMobilityErrorNotification:
@@ -398,11 +388,9 @@ void CS60MetaConnectionProvider::PolicyNotification( TMpmNotification& aNotifica
                     notification.iInfo.iIap == 0 )) 
                 {
                 S60MCPRLOGSTRING2("S60MCPR<%x>::PolicyNotification() EMPMStopIAPNotification IAP %d",(TInt*)this,notification.iInfo.iIap);
-
-                //TODO migrate to use MCPR's TStop and vertical msg down. Not supported at the moment.
-                /*PostToClients<TDefaultClientMatchPolicy>( TNodeCtxId( 0, Id() ),
-                                                          TCFServiceProvider::TStop( KErrCancel ).CRef(),
-                                                          TClientType( TCFClientType::EData) );*/
+                PostToClients<TDefaultClientMatchPolicy>( TNodeCtxId( 0, Id() ),
+                                                          TCFServiceProvider::TStop( KErrDisconnected ).CRef(),
+                                                          TClientType( TCFClientType::EServProvider) );
                 }
 #ifdef _DEBUG
             else
@@ -464,14 +452,11 @@ void CS60MetaConnectionProvider::StorePolicyNotification( TMpmNotification& aNot
     // Store PolicyNotification
     // This could happen if PolicyServer sends notification too early.
     //
-    S60MCPRLOGSTRING1("S60MCPR<%x>::StorePolicyNotification()",(TInt*)this);
     if ( iPendingNotification.Length() == 0 )
         {
         S60MCPRLOGSTRING1("S60MCPR<%x>::StorePolicyNotification() iPendingNotification.Length() == 0",(TInt*)this);
         Mem::Copy((TAny*)iPendingNotification.Ptr(), &aNotification, KMpmMessageLength);
-        S60MCPRLOGSTRING1("S60MCPR<%x>::StorePolicyNotification() Mem::Copy",(TInt*)this);
         iPendingNotification.SetLength( KMpmMessageLength );
-        S60MCPRLOGSTRING1("S60MCPR<%x>::StorePolicyNotification() iPendingNotification.SetLength",(TInt*)this);
         }
 #ifdef _DEBUG
     else

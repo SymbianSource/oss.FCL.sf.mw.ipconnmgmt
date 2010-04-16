@@ -29,7 +29,7 @@
 #include "cellulardatausagekeyupdater.h"
 #include "ConnMonServ.h"
 #include "ConnMonAvailabilityManager.h"
-#include "ConnMonIap.h"
+#include "ConnMonIAP.h"
 #include "ConnMonDef.h"
 #include "log.h"
 
@@ -86,11 +86,16 @@ void CCellularDataUsageKeyUpdater::UpdateKeyL( const TInt aRegistration ) const
                 
     TCmGenConnSettings occSettings = ReadGenConnSettingsL();
   
-    TInt value( occSettings.iCellularDataUsageHome );
+    TInt value( ECmCellularDataUsageDisabled );
         
     if ( aRegistration == ENetworkRegistrationExtRoamingInternational )
         {           
         value = occSettings.iCellularDataUsageVisitor;
+        }
+    else if ( aRegistration == ENetworkRegistrationExtHomeNetwork || 
+              aRegistration == ENetworkRegistrationExtRoamingNational )
+        {           
+        value = occSettings.iCellularDataUsageHome;
         }
 
     CRepository* cmRepository = NULL;
@@ -106,10 +111,12 @@ void CCellularDataUsageKeyUpdater::UpdateKeyL( const TInt aRegistration ) const
             {
             cmRepository->Set( KCurrentCellularDataUsage, value );
             LOGIT1("KCurrentCellularDataUsage set to %d", value)
-            
-            LOGIT("CCellularDataUsageKeyUpdater triggered HandleAvailabilityChange()")
-            iServer->AvailabilityManager()->HandleAvailabilityChange();
-            }    
+            }
+        else
+            {
+            LOGIT1("KCurrentCellularDataUsage already up-to-date %d", previous)
+            }
+        
         delete cmRepository;    
         }
     else
@@ -219,6 +226,9 @@ void CCellularDataUsageKeyUpdater::RunL()
         iErrorCounter = 0;
         
         TRAPD( leaveCode, UpdateKeyL() )
+        
+        LOGIT("CCellularDataUsageKeyUpdater triggered HandleAvailabilityChange()")
+        iServer->AvailabilityManager()->HandleAvailabilityChange();
     
         if ( leaveCode )
             {

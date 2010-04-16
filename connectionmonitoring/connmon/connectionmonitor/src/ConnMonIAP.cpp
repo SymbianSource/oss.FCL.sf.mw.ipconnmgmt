@@ -33,6 +33,7 @@
 #include "connmontelnoti.h"
 #include "ConnMonBearerNotifier.h"
 #include "log.h"
+#include "cellulardatausagekeyupdater.h"
 
 // ============================ MEMBER FUNCTIONS ===============================
 
@@ -1180,6 +1181,7 @@ TInt CConnMonIAP::GetBearerInfo( const TUint aConnectionId, TBearerInfo& aBearer
     {
     LOGENTRFN("CConnMonIAP::GetBearerInfo()")
     TInt err( KErrNone );
+    TBool getBearerCalled( EFalse );
 
     // Find connection matching the given Id
     TInt index = Index( aConnectionId );
@@ -1198,6 +1200,7 @@ TInt CConnMonIAP::GetBearerInfo( const TUint aConnectionId, TBearerInfo& aBearer
                     aConnectionId,
                     iConnInfos[index].iBearer,
                     iConnInfos[index].iBearerInfo );
+            getBearerCalled = ETrue;
             }
         if ( KErrNone == err )
             {
@@ -1243,17 +1246,21 @@ TInt CConnMonIAP::GetBearerInfo( const TUint aConnectionId, TBearerInfo& aBearer
                     iConnInfos[index].iBearerInfo.iBearer == EBearerInfoHSUPA ||
                     iConnInfos[index].iBearerInfo.iBearer == EBearerInfoHSxPA ) )
                 {
-                // CSD/HSCSD info could change after the first query also
-                // GPRS/EdgeGPRS/WCDMA info can change.
-                TInt bearer( EBearerUnknown );
-                TBearerInfo bearerInfo;
-
-                LOGIT("GetBearerInfo: GetBearer() 2nd query")
-                err = GetBearer( aConnectionId, bearer, bearerInfo );
-                if ( ( KErrNone == err ) && ( bearerInfo.iBearer != EBearerInfoUnknown ) )
+                // If GetBearer() was just called, no need to do it again.
+                if ( !getBearerCalled )
                     {
-                    iConnInfos[index].iBearer = bearer;
-                    iConnInfos[index].iBearerInfo = bearerInfo;
+                    // CSD/HSCSD info could change after the first query also
+                    // GPRS/EdgeGPRS/WCDMA info can change.
+                    TInt bearer( EBearerUnknown );
+                    TBearerInfo bearerInfo;
+
+                    LOGIT("GetBearerInfo: GetBearer() 2nd query")
+                    err = GetBearer( aConnectionId, bearer, bearerInfo );
+                    if ( ( KErrNone == err ) && ( bearerInfo.iBearer != EBearerInfoUnknown ) )
+                        {
+                        iConnInfos[index].iBearer = bearer;
+                        iConnInfos[index].iBearerInfo = bearerInfo;
+                        }
                     }
                 }
             }
@@ -2007,8 +2014,15 @@ void CConnMonIAP::ListenL()
             iNetwRegistrationNotifier = CNetwRegistrationNotifier::NewL( iServer, iMobilePhone );
             }
         if ( !iNetwRegistrationNotifier->IsActive() )
-            {
+            {            
             iNetwRegistrationNotifier->Receive(); // (re)start listening
+            
+            // We might have missed the network registration notification before 
+            // we started listening for notifications here. Update the 
+            // network registration information.            
+            TInt registration( ENetworkRegistrationExtNotAvailable );                
+            User::LeaveIfError( GetNetworkRegistration_v2( registration ) );
+            iServer->CellularDataUsageKeyUpdater()->UpdateKeyL( registration );            
             }
 
         // Bearer change (GPRS/Edge GPRS) status events

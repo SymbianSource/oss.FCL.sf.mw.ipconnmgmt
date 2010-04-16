@@ -40,18 +40,26 @@ TInt MPMLauncher::LaunchServer(
     {
     MPMLOGSTRING("MPMLauncher::LaunchServer")
     const TUidType serverUid(KNullUid,aServerUid2,aServerUid3);
+    RSemaphore semaphore;
+    TInt err( KErrNone );
 
-    // We just create a new server process. Simultaneous
-    // launching of two such processes should be detected when the second one
-    // attempts to create the server object, failing with KErrAlreadyExists.
-    //
+    err = semaphore.CreateGlobal( KMPMLauncherSemaphore, 0 );
+    if ( err != KErrNone )
+        {
+        // Creating semaphore failed, which means some other thread is
+        // creating the server right. Propagate error KErrServerBusy
+        // to inform the client it should try connecting again.
+        return KErrServerBusy;
+        }
+    
     MPMLOGSTRING("Create a new server process")
     RProcess server;
     TInt r=server.Create(aServerFileName,KNullDesC,serverUid);
-
+    
     if ( r != KErrNone )
         {
         MPMLOGSTRING2("Server process creation returned error: %d", r)
+        semaphore.Close();
         return r;
         }
     TRequestStatus stat;
@@ -70,6 +78,7 @@ TInt MPMLauncher::LaunchServer(
     // from KErrNone
     r = ( server.ExitType() == EExitPanic ) ? KErrGeneral : stat.Int();
     server.Close();
+    semaphore.Close();
     return r;
     }
 

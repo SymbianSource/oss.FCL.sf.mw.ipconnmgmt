@@ -67,7 +67,7 @@ class CCdcCommsDatCreator: public CBase
 
 
         /** Destructor */
-	    IMPORT_C virtual ~CCdcCommsDatCreator();
+        virtual ~CCdcCommsDatCreator();
         
     private:
     

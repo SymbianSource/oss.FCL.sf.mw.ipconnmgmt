@@ -31,7 +31,7 @@
 #include <cmpluginwlandef.h>
 // #include <vpnapi.h>
 #include <centralrepository.h>
-#include <SettingsInternalCRKeys.h>
+#include <settingsinternalcrkeys.h>
 #include <featmgr.h>
 #include <ConeResLoader.h>
 #include <bautils.h>

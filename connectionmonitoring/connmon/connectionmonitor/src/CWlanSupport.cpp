@@ -1699,6 +1699,7 @@ void CWlanEvent::RssChanged( TWlanRssClass aRssClass, TUint aRss )
             ( aRssClass == EWlanRssClassNormal && previousRssClass == EConnMonWlanRssClassWeak ) )
         {
         LOGIT("Rss class change caused call to HandleAvailabilityChange()")
+        iWlanSupport->EnableWlanScan(); 
         iServer->AvailabilityManager()->HandleAvailabilityChange();
         }
 

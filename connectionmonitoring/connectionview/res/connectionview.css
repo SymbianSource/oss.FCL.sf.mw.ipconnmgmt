@@ -1,0 +1,43 @@
+/*
+* Copyright (c) 2010 Nokia Corporation and/or its subsidiary(-ies). 
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description: 
+*
+*/
+
+HbLabel#mInfoLabel::text
+{
+    font-variant: secondary;
+    text-height: var(hb-param-text-height-secondary);
+    text-align: center;
+}
+
+HbGroupBox#groupBox::headingWidget:portrait
+{
+    fixed-width: expr(var(hb-param-screen-width)-var(hb-param-margin-gene-left)-var(hb-param-margin-gene-right));
+}
+
+HbGroupBox#groupBox::contentWidget:portrait
+{
+    fixed-width: expr(var(hb-param-screen-width)-var(hb-param-margin-gene-left)-var(hb-param-margin-gene-right));
+}
+
+HbGroupBox#groupBox::headingWidget:landscape
+{
+    fixed-width: expr(var(hb-param-screen-height)-var(hb-param-margin-gene-top)-var(hb-param-margin-gene-bottom)-var(hb-param-widget-toolbar-height));
+}
+
+HbGroupBox#groupBox::contentWidget:landscape
+{
+    fixed-width: expr(var(hb-param-screen-height)-var(hb-param-margin-gene-top)-var(hb-param-margin-gene-bottom)-var(hb-param-widget-toolbar-height));
+}

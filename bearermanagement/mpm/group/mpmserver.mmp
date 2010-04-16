@@ -54,7 +54,7 @@ SOURCE            mpmwlanquerydialog.cpp
 SOURCE            mpmiapselection.cpp
 SOURCE            mpmcsidwatcher.cpp
 SOURCE            mpmdialogbase.cpp
-SOURCE            mpmwlanavailability.cpp
+SOURCE            mpmdatausagewatcher.cpp
 
 USERINCLUDE       ../inc
 

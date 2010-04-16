@@ -194,12 +194,29 @@ namespace S60MCprMobilityActivity
             {
             S60MCPRLOGSTRING1("S60MCPR<%x>::TNoTagOrInformMigrationAvailableBackwardsOrErrorOrCancel::TransitionTag() TMPMPreferredCarrierAvailableMsg",(TInt*)&iContext.Node())    
             return S60MCprStates::KInformMigrationAvailable | NetStateMachine::EBackward;
-            }
+            }            
         // else cancel
         return KCancelTag | NetStateMachine::EForward;
         }
 
-
+    // -----------------------------------------------------------------------------
+    // S60MCprMobilityActivity::TInformMigrationCompletedOrError::TransitionTag
+    // -----------------------------------------------------------------------------
+    //
+    DEFINE_SMELEMENT( TInformMigrationCompletedOrError, NetStateMachine::MStateFork, TContext )
+    TBool TInformMigrationCompletedOrError::TransitionTag()
+        {    
+        // Error notification falls into the error -case.
+        if ( iContext.iNodeActivity->Error() ) 
+            {   
+            return MeshMachine::KErrorTag | NetStateMachine::EForward;
+            }
+        else
+            {
+            return S60MCprStates::KInformMigrationCompleted;
+            }
+        }
+        
     // -----------------------------------------------------------------------------
     // S60MCprMobilityActivity::TStartMobilityHandshakeBackwardsOrError::TransitionTag
     // -----------------------------------------------------------------------------
@@ -221,23 +238,29 @@ namespace S60MCprMobilityActivity
     // S60MCprMobilityActivity::TInformMigrationAvailableOrCancelTag::TransitionTag
     // -----------------------------------------------------------------------------
     //
-    DEFINE_SMELEMENT( TInformMigrationAvailableOrCancelTag, NetStateMachine::MStateFork, TContext )
-    TBool TInformMigrationAvailableOrCancelTag::TransitionTag()
-        {
-        if ( iContext.iMessage.IsMessage<TEBase::TCancel>() )
+    DEFINE_SMELEMENT( TInformMigrationAvailableOrErrorOrCancelTag, NetStateMachine::MStateFork, TContext )
+    TBool TInformMigrationAvailableOrErrorOrCancelTag::TransitionTag()
+        {        
+        if ( iContext.iNodeActivity->Error() )
             {
-            S60MCPRLOGSTRING1("S60MCPR<%x>::TInformMigrationAvailableOrCancelTag::TransitionTag() KCancelTag",(TInt*)&iContext.Node())
+            S60MCPRLOGSTRING1("S60MCPR<%x>::TInformMigrationAvailableOrErrorOrCancelTag::TransitionTag() KErrorTag",(TInt*)&iContext.Node())
+            return MeshMachine::KErrorTag | NetStateMachine::EForward;
+            }
+
+        else if ( iContext.iMessage.IsMessage<TEBase::TCancel>() )
+            {
+            S60MCPRLOGSTRING1("S60MCPR<%x>::TInformMigrationAvailableOrErrorOrCancelTag::TransitionTag() KCancelTag",(TInt*)&iContext.Node())
             return KCancelTag | NetStateMachine::EForward;
             }
         else if ( iContext.iMessage.IsMessage<TCFMobilityProvider::TMigrationRejected>() )
             {
-            S60MCPRLOGSTRING1("S60MCPR<%x>::TInformMigrationAvailableOrCancelTag::TransitionTag() KSendInitialApplicationReject",
+            S60MCPRLOGSTRING1("S60MCPR<%x>::TInformMigrationAvailableOrErrorOrCancelTag::TransitionTag() KSendInitialApplicationReject",
                     (TInt*)&iContext.Node())
             return S60MCprStates::KSendInitialApplicationReject | NetStateMachine::EForward;
             }
         else
             {
-            S60MCPRLOGSTRING1("S60MCPR<%x>::TInformMigrationAvailableOrCancelTag::TransitionTag() KInformMigrationAvailable",(TInt*)&iContext.Node())
+            S60MCPRLOGSTRING1("S60MCPR<%x>::TInformMigrationAvailableOrErrorOrCancelTag::TransitionTag() KInformMigrationAvailable",(TInt*)&iContext.Node())
             return S60MCprStates::KInformMigrationAvailable | NetStateMachine::EForward;
             }
         }
@@ -341,16 +364,6 @@ namespace S60MCprMobilityActivity
         //in this implementation.
         __ASSERT_DEBUG(activity.iPreferredAPId, User::Panic(KS60MCprPanic, KPanicNoServiceProvider));
 
-        //Compute all this here to keep EvaluatePreference() as fast as possible
-        activity.iCurrent = static_cast<RMetaServiceProviderInterface*>(
-                iContext.Node().GetFirstClient<TDefaultClientMatchPolicy>(
-                        TClientType( TCFClientType::EServProvider, TCFClientType::EStarted )));
-
-        __ASSERT_DEBUG(activity.iCurrent, User::Panic(KS60MCprPanic, KPanicNoServiceProvider));
-/*  Not valid ASSERT
-        __ASSERT_DEBUG(activity.iCurrent->ProviderInfo().APId() == activity.iCurrentAssumedAPId, 
-                       User::Panic(KS60MCprPanic, KPanicInConsistentMCPRState));
-*/
         // Activity received the necessary information from the policy server earlier 
         // and now holds that information which we'll send to IPCPR.
         TCFMobilityControlClient::TMigrationNotification msg( activity.iCurrentAssumedAPId,
@@ -498,14 +511,14 @@ namespace S60MCprMobilityActivity
 			TClientType(TCFClientType::EData, TCFClientType::ELeaving));
 		iContext.iNodeActivity->PostRequestTo(*dc, TCFDataClient::TStop(iContext.iNodeActivity->Error()).CRef());
 		}
-	
+    
     // -----------------------------------------------------------------------------
-    // CS60MobilityActivity::TAwaitingPreferredCarrierOrCancelOrRejected::Accept
+    // CS60MobilityActivity::TAwaitingPreferredCarrierOrCancelOrRejectedOrErrorNotification::Accept
     // -----------------------------------------------------------------------------
     //
-    DEFINE_SMELEMENT( CS60MobilityActivity::TAwaitingPreferredCarrierOrCancelOrRejected, 
+    DEFINE_SMELEMENT( CS60MobilityActivity::TAwaitingPreferredCarrierOrCancelOrRejectedOrErrorNotification, 
                       NetStateMachine::MState, TContext )
-    TBool CS60MobilityActivity::TAwaitingPreferredCarrierOrCancelOrRejected::Accept()
+    TBool CS60MobilityActivity::TAwaitingPreferredCarrierOrCancelOrRejectedOrErrorNotification::Accept()
         {
         TBool result( EFalse );
         
@@ -518,7 +531,7 @@ namespace S60MCprMobilityActivity
 
             TMpmNotificationPrefIAPAvailable* notif = (TMpmNotificationPrefIAPAvailable*)msg->iPtr;
 
-            S60MCPRLOGSTRING4("S60MCPR<%x>::TAwaitingPreferredCarrierOrCancelOrRejected::Accept() TMPMPreferredCarrierAvailableMsg %d -> %d upgrade=%d",
+            S60MCPRLOGSTRING4("S60MCPR<%x>::TAwaitingPreferredCarrierOrCancelOrRejectedOrErrorNotification::Accept() TMPMPreferredCarrierAvailableMsg %d -> %d upgrade=%d",
                        (TInt*)&iContext.Node(), notif->iOldIapId, notif->iNewIapId, notif->iIsUpgrade)
             // notif must be there.
             ASSERT(notif);
@@ -538,16 +551,26 @@ namespace S60MCprMobilityActivity
             }
         else if ( iContext.iMessage.IsMessage<TEBase::TCancel>() )
             {
-            S60MCPRLOGSTRING1("S60MCPR<%x>::TAwaitingPreferredCarrierOrCancelOrRejected::Accept() TCancel", 
+            S60MCPRLOGSTRING1("S60MCPR<%x>::TAwaitingPreferredCarrierOrCancelOrRejectedOrErrorNotification::Accept() TCancel", 
                     (TInt*)&iContext.Node())
             
             result = ETrue;
             }
         else if ( iContext.iMessage.IsMessage<TCFMobilityProvider::TMigrationRejected>() )
             {
-            S60MCPRLOGSTRING1("S60MCPR<%x>::TAwaitingPreferredCarrierOrCancelOrRejected::Accept() TMigrationRejected", 
+            S60MCPRLOGSTRING1("S60MCPR<%x>::TAwaitingPreferredCarrierOrCancelOrRejectedOrErrorNotification::Accept() TMigrationRejected", 
                     (TInt*)&iContext.Node())
             
+            result = ETrue;
+            }
+        else if ( iContext.iMessage.IsMessage<TCFS60MCPRMessage::TMPMErrorNotificationMsg>() )
+            {
+            CS60MobilityActivity& activity = static_cast<CS60MobilityActivity&>(*iContext.iNodeActivity);
+            TCFS60MCPRMessage::TMPMErrorNotificationMsg* msg = 
+                message_cast<TCFS60MCPRMessage::TMPMErrorNotificationMsg>( &iContext.iMessage );
+            S60MCPRLOGSTRING2("S60MCPR<%x>::TAwaitingPreferredCarrierOrCancelOrRejectedOrErrorNotification::Accept() TMPMErrorNotificationMsg %d",(TInt*)&iContext.Node(),msg->iValue)
+            ASSERT( msg->iValue != KErrNone );
+            activity.SetError( msg->iValue );
             result = ETrue;
             }
 
@@ -666,29 +689,40 @@ namespace S60MCprMobilityActivity
 
             return MeshMachine::KCancelTag | NetStateMachine::EForward;
             }
-/*        else
-            {
-            S60MCPRLOGSTRING1("S60MCPR<%x>::TNoTagOrErrorTagOrApplicationRejectedMigrationOrCancel::TransitionTag() Generating ApplicationIgnoredTheCarrier", (TInt*)&iContext.Node() );
-
-            // Need to put MPM in consistent state and continue.
-            CS60MetaConnectionProvider& node = (CS60MetaConnectionProvider&)iContext.Node();
-            CS60MobilityActivity& activity = static_cast<CS60MobilityActivity&>(*iContext.iNodeActivity);
-            TRAP_IGNORE( node.Policy()->ApplicationIgnoredTheCarrierL( activity.iPreferredAPId ) );
-            
-            if ( iContext.iNodeActivity->Error() == KErrNone )
-                {
-                ASSERT(EFalse); // should not happend
-                iContext.iNodeActivity->SetError( KErrGeneral ); // doesn't have effect if already set.
-                return MeshMachine::KErrorTag | NetStateMachine::EForward;
-                }
-            
-            return MeshMachine::KErrorTag | NetStateMachine::EForward;
-            }*/
         S60MCPRLOGSTRING1("S60MCPR<%x>::TNoTagOrApplicationRejectedMigrationOrCancel::TransitionTag() KErrorTag ESock_IP Panic",(TInt*)&iContext.Node())
         ASSERT(EFalse); // error, IPCPR should not send TError in this case.
         return MeshMachine::KErrorTag | NetStateMachine::EForward;
         }
 
+    // -----------------------------------------------------------------------------
+    // CS60MobilityActivity::TNoTagOrRequestReConnectToCurrentSPOrErrorTag::DoL
+    // -----------------------------------------------------------------------------
+    //
+    DEFINE_SMELEMENT( CS60MobilityActivity::TNoTagOrRequestReConnectToCurrentSPOrErrorTag, 
+                      NetStateMachine::MStateFork, CS60MobilityActivity::TContext )
+    TInt CS60MobilityActivity::TNoTagOrRequestReConnectToCurrentSPOrErrorTag::TransitionTag()
+        {
+        CS60MetaConnectionProvider& node = (CS60MetaConnectionProvider&)iContext.Node();
+        RMetaServiceProviderInterface* sp = (RMetaServiceProviderInterface*)node.ServiceProvider();
+
+        if ( iContext.iNodeActivity->Error() )
+            {
+            S60MCPRLOGSTRING1("S60MCPR<%x>::TNoTagOrBearerPresentOrError::TransitionTag() KErrorTag",(TInt*)&iContext.Node())
+            return MeshMachine::KErrorTag | NetStateMachine::EForward;
+            }
+            // Check whether we're bound to a provider for the given IAP ID already
+        else if (sp && sp->ProviderInfo().APId() == node.PolicyPrefs().IapId())
+            {
+            // Restart the whole layer
+            S60MCPRLOGSTRING1("S60MCPR<%x>::TNoTagOrBearerPresentOrError::TransitionTag() Re-establishment",(TInt*)&iContext.Node());
+            return S60MCprStates::KRequestReConnectToCurrentSP | NetStateMachine::EForward;
+            }
+        else
+            {
+            S60MCPRLOGSTRING1("S60MCPR<%x>::TNoTagOrBearerPresentOrError::TransitionTag() KNoTag",(TInt*)&iContext.Node())
+            return MeshMachine::KNoTag | NetStateMachine::EForward;
+            }
+        }    
     
     // -----------------------------------------------------------------------------
     // CS60MobilityActivity::ClearHandshakingFlag

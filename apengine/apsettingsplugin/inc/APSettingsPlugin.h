@@ -22,7 +22,7 @@
 // System includes
 #include <e32def.h>
 #include <e32cmn.h>
-#include <GSPluginInterface.h>
+#include <gsplugininterface.h>
 #include <ConeResLoader.h>
 
 // Forward declaration

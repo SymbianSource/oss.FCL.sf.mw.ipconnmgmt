@@ -616,6 +616,20 @@ void CProgressNotifier::RunL()
                         {
                         LOGIT1("SERVER: FAILED to start bearer(new) notifier <%d>", ret)
                         }
+                        
+                    // Update IAP availability if WLAN connection is fully started.
+                    // When WLAN connection status is KLinkLayerOpen it is the only
+                    // WLAN available.
+                    //
+                    TBearerInfo bearerInfo;
+
+                    ret = iServer->Iap()->GetBearerInfo( iConnectionId, bearerInfo );
+                    
+                    if ( ret == KErrNone && bearerInfo.iBearer == EBearerInfoWLAN )
+                        {
+                        LOGIT("CProgressNotifier::RunL triggered HandleAvailabilityChange()")
+                        iServer->AvailabilityManager()->HandleAvailabilityChange();	
+                        }	    
                     }
 
                 iFilter = KNoFiltering;

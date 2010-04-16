@@ -560,12 +560,12 @@ namespace S60MCprMobilityActivity
     /**
      * FORK/DECISION: Decides if needs cancel or not.
      */
-    DECLARE_SMELEMENT_HEADER( TInformMigrationAvailableOrCancelTag, 
+    DECLARE_SMELEMENT_HEADER( TInformMigrationAvailableOrErrorOrCancelTag, 
                               MeshMachine::TStateFork<TContext>, 
                               NetStateMachine::MStateFork, 
                               TContext )
     virtual TInt TransitionTag();
-    DECLARE_SMELEMENT_FOOTER( TInformMigrationAvailableOrCancelTag )
+    DECLARE_SMELEMENT_FOOTER( TInformMigrationAvailableOrErrorOrCancelTag )
 
     /**
      * FORK/DECISION: Decides what happens after IPCPR application completes the 
@@ -601,7 +601,7 @@ namespace S60MCprMobilityActivity
      * 1. Continue with handshake to select new AP for MCPR.
      * 2. Return back to migration-phase with new preferred IAP.
      * 3. Close down the system in case of mobilityerror.
-     * @return  //TODO Cancel from IPCPR.
+     * @return
      */
     DECLARE_SMELEMENT_HEADER( TNoTagOrInformMigrationAvailableBackwardsOrErrorOrCancel, 
                               MeshMachine::TStateFork<TContext>, 
@@ -610,6 +610,21 @@ namespace S60MCprMobilityActivity
     virtual TInt TransitionTag();
     DECLARE_SMELEMENT_FOOTER( TNoTagOrInformMigrationAvailableBackwardsOrErrorOrCancel )
 
+    /**
+     * FORK/DECISION: 
+     * 1. Inform that the migration complete or go to error
+     * 2. Error
+     * @return
+     */
+    DECLARE_SMELEMENT_HEADER( TInformMigrationCompletedOrError, 
+                              MeshMachine::TStateFork<TContext>, 
+                              NetStateMachine::MStateFork, 
+                              TContext )
+    virtual TInt TransitionTag();
+    DECLARE_SMELEMENT_FOOTER( TInformMigrationCompletedOrError )
+
+        
+    
     /**
      * Class that is responsible for managing mobility on MCPR side.
      * CS60MobilityActivity is the S60 version of the CMobilityActivity -class
@@ -767,12 +782,12 @@ namespace S60MCprMobilityActivity
              * STATE: Waits for preferred carrier message.
              * @return ETrue if preferred carrier notification is received.
              */
-            DECLARE_SMELEMENT_HEADER( TAwaitingPreferredCarrierOrCancelOrRejected, 
+            DECLARE_SMELEMENT_HEADER( TAwaitingPreferredCarrierOrCancelOrRejectedOrErrorNotification, 
                                       MeshMachine::TState<TContext>, 
                                       NetStateMachine::MState, 
                                       CS60MobilityActivity::TContext)
             virtual TBool Accept();
-            DECLARE_SMELEMENT_FOOTER( TAwaitingPreferredCarrierOrCancelOrRejected )
+            DECLARE_SMELEMENT_FOOTER( TAwaitingPreferredCarrierOrCancelOrRejectedOrErrorNotification )
             
             /**
              * FORK/DECISION: Decides what happens after IPCPR responds to migration offer.
@@ -788,6 +803,21 @@ namespace S60MCprMobilityActivity
             virtual TInt TransitionTag();
             DECLARE_SMELEMENT_FOOTER( TNoTagOrApplicationRejectedMigrationOrCancel )
 
+            /**
+             * FORK/DECISION: 
+             * 1. Proceed to reconnection
+             * 2. Re-establish connection to the same IAP, inform data client that migration is complete
+             * 3. Error
+             * @return
+             */
+            DECLARE_SMELEMENT_HEADER( TNoTagOrRequestReConnectToCurrentSPOrErrorTag, 
+                                      MeshMachine::TStateFork<TContext>, 
+                                      NetStateMachine::MStateFork, 
+                                      TContext )
+            virtual TInt TransitionTag();
+            DECLARE_SMELEMENT_FOOTER( TNoTagOrRequestReConnectToCurrentSPOrErrorTag )
+            
+            
             /**
              * Mutex protected TRANSITION.
              * Mopility scenario should wait until the connection recovery finishes.
@@ -820,16 +850,6 @@ namespace S60MCprMobilityActivity
 
         private: // Member variables.
             
-            /**
-             * Pointer to IPProtocoMCPR which is currently active 
-             */
-            ESock::RMetaServiceProviderInterface* iCurrent;
-
-            /**
-             * Pointer to IPProtocoMCPR which is about to become the active. 
-             */
-            ESock::RMetaServiceProviderInterface* iPreferred;
-
             TUint iCurrentAssumedAPId;  // Current IAP Id
             TUint iPreferredAPId;       // New IAP Id system should roam to.
             TBool iIsUpgrade;           // If the active iPreferredAPId is upgrade to old one.

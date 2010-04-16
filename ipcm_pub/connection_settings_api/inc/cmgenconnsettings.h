@@ -44,18 +44,6 @@ enum TCmCellularDataUsage
     ECmCellularDataUsageDisabled
     };
 
-// DEPRECATED enumeration which will be removed within few weeks.
-// DO NOT USE THESE VALUES.
-// Functionality related to these values is broken although it compiles.
-enum TCmSeamlessnessValue
-        {
-        ECmSeamlessnessNotRoamedTo,   // DO NOT USE
-        ECmSeamlessnessConfirmFirst,  // DO NOT USE
-        ECmSeamlessnessShowprogress,  // DO NOT USE
-        ECmSeamlessnessFullySeamless, // DO NOT USE
-        ECmSeamlessnessDisabled       // DO NOT USE
-        };
-
 // Table for connection settings other than default connection
 struct TCmGenConnSettings
     {
@@ -65,16 +53,6 @@ struct TCmGenConnSettings
     TCmCellularDataUsage   iCellularDataUsageHome;
     // Cellular data usage abroad.
     TCmCellularDataUsage   iCellularDataUsageVisitor;
-
-    // DEPRECATED variable that will be removed within few weeks.
-    // DO NOT USE THESE VARIABLES.
-    // Functionality related to this variable is broken although it compiles.
-    TCmSeamlessnessValue   iSeamlessnessHome;
-    // DEPRECATED variable that will be removed within few weeks.
-    // DO NOT USE THESE VARIABLES.
-    // Functionality related to this variable is broken although it compiles.
-    TCmSeamlessnessValue   iSeamlessnessVisitor;
     };
 
 #endif
-

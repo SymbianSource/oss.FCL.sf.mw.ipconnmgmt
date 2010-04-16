@@ -880,10 +880,11 @@ void CVpnApEngine::ReadVpnDataL( CVpnApItem& aVpnApItem )
 
     CleanupStack::PopAndDestroy( buf ); // buf
 
-    t->ReadUintL( TPtrC(VPN_SERVICE_IAP), aVpnApItem.iRealIapId );    
-
-    t->ReadUintL( TPtrC(VPN_SERVICE_NETWORKID), aVpnApItem.iHomeNetwork );
-
+    // These fields might be missing from CommsDat.
+    // ApEngine does not support SNAPs, use CmManager API to get full support.
+    TRAP_IGNORE( t->ReadUintL( TPtrC(VPN_SERVICE_IAP), aVpnApItem.iRealIapId ) )
+    TRAP_IGNORE( t->ReadUintL( TPtrC(VPN_SERVICE_NETWORKID), aVpnApItem.iHomeNetwork ) )
+    
     CleanupStack::PopAndDestroy( t );   // t
 
     // Get real IAP name !!!!!

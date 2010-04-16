@@ -432,9 +432,9 @@ void CAOServer::CreatePDPPropertyAndSubscribeL()
     // Create property subscriber
     iPDPPropertySubscriber = CAOAsyncWrapper<CAOServer>::NewL(
         this,
-        &PDPPropertySubscriptionIssueRequest,
-        &PDPPropertySubscriptionRunL,
-        &PDPPropertySubscriptionDoCancel,
+        &CAOServer::PDPPropertySubscriptionIssueRequest,
+        &CAOServer::PDPPropertySubscriptionRunL,
+        &CAOServer::PDPPropertySubscriptionDoCancel,
         NULL );
         
     // Subscribe

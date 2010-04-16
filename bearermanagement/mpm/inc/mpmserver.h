@@ -37,6 +37,7 @@ Mobility Policy Manager server class definitions.
 
 class CMPMCommsDatAccess;
 class CMpmCsIdWatcher;
+class CMpmDataUsageWatcher;
 
 // CONSTANTS
 _LIT( KMPMPanicCategory, "Mobility Policy Manager Server" );
@@ -124,7 +125,8 @@ enum TConnectionState
 // Which component initiated sending preferred IAP notifications
 enum TPrefIAPNotifCaller
     {
-    EConnMon = 0, 
+    EConnMon = 0,
+    EConnMonEvent,
     EBearerMan, 
     EConfirmDlgRoaming, 
     EConfirmDlgStarting
@@ -436,9 +438,11 @@ class CMPMServer : public CPolicyServer
         /**
         * Notify each session about IAP availability change.
         * @since 3.1
-        * @param aIapInfo Info about available IAPs 
+        * @param aIapInfo Info about available IAPs
+        * @param aCaller Identifies the calling context 
         */
-        void NotifyBMPrefIapL( const TConnMonIapInfo& aIapInfo );
+        void NotifyBMPrefIapL( const TConnMonIapInfo& aIapInfo,
+                               const TPrefIAPNotifCaller aCaller );
 
         /**
         * Update Connection dialog of each session
@@ -484,17 +488,6 @@ class CMPMServer : public CPolicyServer
         */
         TInt HandleServerUnblackListIap( const TConnectionId aConnId, 
                                          TUint32             aIapId );
-
-        /**
-        * Handling of unblacklisting all IAPs for certain category.
-        * @since 3.2
-        * @param aConnId Connection Id
-        * @param aCategory Either connection lifetime or temporary. 
-        * @return KErrNone if successful, otherwise one of the
-        * system-wide error codes 
-        */
-        TInt HandleServerUnblackListIap( const TConnectionId aConnId, 
-                                         TBlacklistCategory  aCategory );
 
         /**
         * Handling of unblacklisting all IAPs for certain category.
@@ -834,6 +827,12 @@ class CMPMServer : public CPolicyServer
         */
         CMPMServerSession* GetServerSession( TConnectionId aConnId ) const;
         
+        /**
+        * Stops cellular connections, except MMS
+        * @since 5.2
+        */
+        void StopCellularConns();
+
     private:
 
         /**
@@ -937,6 +936,11 @@ class CMPMServer : public CPolicyServer
          * Own.
          */
         CMpmCsIdWatcher* iMpmCsIdWatcher;
+
+        /**
+         * Handle to another central repository watcher
+         */
+        CMpmDataUsageWatcher* iMpmDataUsageWatcher;
 
         // Iap id of the active connection
         TUint32 iActiveIapId;

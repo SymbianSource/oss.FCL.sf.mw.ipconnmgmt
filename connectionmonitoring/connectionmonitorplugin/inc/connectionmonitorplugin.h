@@ -21,7 +21,7 @@
 // User includes
 
 // System includes
-#include <GSPluginInterface.h>
+#include <gsplugininterface.h>
 #include <aknview.h>
 #include <ConeResLoader.h>
 #include <eikclb.h>

@@ -801,10 +801,9 @@ void CProcessorGlobal::SaveGlobalWlanParameterL( const TUint32 aTableType, const
 	    // Convert the input parameter to integer
     	TLex lex( *aValue );
 		
-		TUint value( 0 );
-		
-		User::LeaveIfError( lex.Val( value, EDecimal) );
-		
+    	TInt value( 0 );
+        User::LeaveIfError( lex.Val( value ) );
+        
 		// Set the paramter value
 	    
 	    if ( aField == EWlanBGScanInterval )

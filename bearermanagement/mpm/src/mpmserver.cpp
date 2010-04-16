@@ -25,6 +25,7 @@ Mobility Policy Manager server implementation.
 #include <etel3rdparty.h>                // Voice call notification
 #include <mmtsy_names.h>                 // KMmTsyModuleName
 #include <centralrepository.h>
+#include <es_sock_partner.h>
 
 #include "mpmserver.h"
 #include "mpmserversession.h"
@@ -41,6 +42,8 @@ Mobility Policy Manager server implementation.
 #include "mpmdialog.h"
 #include "mpmprivatecrkeys.h"
 #include "mpmcsidwatcher.h"
+#include "mpmdatausagewatcher.h"
+#include "mpmpropertydef.h"
 
 // ============================= LOCAL FUNCTIONS ===============================
 
@@ -169,6 +172,20 @@ void CMPMServer::ConstructL()
     // Create central repository watcher and start it
     iMpmCsIdWatcher = CMpmCsIdWatcher::NewL();
     iMpmCsIdWatcher->StartL();
+
+    // Create another central repository watcher and start it
+    // TODO: Trapped, because currently it may fatally leave in HW.
+    // (Possibly because of the capability updates of data usage watcher's CR-keys.)
+    TRAPD( duwErr, iMpmDataUsageWatcher = CMpmDataUsageWatcher::NewL( this ) );
+    if (duwErr == KErrNone)
+        {
+        iMpmDataUsageWatcher->StartL();
+        }
+    else
+        {
+        iMpmDataUsageWatcher = NULL;
+        MPMLOGSTRING( "CMPMServer::ConstructL: CMpmDataUsageWatcher::NewL() failed!" )
+        }
 
     // Define P&S keys (snap & iap) for the user connection
     TInt ret = RProperty::Define( KMPMUserConnectionCategory,
@@ -325,6 +342,8 @@ CMPMServer::~CMPMServer()
     delete iDefaultConnection;
     
     delete iMpmCsIdWatcher;    
+    
+    delete iMpmDataUsageWatcher;    
     
     iDedicatedClients.Close();
 
@@ -955,7 +974,8 @@ void CMPMServer::RemoveSession( const CMPMServerSession* aSession )
 // CMPMServer::NotifyBMPrefIapL
 // -----------------------------------------------------------------------------
 //
-void CMPMServer::NotifyBMPrefIapL( const TConnMonIapInfo& aIapInfo )
+void CMPMServer::NotifyBMPrefIapL( const TConnMonIapInfo& aIapInfo, 
+                                   const TPrefIAPNotifCaller aCaller )
     {
     MPMLOGSTRING2( "CMPMServer::NotifyBMPrefIapL - IAPs count: %d", 
         aIapInfo.iCount)
@@ -984,7 +1004,7 @@ void CMPMServer::NotifyBMPrefIapL( const TConnMonIapInfo& aIapInfo )
     for ( TInt i = 0; i < iSessions.Count(); i++ )
         {
         iapInfo = iSessions[i]->GetAvailableIAPs( );
-        iSessions[i]->PrefIAPNotificationL( iapInfo, EConnMon );
+        iSessions[i]->PrefIAPNotificationL( iapInfo, aCaller );
         }
 
     // If a session is displaying connection selection dialog 
@@ -1133,57 +1153,6 @@ TInt CMPMServer::HandleServerUnblackListIap(
         return KErrNotFound;
         }
     }
-
-
-// -----------------------------------------------------------------------------
-// CMPMServer::HandleServerUnblackListIap
-// -----------------------------------------------------------------------------
-//
-TInt CMPMServer::HandleServerUnblackListIap( 
-    const TConnectionId aConnId,
-    TBlacklistCategory  aCategory )
-    {
-    MPMLOGSTRING3( "CMPMServer::HandleServerUnblackListIap -\
- aConnId = 0x%x, aCategory = %i", aConnId, aCategory )
-
-    TInt i;
-    TBool found = EFalse;
-
-    found = FindBlacklistedConnIndex( aConnId, i );
-    if ( found )
-        {
-        // found blacklisted Connection Id
-        TMPMBlackListConnId connIdInfo = iBlackListIdList[i];
-        iBlackListIdList.Remove( i ); // remove from the list 
-
-        found = EFalse;
-        for (TInt j = 0; j < connIdInfo.Count(); j++)
-            {
-            if ( connIdInfo.Category( j ) == aCategory ) 
-                {
-                // found and remove blacklisted iap
-                connIdInfo.Remove( j ); 
-                if ( connIdInfo.Count() == 0 )
-                    {
-                    return KErrNone;
-                    }
-
-                // reinsert connIdInfo at the beginning to reflect activeness
-                iBlackListIdList.Insert( connIdInfo, 0 ); 
-                return KErrNone;
-                }
-            }
-        // nothing found and reinsert at the beginning 
-        // connIdInfo to reflect activeness
-        iBlackListIdList.Insert( connIdInfo, 0 ); 
-        return KErrNotFound;
-        }
-    else
-        {
-        return KErrNotFound;
-        }
-    }
-
 
 // -----------------------------------------------------------------------------
 // CMPMServer::HandleServerUnblackListIap
@@ -1784,7 +1753,7 @@ void CMPMServer::StartForcedRoamingToWlanL( const TConnMonIapInfo& aIapInfo )
     RAvailableIAPList iapList;
     CleanupClosePushL( iapList );
 
-    for ( TInt index = 0; index < aIapInfo.iCount; index++ )
+    for ( TUint index = 0; index < aIapInfo.iCount; index++ )
         {
         if ( CommsDatAccess()->CheckWlanL( aIapInfo.iIap[index].iIapId ) != ENotWlanIap )
             {
@@ -1847,7 +1816,7 @@ void CMPMServer::StartForcedRoamingFromWlanL( const TConnMonIapInfo& aIapInfo )
     RArray<TUint32> packetDataIapIds;
     CleanupClosePushL( packetDataIapIds );
 
-    for ( TInt index = 0; index < aIapInfo.iCount; index++ )
+    for ( TUint index = 0; index < aIapInfo.iCount; index++ )
         {
         if ( CommsDatAccess()->GetBearerTypeL( aIapInfo.iIap[index].iIapId ) ==
             EMPMBearerTypePacketData )
@@ -1876,7 +1845,7 @@ void CMPMServer::StartForcedRoamingFromWlanL( const TConnMonIapInfo& aIapInfo )
             {
             // Check if used WLAN is still available
             TBool currentWlanIapAvailable = EFalse;
-            for ( TInt iapIndex = 0; iapIndex < aIapInfo.iCount; iapIndex++ )
+            for ( TUint iapIndex = 0; iapIndex < aIapInfo.iCount; iapIndex++ )
                 {
                 if ( aIapInfo.iIap[iapIndex].iIapId ==
                     iActiveBMConns[index].iConnInfo.iIapId )
@@ -2005,7 +1974,7 @@ void CMPMServer::NotifyDisconnectL( TInt aConnIndex,
     
                         MPMLOGSTRING2( "CMPMServer::NotifyDisconnectL: \
 Disconnected Connection Id = 0x%x", iSessions[sIndex]->ConnectionId() )
-                        iSessions[sIndex]->ClientErrorNotificationL( KErrDisconnected );
+                        iSessions[sIndex]->ClientErrorNotificationL( KErrForceDisconnected );
                         }
                     }
                 }
@@ -2061,6 +2030,49 @@ Connection Id = 0x%x", aConnId );
     ASSERT( serverSession != NULL );
 
     return serverSession;
+    }
+
+// ---------------------------------------------------------------------------
+// CMPMServer::StopCellularConns
+// Stop all cellular connections except MMS
+// ---------------------------------------------------------------------------
+//
+void CMPMServer::StopCellularConns()
+    {
+    MPMLOGSTRING( "CMPMServer::StopCellularConns" )
+
+    TUint32 iapId;
+	TMPMBearerType bearerType = EMPMBearerTypeNone;
+
+	// No cleanup stack used cause this function doesn't leave.
+    RArray<TUint32> stoppedIaps;
+
+    // Check through active connections
+    for (TInt i = 0; i < iActiveBMConns.Count(); i++)
+        {
+        iapId = iActiveBMConns[i].iConnInfo.iIapId;
+
+        // Don't stop the same IAP twice.
+        if (stoppedIaps.Find( iapId ) == KErrNotFound)
+            {
+            TRAPD( err, bearerType = CommsDatAccess()->GetBearerTypeL( iapId ) );
+            if (err == KErrNone &&
+                    iapId != 0 &&
+                    bearerType == EMPMBearerTypePacketData)
+                {
+                TInt mmsIap( 0 );
+                err = RProperty::Get( KMPMCathegory, KMPMPropertyKeyMMS, mmsIap );
+                // Check that it's not MMS IAP.
+                if (!(err == KErrNone && iapId == mmsIap))
+                    {
+                    // Stop the conn / IAP.
+                    StopConnections( iapId );
+                    stoppedIaps.Append( iapId );
+                    }
+                }
+            }
+        }
+    stoppedIaps.Close();
     }
 
 // -----------------------------------------------------------------------------

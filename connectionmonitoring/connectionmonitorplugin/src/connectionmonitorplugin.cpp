@@ -18,12 +18,12 @@
 
 // User includes
 #include    "connectionmonitorplugin.h"
-#include    <GSParentPlugin.h>
-#include    <GSCommon.hrh>
+#include    <gsparentplugin.h>
+#include    <gscommon.hrh>
 #include    <connectionmonitorpluginrsc.rsg> // GUI Resource
 #include    <connectionmonitorplugin.mbg>
-#include    <GSPrivatePluginProviderIds.h>
-#include    <GSFWViewUIDs.h>
+#include    <gsprivatepluginproviderids.h>
+#include    <gsfwviewuids.h>
 
 // System includes
 #include    <AknNullService.h>

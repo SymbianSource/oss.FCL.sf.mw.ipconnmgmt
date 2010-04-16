@@ -84,13 +84,6 @@ CMPMIapSelection::~CMPMIapSelection()
     //
     StopDisplayingStartingDlg();
     
-    // Cancel WLAN availability check in case it is active
-    //
-    if ( iSession )
-        {
-    	  iSession->MyServer().Events()->CancelCheckWlanWlanAvailability( this );	
-        }	
-    
     delete iConfirmDlgStarting;
     delete iDialog;
     delete iWlanDialog;
@@ -117,12 +110,6 @@ void CMPMIapSelection::ChooseIapL( const TMpmConnPref& aChooseIapPref )
     
     iChooseIapPref = aChooseIapPref;
 
-    // Update iNewWlansAllowed information.
-    // No need to filter away cellular iaps here based on UI's Allow Cellular Usage
-    // setting, since ConnMon checks the setting and reports only correct IAPs
-    // available for MPM.
-    iSession->IsWlanOnlyL( iNewWlansAllowed );
-
     // Always use stored connection info.
     // If stored information doesn't exist, a normal sequence is used.
     TUint32 snap( 0 );
@@ -148,6 +135,9 @@ void CMPMIapSelection::ChooseIapL( const TMpmConnPref& aChooseIapPref )
     MPMLOGSTRING2( "CMPMIapSelection::ChooseIapL: IapID: %i",
             iChooseIapPref.IapId() )
     
+    // Update WLAN only information and whether new WLAN network usage is allowed.
+    TBool wlanOnly = iSession->IsWlanOnlyL( iNewWlansAllowed );
+    
     // Check if direct IAP connection is tried to make
     if ( iChooseIapPref.IapId() != 0 )
         { 
@@ -156,11 +146,22 @@ void CMPMIapSelection::ChooseIapL( const TMpmConnPref& aChooseIapPref )
 
         // Complete selection with error code if wlan only was set and cellular IAP other 
         // than MMS IAP was tried to access  
-        if ( ( iChooseIapPref.BearerSet() ==
-               TExtendedConnPref::EExtendedConnBearerWLAN ) && 
+        if ( wlanOnly && 
                 ( bearerType == EMPMBearerTypePacketData ) && 
                 ( iSession->IsMMSIap( iChooseIapPref.IapId() ) == EFalse ) ) 
-            {
+            {            
+            ChooseIapComplete( KErrPermissionDenied, NULL );
+            return;
+            }
+        }
+        
+           
+    if  ( iChooseIapPref.ConnSelectionDialog() )
+        {
+        // Complete selection with error code if wlan only was set and bearer set as cellular 
+        if ( wlanOnly && 
+             iChooseIapPref.BearerSet() == TExtendedConnPref::EExtendedConnBearerCellular ) 
+            {            
             ChooseIapComplete( KErrPermissionDenied, NULL );
             return;
             }
@@ -367,8 +368,7 @@ void CMPMIapSelection::ExplicitConnectionL()
                 {
                 // Check if we are roaming and cellular data usage query has not yet been presented
                 // to the user in this country
-                if ( iSession->MyServer().RoamingWatcher()->RoamingStatus() == EMPMInternationalRoaming
-                    && iSession->MyServer().RoamingWatcher()->AskCellularDataUsageAbroad() == true )
+                if ( iSession->MyServer().RoamingWatcher()->RoamingStatus() == EMPMInternationalRoaming )
                     {
                     // Check whether queries are enabled
                     if ( !( iChooseIapPref.NoteBehaviour() & TExtendedConnPref::ENoteBehaviourConnDisableQueries ) )
@@ -424,16 +424,7 @@ void CMPMIapSelection::ExplicitConnectionL()
         if ( ( iChooseIapPref.BearerSet() & TExtendedConnPref::EExtendedConnBearerWLAN ) ||
              ( iChooseIapPref.BearerSet() == TExtendedConnPref::EExtendedConnBearerUnknown ) )
             {
-            if ( iNewWlansAllowed && 
-            	   ( iChooseIapPref.BearerSet() == 
-            	     TExtendedConnPref::EExtendedConnBearerWLAN ) )
-                {
-                // User allows only WLAN connections, check WLAN availability.
-                // A note will be shown if no WLANs are available.
-                //
-                iSession->MyServer().Events()->CheckWlanAvailabilityL( this );
-                }
-            else if( iCommsDatAccess->SnapContainsWlanL( snap, iapPath, KMPMNrWlansOne ) )
+            if( iCommsDatAccess->SnapContainsWlanL( snap, iapPath, KMPMNrWlansOne ) )
                 {
                 // Scan wlan networks. After that execution continues 
                 // in CompleteExplicitSnapConnectionL()
@@ -543,34 +534,17 @@ void CMPMIapSelection::CompleteExplicitSnapConnectionL()
                 {
                 if ( iSession->MyServer().RoamingWatcher()->RoamingStatus() == EMPMInternationalRoaming )
                     {
-                    // Check if cellular data usage query has already been presented to the user in this country
-                    if ( iSession->MyServer().RoamingWatcher()->AskCellularDataUsageAbroad() == true )
-                        {
-                        // International roaming
-                        iConfirmDlgStarting = CMPMConfirmDlgStarting::NewL( 
-                                *this, 
-                                connId,
-                                snap, 
-                                validateIapId, 
-                                CMPMConfirmDlg::EConfirmDlgVisitorNetwork,
-                                iChooseIapPref,
-                                iSession->MyServer(),
-                                *iSession,
-                                EExplicitConnection );
-                        }
-                    else
-                        {
-                        // If user has already been queried in this country just complete the IAP selection.
-    
-                        iSession->MyServer().AppendBMConnection( connId, 
-                                snap, 
-                                validateIapId, 
-                                EStarting,
-                                *iSession );
-    
-                        ChooseIapComplete( KErrNone, &iChooseIapPref );
-                        }
-    
+                    // International roaming
+                    iConfirmDlgStarting = CMPMConfirmDlgStarting::NewL( 
+                            *this, 
+                            connId,
+                            snap, 
+                            validateIapId, 
+                            CMPMConfirmDlg::EConfirmDlgVisitorNetwork,
+                            iChooseIapPref,
+                            iSession->MyServer(),
+                            *iSession,
+                            EExplicitConnection );    
                     }
                 else
                     {
@@ -748,7 +722,8 @@ void CMPMIapSelection::ChooseIapComplete(
     
     if ( ( aError == KErrNone ) &&
         !( iChooseIapPref.NoteBehaviour() &
-           TExtendedConnPref::ENoteBehaviourConnDisableNotes ) )
+           TExtendedConnPref::ENoteBehaviourConnDisableNotes ) &&
+         ( iSession->IsMMSIap( aPolicyPref->IapId() ) == EFalse ) )
         {
         TBool connectionAlreadyActive =
             iSession->MyServer().CheckIfStarted( aPolicyPref->IapId() );
@@ -874,28 +849,12 @@ void CMPMIapSelection::HandleUserSelectionL( TBool aIsIap, TUint32 aId, TInt aEr
         TMpmConnPref userPref;
         iUserSelectionSnapId = iCommsDatAccess->MapNetIdtoSnapAPL( aId );
         userPref.SetSnapId( iUserSelectionSnapId );
+        userPref.SetIapId( 0 );
 
-        
-// Agreed that MPM will be migrated to SNAP TAG ID SNAPS.
-//        if ( iUserSelectionSnapId < 0x1000 )  // TODO: remove when connection dialog return valid SNAP TAG ID.
-//            {
-//            // legacy snaps ok
-//            userPref.SetNetId( aId );
-//            iUserSelectionSnapId = aId;
-//            }
-//        else
-//            {
-//            // 5.2 snaps, MPM uses internally legacy snaps. Convert back. -jl- TODO: use CommsDat mapping in future.
-//            userPref.SetNetId( aId - 3000 );
-//            iUserSelectionSnapId = aId - 3000;
-//            }
-        
         MPMLOGSTRING2(
                 "CMPMIapSelection::HandleUserSelectionL: Snap = %i selected by the User", 
                 iUserSelectionSnapId )
 
-//        userPref.SetNetId( aId );
-        userPref.SetIapId( 0 );
 
         ChooseBestIAPL( userPref, iStoredAvailableIaps );
         iUserSelectionIapId = userPref.IapId();
@@ -951,8 +910,7 @@ void CMPMIapSelection::ImplicitConnectionWlanNoteL()
             {
             // Check if we are roaming and cellular data usage query has not yet been presented
             // to the user in this country
-            if ( iSession->MyServer().RoamingWatcher()->RoamingStatus() == EMPMInternationalRoaming
-                && iSession->MyServer().RoamingWatcher()->AskCellularDataUsageAbroad() == true )
+            if ( iSession->MyServer().RoamingWatcher()->RoamingStatus() == EMPMInternationalRoaming )
                 {
                 // Check whether queries are enabled
                 if ( !( iChooseIapPref.NoteBehaviour() & TExtendedConnPref::ENoteBehaviourConnDisableQueries ) )
@@ -1340,62 +1298,6 @@ void CMPMIapSelection::SetConfirmDlgStartingPtrNull()
 CMPMServerSession* CMPMIapSelection::Session()
     {
     return iSession;
-    }
-
-// -----------------------------------------------------------------------------
-// CMPMIapSelection::TriggerInformationNote
-// -----------------------------------------------------------------------------
-//
-void CMPMIapSelection::TriggerInformationNoteL()
-    {
-    // ConnectioUiUtilities client side has a nonblocking active object 
-    // implementation
-    //
-    if ( !( iChooseIapPref.NoteBehaviour() &
-           TExtendedConnPref::ENoteBehaviourConnDisableNotes ) )
-        {           	
-        CConnectionUiUtilities* connUiUtils = CConnectionUiUtilities::NewL();        
-                            
-        connUiUtils->NoWLANNetworksAvailableNote();
-                            
-        delete connUiUtils;
-        }            
-    }
-
-// -----------------------------------------------------------------------------
-// CMPMIapSelection::WlanAvailabilityResponse
-// -----------------------------------------------------------------------------
-//
-void CMPMIapSelection::WlanAvailabilityResponse( const TInt  aError, 
-                                                 const TBool aResult )
-    {
-    if ( ( aError == KErrNone && aResult == EFalse )
-          || ( aError == KErrNotSupported ) )
-        {
-        // no WLANs are available and user allows only
-        // WLAN connections
-        TRAPD( err, TriggerInformationNoteL() );
-        
-        if ( err )
-            {
-            MPMLOGSTRING2( "TriggerInformationNoteL leaved %d", err )
-            }
-            
-        ChooseIapComplete( KErrNotFound, NULL );
-        }
-    else
-        {
-        // Some WLANs are available,
-        // or an error has occured while requesting available WLANs.
-        //
-        TRAPD( err, CompleteExplicitSnapConnectionL() );
-        
-        if ( err )
-            {
-            MPMLOGSTRING2( "CompleteExplicitSnapConnectionL leaved %d", err )
-            ChooseIapComplete( KErrCancel, NULL );
-            }
-        }
     }
 
 // -----------------------------------------------------------------------------

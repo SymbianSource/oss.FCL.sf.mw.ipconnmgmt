@@ -21,7 +21,7 @@
 
 // INCLUDES
 #include "gsconnsettingspluginmodel.h"
-#include <GSBaseContainer.h>
+#include <gsbasecontainer.h>
 
 
 // CONSTANTS

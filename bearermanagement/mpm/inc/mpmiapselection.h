@@ -22,12 +22,10 @@
 
 #include "mpmserversession.h"
 #include "mpmcommsdataccess.h"
-#include "mpmwlanavailability.h"
 
 class CMPMDialog;
 class CMPMWlanQueryDialog;
 class CMPMConfirmDlgStarting;
-class MWlanAvailability;
 class TMpmConnPref;
 
 enum TOfflineNoteResponse
@@ -45,8 +43,7 @@ enum TOfflineNoteResponse
  *  @lib mpmserver.exe
  *  @since S60 v3.2
  */
-class CMPMIapSelection : public CBase,
-                         public MWlanAvailability
+class CMPMIapSelection : public CBase
     {
 
 public:
@@ -240,13 +237,6 @@ public:
      * @since 3.2
      */
     void ConnectionStarted();
-    
-    /**
-     * Triggers an information note. Note disappears automatically. 
-     *
-     * @since 5.2
-     */
-    void TriggerInformationNoteL();
 
     /**
      * Get original MPM connection preferences
@@ -307,18 +297,6 @@ private:
      */
     void ImplicitConnectionWlanNoteL();
     
-private: // from MWlanAvailability
-
-       /**
-       * WLAN availability check response
-       * @since 3.2
-       * @param aError generic Symbian error response code
-       * @param aResult Result of WLAN availability check
-       * @return void
-       */
-       void WlanAvailabilityResponse( const TInt  aError, 
-                                      const TBool aResult );
-
 private:
 
     /**

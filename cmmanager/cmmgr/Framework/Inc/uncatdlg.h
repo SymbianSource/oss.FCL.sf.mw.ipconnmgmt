@@ -69,6 +69,11 @@ NONSHARABLE_CLASS( CUncatDlg ) : public CCmDlg
         */
         void ConstructCMArrayL( RArray<TUint32>& aCmIds );
         
+        /**
+        * Remove hidden Connection Methods from the Array
+        */
+        void ClearHiddenCMsFromArrayL( RArray<TUint32>& aCmIds );
+        
     public: // From MCmCommsDatWatcher
         
         /**

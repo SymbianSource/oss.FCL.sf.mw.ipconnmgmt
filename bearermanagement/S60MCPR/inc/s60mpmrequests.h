@@ -38,6 +38,12 @@ using namespace S60MCPRMPMOperations;
 // Forward declaration
 class CMPMPolicyNotifications;
 
+// Initial reconnect timeout is 100 000 microseconds (0.1 sec), 
+// which is doubled upon issuing the first timer request
+const TInt KMPMReconnectTimeoutMultiplier = 2;
+const TInt KMPMInitialReconnectTimeout = 100000 / KMPMReconnectTimeoutMultiplier;
+const TInt KMPMMaxReconnectTimeout = 800000;
+
 /**
 *  S60 NetMCPR MPM interface management Class inherits from CActive
 */
@@ -257,7 +263,7 @@ NONSHARABLE_CLASS( CMPMPolicyRequests )
         * @since 5.2
         */
         void IssueDeleteRequest();
-
+        
     private:
         // policy request list
         RArray<PolicyRequest>       iPolicyRequests;
@@ -269,6 +275,11 @@ NONSHARABLE_CLASS( CMPMPolicyRequests )
         TBool                       iCommitedToDeleteItself;
         CMPMPolicyNotifications*    iPolicyNotifications;
         MMPMPolicyNotificationUser* iPolicyNotificationsUser;
+        
+        // Reconnect timer related variables
+        RTimer                      iReconnectTimer;
+        TBool                       iReconnectTimerRunning;
+        TInt                        iReconnectTimeout;
     };
 
 #endif // S60MPMREQUESTS_H

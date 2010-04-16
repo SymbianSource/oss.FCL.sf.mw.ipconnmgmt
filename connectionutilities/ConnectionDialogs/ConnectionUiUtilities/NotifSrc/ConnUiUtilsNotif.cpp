@@ -26,13 +26,13 @@
 #include "EasyWepDlgNotif.h"
 #include "EasyWpaDlgNotif.h"
 #include "WLANNetworkUnavailableNoteNotif.h"
-#include "ConfirmationQueryNotif.h"
 #include "ConnectViaNoteNotif.h"
 #include "wlanpowersavetestnotif.h"
 #include "easywapidlgnotif.h"
 #include "nowlannetworksavailablenotif.h"
 #include "connectingviadiscreetpopupnotif.h"
 #include "connectionerrordiscreetpopupnotif.h"
+#include "cellulardataconfirmation.h"
 
 // CONSTANTS
 
@@ -114,7 +114,7 @@ LOCAL_C void CreateNotifiersL(
     aNotifiers->AppendL( serNotify );
     CleanupStack::Pop( serNotify );      
 
-    serNotify = CConfirmationQueryNotif::NewL( resourceFileResponsible );
+    serNotify = CCellularDataConfirmation::NewL( resourceFileResponsible );
     CleanupStack::PushL( serNotify );
     aNotifiers->AppendL( serNotify );
     CleanupStack::Pop( serNotify );     

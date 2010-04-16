@@ -138,6 +138,9 @@ CMPMServerSession::~CMPMServerSession()
 User connection deactivated" )
         }   
 
+    // Clean up the blacklist table 
+    iMyServer.HandleServerUnblackListIap( iConnId, 0 );
+
     // Make sure the connection is removed from server's information array.
     iMyServer.RemoveBMConnection( iConnId, *this );
     }
@@ -445,6 +448,9 @@ while extracting TCommDbConnPref from TConnPref" )
     // 
     iAppUid = aMessage.Int2();
 
+    MPMLOGSTRING2( "CMPMServerSession::HandleServerChooseIapL: \
+Client UID = 0x%x", iAppUid )
+
     if ( !iIapSelection )
         {
         iIapSelection = CMPMIapSelection::NewL( iMyServer.CommsDatAccess(),
@@ -703,11 +709,6 @@ void CMPMServerSession::HandleServerIapConnectionStartedL(
 
     iMyServer.AppendBMIAPConnectionL( startedIap, startedId, *this );
 
-    // Unblacklist all IAPs related to the connection error 
-    // when connection has started.
-    // 
-    iMyServer.HandleServerUnblackListIap( startedId, ETemporary );
-
     // Complete the message as soon as possible to avoid latency in BM
     // 
     aMessage.Complete( KErrNone );
@@ -933,22 +934,13 @@ void CMPMServerSession::HandleServerApplicationMigratesToCarrierL(
                 {
                 if ( MyServer().RoamingWatcher()->RoamingStatus() == EMPMInternationalRoaming )
                     {
-                    //Check if cellular data usage query has already been presented to the user in this country
-                    if ( MyServer().RoamingWatcher()->AskCellularDataUsageAbroad() == true )
-                        {
-                        //International roaming
-                        iConfirmDlgRoaming = CMPMConfirmDlgRoaming::NewL( 
-                                *this, 
-                                snapId, 
-                                iMigrateIap, 
-                                CMPMConfirmDlg::EConfirmDlgVisitorNetwork, 
-                                reconnect );
-                        }
-                    else
-                        {
-                        //Handle like user would have answered "Connect this time" to dialog
-                        RoamingConfirmationCompletedL( KErrNone, EMsgQueryThisTime, reconnect );
-                        }
+                    //International roaming
+                    iConfirmDlgRoaming = CMPMConfirmDlgRoaming::NewL( 
+                            *this, 
+                            snapId, 
+                            iMigrateIap, 
+                            CMPMConfirmDlg::EConfirmDlgVisitorNetwork, 
+                            reconnect );
                     }
                 else
                     {
@@ -1105,13 +1097,6 @@ aError %d, aResponse %d, aReconnect %d",
                     TRAP_IGNORE(MyServer().CommsDatAccess()->WriteGenConnSettingsL( genConnSettings )); 
                     }
                 } 
-            else
-                {
-                //In foreign country connect automatically is not stored in commsdat
-                //even user selected so. We just do not ask confirmation for the cellular
-                //connection again in this country:
-                MyServer().RoamingWatcher()->SetAskCellularDataUsageAbroad( false );            
-                }
             }
         
         //user selected connect this time
@@ -2671,8 +2656,8 @@ No notification requested" )
         // Required notifications must go through whenever MPM decides
         // to initiate them.
         //
-        if( ( iStoredIapInfo.HoldPrefIapNotif() && aCaller == EConnMon )  ||
-                ( state == ERoaming && aCaller == EConnMon ) )
+        if( ( aCaller == EConnMon || aCaller == EConnMonEvent ) && 
+                ( iStoredIapInfo.HoldPrefIapNotif() || state == ERoaming) )
             {
             MPMLOGSTRING( "CMPMServerSession::PrefIAPNotificationL - \
 Mobility ongoing, notification will be handled later" )
@@ -2714,7 +2699,8 @@ registered for notifications" )
         tempMpmConnPref.SetSnapId( snap );
         IapSelectionL()->ChooseBestIAPL( tempMpmConnPref, availableIAPList );
         validateIapId = tempMpmConnPref.IapId();
-        if ( ( validateIapId == 0 ) && ( aCaller == EConnMon ) )
+        if ( ( validateIapId == 0 ) 
+                && ( aCaller == EConnMon || aCaller == EConnMonEvent ) )
             {
             // Since Connection Monitor is the only component which 
             // is unaware of Connection Id and SNAP, it can't send 
@@ -2724,8 +2710,19 @@ registered for notifications" )
             // All the other components take responsibility of 
             // sending the error notification. 
             // 
-            TRAP_IGNORE( ErrorNotificationL( KErrNotFound,
-                                             EMPMMobilityErrorNotification ) )
+            // Do not send the error if this call came from ConnMon Event.
+            // This will prevent unnecessary mobility errors.
+            // For example if there is two WLAN networks in Internet destination
+            // and we get weak indication for the one to which we are connected.
+            // Then connmon signals us with IAPAvailabilityChange which results
+            // to no available IAPs. We should not report error in that case.
+            if ( aCaller == EConnMon )
+                {
+                TRAP_IGNORE( ErrorNotificationL( KErrNotFound,
+                                             EMPMMobilityErrorNotification ) );
+                }
+            CleanupStack::PopAndDestroy( &availableIAPList );
+            return;                                                                   
             }
 
         TUint32 retNetId = 0;
