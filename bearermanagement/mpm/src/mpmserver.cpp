@@ -433,6 +433,7 @@ void CMPMServer::AppendBMConnection( const TConnectionId aConnId,
     connInfo.iSnap   = aSnap;
     connInfo.iIapId  = aIapId;
     connInfo.iState  = aState;
+    connInfo.iAppUid = aSession.AppUid();
 
     // Package into TActiveBMConn //TODO Redundant.. remove the other one.
     // 
@@ -1109,13 +1110,19 @@ TInt CMPMServer::HandleServerUnblackListIap(
         // found blacklisted Connection Id
         TMPMBlackListConnId connIdInfo = iBlackListIdList[i];
         iBlackListIdList.Remove( i ); // remove from the list 
+        
+        MPMLOGSTRING2( "CMPMServer::HandleServerUnblackListIap - \
+connIdInfo count: %d", connIdInfo.Count() )
 
         if ( aIapId == 0 )
             { // 0 will reset Connection Id blacklisted iap list 
+            MPMLOGSTRING( "CMPMServer::HandleServerUnblackListIap - \
+reset Connection Id blacklisted iap list" )
+
             connIdInfo.Close();
             return KErrNone;
             }
-
+        
         found = EFalse;
         for (TInt j = 0; j < connIdInfo.Count(); j++)
             {
@@ -1123,6 +1130,9 @@ TInt CMPMServer::HandleServerUnblackListIap(
                 {
                 // found and remove blacklisted iap
                 connIdInfo.Remove( j ); 
+                MPMLOGSTRING2( "CMPMServer::HandleServerUnblackListIap - \
+removed blacklisted iap in index = %d", j )
+                
                 if ( connIdInfo.Count() == 0 )
                     {
                     return KErrNone;
@@ -1140,6 +1150,8 @@ TInt CMPMServer::HandleServerUnblackListIap(
         }
     else
         {
+        MPMLOGSTRING( "CMPMServer::HandleServerUnblackListIap - \
+not found blacklisted Connection Id" )
         return KErrNotFound;
         }
     }
@@ -1151,8 +1163,9 @@ TInt CMPMServer::HandleServerUnblackListIap(
 void CMPMServer::HandleServerUnblackListIap( 
     TBlacklistCategory  aCategory )
     {
-    MPMLOGSTRING2( "CMPMServer::HandleServerUnblackListIap -\
- aCategory = %i", aCategory )
+    MPMLOGSTRING3( "CMPMServer::HandleServerUnblackListIap -\
+aCategory = %i blacklisted Id count = %d", 
+                   aCategory, iBlackListIdList.Count() )
 
     for( TInt i( 0 ); i < iBlackListIdList.Count(); i++ )
         {
@@ -1160,11 +1173,17 @@ void CMPMServer::HandleServerUnblackListIap(
         TMPMBlackListConnId connIdInfo = iBlackListIdList[i];
         iBlackListIdList.Remove( i ); // remove from the list 
 
+        MPMLOGSTRING3( "CMPMServer::HandleServerUnblackListIap - \
+aConnId = 0x%x, blacklisted IapId count = %d", connIdInfo.iConnId, 
+        connIdInfo.Count() )
+        
         for (TInt j = 0; j < connIdInfo.Count(); j++)
             {
             if ( connIdInfo.Category( j ) == aCategory ) 
                 {
                 // found and remove blacklisted iap
+                MPMLOGSTRING3( "CMPMServer::HandleServerUnblackListIap - \
+removed blacklisted iap id %i in index: %d", connIdInfo.Iap( j ), j )
                 connIdInfo.Remove( j ); 
                 }
             }
@@ -1173,6 +1192,7 @@ void CMPMServer::HandleServerUnblackListIap(
         //
         if( connIdInfo.Count() > 0 )
             {
+            MPMLOGSTRING( "reinsert connIdInfo to reflect activeness" )
             iBlackListIdList.Insert( connIdInfo, 0 );             
             }
         }

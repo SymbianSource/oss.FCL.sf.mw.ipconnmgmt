@@ -2342,6 +2342,39 @@ Unrecognised connection preference type" )
     ResolveConnType( aMpmConnPref );
 
     MPMLOGSTRING2( "CMPMServerSession::ExtractConnPref - \
+BearerSet = %d", aMpmConnPref.BearerSet());
+    
+    MPMLOGSTRING2( "CMPMServerSession::ExtractConnPref - \
+ConnSelectionDialog = %d", aMpmConnPref.ConnSelectionDialog());
+    
+    MPMLOGSTRING2( "CMPMServerSession::ExtractConnPref - \
+ConnType = %d", aMpmConnPref.ConnType());
+    
+    MPMLOGSTRING2( "CMPMServerSession::ExtractConnPref - \
+DisconnectDialog = %d", aMpmConnPref.DisconnectDialog());
+    
+    MPMLOGSTRING2( "CMPMServerSession::ExtractConnPref - \
+ForcedRoaming = %d", aMpmConnPref.ForcedRoaming() );
+    
+    MPMLOGSTRING2( "CMPMServerSession::ExtractConnPref - \
+IapId = %d", aMpmConnPref.IapId());
+    
+    MPMLOGSTRING2( "CMPMServerSession::ExtractConnPref - \
+MandateIap = %d", aMpmConnPref.MandateIap());
+    
+    MPMLOGSTRING2( "CMPMServerSession::ExtractConnPref - \
+NetId = %d", aMpmConnPref.NetId());
+    
+    MPMLOGSTRING2( "CMPMServerSession::ExtractConnPref - \
+NoteBehaviour = %d", aMpmConnPref.NoteBehaviour());
+    
+    MPMLOGSTRING2( "CMPMServerSession::ExtractConnPref - \
+SnapId = %d", aMpmConnPref.SnapId());
+    
+    MPMLOGSTRING2( "CMPMServerSession::ExtractConnPref - \
+SnapPurpose = %d", aMpmConnPref.SnapPurpose());
+
+    MPMLOGSTRING2( "CMPMServerSession::ExtractConnPref - \
 Error code in the end: %d", error )
     return error;
     }

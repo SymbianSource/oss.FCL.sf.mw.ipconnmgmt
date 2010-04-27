@@ -193,8 +193,6 @@ TBool CMPMConfirmDlgStarting::ConfirmDlgResponse( MMPMConfirmDlg* aDlg )
 //
 void CMPMConfirmDlgStarting::UserSelectedCancel( const TInt aError )
     {
-    MPMLOGSTRING2( "CMPMConfirmDlgStarting<0x%x>::UserSelectedCancel", 
-        iConnId )
     MPMLOGSTRING3( "CMPMConfirmDlgStarting<0x%x>::UserSelectedCancel:\
  Complete %d", iConnId, aError )
     iIapSelection.ChooseIapComplete( aError, NULL );

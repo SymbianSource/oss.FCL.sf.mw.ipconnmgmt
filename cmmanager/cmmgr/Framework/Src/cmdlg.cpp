@@ -1658,7 +1658,10 @@ void CCmDlg::HandleListboxDataChangeL()
     CleanupStack::PopAndDestroy( &cmIds ); 
     
     iCmManager->CommitTransactionL( KErrNone );
-    
+
+    // Fix for the added IAP not showing in the list.
+    iListbox->HandleItemAdditionL();
+
     iListbox->DrawNow();
     iListbox->UpdateScrollBarsL();
     

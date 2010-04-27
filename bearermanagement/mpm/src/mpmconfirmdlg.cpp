@@ -86,7 +86,8 @@ void CMPMConfirmDlg::Start( CMPMDialogBase* aDlg )
     //  OR
     //  if ConfirmDlgResponse is not accepted by the iConfirmDlgUser.
     //
-    if ( !aDlg || !iConfirmDlgUser.ConfirmDlgResponse( &((CMPMConfirmDlg*)aDlg)->iConfirmDlgUser ) )
+    if ( !aDlg || !iConfirmDlgUser.ConfirmDlgResponse( 
+                                   &((CMPMConfirmDlg*)aDlg)->iConfirmDlgUser ) )
         {
         MPMLOGSTRING3( "CMPMConfirmDlg::Start Display dialog: SNAP %d, IAP %d", 
                        iSnapId, iIAP )
@@ -95,7 +96,7 @@ void CMPMConfirmDlg::Start( CMPMDialogBase* aDlg )
             {
             case EConfirmDlgHomeNetwork:
                 {                
-                MPMLOGSTRING( "    normal confirm dialog" )
+                MPMLOGSTRING( "    Show home network confirm dialog" )
                 iUtils->ConfirmMethodUsageQuery( iResult,
                                                  true,
                                                  iStatus);
@@ -104,7 +105,7 @@ void CMPMConfirmDlg::Start( CMPMDialogBase* aDlg )
                 
             case EConfirmDlgVisitorNetwork:
                 {
-                MPMLOGSTRING( "    normal confirm dialog" )
+                MPMLOGSTRING( "    Show visitor network confirm dialog" )
                 iUtils->ConfirmMethodUsageQuery( iResult,
                                                  false,
                                                  iStatus);

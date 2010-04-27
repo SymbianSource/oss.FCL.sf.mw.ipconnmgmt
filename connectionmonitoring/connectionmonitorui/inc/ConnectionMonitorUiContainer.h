@@ -205,6 +205,11 @@ class CConnectionMonitorUiContainer : public CCoeControl,
         * Connection count
         */
         TInt iOldConnectionCount;
+        
+        /**
+        * Set when main view list comes to focus
+        */
+        TBool iFocusChanged;
     };
 
 #endif // CONNECTIONMONITORUICONTAINER_H

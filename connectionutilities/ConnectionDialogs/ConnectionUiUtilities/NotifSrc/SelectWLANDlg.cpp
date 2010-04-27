@@ -210,7 +210,12 @@ TBool CSelectWLANDlg::OkToExitL( TInt aButtonId )
                 TWlanConnectionSecurityMode sMode;
                 TWlanConnectionExtentedSecurityMode sExtMode;
 
-                sSID.Copy( buff->Des() );       
+                //sSID.Copy( buff->Des() );
+                TInt err = CnvUtfConverter::ConvertFromUnicodeToUtf8( sSID, buff->Des() );
+                if ( err )
+                    {
+                    sSID.Copy( buff->Des() );
+                    }        
                 CleanupStack::PopAndDestroy( buff );
 
                 iPlugin->SetEasyWlanToHiddenL( ETrue ); 

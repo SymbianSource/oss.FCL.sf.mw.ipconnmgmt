@@ -131,8 +131,8 @@ void CMPMIapSelection::ChooseIapL( const TMpmConnPref& aChooseIapPref )
         iChooseIapPref.SetSnapId( 0 );
         }
 
-    MPMLOGSTRING2( "CMPMIapSelection::ChooseIapL: IapID: %i",
-            iChooseIapPref.IapId() )
+    MPMLOGSTRING3( "CMPMIapSelection::ChooseIapL: IapID: %i SnapId: %i",
+            iChooseIapPref.IapId(), iChooseIapPref.SnapId() )
     
     // Update WLAN only information and whether new WLAN network usage is allowed.
     TBool wlanOnly = iSession->IsWlanOnlyL( iNewWlansAllowed );
@@ -482,7 +482,10 @@ void CMPMIapSelection::CompleteExplicitSnapConnectionL()
     // Check if any suitable IAP's were found, if not then complete selection with error code
     if ( validateIapId == 0 )
         {
-        if ( iChooseIapPref.ConnType() == TMpmConnPref::EConnTypeDefault )
+        if ( iChooseIapPref.ConnType() == TMpmConnPref::EConnTypeDefault ||
+                ( iChooseIapPref.ConnType() == TMpmConnPref::EConnTypeExplicit &&
+                !( iChooseIapPref.NoteBehaviour() & TExtendedConnPref::ENoteBehaviourConnDisableQueries ) &&
+                iCommsDatAccess->IsInternetSnapL( 0, snap ) ) )
             {
             ImplicitConnectionL();
             }

@@ -94,4 +94,5 @@ LIBRARY AknCapServerClient.lib
 LIBRARY aknnotify.lib
 
 LIBRARY	wifiprotplugin.lib
+LIBRARY charconv.lib
 

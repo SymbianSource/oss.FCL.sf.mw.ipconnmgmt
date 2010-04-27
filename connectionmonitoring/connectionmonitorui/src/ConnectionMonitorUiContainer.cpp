@@ -76,7 +76,8 @@ CConnectionMonitorUiContainer::CConnectionMonitorUiContainer(
     iMonitor( aMonitor ),
     iConnectionArray( aConnectionArray ), 
     isWlanSupported( EFalse ),
-    iActiveWrapper( aActiveWrapper )
+    iActiveWrapper( aActiveWrapper ),
+    iFocusChanged( EFalse )
     {
     }
 
@@ -231,15 +232,6 @@ void CConnectionMonitorUiContainer::OnEventL(
             case EConnMonDeleteConnection:
                 {
                 CMUILOGGER_WRITE( "OnEventL EConnMonDeleteConnection" );
-    			CMUILOGGER_WRITE_F( "validIndex: %b", validIndex );
-                
-                if ( validIndex )
-                    {
-                    TBool current
-                        ( aIndex == ( TUint )iListBox->CurrentItemIndex() );
-                    AknListBoxUtils::HandleItemRemovalAndPositionHighlightL(
-                                iListBox, aIndex, ETrue );
-                    }
                 iListBox->UpdateScrollBarsL();
                 break;
                 }
@@ -273,12 +265,19 @@ void CConnectionMonitorUiContainer::OnEventL(
 void CConnectionMonitorUiContainer::OnTimerEventL()
     {
     iListBox->DrawNow();
-    //Update the scrollbar only if connection count has changed
-    //
     TInt iNewConnectionCount = iConnectionArray->MdcaCount();
-    if ( iOldConnectionCount != iNewConnectionCount )
+    if ( iOldConnectionCount > iNewConnectionCount )
+        {
+        iListBox->HandleItemRemovalL();
+        }
+    
+    //Update the scrollbar only if lisbox focus 
+    //has changed
+    //
+    if ( iFocusChanged )
         {
         iListBox->UpdateScrollBarsL();
+        iFocusChanged = EFalse;
         }
     iOldConnectionCount = iNewConnectionCount;
     PushAndRefreshNaviPaneL();
@@ -744,7 +743,8 @@ void CConnectionMonitorUiContainer::PopNaviPane()
 void CConnectionMonitorUiContainer::FocusChanged( TDrawNow aDrawNow )
     {
     CMUILOGGER_ENTERFN( "CConnectionMonitorUiContainer::FocusChanged" );
-    CCoeControl::FocusChanged( aDrawNow );    
+    CCoeControl::FocusChanged( aDrawNow ); 
+    iFocusChanged = ETrue;     
     if ( iListBox )
         {
         iListBox->SetFocus( IsFocused() );

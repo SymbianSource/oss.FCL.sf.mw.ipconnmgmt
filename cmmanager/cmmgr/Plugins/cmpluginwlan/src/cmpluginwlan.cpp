@@ -53,6 +53,7 @@
 #include "cmpwlanactivewaiter.h"
 
 #include <wifiprotuiinprocess.h>
+#include <utf.h>
 
 using namespace CMManager;
 
@@ -1654,9 +1655,19 @@ TBool CCmPluginWlan::AutomaticallyConfigureL()
             // We have to convert the 8-bit SSID to 16-bit for CommsDat.
             HBufC* ssid16 = HBufC::NewLC( ssid.Length() );
             TPtr ssid16Ptr( ssid16->Des() );
-            ssid16Ptr.Copy( ssid );
-
+            
+            // save iap name as unicode
+            TInt error = CnvUtfConverter::ConvertToUnicodeFromUtf8( ssid16Ptr, ssid );
+            if ( error )
+                {
+                ssid16Ptr.Copy( ssid );                  	
+                }
             SetStringAttributeL( ECmName, *ssid16 );
+            
+            // save ssid as UTF8
+            ssid16Ptr.Zero();
+            ssid16Ptr.FillZ();
+            ssid16Ptr.Copy( ssid ); 
             SetStringAttributeL( EWlanSSID, *ssid16 );
             // ConvertWLANConnectionStatesL( )converts WLAN connection state 
             // (TWlanConnectionMode) into EInfra or EAdhoc (TWlanNetMode)
@@ -1763,9 +1774,21 @@ TBool CCmPluginWlan::AutomaticallyConfigureL()
             // no Wlan network found, continuing process...
             HBufC* ssid16 = HBufC::NewLC( ssid.Length() );
             TPtr ssid16Ptr( ssid16->Des() );
-            ssid16Ptr.Copy( ssid );
-            // write ssid and go on...
+            
+            // save iap name as unicode
+            TInt error = CnvUtfConverter::ConvertToUnicodeFromUtf8( ssid16Ptr, ssid );
+            if ( error )
+                {
+                ssid16Ptr.Copy( ssid );	
+                }			
             SetStringAttributeL( ECmName, *ssid16 );
+            
+            // save ssid as UTF8
+            ssid16Ptr.Zero();
+            ssid16Ptr.FillZ();
+            ssid16Ptr.Copy( ssid ); 
+            
+            // write ssid and go on...            
             SetStringAttributeL( EWlanSSID, *ssid16 );
             CleanupStack::PopAndDestroy( ssid16 );
             retval = ProceedWithManualL( ETrue ); // revert to fully manual...
@@ -2006,9 +2029,18 @@ TBool CCmPluginWlan::ShowNWNameQueryL( TDes& aNwName )
                                             aNwName );
     if ( retVal )
         {
+        // save iap name as unicode
         SetStringAttributeL( ECmName, aNwName );
-        SetStringAttributeL( EWlanSSID, aNwName );
         
+        // save ssid as UTF8
+        TWlanSsid ssid;
+        TInt err = CnvUtfConverter::ConvertFromUnicodeToUtf8( ssid, aNwName );
+        if ( err == KErrNone )
+            {
+            aNwName.Copy( ssid );
+            }
+        SetStringAttributeL( EWlanSSID, aNwName );
+        	
         retVal = ETrue;
         }
     return retVal;

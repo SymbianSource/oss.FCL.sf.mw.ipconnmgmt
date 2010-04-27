@@ -133,7 +133,7 @@ NONSHARABLE_CLASS( CmPluginWlanSettingsDlg ) : public CmPluginBaseSettingsDlg
         *
         * @since S60 5.0
         */
-				virtual void GetHelpContext( TCoeHelpContext& aContext ) const;
+		virtual void GetHelpContext( TCoeHelpContext& aContext ) const;
         
     private:  // New functions
         
