@@ -535,13 +535,6 @@ void CMPMConnMonEvents::EventL( const CConnMonEventBase& aConnMonEvent )
             iAvailableIAPs = eventIap->IapAvailability();
             UpdateIAPRefreshTime();
             IapAvailabilityChange( EConnMonEvent );
-            
-            TRAPD( err, iMyServer.UpdateSessionConnectionDlgL() )
-            if( err != KErrNone )
-                {
-                MPMLOGSTRING2( "CMPMConnMonEvents::EventL UpdateSessionConnectionDlgL \
-error code %d", err )
-                }
             break;
             }
         default:

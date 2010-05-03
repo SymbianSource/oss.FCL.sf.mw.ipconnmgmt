@@ -614,7 +614,7 @@ void CProcessorGlobal::UpdateGlobalBearerArrayL
 // CProcessorGlobal::SetDefaultConnectionL
 // ---------------------------------------------------------
 //
-void CProcessorGlobal::SetDefaultConnectionL()
+/*void CProcessorGlobal::SetDefaultConnectionL()
     {
     if( iDefCon->Count() > 0 )
         {
@@ -624,7 +624,7 @@ void CProcessorGlobal::SetDefaultConnectionL()
         {
         SetDefaultConnectionNameL( (*iDefCon)[1] );
         }
-    }
+    }*/
 
 // ---------------------------------------------------------
 // CProcessorGlobal::SetDefaultConnectionTypeL
@@ -759,14 +759,14 @@ void CProcessorGlobal::SetGenConnSettingsL()
 //  CProcessorGlobal::SetDefConnRecordL()
 //-----------------------------------------------------------------------------
 //
-void CProcessorGlobal::SetDefConnRecordL( const TInt aId )
+void CProcessorGlobal::SetDefConnRecordL( const TInt /*aId*/ )
     {
 
-    TCmDefConnValue value;
+/*    TCmDefConnValue value;
     value.iType = iDefaultConnectionType;
-    value.iId = aId;
+    value.iId = aId;*/
     
-    iCmManager->WriteDefConnL( value );
+//    iCmManager->WriteDefConnL( value );
     
     // It gets true if the defconn was set correctly
     iDefaultConnectionSet = ETrue;

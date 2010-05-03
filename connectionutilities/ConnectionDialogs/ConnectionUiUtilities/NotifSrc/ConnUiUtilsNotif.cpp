@@ -26,12 +26,8 @@
 #include "EasyWepDlgNotif.h"
 #include "EasyWpaDlgNotif.h"
 #include "WLANNetworkUnavailableNoteNotif.h"
-#include "ConnectViaNoteNotif.h"
 #include "wlanpowersavetestnotif.h"
 #include "easywapidlgnotif.h"
-#include "nowlannetworksavailablenotif.h"
-#include "connectingviadiscreetpopupnotif.h"
-#include "connectionerrordiscreetpopupnotif.h"
 #include "cellulardataconfirmation.h"
 
 // CONSTANTS
@@ -119,11 +115,6 @@ LOCAL_C void CreateNotifiersL(
     aNotifiers->AppendL( serNotify );
     CleanupStack::Pop( serNotify );     
     
-    serNotify = CConnectViaNoteNotif::NewL( resourceFileResponsible );
-    CleanupStack::PushL( serNotify );
-    aNotifiers->AppendL( serNotify );
-    CleanupStack::Pop( serNotify );     
-  
     serNotify = CWlanPowerSaveQueryNotif::NewL( resourceFileResponsible );
     CleanupStack::PushL( serNotify );
     aNotifiers->AppendL( serNotify );
@@ -134,20 +125,6 @@ LOCAL_C void CreateNotifiersL(
     aNotifiers->AppendL( serNotify );
     CleanupStack::Pop( serNotify );    
 
-    serNotify = CConnectingViaDiscreetPopupNotif::NewL( resourceFileResponsible );
-    CleanupStack::PushL( serNotify );
-    aNotifiers->AppendL( serNotify );
-    CleanupStack::Pop( serNotify );
-    
-    serNotify = CNoWLANNetworksAvailableNotif::NewL( resourceFileResponsible );
-    CleanupStack::PushL( serNotify );
-    aNotifiers->AppendL( serNotify );
-    CleanupStack::Pop( serNotify );
-
-    serNotify = CConnectionErrorDiscreetPopupNotif::NewL( resourceFileResponsible );
-    CleanupStack::PushL( serNotify );
-    aNotifiers->AppendL( serNotify );
-    CleanupStack::Pop( serNotify );
     }
     
 // End of File

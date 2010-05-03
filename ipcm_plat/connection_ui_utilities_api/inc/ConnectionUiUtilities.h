@@ -108,18 +108,35 @@ NONSHARABLE_CLASS( CConnectionUiUtilities ) : public CBase
         
         /**
         * Pops up discreet popup indicating that connection is being
+        * established to not yet known access point. The access point details
+        * can be later provided with ConnectingViaDiscreetPopup( aIAPId,
+        * aConnectionAlreadyActive) method.
+        * This method should only be used from the MPM in order to provide
+        * a consistent popup behavior across the platform.
+        */
+        IMPORT_C void ConnectingViaDiscreetPopup( );
+
+        /**
+        * Pops up discreet popup indicating that connection is being
         * established to the given access point.
         * This method should only be used from the MPM in order to provide
         * a consistent popup behavior across the platform.
         * @param aIAPId The id of the access point.
-        * @param aConnectionActive is connection already active.
+        * @param aConnectionActive ETrue connection already active.
         */
-        IMPORT_C void ConnectingViaDiscreetPopup( const TUint32& aIAPId, TBool aConnectionAlreadyActive );
+        IMPORT_C void ConnectingViaDiscreetPopup( const TUint32& aIAPId,
+                TBool aConnectionAlreadyActive );
+
+        /**
+        * Cancels (hides) connecting via discreet popup.
+        * This method should only be used from the MPM in order to provide
+        * a consistent popup behavior across the platform.
+        */
+        IMPORT_C void CancelConnectingViaDiscreetPopup( );
 
         /**
         * Pops up a discreet popup indicating a connection error.
-        * Only appropriate error codes show the popup, otherwise
-        * (such as with general errors) the popup is not shown.
+        * Only appropriate error codes show the popup.
         * This method should only be used from the MPM in order to provide
         * a consistent popup behavior across the platform.
         * @param aErrCode Symbian error code.

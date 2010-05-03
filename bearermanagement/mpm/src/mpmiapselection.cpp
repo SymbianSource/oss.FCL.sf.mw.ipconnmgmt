@@ -17,7 +17,6 @@
 
 #include "mpmiapselection.h"
 #include "mpmlogger.h"
-#include "mpmdialog.h"
 #include "mpmserversession.h"
 #include "mpmcommsdataccess.h"
 #include "mpmconnmonevents.h"
@@ -31,19 +30,19 @@
 // ---------------------------------------------------------------------------
 //
 CMPMIapSelection::CMPMIapSelection( CMPMCommsDatAccess*  aCommsDatAccess,
-                                    CMPMServerSession*   aSession )
+                                    CMPMServerSession*   aSession,
+                                    CConnectionUiUtilities* aConnUiUtils )
     : iChooseIapState( ENoConnection ),
       iCommsDatAccess( aCommsDatAccess ),
+      iConnUiUtils( aConnUiUtils ),
       iStoredIapInfo(),
       iSession( aSession ),
       iConfirmDlgStarting( NULL ),
-      iDialog( NULL ),
       iWlanDialog( NULL ),
       iNextBestExists( EFalse ),
       iUserSelectionIapId( 0 ),
       iUserSelectionSnapId( 0 ),
       iImplicitState( EImplicitStart ),
-      iOfflineNoteResponse( EOfflineResponseUndefined ),
       iIsRoaming( EFalse ),
       iNewWlansAllowed ( EFalse )
     {
@@ -63,10 +62,12 @@ void CMPMIapSelection::ConstructL()
 // ---------------------------------------------------------------------------
 //
 CMPMIapSelection* CMPMIapSelection::NewL( CMPMCommsDatAccess*  aCommsDatAccess,
-                                          CMPMServerSession*   aSession )
+                                          CMPMServerSession*   aSession,
+                                          CConnectionUiUtilities* aConnUiUtils )
     {
     CMPMIapSelection* self = new ( ELeave ) CMPMIapSelection( aCommsDatAccess,
-                                                              aSession );
+                                                              aSession,
+                                                              aConnUiUtils );
     CleanupStack::PushL( self );
     self->ConstructL();
     CleanupStack::Pop( self );
@@ -85,7 +86,6 @@ CMPMIapSelection::~CMPMIapSelection()
     StopDisplayingStartingDlg();
     
     delete iConfirmDlgStarting;
-    delete iDialog;
     delete iWlanDialog;
     }
 
@@ -132,8 +132,8 @@ void CMPMIapSelection::ChooseIapL( const TMpmConnPref& aChooseIapPref )
         iChooseIapPref.SetSnapId( 0 );
         }
 
-    MPMLOGSTRING2( "CMPMIapSelection::ChooseIapL: IapID: %i",
-            iChooseIapPref.IapId() )
+    MPMLOGSTRING3( "CMPMIapSelection::ChooseIapL: IapID: %i SnapId: %i",
+            iChooseIapPref.IapId(), iChooseIapPref.SnapId() )
     
     // Update WLAN only information and whether new WLAN network usage is allowed.
     TBool wlanOnly = iSession->IsWlanOnlyL( iNewWlansAllowed );
@@ -345,7 +345,7 @@ void CMPMIapSelection::ExplicitConnectionL()
         // KErrGprsOfflineMode should be returned instead of KErrNone.
         // 
         
-        if ( !iapTypeLanOrWlan && iSession->IsPhoneOfflineL() )
+        if ( !iapTypeLanOrWlan && iSession->MyServer().IsPhoneOffline() )
             {
             ChooseIapComplete( KErrGprsOfflineMode, &iChooseIapPref );
             }
@@ -448,19 +448,6 @@ void CMPMIapSelection::ExplicitConnectionL()
     }
 
 // -----------------------------------------------------------------------------
-// CMPMIapSelection::UpdateConnectionDialog
-// -----------------------------------------------------------------------------
-//
-void CMPMIapSelection::UpdateConnectionDialogL()
-    {
-    if( iDialog )
-        {
-        MPMLOGSTRING( "CMPMIapSelection::UpdateConnectionDialogL data will be updated" )
-        iDialog->PublishSortSnapInfoL();
-        }
-    }
-
-// -----------------------------------------------------------------------------
 // CMPMIapSelection::CompleteExplicitSnapConnectionL
 // -----------------------------------------------------------------------------
 //
@@ -513,7 +500,7 @@ void CMPMIapSelection::CompleteExplicitSnapConnectionL()
         {
         ChooseIapComplete( KErrGprsServicesNotAllowed, NULL );
         }
-    else if ( !iapTypeLanOrWlan && iSession->IsPhoneOfflineL() )
+    else if ( !iapTypeLanOrWlan && iSession->MyServer().IsPhoneOffline() )
         {
         // In case offline mode is enabled, only LAN or WLAN is allowed.
         // If some other bearer has been requested, then error code 
@@ -649,8 +636,6 @@ TBool CMPMIapSelection::StartWlanQueryIfNeededL( TUint32 aIapId, TBool aIsRoamin
 //
 void CMPMIapSelection::ImplicitConnectionCheckWlanScanNeededL()
     {
-    __ASSERT_DEBUG( !iDialog, PanicServer( EMPMReceiveAlreadyActive ) );
-
     MPMLOGSTRING( "CMPMIapSelection::ImplicitConnectionCheckWlanScanNeededL" )
 
     iCommsDatAccess->CheckWLANIapL( *iSession );
@@ -719,27 +704,7 @@ void CMPMIapSelection::ChooseIapComplete(
     const TMpmConnPref* aPolicyPref )
     {
     MPMLOGSTRING2( "CMPMIapSelection::ChooseIapComplete aError = %d", aError )
-    
-    if ( ( aError == KErrNone ) &&
-        !( iChooseIapPref.NoteBehaviour() &
-           TExtendedConnPref::ENoteBehaviourConnDisableNotes ) &&
-         ( iSession->IsMMSIap( aPolicyPref->IapId() ) == EFalse ) )
-        {
-        TBool connectionAlreadyActive =
-            iSession->MyServer().CheckIfStarted( aPolicyPref->IapId() );
-        CConnectionUiUtilities* connUiUtils = NULL;
-        TRAPD( popupError,
-               connUiUtils = CConnectionUiUtilities::NewL();
-               connUiUtils->ConnectingViaDiscreetPopup(
-                   aPolicyPref->IapId(),
-                   connectionAlreadyActive );
-               delete connUiUtils; );
-        if ( popupError && connUiUtils )
-            {
-            delete connUiUtils;
-            }
-        }
-    
+        
     if( iWlanDialog )
         {
         delete iWlanDialog;
@@ -796,7 +761,6 @@ void CMPMIapSelection::UserWlanSelectionDoneL( TInt aError, TUint32 aIapId )
                                                          aIapId,
                                                          EStarting,
                                                          *iSession );
-                iWlanDialog->StoreEasyWlanSelectionL();
                 delete iWlanDialog;
                 iWlanDialog = NULL;
 
@@ -822,8 +786,6 @@ void CMPMIapSelection::HandleUserSelectionError( TInt aError  )
         aError )
     
     ChooseIapComplete( aError, NULL );
-    delete iDialog;
-    iDialog = NULL;
     }
 
        
@@ -847,7 +809,7 @@ void CMPMIapSelection::HandleUserSelectionL( TBool aIsIap, TUint32 aId, TInt aEr
         // User selected SNAP
         // 
         TMpmConnPref userPref;
-        iUserSelectionSnapId = iCommsDatAccess->MapNetIdtoSnapAPL( aId );
+        iUserSelectionSnapId = aId;
         userPref.SetSnapId( iUserSelectionSnapId );
         userPref.SetIapId( 0 );
 
@@ -872,12 +834,13 @@ void CMPMIapSelection::HandleUserSelectionL( TBool aIsIap, TUint32 aId, TInt aEr
 
         }
     
-    // We are done
-    // 
-    delete iDialog;
-    iDialog = NULL;
-    
-    ImplicitConnectionL();
+    // Letting a function leave here would panic the whole MPM.
+    //
+    TRAPD( err, ImplicitConnectionL() );
+    if( err != KErrNone )
+        {
+        ChooseIapComplete( err, &iChooseIapPref );
+        }
     }
     
 // -----------------------------------------------------------------------------
@@ -944,43 +907,6 @@ void CMPMIapSelection::ImplicitConnectionWlanNoteL()
     }
 
 // -----------------------------------------------------------------------------
-// CMPMIapSelection::OfflineNoteResponse
-// -----------------------------------------------------------------------------
-//
-TOfflineNoteResponse CMPMIapSelection::OfflineNoteResponse()
-    {
-#ifndef _PLATFORM_SIMULATOR_
-    MPMLOGSTRING2( "CMPMIapSelection::OfflineNoteResponse: %d",
-                   iOfflineNoteResponse )
-    return iOfflineNoteResponse;
-#else
-    // Platsim simulates WLAN and offline-mode. To ease automated testing,
-    // offline connection confirmation is not asked in Platsim-variant
-    MPMLOGSTRING( "CMPMIapSelection::OfflineNoteResponse: yes for Platsim" )
-    return EOfflineResponseYes;
-#endif
-    }
-
-// -----------------------------------------------------------------------------
-// CMPMIapSelection::ConnectionStarted
-// -----------------------------------------------------------------------------
-//
-void CMPMIapSelection::ConnectionStarted()
-    {
-    MPMLOGSTRING( "CMPMIapSelection::ConnectionStarted: reset offline response" )
-    SetOfflineNoteResponse( EOfflineResponseUndefined );
-    }
-    
-// -----------------------------------------------------------------------------
-// CMPMIapSelection::SetOfflineNoteShown
-// -----------------------------------------------------------------------------
-//
-void CMPMIapSelection::SetOfflineNoteResponse( TOfflineNoteResponse aResponse )
-    {
-    MPMLOGSTRING2( "CMPMIapSelection::SetOfflineNoteResponse %d ", aResponse )
-    iOfflineNoteResponse = aResponse;
-    }
-// -----------------------------------------------------------------------------
 // CMPMIapSelection::CompleteImplicitConnectionL
 // -----------------------------------------------------------------------------
 //
@@ -995,7 +921,7 @@ void CMPMIapSelection::CompleteImplicitConnectionL()
                                    iapTypeLanOrWlan,
                                    *iSession );
                                    
-    if ( !iapTypeLanOrWlan && iSession->IsPhoneOfflineL() )
+    if ( !iapTypeLanOrWlan && iSession->MyServer().IsPhoneOffline() )
         {
         MPMLOGSTRING2( "CMPMIapSelection::CompleteImplicitConnectionL: Completing with code = %i",
                 KErrGprsOfflineMode )
@@ -1020,7 +946,6 @@ void CMPMIapSelection::CompleteImplicitConnectionL()
         
         if( iWlanDialog )
             {
-            iWlanDialog->StoreEasyWlanSelectionL();
             delete iWlanDialog;
             iWlanDialog = NULL;
             }
@@ -1039,13 +964,14 @@ void CMPMIapSelection::ImplicitConnectionIapSelectionL()
     MPMLOGSTRING( "CMPMIapSelection::ImplicitConnectionIapSelectionL" )
     iSession->AvailableUnblacklistedIapsL( iStoredAvailableIaps, iSession->ConnectionId() );
 
-    // Create and initiate user dialog
-    //
-    iDialog = CMPMDialog::NewL( *this,
-                                iStoredAvailableIaps,
-                                iChooseIapPref.BearerSet(),
-                                *iSession->MyServer().ConnectDialogQueue(),
-                                iSession->MyServer() );
+    // The connection selection dialog doesn't exist any longer, thus
+    // the HandleUserSelection is called with the Internet SNAP that is returned instead
+    TInt err = KErrNone;
+    TInt internetSnapId = 0;
+    // if the reading leaves, then the internet snap did not exist for some reason
+    TRAP ( err, internetSnapId = 
+        iCommsDatAccess->DestinationIdL( CMManager::ESnapPurposeInternet ));
+    HandleUserSelectionL( false, internetSnapId, err );
     }
 
 // -----------------------------------------------------------------------------

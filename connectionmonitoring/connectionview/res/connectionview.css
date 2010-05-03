@@ -22,22 +22,7 @@ HbLabel#mInfoLabel::text
     text-align: center;
 }
 
-HbGroupBox#groupBox::headingWidget:portrait
+HbPushButton#disconnectButton
 {
-    fixed-width: expr(var(hb-param-screen-width)-var(hb-param-margin-gene-left)-var(hb-param-margin-gene-right));
-}
-
-HbGroupBox#groupBox::contentWidget:portrait
-{
-    fixed-width: expr(var(hb-param-screen-width)-var(hb-param-margin-gene-left)-var(hb-param-margin-gene-right));
-}
-
-HbGroupBox#groupBox::headingWidget:landscape
-{
-    fixed-width: expr(var(hb-param-screen-height)-var(hb-param-margin-gene-top)-var(hb-param-margin-gene-bottom)-var(hb-param-widget-toolbar-height));
-}
-
-HbGroupBox#groupBox::contentWidget:landscape
-{
-    fixed-width: expr(var(hb-param-screen-height)-var(hb-param-margin-gene-top)-var(hb-param-margin-gene-bottom)-var(hb-param-widget-toolbar-height));
+    max-width: expr(var(hb-param-screen-short-edge)-var(hb-param-margin-gene-left)-var(hb-param-margin-gene-right));
 }

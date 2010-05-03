@@ -31,7 +31,6 @@ VENDORID VID_DEFAULT
 
 SOURCEPATH  ../cconndlg/clientsrc
 SOURCE GenConAgentDialogServer.cpp
-SOURCE ActiveLogin.cpp
 
 USERINCLUDE     ../cconndlg/inc ../cconndlg/clientinc
 

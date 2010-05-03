@@ -22,12 +22,7 @@
 #include <eikdef.h>
 #include <d32dbms.h>
 #include <featmgr.h>
-
-#ifdef SYMBIAN_ENABLE_SPLIT_HEADERS
-#include <ProtectDB.h>
-#else
 #include <comms-infras/commdb/protection/protectdb.h>
-#endif
 
 #include <etelpckt.h>
 #ifdef __TEST_USE_SHARED_DATA

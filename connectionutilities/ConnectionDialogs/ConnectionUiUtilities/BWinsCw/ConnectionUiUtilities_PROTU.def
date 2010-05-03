@@ -53,4 +53,6 @@ EXPORTS
 	?ConfirmMethodUsageQuery@CConnectionUiUtilities@@QAEXAAW4TMsgQueryLinkedResults@@HAAVTRequestStatus@@@Z @ 52 NONAME ; void CConnectionUiUtilities::ConfirmMethodUsageQuery(enum TMsgQueryLinkedResults &, int, class TRequestStatus &)
 	?ConnectingViaDiscreetPopup@CConnectionUiUtilities@@QAEXABKH@Z @ 53 NONAME ; void CConnectionUiUtilities::ConnectingViaDiscreetPopup(unsigned long const &, int)
 	?ConnectionErrorDiscreetPopup@CConnectionUiUtilities@@QAEXABH@Z @ 54 NONAME ; void CConnectionUiUtilities::ConnectionErrorDiscreetPopup(int const &)
+	?CancelConnectingViaDiscreetPopup@CConnectionUiUtilities@@QAEXXZ @ 55 NONAME ; void CConnectionUiUtilities::CancelConnectingViaDiscreetPopup(void)
+	?ConnectingViaDiscreetPopup@CConnectionUiUtilities@@QAEXXZ @ 56 NONAME ; void CConnectionUiUtilities::ConnectingViaDiscreetPopup(void)
 

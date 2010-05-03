@@ -191,7 +191,7 @@ TInt CWlanSupport::GetBearerAvailabilityL( const RMessage2& aMessage, TBool& aAv
 
 
 // -----------------------------------------------------------------------------
-// CWlanSupport::GetSignalStrength
+// CWlanSupport::GetSignalStrengthL
 // -----------------------------------------------------------------------------
 //
 TInt CWlanSupport::GetSignalStrengthL(
@@ -416,7 +416,7 @@ TInt CWlanSupport::AppendAvailableIaps( RArray<TUint>& aIdArray )
     }
 
 // -----------------------------------------------------------------------------
-// CWlanSupport::AppendAvailableIapsBySsid
+// CWlanSupport::AppendAvailableIapsBySsidL
 // -----------------------------------------------------------------------------
 //
 TInt CWlanSupport::AppendAvailableIapsBySsidL( RArray<TUint>& aIdArray )
@@ -591,33 +591,13 @@ TInt CWlanSupport::GetConnectionSecurity( TInt& aConnectionSecurity )
     LOGENTRFN("CWlanSupport::GetConnectionSecurity()")
     TInt err( KErrNone );
 
-    TWlanConnectionSecurityMode mode( EWlanConnectionSecurityOpen );
+    TWlanConnectionExtentedSecurityMode mode( EWlanConnectionExtentedSecurityModeOpen );
 
     // Get security mode
-    err = iWlanMgmt->GetConnectionSecurityMode( mode );
+    err = iWlanMgmt->GetExtendedConnectionSecurityMode( mode );
     if ( KErrNone == err )
         {
-        switch ( mode )
-            {
-            case EWlanConnectionSecurityOpen:
-                aConnectionSecurity = EConnMonSecurityOpen;
-                break;
-            case EWlanConnectionSecurityWep:
-                aConnectionSecurity = EConnMonSecurityWep;
-                break;
-            case EWlanConnectionSecurity802d1x:
-                aConnectionSecurity = EConnMonSecurity802d1x;
-                break;
-            case EWlanConnectionSecurityWpa:
-                aConnectionSecurity = EConnMonSecurityWpa;
-                break;
-            case EWlanConnectionSecurityWpaPsk:
-                aConnectionSecurity = EConnMonSecurityWpaPsk;
-                break;
-            default:
-                aConnectionSecurity = EConnMonSecurityOpen;
-                break;
-            }
+        aConnectionSecurity = ConvertWlanExtSecModeToConnMonSecModeV2( mode );
         LOGIT1("GetConnectionSecurity: security mode %d", aConnectionSecurity)
         }
 
@@ -773,28 +753,10 @@ void CWlanSupport::GetWLANNetworksL( RConnMonWLANNetworksArray& aWlanNetworks )
             TUint signalStrength(scanInfo->RXLevel());
             LOGIT1("CWlanSupport::GetWLANNetworksL: signalStrength %d", signalStrength)
 
-            // SecurityMode
-            TUint8 ieLength( 0 );
-            const TUint8* wpaData;
-
-            TUint securityMode( EConnMonSecurityOpen );
-            if ( scanInfo->Capability() & KWlan802Dot11CapabilityPrivacyMask )
-                {
-                if ( ( scanInfo->InformationElement(
-                        KWlan802Dot11RsnIE,
-                        ieLength,
-                        &wpaData ) == KErrNone ) ||
-                     ( scanInfo->WpaIE(
-                        ieLength,
-                        &wpaData ) == KErrNone ) )
-                    {
-                    securityMode = EConnMonSecurityWpa; // WPA
-                    }
-                else
-                    {
-                    securityMode = EConnMonSecurityWep; // WEP
-                    }
-                }
+            // Security mode
+            TInt wlanExtSecurityMode( scanInfo->ExtendedSecurityMode() );
+            TInt securityModeV2( ConvertWlanExtSecModeToConnMonSecModeV2( wlanExtSecurityMode ) );
+            TInt securityMode( ConvertConMonSecModeV2ToConnMonSecMode( securityModeV2 ) );
             LOGIT1("CWlanSupport::GetWLANNetworksL: securityMode %d", securityMode)
 
             // SSID == name
@@ -867,7 +829,7 @@ TInt CWlanSupport::GetWlanNetworksL( const RMessage2& aMessage )
 
 
 // -----------------------------------------------------------------------------
-// CWlanSupport::ParseWlanNetworks
+// CWlanSupport::ParseWlanNetworksL
 // -----------------------------------------------------------------------------
 //
 void CWlanSupport::ParseWlanNetworksL(
@@ -899,28 +861,13 @@ void CWlanSupport::ParseWlanNetworksL(
         // Signal strength
         TUint signalStrength( aScanInfo->RXLevel() );
 
-        // SecurityMode
-        TUint8 ieLength( 0 );
-        const TUint8* wpaData;
+        // Security mode
+        TInt wlanExtSecurityMode( aScanInfo->ExtendedSecurityMode() );
+        TInt securityModeV2( ConvertWlanExtSecModeToConnMonSecModeV2( wlanExtSecurityMode ) );
+        TInt securityMode( ConvertConMonSecModeV2ToConnMonSecMode( securityModeV2 ) );
 
-        TUint securityMode( EConnMonSecurityOpen );
-        if ( aScanInfo->Capability() & KWlan802Dot11CapabilityPrivacyMask )
-            {
-            if ( ( aScanInfo->InformationElement(
-                    KWlan802Dot11RsnIE,
-                    ieLength,
-                    &wpaData ) == KErrNone ) ||
-                 ( aScanInfo->WpaIE(
-                    ieLength,
-                    &wpaData ) == KErrNone ) )
-                {
-                securityMode = EConnMonSecurityWpa; // WPA
-                }
-            else
-                {
-                securityMode = EConnMonSecurityWep; // WEP
-                }
-            }
+        // Protected setup
+        TBool protectedSetupSupport( aScanInfo->IsProtectedSetupSupported() );
 
         // SSID == name
         TBuf8<CConnMonWlanNetwork::KMaxNameLength> name8;
@@ -955,6 +902,8 @@ void CWlanSupport::ParseWlanNetworksL(
                 connectionMode,
                 signalStrength,
                 securityMode,
+                securityModeV2,
+                protectedSetupSupport,
                 bssid,
                 KNullDesC() );
         CleanupStack::PushL( net );
@@ -970,7 +919,7 @@ void CWlanSupport::ParseWlanNetworksL(
 
 
 // -----------------------------------------------------------------------------
-// CWlanSupport::GetCurrentWlanNetwork
+// CWlanSupport::GetCurrentWlanNetworkL
 // -----------------------------------------------------------------------------
 //
 TInt CWlanSupport::GetCurrentWlanNetworkL(
@@ -981,6 +930,7 @@ TInt CWlanSupport::GetCurrentWlanNetworkL(
 
     TInt connectionMode;
     TInt connectionSecurity;
+    TInt connectionSecurityV2;
     TInt connectionSignalQuality;
     TBuf<CConnMonWlanNetwork::KMaxNameLength> connectionSsid;
     TBuf8<CConnMonWlanNetwork::KWlanBssId> connectionBssid;
@@ -990,7 +940,8 @@ TInt CWlanSupport::GetCurrentWlanNetworkL(
     if ( KErrNone == err )
         {
         // Get connection security mode
-        err = GetConnectionSecurity( connectionSecurity );
+        err = GetConnectionSecurity( connectionSecurityV2 );
+        connectionSecurity = ConvertConMonSecModeV2ToConnMonSecMode( connectionSecurityV2 );
         }
     if ( KErrNone == err )
         {
@@ -1015,6 +966,8 @@ TInt CWlanSupport::GetCurrentWlanNetworkL(
                 connectionMode,
                 connectionSignalQuality,
                 connectionSecurity,
+                connectionSecurityV2,
+                0,
                 connectionBssid,
                 KNullDesC() );
         CleanupStack::PushL( net );
@@ -1045,7 +998,7 @@ TInt CWlanSupport::GetWlanProbeRawBuffersL( const RMessage2& aMessage )
 
 
 // -----------------------------------------------------------------------------
-// CWlanSupport::ParseWlanNetworks
+// CWlanSupport::ParseWlanProbeRawBuffersL
 // -----------------------------------------------------------------------------
 //
 void CWlanSupport::ParseWlanProbeRawBuffersL(
@@ -1200,7 +1153,7 @@ TInt CWlanSupport::WlanSessionIndex( CConnMonSession* aSessionId )
     }
 
 // -----------------------------------------------------------------------------
-// CWlanSupport::SetIntAttribute
+// CWlanSupport::SetIntAttributeL
 // -----------------------------------------------------------------------------
 //
 TInt CWlanSupport::SetIntAttributeL(
@@ -1232,7 +1185,7 @@ TInt CWlanSupport::SetIntAttributeL(
     }
 
 // -----------------------------------------------------------------------------
-// CWlanSupport::SetUintAttribute
+// CWlanSupport::SetUintAttributeL
 // -----------------------------------------------------------------------------
 //
 TInt CWlanSupport::SetUintAttributeL(
@@ -1264,7 +1217,7 @@ TInt CWlanSupport::SetUintAttributeL(
     }
 
 // -----------------------------------------------------------------------------
-// CWlanSupport::GetIntAttribute
+// CWlanSupport::GetIntAttributeL
 // -----------------------------------------------------------------------------
 //
 TInt CWlanSupport::GetIntAttributeL( const RMessage2& aMessage, TInt& aValue )
@@ -1293,7 +1246,7 @@ TInt CWlanSupport::GetIntAttributeL( const RMessage2& aMessage, TInt& aValue )
     }
 
 // -----------------------------------------------------------------------------
-// CWlanSupport::GetUintAttribute
+// CWlanSupport::GetUintAttributeL
 // -----------------------------------------------------------------------------
 //
 TInt CWlanSupport::GetUintAttributeL( const RMessage2& aMessage, TUint& aValue )
@@ -1322,7 +1275,7 @@ TInt CWlanSupport::GetUintAttributeL( const RMessage2& aMessage, TUint& aValue )
     }
 
 // -----------------------------------------------------------------------------
-// CWlanSupport::SetStringAttribute
+// CWlanSupport::SetStringAttributeL
 //
 // Currently assumes the descriptor attribute 'aValue' length has been checked
 // earlier and is short enough.
@@ -1358,7 +1311,7 @@ TInt CWlanSupport::SetStringAttributeL(
     }
 
 // -----------------------------------------------------------------------------
-// CWlanSupport::GetStringAttribute
+// CWlanSupport::GetStringAttributeL
 // -----------------------------------------------------------------------------
 //
 TInt CWlanSupport::GetStringAttributeL(
@@ -1469,6 +1422,90 @@ TBool CWlanSupport::WlanRssGoodEnough()
 
     LOGEXITFN1("CWlanSupport::WlanRssGoodEnough()", value)
     return value;
+    }
+
+// -----------------------------------------------------------------------------
+// CWlanSupport::ConvertConMonSecModeV2ToConnMonSecMode
+// -----------------------------------------------------------------------------
+//
+TInt CWlanSupport::ConvertConMonSecModeV2ToConnMonSecMode( TInt aConnMonSecModeV2 )
+    {
+    TInt connMonSecMode( EConnMonSecurityOpen );
+    switch ( aConnMonSecModeV2 )
+        {
+        case EConnMonSecurityV2Open:
+            connMonSecMode = EConnMonSecurityOpen;
+            break;
+        case EConnMonSecurityV2WepOpen:
+        case EConnMonSecurityV2WepShared:
+            connMonSecMode = EConnMonSecurityWep;
+            break;
+        case EConnMonSecurityV2802d1x:
+            connMonSecMode = EConnMonSecurity802d1x;
+            break;
+        case EConnMonSecurityV2Wpa:
+        case EConnMonSecurityV2Wpa2:
+            connMonSecMode = EConnMonSecurityWpa;
+            break;
+        case EConnMonSecurityV2WpaPsk:
+        case EConnMonSecurityV2Wpa2Psk:
+            connMonSecMode = EConnMonSecurityWpaPsk;
+            break;
+        case EConnMonSecurityV2Wapi:
+        case EConnMonSecurityV2WapiPsk:
+            connMonSecMode = EConnMonSecurity802d1x;
+            break;
+        default:
+            connMonSecMode = EConnMonSecurityOpen;
+            break;
+        }
+    return connMonSecMode;
+    }
+
+// -----------------------------------------------------------------------------
+// CWlanSupport::ConvertWlanExtSecModeToConnMonSecModeV2
+// -----------------------------------------------------------------------------
+//
+TInt CWlanSupport::ConvertWlanExtSecModeToConnMonSecModeV2( TInt aWlanExtSecMode )
+    {
+    TInt connMonSecModeV2( EConnMonSecurityV2Open );
+    switch ( aWlanExtSecMode )
+        {
+        case EWlanConnectionExtentedSecurityModeOpen:
+            connMonSecModeV2 = EConnMonSecurityV2Open;
+            break;
+        case EWlanConnectionExtentedSecurityModeWepOpen:
+            connMonSecModeV2 = EConnMonSecurityV2WepOpen;
+            break;
+        case EWlanConnectionExtentedSecurityModeWepShared:
+            connMonSecModeV2 = EConnMonSecurityV2WepShared;
+            break;
+        case EWlanConnectionExtentedSecurityMode802d1x:
+            connMonSecModeV2 = EConnMonSecurityV2802d1x;
+            break;
+        case EWlanConnectionExtentedSecurityModeWpa:
+            connMonSecModeV2 = EConnMonSecurityV2Wpa;
+            break;
+        case EWlanConnectionExtentedSecurityModeWpaPsk:
+            connMonSecModeV2 = EConnMonSecurityV2WpaPsk;
+            break;
+        case EWlanConnectionExtentedSecurityModeWpa2:
+            connMonSecModeV2 = EConnMonSecurityV2Wpa2;
+            break;
+        case EWlanConnectionExtentedSecurityModeWpa2Psk:
+            connMonSecModeV2 = EConnMonSecurityV2Wpa2Psk;
+            break;
+        case EWlanConnectionExtentedSecurityModeWapi:
+            connMonSecModeV2 = EConnMonSecurityV2Wapi;
+            break;
+        case EWlanConnectionExtentedSecurityModeWapiPsk:
+            connMonSecModeV2 = EConnMonSecurityV2WapiPsk;
+            break;
+        default:
+            connMonSecModeV2 = EConnMonSecurityV2Open;
+            break;
+        }
+    return connMonSecModeV2;
     }
 
 // ============================ MEMBER FUNCTIONS ===============================
@@ -1788,7 +1825,7 @@ void CWlanSession::SetWlanScanCacheLifetime(
     }
 
 // -----------------------------------------------------------------------------
-// CWlanSession::GetScanResults
+// CWlanSession::GetScanResultsL
 // -----------------------------------------------------------------------------
 //
 void CWlanSession::GetScanResultsL( const RMessage2& aMessage )
@@ -2002,7 +2039,7 @@ void CWlanSession::CompleteActiveRequestsWithError(
     }
 
 // -----------------------------------------------------------------------------
-// CWlanSession::CompleteActiveRequests
+// CWlanSession::CompleteActiveRequestsL
 // -----------------------------------------------------------------------------
 //
 void CWlanSession::CompleteActiveRequestsL(
@@ -2176,7 +2213,7 @@ void CWlanSession::CompleteGetSignalStrengthRequest(
     }
 
 // -----------------------------------------------------------------------------
-// CWlanSession::CompleteGetNetworkNamesRequest
+// CWlanSession::CompleteGetNetworkNamesRequestL
 // Completes the asynchronous client request: GetPckgAttribute( KNetworkNames )
 // -----------------------------------------------------------------------------
 //
@@ -2207,7 +2244,7 @@ void CWlanSession::CompleteGetNetworkNamesRequestL(
     }
 
 // -----------------------------------------------------------------------------
-// CWlanSession::CompleteGetWlanNetworksRequest
+// CWlanSession::CompleteGetWlanNetworksRequestL
 // Completes the asynchronous client request: GetPckgAttribute( KWlanNetworks )
 // -----------------------------------------------------------------------------
 //
@@ -2259,7 +2296,7 @@ void CWlanSession::CompleteGetWlanNetworksRequestL(
     }
 
 // -----------------------------------------------------------------------------
-// CWlanSession::CompleteGetWlanSsidNetworksRequest
+// CWlanSession::CompleteGetWlanSsidNetworksRequestL
 // Completes the asynchronous client request: GetPckgAttribute( KWlanSsidNetworks )
 // -----------------------------------------------------------------------------
 //
@@ -2311,7 +2348,7 @@ void CWlanSession::CompleteGetWlanSsidNetworksRequestL(
     }
 
 // -----------------------------------------------------------------------------
-// CWlanSession::CompleteGetWlanProbeRawBuffersRequest
+// CWlanSession::CompleteGetWlanProbeRawBuffersRequestL
 // Completes the asynchronous client request: GetPckgAttribute( KWlanProbeRawBuffers )
 // -----------------------------------------------------------------------------
 //

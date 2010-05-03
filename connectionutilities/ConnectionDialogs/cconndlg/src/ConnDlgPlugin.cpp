@@ -17,14 +17,7 @@
 
 // INCLUDE FILES
 #include "ConnDlgPlugin.h"
-#include "AuthenticationDialog.h"
-#include "ReconnectDialog.h"
-#include "QosDialog.h"
-#include "NewIapDialog.h"
-#include "ActiveIapPlugin.h"
 
-#include "ActiveSelectConnectionPlugin.h"
-#include "CConnDlgPrivateCRKeys.h"
 #include <centralrepository.h>
 
 #include "ConnectionDialogsUidDefs.h"
@@ -34,26 +27,22 @@
 #include <bautils.h>
 #include <e32property.h> 
 #include <rmpm.h>
+#include <cmmanager.h>
+#include <cmdestination.h>
+#include <commsdat.h>
 
-#include <CConnDlgPlugin.rsg>
 #include <data_caging_path_literals.hrh>
+
+
+// NOTE that the functionality this file is DEPRECATED
+// None on the methods have UI functionality, the plugins complete the requests
+// immediately when they are started
 
 using namespace CommsDat;
 
 // CONSTANTS
 
-// RSC file name.
-_LIT( KResourceFileName, "CConnDlgPlugin.rsc" );
-
-// Panic string
-_LIT( KConnDlgPluginPanic, "CConnDlgPlugin" );
-
 LOCAL_D const TInt KPluginGranularity = 4;
-
-#if defined(_DEBUG)
-_LIT( KErrActiveObjectNull, "iActivePlugin not NULL" );
-#endif
-
 
 
 LOCAL_C void CreateNotifiersL( 
@@ -160,55 +149,61 @@ CConnDlgIapPlugin::TNotifierInfo CConnDlgIapPlugin::RegisterL()
 void CConnDlgIapPlugin::StartL( const TDesC8& aBuffer, TInt aReplySlot,
                                 const RMessagePtr2& aMessage )
     {
-    iPrefs.Copy( (TPtrC8) aBuffer );
 
     iCancelled = EFalse;
     iReplySlot = aReplySlot;
     iMessage = aMessage;
     
-    // Check if there is a suitable active connection
-    TInt iap( 0 );
-    TInt bearer( ECommDbBearerWLAN ); // User conn. is always WLAN in 9.1
-                                      
-    // Is there active User connection
-    TInt err = GetUserConnection( iap );
+    // The UI is deprectad, complete the request and return the best available iap
+    RCmManager cmManager;
+    cmManager.OpenL();     
+    CleanupClosePushL( cmManager ); 
     
-    if ( err != KErrNone || iap == 0 )
-        {
-        // Is there any active connection
-    	err = GetActiveConnection( iap, bearer );
-        }
-
-    if ( ( err == KErrNone ) && 
-         ( iap != 0 )        &&  
-         ( iPrefs().iBearerSet & bearer ) )
-        {
-    	// a suitable connection is already active
-    	iIAP = iap;
-    	CompleteL( KErrNone );
-        }
-    else
-        {
-        // display a dialog
-        __ASSERT_DEBUG( !iActivePlugin, 
-                    User::Panic( KErrActiveObjectNull, KErrNone ) );
+    RArray<TUint32> destinationArray;    
+    cmManager.AllDestinationsL( destinationArray );
+    CleanupClosePushL(destinationArray);   
+    TInt error = KErrNotFound;
     
-        iActivePlugin = CActiveCConnDlgIapPlugin::NewL( this, iPrefs() );
-        iActivePlugin->StartSearchIAPsL();	
+    // loop the destinations and find the internet snap
+    for (TInt i = 0; i < destinationArray.Count(); ++i)
+        {   
+        RCmDestination destination = cmManager.DestinationL( destinationArray[i] );
+        CleanupClosePushL(destination);
+        TUint32 purposeMetaData = destination.MetadataL( CMManager::ESnapMetadataPurpose );
+        
+        // If the internet snap was found, check out the IAPs
+        if ( CMManager::ESnapPurposeInternet ==  purposeMetaData )
+            {
+            RMPM mpm;
+            User::LeaveIfError(mpm.Connect());
+            TMpmSnapBuffer buffer;
+            buffer.Reset();
+            User::LeaveIfError( mpm.SortSNAP( destination.Id(), buffer )); 
+            mpm.Close();
+            // if there are iaps in the list, return the first
+            // if there are none, return an error
+            if ( buffer.Count() > 0 )
+                {
+                iIAP = buffer.iIapId[0];
+                error = KErrNone;
+                }
+            CleanupStack::PopAndDestroy(); //destination
+            break;
+            }                
+        CleanupStack::PopAndDestroy(); //destination
         }
+    CleanupStack::PopAndDestroy(); //destinationArray
+    CleanupStack::PopAndDestroy(); //cmManager
+    
+    CompleteL( error );
     }
-
-
 
 // ---------------------------------------------------------
 // void CConnDlgIapPlugin::Cancel()
 // ---------------------------------------------------------
 //
 void CConnDlgIapPlugin::Cancel()
-    {
-    delete iActivePlugin;
-    iActivePlugin = NULL;
-    
+    { 
     if ( !iCancelled )
         {
         iCancelled = ETrue;
@@ -251,78 +246,10 @@ void CConnDlgIapPlugin::CompleteL( TInt aStatus )
 // ---------------------------------------------------------
 //
 CConnDlgIapPlugin* CConnDlgIapPlugin::NewL( 
-                                        const TBool aResourceFileResponsible )
+                                        const TBool /*aResourceFileResponsible*/ )
     {
     CConnDlgIapPlugin* self = new (ELeave) CConnDlgIapPlugin();
-    CleanupStack::PushL( self );
-    self->ConstructL( KResourceFileName, aResourceFileResponsible );
-    CleanupStack::Pop();
-
     return self;
-    }
-
-// ---------------------------------------------------------
-// CConnDlgIapPlugin::SetPreferredIapIdL
-// ---------------------------------------------------------
-//    
-void CConnDlgIapPlugin::SetPreferredIapIdL( TUint32 aIAPId )
-    {
-    CLOG_ENTERFN( "CConnDlgIapPlugin::SetPreferredIapIdL " );
-    
-    iIAP = aIAPId;
-        
-    CLOG_LEAVEFN( "CConnDlgIapPlugin::SetPreferredIapIdL " );
-    }
-    
-    
-// ---------------------------------------------------------
-// CConnDlgIapPlugin::GetActiveConnection
-// ---------------------------------------------------------
-//    
-TInt CConnDlgIapPlugin::GetActiveConnection( TInt& aIapId, 
-                                             TInt& aBearer )
-    {
-    aIapId  = 0;
-    aBearer = 0;
-    
-    TInt err = RProperty::Get( KMPMActiveConnectionCategory, 
-                               KMPMPSKeyActiveConnectionIap, 
-                               aIapId );
-                               
-    CLOG_WRITEF( _L( "KMPMPSKeyActiveConnectionIap : %d" ), aIapId );                           
-    CLOG_WRITEF( _L( "err : %d" ), err );                           
-                               
-    if ( err == KErrNone )
-        {
-    	err = RProperty::Get( KMPMActiveConnectionCategory, 
-                              KMPMPSKeyActiveConnectionBearer, 
-                              aBearer );
-        }
-        
-    CLOG_WRITEF( _L( "KMPMPSKeyActiveConnectionBearer : %d" ), aBearer );                           
-    CLOG_WRITEF( _L( "err : %d" ), err );
-    CLOG_WRITEF( _L( "iPrefs().iBearerSet : %d" ), iPrefs().iBearerSet );
-    
-    return err;
-    }
-    
-    
-// ---------------------------------------------------------
-// CConnDlgIapPlugin::GetUserConnection
-// ---------------------------------------------------------
-//    
-TInt CConnDlgIapPlugin::GetUserConnection( TInt& aIapId )
-    {
-    aIapId  = 0;
-    
-    TInt err = RProperty::Get( KMPMUserConnectionCategory, 
-                               KMPMPSKeyUserConnectionIap, 
-                               aIapId );
-                
-    CLOG_WRITEF( _L( "KMPMPSKeyUserConnectionIap : %d" ), aIapId );                           
-    CLOG_WRITEF( _L( "err : %d" ), err );                            
-        
-    return err;    
     }
             
 
@@ -353,19 +280,12 @@ void CConnDlgAuthenticationPlugin::StartL( const TDesC8& aBuffer,
     {
     CLOG_ENTERFN( "CConnDlgAuthenticationPlugin::StartL" );
 
-    if ( aBuffer.Length() > iAuthPairBuff.Length() )
-        {
-        CLOG_WRITE( "User::Panic, EConnDlgIllegalRequest" );
-        User::Panic( KConnDlgPluginPanic, EConnDlgIllegalRequest );
-        }
-
-    iAuthPairBuff.Copy( aBuffer );
-
     iReplySlot = aReplySlot;
     iMessage = aMessage;
     iCancelled = EFalse;
 
-    GetAuthenticationL();
+    // The UI is deprecated, just complete the request
+    CompleteL(KErrNotSupported);
 
     CLOG_LEAVEFN( "CConnDlgAuthenticationPlugin::StartL" );
     }
@@ -387,29 +307,9 @@ void CConnDlgAuthenticationPlugin::Cancel()
             {
             iMessage.Complete( KErrCancel );
             }
-        delete iDialog;
-        iDialog = NULL;
         }
 
     CLOG_LEAVEFN( "CConnDlgAuthenticationPlugin::Cancel" );
-    }
-
-
-// ---------------------------------------------------------
-// void CConnDlgAuthenticationPlugin::GetAuthenticationL()
-// ---------------------------------------------------------
-//
-void CConnDlgAuthenticationPlugin::GetAuthenticationL()
-    {
-    CLOG_ENTERFN( "CConnDlgAuthenticationPlugin::GetAuthenticationL" );
-
-    iDialog = CAuthenticationDialog::NewL( this, iAuthPairBuff().iUsername, 
-                                           iAuthPairBuff().iPassword );
-
-
-    iDialog->ExecuteLD( R_CONNDLG_AUTHENTICATION );
-
-    CLOG_LEAVEFN( "CConnDlgAuthenticationPlugin::GetAuthenticationL" );
     }
 
 
@@ -424,11 +324,6 @@ void CConnDlgAuthenticationPlugin::CompleteL( TInt aStatus )
     iCancelled = ETrue;
     if ( !iMessage.IsNull() )
         {
-        if ( aStatus == KErrNone )
-            {
-            iMessage.WriteL( iReplySlot, iAuthPairBuff );
-            }
-
         iMessage.Complete( aStatus );
         }
     Cancel();
@@ -442,14 +337,10 @@ void CConnDlgAuthenticationPlugin::CompleteL( TInt aStatus )
 // ---------------------------------------------------------
 //
 CConnDlgAuthenticationPlugin* CConnDlgAuthenticationPlugin::NewL( 
-                                        const TBool aResourceFileResponsible )
+                                        const TBool /*aResourceFileResponsible*/ )
     {
     CConnDlgAuthenticationPlugin* self = new (ELeave) 
                                                 CConnDlgAuthenticationPlugin();
-    CleanupStack::PushL( self );
-    self->ConstructL( KResourceFileName, aResourceFileResponsible );
-    CleanupStack::Pop();
-
     return self;
     }
 
@@ -459,7 +350,6 @@ CConnDlgAuthenticationPlugin* CConnDlgAuthenticationPlugin::NewL(
 // ---------------------------------------------------------
 //
 CConnDlgAuthenticationPlugin::CConnDlgAuthenticationPlugin()
-: iAuthPair( TAuthenticationPair() )
     {
     }
 
@@ -489,7 +379,7 @@ void CConnDlgQosPlugin::StartL( const TDesC8& /*aBuffer*/, TInt aReplySlot,
     iMessage = aMessage;
     iCancelled = EFalse;
 
-    GetReconnectL();
+    CompleteL(KErrNotSupported);
     }
 
 
@@ -506,20 +396,7 @@ void CConnDlgQosPlugin::Cancel()
             {
             iMessage.Complete( KErrCancel );
             }
-        delete iDialog;
-        iDialog = NULL;
         }
-    }
-
-
-// ---------------------------------------------------------
-// void CConnDlgQosPlugin::GetReconnectL()
-// ---------------------------------------------------------
-//
-void CConnDlgQosPlugin::GetReconnectL()
-    {
-    iDialog = new (ELeave) CQosDialog( this, iBool );
-    iDialog->ExecuteLD( R_CONNDLG_QOS );
     }
 
 
@@ -532,11 +409,6 @@ void CConnDlgQosPlugin::CompleteL( TInt aStatus )
     iCancelled = ETrue;
     if ( !iMessage.IsNull() )
         {
-        if ( aStatus == KErrNone )
-            {
-            TRAP_IGNORE( iMessage.WriteL( iReplySlot, TPckg<TBool>( iBool ) ) );
-            }
-
         iMessage.Complete( aStatus );
         }
     Cancel();
@@ -548,13 +420,9 @@ void CConnDlgQosPlugin::CompleteL( TInt aStatus )
 // ---------------------------------------------------------
 //
 CConnDlgQosPlugin* CConnDlgQosPlugin::NewL( 
-                                        const TBool aResourceFileResponsible )
+                                        const TBool /*aResourceFileResponsible*/ )
     {
     CConnDlgQosPlugin* self = new (ELeave) CConnDlgQosPlugin();
-    CleanupStack::PushL( self );
-    self->ConstructL( KResourceFileName, aResourceFileResponsible );
-    CleanupStack::Pop();
-
     return self;
     }
 
@@ -585,7 +453,8 @@ void CConnDlgReconnectPlugin::StartL( const TDesC8& /*aBuffer*/,
     iMessage = aMessage;
     iCancelled = EFalse;
 
-    GetReconnectL();
+    // The UI is deprecated, just complete the request
+    CompleteL(KErrNotSupported);
     }
 
 
@@ -602,20 +471,7 @@ void CConnDlgReconnectPlugin::Cancel()
             {
             iMessage.Complete( KErrCancel );
             }
-        delete iDialog;
-        iDialog = NULL;
         }
-    }
-
-
-// ---------------------------------------------------------
-// void CConnDlgReconnectPlugin::GetReconnectL()
-// ---------------------------------------------------------
-//
-void CConnDlgReconnectPlugin::GetReconnectL()
-    {
-    iDialog = new (ELeave) CReconnectDialog( this, iBool );
-    iDialog->ExecuteLD( R_CONNDLG_RECONNECT );
     }
 
 
@@ -628,11 +484,6 @@ void CConnDlgReconnectPlugin::CompleteL( TInt aStatus )
     iCancelled = ETrue;
     if ( !iMessage.IsNull() )
         {
-        if ( aStatus == KErrNone )
-            {
-            iMessage.WriteL( iReplySlot, TPckg<TBool>( iBool ) );
-            }
-
         iMessage.Complete( aStatus );
         }
     Cancel();
@@ -645,13 +496,9 @@ void CConnDlgReconnectPlugin::CompleteL( TInt aStatus )
 // ---------------------------------------------------------
 //
 CConnDlgReconnectPlugin* CConnDlgReconnectPlugin::NewL( 
-                                        const TBool aResourceFileResponsible )
+                                        const TBool /*aResourceFileResponsible*/ )
     {
     CConnDlgReconnectPlugin* self = new (ELeave) CConnDlgReconnectPlugin();
-    CleanupStack::PushL( self );
-    self->ConstructL( KResourceFileName, aResourceFileResponsible );
-    CleanupStack::Pop();
-
     return self;
     }
 
@@ -678,17 +525,12 @@ CConnDlgNewIapPlugin::TNotifierInfo CConnDlgNewIapPlugin::RegisterL()
 void CConnDlgNewIapPlugin::StartL( const TDesC8& aBuffer, TInt aReplySlot,
                                    const RMessagePtr2& aMessage )
     {
-    if ( aBuffer.Length() > iPrefs.Length() )
-        {
-        User::Panic( KConnDlgPluginPanic, EConnDlgIllegalRequest );
-        }
-
-    iPrefs.Copy( aBuffer );
     iReplySlot = aReplySlot;
     iMessage = aMessage;
     iCancelled = EFalse;
 
-    GetNewIapL();
+    // This api has been deprecated, just Complete the request
+    CompleteL(KErrNotSupported);
     }
 
 
@@ -705,20 +547,7 @@ void CConnDlgNewIapPlugin::Cancel()
             {
             iMessage.Complete( KErrCancel );
             }
-        delete iDialog;
-        iDialog = NULL;
         }
-    }
-
-
-// ---------------------------------------------------------
-// void CConnDlgNewIapPlugin::GetNewIapL()
-// ---------------------------------------------------------
-//
-void CConnDlgNewIapPlugin::GetNewIapL()
-    {
-    iDialog = new (ELeave) CNewIapDialog( this, iConnect, iPrefs() );
-    iDialog->ExecuteLD( R_CONNDLG_NEW_IAP );
     }
 
 
@@ -731,11 +560,6 @@ void CConnDlgNewIapPlugin::CompleteL( TInt aStatus )
     iCancelled = ETrue;
     if ( !iMessage.IsNull() )
         {
-        if ( aStatus == KErrNone )
-            {
-            iMessage.WriteL( iReplySlot, TPckg<TBool>( iConnect ) );
-            }
-
         iMessage.Complete( aStatus );
         }
     Cancel();
@@ -747,13 +571,9 @@ void CConnDlgNewIapPlugin::CompleteL( TInt aStatus )
 // ---------------------------------------------------------
 //
 CConnDlgNewIapPlugin* CConnDlgNewIapPlugin::NewL( 
-                                        const TBool aResourceFileResponsible )
+                                        const TBool /*aResourceFileResponsible*/ )
     {
     CConnDlgNewIapPlugin* self = new (ELeave) CConnDlgNewIapPlugin();
-    CleanupStack::PushL( self );
-    self->ConstructL( KResourceFileName, aResourceFileResponsible );
-    CleanupStack::Pop();
-
     return self;
     }
 
@@ -779,61 +599,51 @@ CConnDlgSelectConnectionPlugin::TNotifierInfo
 // ---------------------------------------------------------
 //
 
-void CConnDlgSelectConnectionPlugin::StartL( const TDesC8& aBuffer, 
+void CConnDlgSelectConnectionPlugin::StartL( const TDesC8& /*aBuffer*/, 
                                              TInt aReplySlot,
                                              const RMessagePtr2& aMessage )
     {
-    if ( iActivePlugin )
-        {
-        aMessage.Complete( KErrServerBusy );
-        return;
-        }
         
-    iPrefs.Copy( ( TPtrC8 ) aBuffer );
-
-    iCancelled = ETrue; // This method could leave before displaying the dialog.
     iReplySlot = aReplySlot;
     iMessage = aMessage;
     
-    __ASSERT_DEBUG( !iActivePlugin, 
-                     User::Panic( KErrActiveObjectNull, KErrNone ) );
+    // because the connection dialog is deprecated and removed functionality,
+    // return the Internet SNAP and complete
+    RCmManager cmManager;
+    cmManager.OpenL();     
+    CleanupClosePushL( cmManager ); 
     
-    iElementID = iPrefs().iRank;
-    iActivePlugin = CActiveSelectConnectionPlugin::NewL( this,
-                                                         iElementID,
-                                                         iPrefs().iBearerSet );
-    // Check if there is a suitable active connection
-    TInt snap( 0 );
-    TInt iap( 0 );
-    TInt bearer( ECommDbBearerWLAN ); // User conn. is always WLAN in 9.1
+    RArray<TUint32> destinationArray;    
+    cmManager.AllDestinationsL( destinationArray );
+    CleanupClosePushL(destinationArray);   
+    bool found = false;
     
-    // Is there active User connection
-    TInt err = GetUserConnection( iap, snap );
-    
-    if ( ( err != KErrNone ) || ( iap == 0 && snap == 0 ) )
-        {
-        // Is there any active connection
-    	err = GetActiveConnection( iap, snap, bearer );
+    // loop the destinations and find the internet snap
+    for (TInt i = 0; i < destinationArray.Count() && !found; ++i)
+        {   
+        RCmDestination destination = cmManager.DestinationL( destinationArray[i] );
+        CleanupClosePushL(destination);
+        
+        TUint32 purposeMetaData = destination.MetadataL( CMManager::ESnapMetadataPurpose );
+        if ( CMManager::ESnapPurposeInternet ==  purposeMetaData )
+            {
+            iElementID = destination.ElementId();
+            found = true;
+            }                
+        CleanupStack::PopAndDestroy(); //destination
         }
-                                      
-    if ( ( err == KErrNone ) && 
-         ( iap != 0 || snap != 0 ) && 
-         ( iPrefs().iBearerSet & bearer ) &&
-         ( iPrefs().iDirection == 0 ) )     // JavaVM sets iDirection to "1"
+    CleanupStack::PopAndDestroy(); //destinationArray
+    CleanupStack::PopAndDestroy(); //cmManager
+    
+    if (found)
         {
-    	// a suitable connection is already active
-    	SetElementIDL( iap, snap );
-    	CompleteL( KErrNone );
-        }
-    else
+        CompleteL(KErrNone);
+        } 
+    else 
         {
-        // display dialog
-        iActivePlugin->ShowSelectConnectionL();
-        iCancelled = EFalse; // Dialog is now up and running
+        CompleteL(KErrNotFound);
         }
     }
-
-
 
 // ---------------------------------------------------------
 // void CConnDlgSelectConnectionPlugin::Cancel()
@@ -841,12 +651,7 @@ void CConnDlgSelectConnectionPlugin::StartL( const TDesC8& aBuffer,
 //
 void CConnDlgSelectConnectionPlugin::Cancel()
     {
-    CLOG_ENTERFN( "CConnDlgSelectConnectionPlugin::Cancel" );      
-
-    delete iActivePlugin;
-    CLOG_WRITE( "iActivePlugin deleted" );      
-    iActivePlugin = NULL;
-    CLOG_WRITE( "iActivePlugin NULLed" );      
+    CLOG_ENTERFN( "CConnDlgSelectConnectionPlugin::Cancel" );          
     
     if ( !iCancelled )
         {
@@ -895,97 +700,12 @@ void CConnDlgSelectConnectionPlugin::CompleteL( TInt aStatus )
 // ---------------------------------------------------------
 //
 CConnDlgSelectConnectionPlugin* CConnDlgSelectConnectionPlugin::NewL( 
-                                        const TBool aResourceFileResponsible )
+                                        const TBool /*aResourceFileResponsible*/ )
     {
     CConnDlgSelectConnectionPlugin* self = 
                             new (ELeave) CConnDlgSelectConnectionPlugin();
-    CleanupStack::PushL( self );
-    self->ConstructL( KResourceFileName, aResourceFileResponsible );
-    CleanupStack::Pop();
-
     return self;
     }
-
-
-// ---------------------------------------------------------
-// CConnDlgSelectConnectionPlugin::SetSelectedIDsL
-// ---------------------------------------------------------
-//    
-void CConnDlgSelectConnectionPlugin::SetElementIDL( TUint32 aIAPId, 
-                                                    TUint32 aDestinationId )
-    {
-    iElementID = iActivePlugin->GetElementIDL( aIAPId, aDestinationId );
-    }
     
-    
-// ---------------------------------------------------------
-// CConnDlgSelectConnectionPlugin::GetUserConnection
-// ---------------------------------------------------------
-//    
-TInt CConnDlgSelectConnectionPlugin::GetUserConnection( TInt& aIapId, 
-                                                        TInt& aSnapId )
-    {
-    aIapId  = 0;
-    aSnapId = 0;
-    
-    TInt err = RProperty::Get( KMPMUserConnectionCategory, 
-                               KMPMPSKeyUserConnectionSnap, 
-                               aSnapId );
-    
-    if ( err != KErrNone || aSnapId == 0 )
-        {
-        err = RProperty::Get( KMPMUserConnectionCategory, 
-                              KMPMPSKeyUserConnectionIap, 
-                              aIapId );
-        }
-       
-    CLOG_WRITEF( _L( "KMPMPSKeyUserConnectionSnap : %d" ), aSnapId );                      
-    CLOG_WRITEF( _L( "KMPMPSKeyUserConnectionIap : %d" ), aIapId );                           
-    CLOG_WRITEF( _L( "err : %d" ), err );
-        
-    return err;    
-    }
-
-
-// ---------------------------------------------------------
-// CConnDlgSelectConnectionPlugin::GetActiveConnection
-// ---------------------------------------------------------
-//    
-TInt CConnDlgSelectConnectionPlugin::GetActiveConnection( TInt& aIapId, 
-                                                          TInt& aSnapId,
-                                                          TInt& aBearer )
-    {
-    aIapId  = 0;
-    aSnapId = 0;
-    aBearer = 0;
-    
-    TInt err = RProperty::Get( KMPMActiveConnectionCategory, 
-                               KMPMPSKeyActiveConnectionSnap, 
-                               aSnapId );
-                                  
-    if ( err != KErrNone || aSnapId == 0 )
-        {
-        err = RProperty::Get( KMPMActiveConnectionCategory, 
-                              KMPMPSKeyActiveConnectionIap, 
-                              aIapId );
-        }
-         
-    CLOG_WRITEF( _L( "KMPMPSKeyActiveConnectionSnap : %d" ), aSnapId );                      
-    CLOG_WRITEF( _L( "KMPMPSKeyActiveConnectionIap : %d" ), aIapId );                           
-    CLOG_WRITEF( _L( "err : %d" ), err );                           
-                               
-    if ( err == KErrNone )
-        {
-    	err = RProperty::Get( KMPMActiveConnectionCategory, 
-                              KMPMPSKeyActiveConnectionBearer, 
-                              aBearer );
-        }
-
-    CLOG_WRITEF( _L( "KMPMPSKeyActiveConnectionBearer : %d" ), aBearer );                           
-    CLOG_WRITEF( _L( "iPrefs().iBearerSet : %d" ), iPrefs().iBearerSet );
-    CLOG_WRITEF( _L( "err : %d" ), err );
-    
-    return err;
-    }
 
 // End of File

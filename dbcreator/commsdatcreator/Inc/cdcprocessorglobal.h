@@ -66,7 +66,7 @@ class CProcessorGlobal : public CProcessorBase
                                 RPointerArray< HBufC >& aDefCon );
 
         // Stores the default connection values
-        void SetDefaultConnectionL();
+     //   void SetDefaultConnectionL();
         
         /**
         * Destructor.

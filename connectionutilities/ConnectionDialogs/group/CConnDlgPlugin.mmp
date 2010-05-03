@@ -44,23 +44,8 @@ MW_LAYER_SYSTEMINCLUDE
 SYSTEMINCLUDE   /epoc32/include/uikon
 
 
-START RESOURCE ../cconndlg/data/CConnDlgPlugin.rss
-HEADER
-TARGETPATH RESOURCE_FILES_DIR
-LANGUAGE_IDS
-END  // RESOURCE
-
-
 SOURCEPATH  ../cconndlg/src
-SOURCE  ConnDlgPlugin.cpp IAPDialog.cpp  AuthenticationDialog.cpp
-SOURCE  ReconnectDialog.cpp NewIapDialog.cpp QosDialog.cpp
-SOURCE  ActiveIapPlugin.cpp
-SOURCE  ActiveBase.cpp
-SOURCE  SelectConnectionDialog.cpp
-SOURCE  ActiveSelectConnectionPlugin.cpp
-SOURCE  SelectExplicitDialog.cpp
-SOURCE  ActiveSelectExplicit.cpp
-SOURCE  sortsnaputils.cpp
+SOURCE  ConnDlgPlugin.cpp
 
 SOURCEPATH  ../src
 SOURCE  ConnectionInfo.cpp ConnectionInfoKey.cpp ConnectionInfoArray.cpp ExpiryTimer.cpp
@@ -89,9 +74,10 @@ DEBUGLIBRARY efsrv.lib
 
 
 #ifdef WINSCW
-    DEFFILE ../cconndlg/BWinsCw/CConnDlgPlugin.DEF
+DEFFILE ../cconndlg/BWinsCw/CConnDlgPlugin.DEF
 #else
-    DEFFILE ../cconndlg/EABI/CCONNDLGPLUGIN.DEF
+DEFFILE ../cconndlg/EABI/CCONNDLGPLUGIN.DEF
 #endif
 
 // End of File
+

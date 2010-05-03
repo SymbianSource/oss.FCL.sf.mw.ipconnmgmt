@@ -111,6 +111,9 @@ class ConnectionView: public HbMainWindow
         /* Pointer to the main view of the window */
         HbView *mMainView;
         
+        /* Pointer to the secondary view of the window */
+        HbView *mNoConnView;
+        
         /* The main vertical layout which contains the group box container */
         QGraphicsLinearLayout* mMainLayout;
         
@@ -134,9 +137,6 @@ class ConnectionView: public HbMainWindow
         
         /* The toolbar action which can be used to disconnect all the connections */
         HbAction *mDisconnectAction;
-        
-        /* The label used to inform if there are no active connections */
-        HbLabel *mInfoLabel;
         
         /* The id of the timer used to close the application */
         int mClosingTimer;

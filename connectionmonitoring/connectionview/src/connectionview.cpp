@@ -81,12 +81,9 @@ ConnectionView::~ConnectionView()
 {
     OstTraceFunctionEntry0( DUP1_CONNECTIONVIEW_CONNECTIONVIEW_ENTRY );
     // other widgets are childs of this widget, so they will be
-    // deleted along with mMainView. Add infolabel and scrollarea
-    // again under mainlayout, since one of them is only there at the time
-    // this way all the ui components are deleted at once
-    mInfoLabel->setParentLayoutItem(mMainLayout);
-    mScrollArea->setParentLayoutItem(mMainLayout);
+    // deleted along with mMainView. 
     delete mMainView;
+    delete mNoConnView;
     OstTraceFunctionExit0( DUP1_CONNECTIONVIEW_CONNECTIONVIEW_EXIT );
 }
 
@@ -108,10 +105,20 @@ void ConnectionView::createView()
 {
     OstTraceFunctionEntry0( CONNECTIONVIEW_CREATEVIEW_ENTRY );
     
-    // Create the mainView and the layout for the window
-    mMainView = new HbView();
-    addView(mMainView);
-    setCurrentView(mMainView);
+    // Create the secondary view for displaying the "No active connections"-text
+    mNoConnView = new HbView();
+    mNoConnView->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+    addView(mNoConnView);
+    QGraphicsLinearLayout *noConnViewLayout = new QGraphicsLinearLayout(Qt::Vertical);
+    noConnViewLayout->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+
+    HbLabel *infoLabel = new HbLabel;
+    infoLabel->setObjectName("mInfoLabel");
+    infoLabel->setPlainText(hbTrId("txt_occ_info_no_active_connections"));
+    infoLabel->setAlignment(Qt::AlignCenter);
+    noConnViewLayout->addItem(infoLabel);
+    noConnViewLayout->setAlignment(infoLabel, Qt::AlignCenter);
+    mNoConnView->setLayout(noConnViewLayout);
    
     mMainLayout = new QGraphicsLinearLayout(Qt::Vertical);
     mMainLayout->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
@@ -120,7 +127,9 @@ void ConnectionView::createView()
     mScrollArea->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     mMainLayout->addItem(mScrollArea);
 
-    // Create the widgets and layouts for the scroll area
+    // Create the mainView and the layout for the window
+    mMainView = new HbView();
+    addView(mMainView);
     ScrollAreaWidget *scrollContent = new ScrollAreaWidget();
     scrollContent->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     mScrollArea->installEventFilter(scrollContent);
@@ -141,12 +150,6 @@ void ConnectionView::createView()
             SIGNAL(triggered(bool)),
             this,
             SLOT(disconnectAll()));
-    
-    // label for informing the user that there are no connections
-    mInfoLabel = new HbLabel;
-    mInfoLabel->setObjectName("mInfoLabel");
-    mInfoLabel->setPlainText(hbTrId("txt_occ_info_no_active_connections"));
-    mInfoLabel->setAlignment(Qt::AlignCenter);
     
     // Create the actual groupboxes for all the active connections
     createGroupBoxesForConnections();  
@@ -180,12 +183,9 @@ void ConnectionView::createGroupBoxesForConnections()
         mToolBar->hide();
     }
     
-    // if there are connections, then the label should be removed
-    // and the connection boxes drawn
+    // if there are connections, the main view with the connections is shown
     if (mConnectionCount > 0) { 
-        mMainLayout->removeItem(mInfoLabel);
-        mInfoLabel->hide();
-        mMainLayout->addItem(mScrollArea);
+        setCurrentView(mMainView);
 
         for (int i=0; i<mConnectionCount; i++) {
             // Get the iap id and the iap name for the UI construction
@@ -204,12 +204,9 @@ void ConnectionView::createGroupBoxesForConnections()
             this, 
             SLOT(disconnectSelectedIap(int)));
         
-        // there are no connections, inform the user with the text 
+        // there are no connections, show the view with the "no connections" label
     } else {
-        mMainLayout->removeItem(mScrollArea);
-        mInfoLabel->show();
-        mMainLayout->addItem(mInfoLabel);
-        mMainLayout->setAlignment(mInfoLabel, Qt::AlignCenter);
+        setCurrentView(mNoConnView);
         // start the timer to close the application after 3 seconds
         if (mClosingTimer == 0) {
             mClosingTimer = startTimer(timerValue);
@@ -308,6 +305,7 @@ void ConnectionView::addGroupBox(int iapId, QString iapName)
     // Create the disconnection button
     HbPushButton* button = new HbPushButton(
             hbTrId("txt_occ_button_disconnect"), mMainView);
+    button->setObjectName("disconnectButton");
     button->setSizePolicy(QSizePolicy::Preferred, 
                           QSizePolicy::Preferred, 
                           QSizePolicy::PushButton);

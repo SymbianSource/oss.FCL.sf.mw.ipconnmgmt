@@ -48,7 +48,7 @@ public:
     
     // Access is allowed allways
     bool accessAllowed(const QString &indicatorType,
-                       const HbSecurityInfo *securityInfo) const;
+                       const QVariantMap &securityInfo) const;
     
     // Create indicator. Currently installs translation.
     HbIndicatorInterface* createIndicator(const QString &indicatorType);

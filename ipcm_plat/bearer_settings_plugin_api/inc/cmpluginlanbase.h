@@ -23,7 +23,7 @@
 #include <e32base.h>
 #include <eikdoc.h>
 #include <apparc.h>
-#include <CommsDatTypesV1_1.h>
+#include <commsdattypesv1_1.h>
 #ifdef SYMBIAN_ENABLE_SPLIT_HEADERS
 #include <commsdat_partner.h>
 #endif
@@ -79,20 +79,6 @@ class CCmPluginLanBase : public CCmPluginBaseEng
         */
         IMPORT_C void PrepareToUpdateRecordsL();
         
-        /**
-        * No UI for LanBase.
-        * Panics in debug mode, leaves with KErrNotSupported in
-        * release mode.
-        */
-        IMPORT_C virtual TInt RunSettingsL();
-        
-        /**
-        * No UI for LanBase.
-        * Panics in debug mode, leaves with KErrNotSupported in
-        * release mode.
-        */
-        IMPORT_C virtual TBool InitializeWithUiL( TBool aManuallyConfigure );
-                
     private:
     
         IMPORT_C CommsDat::CCDLANServiceRecord& ServiceRecord()const;

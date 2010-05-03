@@ -55,4 +55,6 @@ EXPORTS
 	_ZN22CConnectionUiUtilities26ConnectingViaDiscreetPopupERKmi @ 54 NONAME
 	_ZN22CConnectionUiUtilities27NoWLANNetworksAvailableNoteEv @ 55 NONAME
 	_ZN22CConnectionUiUtilities28ConnectionErrorDiscreetPopupERKi @ 56 NONAME
+	_ZN22CConnectionUiUtilities32CancelConnectingViaDiscreetPopupEv @ 57 NONAME
+	_ZN22CConnectionUiUtilities26ConnectingViaDiscreetPopupEv @ 58 NONAME
 

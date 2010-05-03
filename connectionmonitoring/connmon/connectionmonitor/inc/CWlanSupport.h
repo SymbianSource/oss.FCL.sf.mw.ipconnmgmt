@@ -369,6 +369,16 @@ public:
      */
     TBool WlanRssGoodEnough();
 
+    /**
+     * Converts a WLAN security mode from ConnMon's
+     * TConnMonSecurityModeV2-format to ConnMon's TConnMonSecurityMode-format.
+     *
+     * @since 5.2
+     * @param aSecModeV2 Security mode in TConnMonSecurityModeV2-format.
+     * @return Security mode in TConnMonSecurityMode-format.
+     */
+    TInt ConvertConMonSecModeV2ToConnMonSecMode( TInt aSecModeV2 );
+
 private:
     CWlanSupport( CConnMonServer* aServer );
 
@@ -376,6 +386,18 @@ private:
      * Second phase construction.
      */
     void ConstructL();
+    
+    /**
+     * Converts a WLAN security mode from WLAN engine's
+     * TWlanConnectionExtentedSecurityMode-format to ConnMon's
+     * TConnMonSecurityModeV2-format.
+     *
+     * @since 5.2
+     * @param aWlanExtSecMode Security mode in
+     * TWlanConnectionExtentedSecurityMode-format.
+     * @return Security mode in TConnMonSecurityModeV2-format.
+     */
+    TInt ConvertWlanExtSecModeToConnMonSecModeV2( TInt aWlanExtSecMode );
 
 private: // Data
     // Pointer to server module

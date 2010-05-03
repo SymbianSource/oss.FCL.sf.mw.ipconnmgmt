@@ -183,21 +183,6 @@ _LIT( KWiFiProtSetupPluginName , "wifiprotplugin.dll" );
                                             KUidEasyWapiDlg,
                                             KMyPriority ) );
 
-    subjects->AppendL( new( ELeave ) CAknNotifierWrapperLight( *master,
-                                            KUidNoWLANNetworksAvailableNote,
-                                            KUidNoWLANNetworksAvailableNote,
-                                            KMyPriority ) );   
-
-    subjects->AppendL( new( ELeave ) CAknNotifierWrapperLight( *master,
-                                            KUidConnectingViaDiscreetPopup,
-                                            KUidConnectingViaDiscreetPopup,
-                                            KMyPriority ) );
-
-    subjects->AppendL( new( ELeave ) CAknNotifierWrapperLight( *master,
-                                            KUidConnectionErrorDiscreetPopup,
-                                            KUidConnectionErrorDiscreetPopup,
-                                            KMyPriority ) );                                                                                           
-                                            
     CleanupStack::Pop();    // array cleanup
     return( subjects );
     }

@@ -1,0 +1,28 @@
+/*
+* Copyright (c) 2010 Nokia Corporation and/or its subsidiary(-ies). 
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:
+* Control Panel packet data AP plugin iby file.
+*
+*/
+
+#ifndef CPPACKETDATAAPPLUGIN_IBY
+#define CPPACKETDATAAPPLUGIN_IBY
+
+#include <data_caging_paths_for_iby.hrh>
+
+file=ABI_DIR/BUILD_DIR/cppacketdataapplugin.dll SHARED_LIB_DIR/cppacketdataapplugin.dll
+
+data=/epoc32/data/c/resource/qt/plugins/controlpanel/bearerap/cppacketdataapplugin.qtplugin resource/qt/plugins/controlpanel/bearerap/cppacketdataapplugin.qtplugin
+
+#endif // CPPACKETDATAAPPLUGIN_IBY

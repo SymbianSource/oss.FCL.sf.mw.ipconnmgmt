@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2006 Nokia Corporation and/or its subsidiary(-ies). 
+* Copyright (c) 2006-2010 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -11,8 +11,8 @@
 *
 * Contributors:
 *
-* Description:  File that exports the files belonging to 
-:                Extended Connection Settings API
+* Description:
+* File that exports the files belonging to Extended Connection Settings API.
 *
 */
 
@@ -24,10 +24,10 @@ DEFAULT
 
 PRJ_EXPORTS
 
-../inc/cmdestinationext.h     MW_LAYER_PLATFORM_EXPORT_PATH(cmdestinationext.h)
-../inc/cmconnectionmethodext.h     MW_LAYER_PLATFORM_EXPORT_PATH(cmconnectionmethodext.h)
-../inc/cmpsettingsconsts.h     MW_LAYER_PLATFORM_EXPORT_PATH(cmpsettingsconsts.h)
-../inc/cmsettingsui.h     MW_LAYER_PLATFORM_EXPORT_PATH(cmsettingsui.h)
-../inc/cmcommonui.h     MW_LAYER_PLATFORM_EXPORT_PATH(cmcommonui.h)
-../inc/cmmanagerext.h     MW_LAYER_PLATFORM_EXPORT_PATH(cmmanagerext.h)
-../inc/cmmanagerkeys.h    MW_LAYER_PLATFORM_EXPORT_PATH(cmmanagerkeys.h)
+../inc/cmdestinationext.h       MW_LAYER_PLATFORM_EXPORT_PATH(cmdestinationext.h)
+../inc/cmconnectionmethodext.h  MW_LAYER_PLATFORM_EXPORT_PATH(cmconnectionmethodext.h)
+../inc/cmpsettingsconsts.h      MW_LAYER_PLATFORM_EXPORT_PATH(cmpsettingsconsts.h)
+../inc/cmsettingsui.h           MW_LAYER_PLATFORM_EXPORT_PATH(cmsettingsui.h)
+../inc/cmcommonui.h             MW_LAYER_PLATFORM_EXPORT_PATH(cmcommonui.h)
+../inc/cmmanagerext.h           MW_LAYER_PLATFORM_EXPORT_PATH(cmmanagerext.h)
+../inc/cmmanagerkeys.h          MW_LAYER_PLATFORM_EXPORT_PATH(cmmanagerkeys.h)

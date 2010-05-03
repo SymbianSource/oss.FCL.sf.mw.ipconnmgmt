@@ -235,13 +235,6 @@ void CMPMCommsDatAccess::ValidateIapL(
 
                 TUint32 presumedIapId = aIapId; 
 
-                // Find and change Iap and Net Id if SSID exist
-                //
-                if ( !CheckEasyWLanL( aIapId ) )
-                    {
-                    aSession.MyServer().Events()->FindSSID( ssid, aIapId, aNetId );
-                    }
-
                 // Store Iap Id, Net Id and empty APN to TConnInfo, 
                 // so that FindAPN can utilise the information 
                 // during the validation of next IAP to support 
@@ -413,125 +406,6 @@ void CMPMCommsDatAccess::CheckBearerL(
     CleanupStack::PopAndDestroy(buf1);
     CleanupStack::PopAndDestroy(commsDbIapTableView);    
     CleanupStack::PopAndDestroy(commsDatabase);
-    }
-
-// -----------------------------------------------------------------------------
-// CMPMCommsDatAccess::CheckEasyWLanL
-// -----------------------------------------------------------------------------
-//
-TBool CMPMCommsDatAccess::CheckEasyWLanL( TUint32 aIapId ) const
-    {
-    MPMLOGSTRING2( "CMPMCommsDatAccess::CheckEasyWLanL: IAP Id = %i", aIapId)
-
-    TBool easyWlan = EFalse;
-    CCommsDatabase* commsDatabase = CCommsDatabase::NewL();
-    CleanupStack::PushL( commsDatabase );
-
-    // Make hidden records visible
-    // 
-    commsDatabase->ShowHiddenRecords();
-
-    CCommsDbTableView* commsDbIapTableView = 
-        commsDatabase->OpenViewMatchingUintLC( TPtrC( IAP ),
-                                               TPtrC( COMMDB_ID ),
-                                               aIapId );
-
-    User::LeaveIfError( commsDbIapTableView->GotoFirstRecord() );
-
-    TInt length1( 0 );
-
-    commsDbIapTableView->ReadColumnLengthL( TPtrC( IAP_SERVICE_TYPE ), 
-                                            length1 );
-
-    HBufC* buf1 = HBufC::NewLC( length1 );
-    TPtr ptr1( buf1->Des() );
-
-    // Read IAP's service type
-    //
-    commsDbIapTableView->ReadTextL(TPtrC( IAP_SERVICE_TYPE ), ptr1 );
-    MPMLOGSTRING2(
-        "CMPMCommsDatAccess::CheckEasyWLanL: IAP service type = %S", &ptr1 )
-
-    if ( ptr1.Compare( TPtrC( LAN_SERVICE ) ) == KErrNone )
-        {
-        TUint32 service( 0 );
-        commsDbIapTableView->ReadUintL( TPtrC( IAP_SERVICE ), service );
-
-        // Now open a view to LAN_SERVICE table
-        //
-        CCommsDbTableView* commsDbLanTableView = 
-            commsDatabase->OpenViewMatchingUintLC( TPtrC( LAN_SERVICE ),
-                                                   TPtrC( COMMDB_ID ),
-                                                   service );
-
-        User::LeaveIfError( commsDbLanTableView->GotoFirstRecord() );
-
-        TUint32 commDbId( 0 );
-
-        commsDbLanTableView->ReadUintL( TPtrC( COMMDB_ID ), commDbId );
-
-        // Now open a view to WLAN_SERVICE table
-        //
-        // If non wlan product, wlan tables won't exist and this will 
-        // leave. In that case do not check WLAN related issues 
-        //
-        CCommsDbTableView* commsDbWlanTableView( NULL );
-        TRAPD( err2, commsDbWlanTableView =
-                     commsDatabase->OpenViewMatchingUintLC( TPtrC( WLAN_SERVICE ),
-                                                            TPtrC( WLAN_SERVICE_ID ),
-                                                            commDbId );
-                     CleanupStack::Pop( commsDbWlanTableView ) );
-        if ( err2 == KErrNone )
-            {
-            // Push back to cleanup stack. Object must be popped within 
-            // TRAP, to avoid unbalance in cleanup stack and panic 71
-            CleanupStack::PushL( commsDbWlanTableView );
-
-            TInt err = commsDbWlanTableView->GotoFirstRecord();
-
-            if ( err == KErrNone )
-                {
-                TInt ssidLength( 0 );
-                commsDbWlanTableView->ReadColumnLengthL( TPtrC( NU_WLAN_SSID ), 
-                                                                ssidLength );
-                if ( ssidLength == 0 )
-                    {
-                    MPMLOGSTRING(
-                        "CMPMCommsDatAccess::CheckEasyWLanL: IAP is Easy WLAN" )
-                    easyWlan = ETrue;
-                    }
-                else
-                    {
-                    MPMLOGSTRING(
-                        "CMPMCommsDatAccess::CheckEasyWLanL: IAP isn't Easy WLAN" )
-                    easyWlan = EFalse;
-                    }
-                }
-            else
-                {
-                MPMLOGSTRING2( "CMPMCommsDatAccess::CheckEasyWLanL\
- GotoFirstRecord returned %d", err )
-                }
-
-            // Release memory
-            //
-            CleanupStack::PopAndDestroy( commsDbWlanTableView );
-            }
-        else
-            {
-            MPMLOGSTRING2(
-                        "CMPMCommsDatAccess::CheckEasyWLanL: WLAN table view failed, err %d", err2 )
-            }    
-        CleanupStack::PopAndDestroy( commsDbLanTableView );
-        }
-
-    // Release memory
-    //
-    CleanupStack::PopAndDestroy( buf1 );
-    CleanupStack::PopAndDestroy( commsDbIapTableView );
-    CleanupStack::PopAndDestroy( commsDatabase );
-
-    return easyWlan;
     }
 
 // -----------------------------------------------------------------------------
@@ -1034,317 +908,6 @@ void CMPMCommsDatAccess::CheckWLANIapL(CMPMServerSession& aSession)
     CleanupStack::PopAndDestroy( table );
     CleanupStack::PopAndDestroy( commsDatabase );
     }
-        
-// -----------------------------------------------------------------------------
-// CMPMCommsDatAccess::CheckWLANIapWithSsidL
-// -----------------------------------------------------------------------------
-//
-
-TUint32 CMPMCommsDatAccess::CheckWLANIapWithSsidL( TWlanSsid& aSsid, 
-                                                   TUint32 aSecMode,
-                                                   TWlanNetMode aConnMode )
-    {
-    MPMLOGSTRING( "CMPMCommsDatAccess::CheckWLANIapWithSsidL" )
-    TUint iapId( 0 );
-
-    // Creating a session with the latest version
-    //     
-    CMDBSession* db = CMDBSession::NewLC( KCDVersion1_1 );
-
-    db->SetAttributeMask( ECDHidden | ECDProtectedWrite );
-
-    // Find Wlan service record
-    //
-    TBuf<KWlanMaxSsidLength> ssid16;
-    CnvUtfConverter::ConvertToUnicodeFromUtf8( ssid16, aSsid );
-    MPMLOGSTRING4( "CMPMCommsDatAccess::CheckWLANIapWithSsidL sec:%d, conn:%d ssid %S", 
-                   aSecMode, 
-                   aConnMode, 
-                   &ssid16 )
-    CMDBRecordSet<CCDWlanServiceRecord>* wlanSet = 
-        new ( ELeave ) CMDBRecordSet<CCDWlanServiceRecord>( 
-         CCDWlanServiceRecord::TableIdL( *db ) );
-    CleanupStack::PushL( wlanSet ); 
-
-    CCDWlanServiceRecord* wlanRecord = new ( ELeave ) 
-        CCDWlanServiceRecord( CCDWlanServiceRecord::TableIdL( *db ) );
-
-    CleanupStack::PushL( wlanRecord ); 
-    wlanSet->LoadL( *db );
-    
-    MPMLOGSTRING2( "CMPMCommsDatAccess::CheckWLANIapWithSsidL, record count:%d", 
-                   wlanSet->iRecords.Count() )
-    TBool matchFound( EFalse );
-    for (TInt i = 0; ( i < wlanSet->iRecords.Count() ) && !matchFound; i++ )
-        {
-        wlanRecord->SetElementId( GetRealElementId( wlanSet->iRecords[i] ) );
-        wlanRecord->LoadL( *db );
-        TBuf<KWlanMaxSsidLength> ssid;
-        ssid = wlanRecord->iWLanSSID;
-        //if not easywlan, continue
-        //
-        if( ssid.Compare( KNullDesC() ) )
-            {
-            ssid = wlanRecord->iWLanSSID.GetL();
-            TUint32 secMode = wlanRecord->iWlanSecMode;
-            TUint32 connMode = wlanRecord->iWlanConnMode;
-        
-            if ( connMode )
-                {
-                connMode = 1;    
-                }
-            MPMLOGSTRING3( "CMPMCommsDatAccess::CheckWLANIapWithSsidL CommsDat secmode:%d, connmode:%d ", 
-        				   secMode, 
-        				   connMode )
-
-            if ( !ssid.Compare( ssid16 ) && ( aConnMode == connMode ) )
-        	    {
-        	    //compare sec mode
-        	    if ( aSecMode == EWlanSecModeOpen || aSecMode == EWlanSecModeWep )
-        		    {
-        		    if ( aSecMode == secMode )
-        		        {
-        		        MPMLOGSTRING( "CMPMCommsDatAccess::CheckWLANIapWithSsidL match found, open/wep " )
-        		        matchFound = ETrue;
-        		        }
-        			    
-        		    }
-            	//WPA PSK case
-            	else if ( aSecMode == EWlanSecModeWpa2 )
-            		{
-        	    	if ( ( secMode > EWlanSecModeWep ) && (wlanRecord->iWlanEnableWpaPsk) )
-        	    	    {
-        	    	    MPMLOGSTRING( "CMPMCommsDatAccess::CheckWLANIapWithSsidL match found, wpa psk " )
-        	    	    matchFound = ETrue;
-        	    	    }
-            		}
-            	//aSecMode = EWlanSecModeWpa
-            	else
-            		{
-        	    	if ( secMode > EWlanSecModeWep )
-        	    	    {
-        	    	    MPMLOGSTRING( "CMPMCommsDatAccess::CheckWLANIapWithSsidL match found, wpa " )
-        	    	    matchFound = ETrue;
-        	    	    }
-            		}
-        			
-        		}
-        	}
-        }
-    
-    if ( matchFound )
-        {
-        // load Iap record
-        //
-        CCDIAPRecord* iapRecord = static_cast<CCDIAPRecord*> ( 
-            CCDRecordBase::RecordFactoryL( KCDTIdIAPRecord ) );
-        CleanupStack::PushL( iapRecord );
-
-        CCDLANServiceRecord* lanRecord = static_cast<CCDLANServiceRecord*> (
-            CCDRecordBase::RecordFactoryL( KCDTIdLANServiceRecord ));
-        CleanupStack::PushL( lanRecord );
-        
-        iapRecord->iServiceType.SetL( TPtrC( KCDTypeNameLANService ) );
-        
-        lanRecord->SetRecordId( wlanRecord->iWlanServiceId );
-        lanRecord->LoadL( *db );
-
-        iapRecord->iService = lanRecord->ElementId();
-
-/*        iapRecord->iServiceType.SetL( TPtrC( KCDTypeNameLANService ) );
-        iapRecord->iService = wlanRecord->iWlanServiceId;
-*/
-        if( iapRecord->FindL( *db ) )
-            {
-            MPMLOGSTRING( "CMPMCommsDatAccess::CheckWLANIapWithSsidL iap found" )
-            // Iap record found
-            //
-            iapId = iapRecord->RecordId();
-            }
-        CleanupStack::PopAndDestroy( lanRecord );
-        CleanupStack::PopAndDestroy( iapRecord );
-        }
-    CleanupStack::PopAndDestroy( wlanRecord );
-    CleanupStack::PopAndDestroy( wlanSet );
-    CleanupStack::PopAndDestroy( db );
-    
-    return iapId;
-    }
-
-// -----------------------------------------------------------------------------
-// CMPMCommsDatAccess::SetEasyWlanDataL
-// -----------------------------------------------------------------------------
-//
-void CMPMCommsDatAccess::SetEasyWlanDataL( const TWlanSsid& aSsid,
-                                           TUint            aSecMode,
-                                           TWlanNetMode     aConnMode,
-                                           TWepKeyData      aWepData,
-                                           TUint            aEnableWpaPsk,
-                                           const TDesC8&    aWpaPsk,
-                                           TUint            aWpaKeyLen )
-    {
-    MPMLOGSTRING( "CMPMCommsDatAccess::SetEasyWlanDataL" )
-    CMDBSession* dbSession = CMDBSession::NewL( KCDVersion1_1 );
-    CleanupStack::PushL(dbSession);
-
-    // Try to open a transaction to obtain write lock
-    dbSession->OpenTransactionL();
-
-    TUint32 wlanId = FindEasyWlanServiceIdL( dbSession );
-    if( !wlanId )
-        {
-        MPMLOGSTRING( "CMPMCommsDatAccess::SetEasyWlanDataL unable to store \
- easy wlan settings" )
-        dbSession->Close();		
-		CleanupStack::PopAndDestroy( dbSession );
-        return;
-        }
-    
-    CMDBGenericRecord* record = static_cast<CMDBGenericRecord*> 
-				    ( CCDRecordBase::RecordFactoryL( 0));
-    CleanupStack::PushL( record );
-    record->InitializeL( TPtrC( WLAN_SERVICE ),NULL );
-    record->SetRecordId( wlanId );
-    record->LoadL( *dbSession );
-
-        TBuf<KWlanMaxSsidLength> ssid16;
-        CnvUtfConverter::ConvertToUnicodeFromUtf8( ssid16, aSsid );
-        CMDBField<TDesC>* textField = (CMDBField<TDesC>*)record->GetFieldByIdL(KCDTIdWlanUsedSSID);
-        textField->SetMaxLengthL( ssid16.Length());
-        textField->SetL( ssid16 );
-    
-        *((CMDBField<TUint32>*)record->GetFieldByIdL(KCDTIdWlanSecMode)) = aSecMode;
-        *((CMDBField<TUint32>*)record->GetFieldByIdL(KCDTIdWlanConnMode)) = aConnMode;
-    
-        if (aEnableWpaPsk)
-    	    {
-    	    MPMLOGSTRING( "CMPMCommsDatAccess::SetEasyWlanDataL wpa psk" )
-    	    CMDBField<TDesC8>* binField = (CMDBField<TDesC8>*)
-		   									record->GetFieldByIdL(KCDTIdWlanWpaPreSharedKey);
-		    binField->SetMaxLengthL( aWpaKeyLen );
-		    binField->SetL( aWpaPsk );
-
-		    *((CMDBField<TUint32>*)record->GetFieldByIdL(KCDTIdWlanWpaKeyLength)) = aWpaKeyLen;
-		    *((CMDBField<TUint32>*)record->GetFieldByIdL(KCDTIdWlanEnableWpaPsk)) = aEnableWpaPsk;
-    	    }
-        else if (aSecMode == EWlanSecModeWep)
-    	    {
-    	    MPMLOGSTRING( "CMPMCommsDatAccess::SetEasyWlanDataL wep psk" )
-     	    *((CMDBField<TUint32>*)record->GetFieldByIdL( KCDTIdWlanWepIndex )) = 
-     	        aWepData.iDefaultWep;
- 
-    	    SetWepKeyL( KCDTIdWlanFormatKey1, KCDTIdWlanWepKey1, 
-    	                aWepData.iWep1, aWepData.iWepFormat1, record );
-            SetWepKeyL( KCDTIdWlanFormatKey2, KCDTIdWlanWepKey2, 
-                        aWepData.iWep2, aWepData.iWepFormat2, record );
-            SetWepKeyL( KCDTIdWlanFormatKey3, KCDTIdWlanWepKey3, 
-                        aWepData.iWep3, aWepData.iWepFormat3, record );
-            SetWepKeyL( KCDTIdWlanFormatKey4, KCDTIdWlanWepKey4, 
-                        aWepData.iWep4, aWepData.iWepFormat4, record );
-    	    }
-    	else
-    	    {
-    	    MPMLOGSTRING2( "CMPMCommsDatAccess::SetEasyWlanDataL sec mode %d, no key data written",
-    	         aSecMode )
-    	    }
-    
-        //Finally save all to commsdat.
-        record->ModifyL( *dbSession );
-        dbSession->CommitTransactionL();
-        dbSession->Close();
-        CleanupStack::PopAndDestroy( record );
-        CleanupStack::PopAndDestroy( dbSession );
-    }
-
-// -----------------------------------------------------------------------------
-// CMPMCommsDatAccess::SetWepKeyL
-// -----------------------------------------------------------------------------
-//
-void CMPMCommsDatAccess::SetWepKeyL( TMDBElementId       aFormatId,
-                                     TMDBElementId       aKeyId, 
-                                     TWlanWepKey         aWepKey,
-                                     TUint               aWepFormat,
-                                     CMDBGenericRecord*  aRecord )
-    {
-    CMDBField<TUint32>* formatField = static_cast<CMDBField<TUint32>*>
-            ( aRecord->GetFieldByIdL( aFormatId ) );
-    formatField->SetL( aWepFormat );
-    CMDBField<TDesC8>* wepKey = static_cast<CMDBField<TDesC8>*>
-            ( aRecord->GetFieldByIdL( aKeyId ) );
-    if ( aWepFormat )
-        {
-        wepKey->SetL( aWepKey );
-        }
-    else
-        {
-        //Convert Ascii to Hex format, as only Hex value to be stored in CommsDat
-        HBufC8* buf8Conv = HBufC8::NewLC( aWepKey.Length() * KMpmDoubleLength );
-        ConvertAsciiToHex( aWepKey, buf8Conv );
-        wepKey->SetL( buf8Conv->Des() );
-        CleanupStack::PopAndDestroy( buf8Conv );
-        }
-    }
-
-// -----------------------------------------------------------------------------
-// CMPMCommsDatAccess::ConvertAsciiToHex
-// -----------------------------------------------------------------------------
-//
-void CMPMCommsDatAccess::ConvertAsciiToHex( const TDesC8& aSource, 
-        							        HBufC8* aDest )
-    {
-    MPMLOGSTRING( "CMPMCommsDatAccess::ConvertAsciiToHex" )
-    _LIT( hex, "0123456789ABCDEF" );
-    TInt size = aSource.Size();
-    TPtr8 ptr = aDest->Des();
-    for ( TInt ii = 0; ii < size; ii++ )
-    	{
-    	TText8 ch = aSource[ii];
-    	ptr.Append( hex()[(ch/16)&0x0f] );
-    	ptr.Append( hex()[ch&0x0f] );
-    	}
-    }
-
-// -----------------------------------------------------------------------------
-// CMPMCommsDatAccess::FindEasyWlanServiceIdL
-// -----------------------------------------------------------------------------
-//
-TUint32 CMPMCommsDatAccess::FindEasyWlanServiceIdL( CMDBSession* aDb )
-    {
-    // if the method returns the record container there is for 
-    // some reason garbage data in the key values
-    //
-    TUint32 wlanId( 0 );
-    MPMLOGSTRING( "CMPMCommsDatAccess::FindEasyWlanServiceIdL" )    
-
-    CMDBRecordSet<CCDWlanServiceRecord>* wlanSet = 
-        new ( ELeave ) CMDBRecordSet<CCDWlanServiceRecord>( 
-         CCDWlanServiceRecord::TableIdL( *aDb ) );
-    CleanupStack::PushL( wlanSet ); 
-    wlanSet->LoadL( *aDb );
-    
-    TBool found( EFalse );
-    for ( TInt i = 0; i < wlanSet->iRecords.Count() && !found; i++ )
-        {
-        CCDWlanServiceRecord* wlanRecord = new ( ELeave ) 
-            CCDWlanServiceRecord( CCDWlanServiceRecord::TableIdL( *aDb ) );
-        CleanupStack::PushL( wlanRecord );
-
-        wlanRecord->SetElementId( GetRealElementId( wlanSet->iRecords[i] ) );
-        wlanRecord->LoadL( *aDb );
-        
-        TDesC ssid = wlanRecord->iWLanSSID;
-        if( !ssid.Compare( KNullDesC() ) )
-            {
-            MPMLOGSTRING2( "CMPMCommsDatAccess::FindEasyWlanServiceIdL: \
-found service entry %i", wlanRecord->RecordId() )
-            wlanId = wlanRecord->RecordId();
-            found = ETrue;
-            }
-        CleanupStack::PopAndDestroy( wlanRecord );
-        }
-    CleanupStack::PopAndDestroy( wlanSet );
-    return wlanId;
-    }
 
 // -----------------------------------------------------------------------------
 // CMPMCommsDatAccess::CheckHiddenAgentL
@@ -1753,12 +1316,6 @@ TWlanIapType CMPMCommsDatAccess::CheckWlanL( TUint32 aIapId ) const
                 TInt ssidLength( 0 );
                 commsDbWlanTableView->ReadColumnLengthL( TPtrC( NU_WLAN_SSID ), 
                                                      ssidLength );
-                if ( ssidLength == 0 )
-                    {
-                    MPMLOGSTRING(
-                        "CMPMCommsDatAccess::CheckWlanL: IAP is Easy WLAN" )
-                    wlan = EEasyWlanIap;
-                    }
                 }
             else
                 {
@@ -2325,7 +1882,26 @@ aVirtualIapId is not virtual, return as aRealIapId" )
 
             TMpmConnPref tempMpmConnPref;
             tempMpmConnPref.SetSnapId( snap );
-            aSession.IapSelectionL()->ChooseBestIAPL( tempMpmConnPref, aAvailableIAPList );
+
+            // Ensure that there will be no infinite loops by dropping
+            // this virtual iap out from the list of available iaps.
+            // E.g. next layer SNAP could be the same as current SNAP.
+            RAvailableIAPList tempList;
+            CleanupClosePushL( tempList );
+              
+            for( TInt i=0; i < aAvailableIAPList.Count(); i++ )
+                {
+                // drop this virtual iap out from the list of
+                // available iaps to prevent from infinitely looping
+                //	
+                if ( aAvailableIAPList[i] != aVirtualIapId )
+                    {
+                    tempList.Append( aAvailableIAPList[i] );
+                    }
+                }
+            aSession.IapSelectionL()->ChooseBestIAPL( tempMpmConnPref, tempList );
+            CleanupStack::PopAndDestroy( &tempList );
+
             aRealIapId = tempMpmConnPref.IapId();
             }
         else if ( virtualNext->iNextLayerIAP != 0 )
@@ -2344,10 +1920,18 @@ aVirtualIapId is not virtual, return as aRealIapId" )
                 MPMLOGSTRING(
                     "CMPMCommsDatAccess::FindRealIapL: Call FindRealIapL" )
 
-                FindRealIapL( iap2->RecordId(), 
-                              aRealIapId, 
-                              aAvailableIAPList,
-                              aSession );
+                if ( aVirtualIapId != virtualNext->iNextLayerIAP )
+                    {
+                    FindRealIapL( iap2->RecordId(), 
+                                  aRealIapId, 
+                                  aAvailableIAPList,
+                                  aSession );
+                    }
+                else
+                    {
+                    aRealIapId = 0;
+                    MPMLOGSTRING( "CMPMCommsDatAccess::FindRealIapL: Virtual iap points to itself" )
+                    }
                 }
             else
                 {
@@ -2665,201 +2249,6 @@ void CMPMCommsDatAccess::BuildWlanArrayL(CMDBSession& aDb,
         }
     
     CleanupStack::PopAndDestroy( ptrLanBearerRecordSet );    
-    }
-
-// -----------------------------------------------------------------------------
-// CMPMCommsDatAccess::AreActiveIapsInSameSnapL
-// -----------------------------------------------------------------------------
-//
-TBool CMPMCommsDatAccess::AreActiveIapsInSameSnapL ( RArray<TActiveBMConn>& aActiveBMConns,
-                                                     TUint32& aSnapId )
-    {
-    MPMLOGSTRING( "CMPMCommsDatAccess::AreActiveIapsInSameSnapL" )
-    TBool same = ETrue;
-    TUint32 snapId = 0;
-    TUint32 prevSnapId = 0;
-            
-    // Go through all active connections
-    for (TInt index = 0; index < aActiveBMConns.Count(); index++ )
-        {
-        // Do check only for active connections
-        if ( aActiveBMConns[index].iConnInfo.iState != EStarted )
-            {
-            continue;
-            }
-        
-        // Iap id must be nonzero
-        if ( aActiveBMConns[index].iConnInfo.iIapId )
-            {
-            prevSnapId = snapId;
-            // Get destination id for the iap
-            snapId = GetSnapIdL( aActiveBMConns[index].iConnInfo.iIapId );
-                        
-            // Check if previous iap's destination is different
-            if ( ( ( prevSnapId != snapId ) && prevSnapId && snapId ) ||
-                 !snapId )
-                {
-                // Set return value to false and leave loop
-                same = EFalse;
-                break;
-                }
-            }
-        }
-    
-    // Return destId for later use
-    aSnapId = snapId;
-    
-    return same;
-    }
-
-// -----------------------------------------------------------------------------
-// CMPMCommsDatAccess::SelectActiveConnectionL
-// -----------------------------------------------------------------------------
-//
-void CMPMCommsDatAccess::SelectActiveConnectionL ( const TUint32 aSnapId,
-                                                   RArray<TActiveBMConn>& aActiveBMConns,
-                                                   TUint32& aActiveIapId,
-                                                   TUint32& aActiveSnapId,
-                                                   TMPMBearerType& aActiveBearerType,
-                                                   CMPMServerSession& aSession )
-    {
-    MPMLOGSTRING( "CMPMCommsDatAccess::SelectActiveConnectionL" )
-    RArray<TUint32> activeIaps;
-    RArray<TNetIap> iapIds;
-    
-    // Reset output parameters
-    aActiveIapId = 0;
-    aActiveSnapId = 0;
-    aActiveBearerType = EMPMBearerTypeNone;
-
-    CleanupClosePushL( activeIaps );
-        
-    for (TInt index = 0; index < aActiveBMConns.Count(); index++ )
-        {
-        CMPMServerSession* serverSession = 
-            aSession.MyServer().GetServerSession(
-                aActiveBMConns[index].iConnInfo.iConnId );
-
-        // Add only started iaps to array
-        if ( aActiveBMConns[index].iConnInfo.iState == EStarted &&
-             serverSession->ChooseBestIapCalled() )
-            {
-            activeIaps.AppendL ( aActiveBMConns[index].iConnInfo.iIapId );
-            }
-        }
-        
-    CleanupClosePushL( iapIds );
-    SearchDNEntriesL( aSnapId, iapIds );
-    
-    // Remove any deactived IAP from iapIds
-    TInt ret        = KErrNotFound;
-    TInt destCount  = iapIds.Count();
-    
-    // Decrement by one, because count is n, 
-    // but indexes in array are 0 .. n-1.
-    // 
-    destCount--;
-
-    // This time we are browsing the array from the end to the beginning, 
-    // because removing one element from array affects index numbering.
-    for ( TInt k = destCount; k >= 0; k-- )
-        {
-        ret = activeIaps.Find( iapIds[k].iIapId );
-        if ( ret == KErrNotFound )
-            {
-            MPMLOGSTRING2( "CMPMCommsDatAccess::SelectActiveConnectionL: \
-Remove deactived IAP = %i", iapIds[k].iIapId )
-            iapIds.Remove( k );
-            }
-        }
-
-    // Determine the actual priorities for IAPs
-    DeterminePrioritiesL( iapIds, activeIaps, aSession );
-
-    // Check if a matching available IAP is found.
-    if( iapIds.Count() )
-        {
-        // Go through all iaps
-        for ( TInt index = 0; index < iapIds.Count(); index++ )
-            {
-            // Get bearer type
-            TMPMBearerType bearerType = GetBearerTypeL( iapIds[index].iIapId );
-        
-            // If iap is not vpn, wlan or packet then skip it
-            if ( bearerType == EMPMBearerTypeOther )
-                {
-                continue;
-                }
-            
-            // Set bearer type, iap id and snap id
-            for (TInt index2 = 0; index2 < aActiveBMConns.Count(); index2++ )
-                {
-                if ( ( aActiveBMConns[index2].iConnInfo.iIapId ==
-                       iapIds[index].iIapId ) )
-                    {
-                    if ( aSession.MyServer().DedicatedClients().Find(
-                         aActiveBMConns[index2].iConnInfo.iAppUid ) != KErrNone )
-                        {
-                        aActiveSnapId = aActiveBMConns[index2].iConnInfo.iSnap;
-                        aActiveIapId = aActiveBMConns[index2].iConnInfo.iIapId;
-                        aActiveBearerType = bearerType;
-                        }
-                    break;
-                    }
-                }
-            
-            break;
-            }
-        }
-
-    MPMLOGSTRING4(
-        "CMPMCommsDatAccess::SelectActiveConnectionL: Iap id = %i, Snap id = %i, \
-Bearer type = %i",
-        aActiveIapId, aActiveSnapId, aActiveBearerType )
-    
-    CleanupStack::PopAndDestroy( &iapIds );
-    CleanupStack::PopAndDestroy( &activeIaps );
-    }
-    
-// -----------------------------------------------------------------------------
-// CMPMCommsDatAccess::GetSnapIdL
-// -----------------------------------------------------------------------------
-//
-TUint32 CMPMCommsDatAccess::GetSnapIdL( TUint32 aIapId )
-    {
-    MPMLOGSTRING( "CMPMCommsDatAccess::GetSnapIdL" )
-    TUint32 snapId = 0;
-    RArray<TUint> snapIds;
-        
-    CleanupClosePushL( snapIds );
-    // Get destinations
-    FindAllSnapsL( snapIds );
-
-    for (TInt index = 0; index < snapIds.Count(); index++)
-        {
-        RArray<TNetIap> ids;
-        // Get iaps belonging to this snap
-        CleanupClosePushL( ids );
-        SearchDNEntriesL( snapIds[index], ids );
-            
-        for (TInt index2 = 0; index2 < ids.Count(); index2++)
-            {
-            // Check if iap belongs to this destination
-            if (ids[index2].iIapId == aIapId)
-                {
-                snapId = snapIds[index];
-                CleanupStack::PopAndDestroy( &ids );                    
-                CleanupStack::PopAndDestroy( &snapIds );
-                return snapId;
-                }
-            }
-        
-        CleanupStack::PopAndDestroy( &ids );
-        }
-
-    CleanupStack::PopAndDestroy( &snapIds );
-    
-    return snapId;
     }
 
 // -----------------------------------------------------------------------------

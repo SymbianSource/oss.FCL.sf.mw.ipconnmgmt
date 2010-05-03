@@ -65,18 +65,10 @@ SOURCE      ActiveOfflineWlanDisabledNote.cpp
 SOURCE      WLANNetworkUnavailableNoteNotif.cpp
 SOURCE      ActiveWLANNetworkUnavailableNote.cpp
 
-SOURCE      ActiveConnectViaNote.cpp
-SOURCE      ConnectViaNoteNotif.cpp
 SOURCE      NoteDlgSuppressingSwitch.cpp
 SOURCE      wlanpowersavetest.cpp
 SOURCE      wlanpowersavetestnotif.cpp
 SOURCE      easywapidlgnotif.cpp
-SOURCE      nowlannetworksavailablenotif.cpp
-SOURCE      connectingviadiscreetpopup.cpp
-SOURCE      connectingviadiscreetpopupnotif.cpp
-SOURCE      connectionerrordiscreetpopup.cpp
-SOURCE      connectionerrordiscreetpopupnotif.cpp
-SOURCE      nowlansdiscreetpopup.cpp
 SOURCE      cellulardataconfirmation.cpp 
 SOURCE      devicedialogobserver.cpp
 
@@ -99,10 +91,13 @@ MW_LAYER_SYSTEMINCLUDE
 
 SYSTEMINCLUDE   /epoc32/include/libc 
 SYSTEMINCLUDE   /epoc32/include/uikon
+SYSTEMINCLUDE   /epoc32/include/mw/hb/hbcore
+SYSTEMINCLUDE   /epoc32/include/mw/hb/hbwidgets
+
 
 LIBRARY     euser.lib eikdlg.lib eiksrv.lib cone.lib eikcore.lib eikcoctl.lib
 LIBRARY     bafl.lib avkon.lib AknSkins.lib Ecom.lib 
-LIBRARY     eiksrvui.lib
+LIBRARY		eiksrvui.lib
 LIBRARY     commonengine.lib
 LIBRARY     AKNNOTIFY.LIB
 LIBRARY     AknIcon.lib
@@ -114,13 +109,13 @@ LIBRARY     FeatMgr.lib
 LIBRARY     charconv.lib
 
 LIBRARY     commdb.lib
-LIBRARY     cmmanager.lib
+LIBRARY		  cmmanager.lib
 LIBRARY     etel3rdparty.lib 
 LIBRARY     HbCore.lib
 LIBRARY     HbWidgets.lib
 
 #if defined(ARMCC)
-    DEFFILE ../ConnectionUiUtilities/EABI/ConnUiUtilsNotif.DEF
+DEFFILE ../ConnectionUiUtilities/EABI/ConnUiUtilsNotif.DEF
 #elif defined( WINSCW )
     DEFFILE ../ConnectionUiUtilities/BWinsCw/ConnUiUtilsNotif.DEF
 #endif

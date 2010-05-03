@@ -29,6 +29,7 @@ Mobility Policy Manager server class definitions.
 #include <etel.h>           // RTelServer
 #include <etelmm.h>         // RMobilePhone
 #include <etelpckt.h>       // RPacketService
+#include <ConnectionUiUtilities.h>
 
 #include "mpmcommon.h"
 #include "rmpm.h"
@@ -38,6 +39,7 @@ Mobility Policy Manager server class definitions.
 class CMPMCommsDatAccess;
 class CMpmCsIdWatcher;
 class CMpmDataUsageWatcher;
+class CMpmOfflineWatcher;
 
 // CONSTANTS
 _LIT( KMPMPanicCategory, "Mobility Policy Manager Server" );
@@ -167,6 +169,13 @@ enum TMPMBearerType
     EMPMBearerTypeOther
     };
 
+enum TOfflineWlanQueryResponse
+    {
+    EOfflineResponseUndefined,
+    EOfflineResponseYes,
+    EOfflineResponseNo
+    };
+
 // FUNCTION PROTOTYPES
 void PanicServer( TInt aPanic );
 
@@ -179,7 +188,6 @@ class CMPMConfirmDlgRoaming;
 class CMPMConfirmDlgStarting;
 class CMPMDefaultConnection;
 class CMPMWlanQueryDialog;
-class CMPMDialog;
 
 // CLASS DECLARATION
 /**
@@ -343,8 +351,10 @@ class CMPMServer : public CPolicyServer
         * Checks if the connection is started for the Iap Id.
         * @since 3.2
         * @param aIapId IAP Id of the connection
+        * @param aConnId Connection Id
         */
-        TBool CheckIfStarted( const TUint32 aIapId );
+        TBool CheckIfStarted( const TUint32 aIapId, 
+                              const TConnectionId aConnId );
 
         /**
         * Checks if a connection is started with wlan iap.
@@ -443,12 +453,6 @@ class CMPMServer : public CPolicyServer
         */
         void NotifyBMPrefIapL( const TConnMonIapInfo& aIapInfo,
                                const TPrefIAPNotifCaller aCaller );
-
-        /**
-        * Update Connection dialog of each session
-        * @since 3.2
-        */
-        void UpdateSessionConnectionDlgL();
 
         /**
         * Handling of blacklisting certain IAP and the presumed IAP for 
@@ -629,13 +633,6 @@ class CMPMServer : public CPolicyServer
         inline CMPMWlanQueryDialog* FirstInWlanQueryQueue();
 
         /**
-        * Get the ConnectDialogQueue.
-        * @since 3.2
-        * @return Pointer to the CMPMDialogQueue.
-        */
-        inline CArrayPtrFlat<CMPMDialog>* ConnectDialogQueue();
-
-        /**
         * Get the Default Connection object.
         * @since 3.2
         * @return Pointer to the Default Connection object.
@@ -790,34 +787,6 @@ class CMPMServer : public CPolicyServer
         inline CMpmCsIdWatcher* CsIdWatcher();
 
         /**
-        * Change state of the P&S keys according to active connection.
-        * @since 5.0
-        * @param aSession Handle to session used by connection.
-        */
-        void UpdateActiveConnectionL( CMPMServerSession& aSession );
-
-        /**
-        * Map bearer type between MPM and commsdat.
-        * @since 5.0
-        * @param aBearerType Bearer type used by MPM for active connection selection.
-        * @return Bearer type used by commsdat
-        */
-        TUint32 MapBearerType( TMPMBearerType aBearerType );
-
-        /**
-        * Writes new active connection to the P&S keys
-        * @since 5.0
-        */    
-        void PublishActiveConnection();
-        
-        /**
-        * Returns number of active connections.
-        * @since 5.0
-        * @return Number of active connections
-        */
-        TInt NumberOfActiveConnections();
-
-        /**
         * Returns server session instance that corresponds to given
         * connection id.
         * @since 5.2
@@ -832,6 +801,39 @@ class CMPMServer : public CPolicyServer
         * @since 5.2
         */
         void StopCellularConns();
+        
+        /**
+        * Handle to connection ui utilities
+        */        
+        inline CConnectionUiUtilities* ConnUiUtils() const;
+
+        /**
+        * Offline mode watcher updates the mode variable stored by MPM server.
+        * @since 5.2
+        * @param aNewModeValue New offline mode value to be updated.
+        */
+        void UpdateOfflineMode( TInt aNewModeValue );
+
+        /**
+        * Tells if the phone is in offline mode.
+        * @since 5.2
+        * @return ETrue if phone is in offline mode.
+        */
+        TBool IsPhoneOffline();
+
+        /**
+        * Tells the "Use WLAN in offline mode" query response.
+        * @since 5.2
+        * @return TOfflineWlanQueryResponse (not_responded/yes/no).
+        */
+        TOfflineWlanQueryResponse OfflineWlanQueryResponse();
+
+        /**
+        * Called when the "Use WLAN in offline mode" query has been responded.
+        * @since 5.2
+        * @param aResponse setting the query response value (not_responded/yes/no).
+        */
+        void SetOfflineWlanQueryResponse( TOfflineWlanQueryResponse aResponse);
 
     private:
 
@@ -912,9 +914,6 @@ class CMPMServer : public CPolicyServer
 
         // Solves problem with overlapping Wlan Queries
         CArrayPtrFlat<CMPMWlanQueryDialog>* iWlanQueryQueue;
-
-        // Solves problem with overlapping Connection Dialogs
-        CArrayPtrFlat<CMPMDialog>* iConnectDialogQueue;
         
         // Handles Default Connection selection
         CMPMDefaultConnection* iDefaultConnection;
@@ -938,24 +937,30 @@ class CMPMServer : public CPolicyServer
         CMpmCsIdWatcher* iMpmCsIdWatcher;
 
         /**
-         * Handle to another central repository watcher
+         * Handle to central repository watcher
          */
         CMpmDataUsageWatcher* iMpmDataUsageWatcher;
 
-        // Iap id of the active connection
-        TUint32 iActiveIapId;
-        
-        // Snap id of the active connection
-        TUint32 iActiveSnapId;
-
-        // Bearer type of the active connection
-        TMPMBearerType iActiveBearerType;
+        /**
+         * Handle to central repository watcher
+         */
+        CMpmOfflineWatcher* iMpmOfflineWatcher;
 
         // Dedicated clients
         RArray<TUint32> iDedicatedClients;
 
         // Used for commsdat related functionalities
         CMPMCommsDatAccess* iCommsDatAccess;
+
+        // Handle to connection UI utilities
+        //
+        CConnectionUiUtilities* iConnUiUtils;
+        
+        // Offline mode.
+        TInt iOfflineMode;
+        
+        // Is WLAN usage already accepted in this offline session.
+        TOfflineWlanQueryResponse iOfflineWlanQueryResponse;
     };
 
 #include "mpmserver.inl"

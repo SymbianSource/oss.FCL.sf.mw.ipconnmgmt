@@ -350,8 +350,8 @@ EXPORT_C void CCdcCommsDatCreator::CreateCommsDatL( const TFileName& aInFileName
     SetLingerSettingsL( iLingerSettings );
 
     // Sets the default connection    
-    SetDefaultConnectionL( iDefCon );
-
+//    SetDefaultConnectionL( iDefCon );
+    
     // Logs IAPs in UDEB mode
     #ifdef _DEBUG
     LogIapIdsL();
@@ -587,7 +587,7 @@ void CCdcCommsDatCreator::SetUnderlyingIapL( RPointerArray< HBufC >& aUnderLying
 // CCdcCommsDatCreator::ProcessDNL
 // ---------------------------------------------------------
 //
-void CCdcCommsDatCreator::SetDefaultConnectionL( RPointerArray< HBufC >& aDefCon )
+/*void CCdcCommsDatCreator::SetDefaultConnectionL( RPointerArray< HBufC >& aDefCon )
     {
     // Sets the default connection    
     if( aDefCon.Count() > 0 )
@@ -605,12 +605,12 @@ void CCdcCommsDatCreator::SetDefaultConnectionL( RPointerArray< HBufC >& aDefCon
         
         CleanupStack::PushL( glb );
         glb->SetDefaultConnectionL();
-                
+        
         CleanupStack::PopAndDestroy( glb );
 
         CLOG_WRITE( "--------------------------------------\n" )
         }
-    }
+    }*/
 
 // ---------------------------------------------------------
 // CCdcCommsDatCreator::SetUnderlyingIapL

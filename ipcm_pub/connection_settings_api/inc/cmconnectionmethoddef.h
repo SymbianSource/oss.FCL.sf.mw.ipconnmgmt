@@ -135,50 +135,14 @@ namespace CMManager
                                     */
 
         ECmBearerIcon = 100,        /**<
-                                    * Return the bearer specific icon. Assumes that
-                                    * there's an existing EEikEnv in the client.                        
-                                    * Type cast return value from TUint32 to 
-                                    * CGuiIcon*.
-                                    * Return value 0 means bearer has no icon.
-                                    * (TUint32 - default: none - read only)
+                                    * Sets/Gets the Connection Method specific icon name(may
+                                    * contain the path too).
+                                    * Used with Get/SetStringAttribute().
+                                    * Returns NULL if not found.
+                                    * (String - default: None )
                                     */ 
-                        
-        ECmBearerAvailableIcon,     /**<
-                                    * Return the bearer available specific icon. 
-                                    * Assumes that there's an existing EEikEnv 
-                                    * in the client. Type cast return value from 
-                                    * TUint32 to CGuiIcon*.
-                                    * Return value 0 means bearer has no icon.
-                                    * (TUint32 - default: none - read only)
-                                    */
-                        
-        ECmBearerAvailableName = 200,   /**<
-                                        * Name of the bearer. Can be used in 
-                                        * layout 
-                                        * list_double_large_graphic_popup_menu_pane.
-                                        * (String - default: none - read only)
-                                        */
-                        
-        ECmBearerSupportedName,     /**<
-                                    * Name of the bearer. Can be used in 
-                                    * layout list_single_popup_menu_pane_1.
-                                    * (String - default: none - read only)
-                                    */
-                        
-        ECmBearerAvailableText,     /**<
-                                    * Localized text 'Available'. Can be used in 
-                                    * layout 
-                                    * list_double_large_graphic_popup_menu_pane.
-                                    * (String - default: none - read only)
-                                    */
-                        
-        ECmBearerNamePopupNote,     /**<
-                                    * Localized text of the bearer type name.
-                                    * Can be used in layout popup note.
-                                    * (String - default: none - read only)
-                                    */
-
-        ECmCommsDBBearerType,       /**<
+                       
+        ECmCommsDBBearerType = 204, /**<
                                     * For backward compatibility, connection method
                                     * can return its CommsDB specific bearer type.
                                     * (TUint32 - default: none - read only)
@@ -186,13 +150,7 @@ namespace CMManager
                                     * type exists in CommsDat.
                                     */
                                 
-        ECmBearerSettingName,       /**<
-                                    * Name of the data bearer used when 
-                                    * accessing external network.
-                                    * (String - default: none - read only)
-                                    */
-        
-        ECmVirtual,                 /**<
+        ECmVirtual = 206,          /**<
                                     * Is the given connection method virtual?
                                     * (TBool - default: none - read only)
                                     */
@@ -206,13 +164,7 @@ namespace CMManager
                                     * (TUint32 - default: none - read only)
                                     */
                                     
-        ECmAddToAvailableList,      /**<
-                                    * Bearer type has to be added to the avaialable
-                                    * bearer type list.
-                                    * (TBool - default: EFalse - read only)
-                                    */                   
-                        
-        ECmLoadResult,              /**<
+        ECmLoadResult = 402,        /**<
                                     * Result of the load process. KErrNone if there
                                     * was no error. Otherwise a system wide
                                     * error code.

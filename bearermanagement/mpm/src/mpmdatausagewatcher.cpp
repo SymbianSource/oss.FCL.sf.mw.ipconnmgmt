@@ -82,14 +82,11 @@ void CMpmDataUsageWatcher::StartL()
     {
     MPMLOGSTRING( "CMpmDataUsageWatcher::StartL" )
 
-    // Request notification
-    User::LeaveIfError( iRepository->NotifyRequest( KCurrentCellularDataUsage,
-            iStatus ) );
-    SetActive();
+    // Get the initial data usage value from repository.
+    User::LeaveIfError( GetCurrentDataUsageValue() );
 
-    // Get value from central repository
-    User::LeaveIfError( iRepository->Get( KCurrentCellularDataUsage,
-            iCellularDataUsage ) );
+    // Request notifications.
+    User::LeaveIfError( RequestNotifications() );
     }
 
 // ---------------------------------------------------------------------------
@@ -101,38 +98,39 @@ void CMpmDataUsageWatcher::RunL()
     {
     MPMLOGSTRING( "CMpmDataUsageWatcher::RunL" )
 
-    User::LeaveIfError( iStatus.Int() );
-
-    // Request new notification
-    User::LeaveIfError( iRepository->NotifyRequest( KCurrentCellularDataUsage,
-            iStatus ) );
-    SetActive();
-
-    TInt oldCellularDataUsage = iCellularDataUsage;
-
-    // Get the new value from central repository
-    User::LeaveIfError( iRepository->Get( KCurrentCellularDataUsage,
-            iCellularDataUsage ) );
-    
-    // Stop cellular connections if the setting changes into Disabled
-    if ( oldCellularDataUsage != ECmCellularDataUsageDisabled &&
-         iCellularDataUsage == ECmCellularDataUsageDisabled &&
-         iServer->RoamingWatcher()->RoamingStatus() != EMPMRoamingStatusUnknown )
+    if ( iStatus.Int() < KErrNone )
         {
-        iServer->StopCellularConns();
+        MPMLOGSTRING2("Status: 0x%08X", iStatus.Int())
+        iErrorCounter++;
+        if ( iErrorCounter > KMpmDataUsageWatcherCenRepErrorThreshold )
+            {
+            MPMLOGSTRING2("Over %d consecutive errors, stopping notifications permanently.",
+                    KMpmDataUsageWatcherCenRepErrorThreshold)
+            return;
+            }
+        // Else: Error occured but counter not expired. Proceed.
         }
-    }
+    else
+        {
+        // Notification is received ok => Reset the counter.
+        iErrorCounter = 0;
 
-// ---------------------------------------------------------------------------
-// From class CActive.
-// Nothing to do over here.
-// ---------------------------------------------------------------------------
-//
-TInt CMpmDataUsageWatcher::RunError( TInt /*aError*/ )
-    {
-    MPMLOGSTRING( "CMpmDataUsageWatcher::RunError" )
+        // Get the new Cellular data usage setting value from central repository.
+        TInt oldCellularDataUsage = iCellularDataUsage;
 
-    return KErrNone;
+        if ( GetCurrentDataUsageValue() == KErrNone )
+            {
+            // Stop cellular connections if the setting changes into Disabled.
+            if ( oldCellularDataUsage != ECmCellularDataUsageDisabled &&
+                    iCellularDataUsage == ECmCellularDataUsageDisabled &&
+                    iServer->RoamingWatcher()->RoamingStatus() != EMPMRoamingStatusUnknown )
+                {
+                iServer->StopCellularConns();
+                }
+            }
+        }
+    
+    RequestNotifications();
     }
 
 // ---------------------------------------------------------------------------
@@ -147,3 +145,40 @@ void CMpmDataUsageWatcher::DoCancel()
     iRepository->NotifyCancel( KCurrentCellularDataUsage );
     }
 
+// ---------------------------------------------------------------------------
+// Request notifications.
+// ---------------------------------------------------------------------------
+//
+TInt CMpmDataUsageWatcher::RequestNotifications()
+    {
+    MPMLOGSTRING( "CMpmDataUsageWatcher::RequestNotifications" )
+
+    TInt err = iRepository->NotifyRequest( KCurrentCellularDataUsage, iStatus );
+        
+    if ( err == KErrNone )
+        {
+        SetActive();
+        }
+    else
+        {
+        MPMLOGSTRING2( "CMpmDataUsageWatcher::RequestNotifications, ERROR: %d", err )
+        }
+    return err;
+    }
+
+// ---------------------------------------------------------------------------
+// Get current repository key value.
+// ---------------------------------------------------------------------------
+//
+TInt CMpmDataUsageWatcher::GetCurrentDataUsageValue()
+    {
+    MPMLOGSTRING( "CMpmDataUsageWatcher::GetCurrentDataUsageValue" )
+
+    TInt err = iRepository->Get( KCurrentCellularDataUsage, iCellularDataUsage );
+        
+    if ( err != KErrNone )
+        {
+        MPMLOGSTRING2( "CMpmDataUsageWatcher::GetCurrentDataUsageValue, ERROR: %d", err )
+        }
+    return err;
+    }

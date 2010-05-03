@@ -21,13 +21,8 @@
 #include <commdb.h>
 #include <ApEngineConsts.h>
 
-#ifdef SYMBIAN_ENABLE_SPLIT_HEADERS
-#include <ProtectDB.h>
-#include <protectcpdb.h>
-#else
 #include <comms-infras/commdb/protection/protectdb.h>
 #include <comms-infras/commdb/protection/protectcpdb.h>
-#endif
 
 #include <ApProtHandler.h>
 #include <ApListItem.h>

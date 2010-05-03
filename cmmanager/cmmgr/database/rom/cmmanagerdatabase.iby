@@ -14,13 +14,12 @@
 * Description:
 *
 */
-#ifndef __CMMANAGERDATABASE_IBY__
-#define __CMMANAGERDATABASE_IBY__
 
+#ifndef CMMANAGERDATABASE_IBY__
+#define CMMANAGERDATABASE_IBY__
 
 file=ABI_DIR\BUILD_DIR\cmmanagerdatabase.dll     SHARED_LIB_DIR\cmmanagerdatabase.dll
 
 
-
-#endif // __CMMANAGERDATABASE_IBY__
+#endif // CMMANAGERDATABASE_IBY__
 

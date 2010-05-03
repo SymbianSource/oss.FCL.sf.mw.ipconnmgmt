@@ -1,0 +1,42 @@
+EXPORTS
+	?setString8Attribute@CmConnectionMethodShim@@QAEXW4ConnectionMethodAttribute@CMManagerShim@@VQString@@@Z @ 1 NONAME ; void CmConnectionMethodShim::setString8Attribute(enum CMManagerShim::ConnectionMethodAttribute, class QString)
+	?getString8Attribute@CmConnectionMethodShim@@QBE?AVQString@@W4ConnectionMethodAttribute@CMManagerShim@@@Z @ 2 NONAME ; class QString CmConnectionMethodShim::getString8Attribute(enum CMManagerShim::ConnectionMethodAttribute) const
+	?connectionMethodCount@CmDestinationShim@@QBEHXZ @ 3 NONAME ; int CmDestinationShim::connectionMethodCount(void) const
+	?modifyPriority@CmDestinationShim@@QAEXPAVCmConnectionMethodShim@@H@Z @ 4 NONAME ; void CmDestinationShim::modifyPriority(class CmConnectionMethodShim *, int)
+	?setBoolAttribute@CmConnectionMethodShim@@QAEXW4ConnectionMethodAttribute@CMManagerShim@@_N@Z @ 5 NONAME ; void CmConnectionMethodShim::setBoolAttribute(enum CMManagerShim::ConnectionMethodAttribute, bool)
+	?createConnectionMethod@CmManagerShim@@QAEPAVCmConnectionMethodShim@@I@Z @ 6 NONAME ; class CmConnectionMethodShim * CmManagerShim::createConnectionMethod(unsigned int)
+	?getIntAttribute@CmConnectionMethodShim@@QBEIW4ConnectionMethodAttribute@CMManagerShim@@@Z @ 7 NONAME ; unsigned int CmConnectionMethodShim::getIntAttribute(enum CMManagerShim::ConnectionMethodAttribute) const
+	?isHidden@CmDestinationShim@@QBE_NXZ @ 8 NONAME ; bool CmDestinationShim::isHidden(void) const
+	?setIntAttribute@CmConnectionMethodShim@@QAEXW4ConnectionMethodAttribute@CMManagerShim@@I@Z @ 9 NONAME ; void CmConnectionMethodShim::setIntAttribute(enum CMManagerShim::ConnectionMethodAttribute, unsigned int)
+	?update@CmDestinationShim@@QAEXXZ @ 10 NONAME ; void CmDestinationShim::update(void)
+	?setStringAttribute@CmConnectionMethodShim@@QAEXW4ConnectionMethodAttribute@CMManagerShim@@VQString@@@Z @ 11 NONAME ; void CmConnectionMethodShim::setStringAttribute(enum CMManagerShim::ConnectionMethodAttribute, class QString)
+	??0CmConnectionMethodShim@@QAE@AAVRCmConnectionMethod@@@Z @ 12 NONAME ; CmConnectionMethodShim::CmConnectionMethodShim(class RCmConnectionMethod &)
+	?deleteDestination@CmDestinationShim@@QAEXXZ @ 13 NONAME ; void CmDestinationShim::deleteDestination(void)
+	?metadata@CmDestinationShim@@QBEIW4SnapMetadataField@CMManagerShim@@@Z @ 14 NONAME ; unsigned int CmDestinationShim::metadata(enum CMManagerShim::SnapMetadataField) const
+	?destination@CmManagerShim@@QBEPAVCmDestinationShim@@I@Z @ 15 NONAME ; class CmDestinationShim * CmManagerShim::destination(unsigned int) const
+	?getBoolAttribute@CmConnectionMethodShim@@QBE_NW4ConnectionMethodAttribute@CMManagerShim@@@Z @ 16 NONAME ; bool CmConnectionMethodShim::getBoolAttribute(enum CMManagerShim::ConnectionMethodAttribute) const
+	?connectionMethod@CmManagerShim@@QBEPAVCmConnectionMethodShim@@I@Z @ 17 NONAME ; class CmConnectionMethodShim * CmManagerShim::connectionMethod(unsigned int) const
+	?connectionMethod@CmManagerShim@@QBEXAAV?$QList@I@@_N@Z @ 18 NONAME ; void CmManagerShim::connectionMethod(class QList<unsigned int> &, bool) const
+	?update@CmConnectionMethodShim@@QAEXXZ @ 19 NONAME ; void CmConnectionMethodShim::update(void)
+	?name@CmDestinationShim@@QBE?AVQString@@XZ @ 20 NONAME ; class QString CmDestinationShim::name(void) const
+	?allDestinations@CmManagerShim@@QBEXAAV?$QList@I@@@Z @ 21 NONAME ; void CmManagerShim::allDestinations(class QList<unsigned int> &) const
+	??1CmManagerShim@@QAE@XZ @ 22 NONAME ; CmManagerShim::~CmManagerShim(void)
+	?protectionLevel@CmDestinationShim@@QBE?AW4CmmProtectionLevel@CMManagerShim@@XZ @ 23 NONAME ; enum CMManagerShim::CmmProtectionLevel CmDestinationShim::protectionLevel(void) const
+	?getStringAttribute@CmConnectionMethodShim@@QBE?AVQString@@W4ConnectionMethodAttribute@CMManagerShim@@@Z @ 24 NONAME ; class QString CmConnectionMethodShim::getStringAttribute(enum CMManagerShim::ConnectionMethodAttribute) const
+	?id@CmDestinationShim@@QBEIXZ @ 25 NONAME ; unsigned int CmDestinationShim::id(void) const
+	??0CmManagerShim@@QAE@XZ @ 26 NONAME ; CmManagerShim::CmManagerShim(void)
+	??1CmConnectionMethodShim@@QAE@XZ @ 27 NONAME ; CmConnectionMethodShim::~CmConnectionMethodShim(void)
+	?connectionMethodByID@CmDestinationShim@@QBEPAVCmConnectionMethodShim@@I@Z @ 28 NONAME ; class CmConnectionMethodShim * CmDestinationShim::connectionMethodByID(unsigned int) const
+	??0CmDestinationShim@@QAE@AAVRCmDestination@@@Z @ 29 NONAME ; CmDestinationShim::CmDestinationShim(class RCmDestination &)
+	?connectionMethod@CmDestinationShim@@QBEPAVCmConnectionMethodShim@@H@Z @ 30 NONAME ; class CmConnectionMethodShim * CmDestinationShim::connectionMethod(int) const
+	?addConnectionMethod@CmDestinationShim@@QAEHPAVCmConnectionMethodShim@@@Z @ 31 NONAME ; int CmDestinationShim::addConnectionMethod(class CmConnectionMethodShim *)
+	?deleteConnectionMethod@CmDestinationShim@@QAEXPAVCmConnectionMethodShim@@@Z @ 32 NONAME ; void CmDestinationShim::deleteConnectionMethod(class CmConnectionMethodShim *)
+	?deleteConnectionMethod@CmConnectionMethodShim@@QAE_NXZ @ 33 NONAME ; bool CmConnectionMethodShim::deleteConnectionMethod(void)
+	?priority@CmDestinationShim@@QBEIPAVCmConnectionMethodShim@@@Z @ 34 NONAME ; unsigned int CmDestinationShim::priority(class CmConnectionMethodShim *) const
+	?setName@CmDestinationShim@@QAEXVQString@@@Z @ 35 NONAME ; void CmDestinationShim::setName(class QString)
+	??1CmDestinationShim@@QAE@XZ @ 36 NONAME ; CmDestinationShim::~CmDestinationShim(void)
+	?removeConnectionMethod@CmDestinationShim@@QAEXPAVCmConnectionMethodShim@@@Z @ 37 NONAME ; void CmDestinationShim::removeConnectionMethod(class CmConnectionMethodShim *)
+	?createDestination@CmManagerShim@@QAEPAVCmDestinationShim@@VQString@@@Z @ 38 NONAME ; class CmDestinationShim * CmManagerShim::createDestination(class QString)
+	?refresh@CmConnectionMethodShim@@QAEXXZ @ 39 NONAME ; void CmConnectionMethodShim::refresh(void)
+	?refresh@CmDestinationShim@@QAEXXZ @ 40 NONAME ; void CmDestinationShim::refresh(void)
+

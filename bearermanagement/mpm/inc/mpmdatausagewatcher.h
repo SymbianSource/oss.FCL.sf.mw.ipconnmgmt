@@ -24,6 +24,9 @@
 class CRepository;
 class CMPMServer;
 
+// Stop after this many consecutive central repository errors.
+const TInt KMpmDataUsageWatcherCenRepErrorThreshold = 80;
+
 /**
  *  Class for accessing central repository.
  *  Follows KCurrentCellularDataUsage key in central repository.
@@ -55,11 +58,6 @@ public:
     void RunL();
 
     /**
-    * Active object's RunError.
-    */
-    TInt RunError( TInt aError );
-
-    /**
     * Active object's DoCancel.
     */
     void DoCancel();
@@ -75,6 +73,17 @@ private:
     * Symbian 2nd phase constructor.
     */
     void ConstructL();
+    
+    /**
+    * Request for notifications.
+    */
+    TInt RequestNotifications();
+    
+    /**
+    * Get current cellular data usage value.
+    */
+    TInt GetCurrentDataUsageValue();
+
 
 private: // data
 
@@ -94,6 +103,11 @@ private: // data
      * Not own.
      */
     CMPMServer* iServer;
+
+    /**
+     * Error counter.
+     */
+    TUint iErrorCounter;
 
     };
 

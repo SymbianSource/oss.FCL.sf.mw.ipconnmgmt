@@ -96,7 +96,7 @@ class CCdcCommsDatCreator: public CBase
 
         void SetUnderlyingIapL( RPointerArray< HBufC >& aUnderLying );
 
-        void SetDefaultConnectionL( RPointerArray< HBufC >& aDefCon );
+//        void SetDefaultConnectionL( RPointerArray< HBufC >& aDefCon );
         
         void SetWlanSecurityL( RPointerArray< HBufC >& aWlanSecurity );
         

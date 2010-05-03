@@ -1,0 +1,5 @@
+<RCC>
+    <qresource prefix="/docml" >
+        <file>cpdestinationplugindialogs.docml</file>
+    </qresource>
+</RCC>

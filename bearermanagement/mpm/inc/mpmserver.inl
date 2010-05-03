@@ -136,15 +136,6 @@ inline CMPMWlanQueryDialog* CMPMServer::FirstInWlanQueryQueue()
     }
 
 // -----------------------------------------------------------------------------
-// CMPMServer::ConnectDialogQueue
-// -----------------------------------------------------------------------------
-//
-inline CArrayPtrFlat<CMPMDialog>* CMPMServer::ConnectDialogQueue()
-    {
-    return iConnectDialogQueue;
-    }
-
-// -----------------------------------------------------------------------------
 // CMPMServer::IncrementConnections
 // -----------------------------------------------------------------------------
 //
@@ -262,9 +253,18 @@ inline CMPMCommsDatAccess* CMPMServer::CommsDatAccess()
 // CMPMServer::RoamingWatcher()
 // -----------------------------------------------------------------------------
 //
-CMPMRoamingWatcher* CMPMServer::RoamingWatcher() const
+inline CMPMRoamingWatcher* CMPMServer::RoamingWatcher() const
     {
     return iRoamingWatcher;
+    }
+
+// -----------------------------------------------------------------------------
+// CMPMServer::ConnUiUtils()
+// -----------------------------------------------------------------------------
+//
+inline CConnectionUiUtilities* CMPMServer::ConnUiUtils() const
+    {
+    return iConnUiUtils;
     }
 
 // End of File

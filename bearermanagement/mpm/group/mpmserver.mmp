@@ -34,7 +34,6 @@ CAPABILITY        CAP_SERVER NetworkControl
 epocstacksize 0x5000
 
 SOURCEPATH        ../src
-SOURCE            mpmdialog.cpp
 SOURCE            mpmconnmonevents.cpp
 SOURCE            mpmconnmonreqs.cpp
 SOURCE            mpmserversession.cpp
@@ -55,6 +54,7 @@ SOURCE            mpmiapselection.cpp
 SOURCE            mpmcsidwatcher.cpp
 SOURCE            mpmdialogbase.cpp
 SOURCE            mpmdatausagewatcher.cpp
+SOURCE            mpmofflinewatcher.cpp
 
 USERINCLUDE       ../inc
 
@@ -81,8 +81,6 @@ LIBRARY           etelpckt.lib
 LIBRARY           connectionuiutilities.lib
 LIBRARY           cmmanagerdatabase.lib
 LIBRARY           charconv.lib
-LIBRARY           wifiprotclient.lib
-LIBRARY           wifiprotplugin.lib
 LIBRARY           cmmanager.lib
 DEBUGLIBRARY      flogger.lib
 

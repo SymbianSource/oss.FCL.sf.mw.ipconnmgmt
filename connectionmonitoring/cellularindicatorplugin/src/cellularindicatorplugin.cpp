@@ -40,7 +40,7 @@ const static char IndicatorType[] =
     CellularIndicatorPlugin::CellularIndicatorPlugin
  */
 CellularIndicatorPlugin::CellularIndicatorPlugin() :
-    HbIndicatorInterface(IndicatorType, GroupPriorityAverage,
+    HbIndicatorInterface(IndicatorType, SettingCategory,
         InteractionActivated),
     mError(0)
 {
@@ -73,7 +73,7 @@ QStringList CellularIndicatorPlugin::indicatorTypes() const
     CellularIndicatorPlugin::accessAllowed
  */
 bool CellularIndicatorPlugin::accessAllowed(const QString &indicatorType,
-    const HbSecurityInfo *securityInfo) const
+    const QVariantMap &securityInfo) const
 {
     OstTraceFunctionEntry0( CELLULARINDICATORPLUGIN_ACCESSALLOWED_ENTRY );
     Q_UNUSED(indicatorType)
@@ -217,7 +217,6 @@ QVariant CellularIndicatorPlugin::indicatorData(int role) const
         }
         break;
 
-    case IconNameRole:
     case DecorationNameRole:
         // Return the icon
         ret = HbIcon("qtg_small_gprs");

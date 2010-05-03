@@ -1,0 +1,27 @@
+EXPORTS
+	?GetBoolAttributeL@CCmPluginBaseEng@@QAEHKPAVCCmClientPluginInstance@@@Z @ 1 NONAME ; int CCmPluginBaseEng::GetBoolAttributeL(unsigned long, class CCmClientPluginInstance *)
+	?CreateNewL@CCmPluginBaseEng@@QAEXK@Z @ 2 NONAME ; void CCmPluginBaseEng::CreateNewL(unsigned long)
+	?SetStringAttributeL@CCmPluginBaseEng@@QAEXKABVTDesC16@@PAVCCmClientPluginInstance@@@Z @ 3 NONAME ; void CCmPluginBaseEng::SetStringAttributeL(unsigned long, class TDesC16 const &, class CCmClientPluginInstance *)
+	?GetGenericTableIdsToBeObserved@CCmPluginBaseEng@@QBEXAAV?$RArray@K@@@Z @ 4 NONAME ; void CCmPluginBaseEng::GetGenericTableIdsToBeObserved(class RArray<unsigned long> &) const
+	?GetPluginDataL@CCmPluginBaseEng@@QAEXPAVCCmClientPluginInstance@@@Z @ 5 NONAME ; void CCmPluginBaseEng::GetPluginDataL(class CCmClientPluginInstance *)
+	?SetString8AttributeL@CCmPluginBaseEng@@QAEXKABVTDesC8@@PAVCCmClientPluginInstance@@@Z @ 6 NONAME ; void CCmPluginBaseEng::SetString8AttributeL(unsigned long, class TDesC8 const &, class CCmClientPluginInstance *)
+	?GetIntAttributeL@CCmPluginBaseEng@@QAEKKPAVCCmClientPluginInstance@@@Z @ 7 NONAME ; unsigned long CCmPluginBaseEng::GetIntAttributeL(unsigned long, class CCmClientPluginInstance *)
+	?CheckIfNameModifiedL@CCmPluginBaseEng@@IBEXPAVCCDRecordBase@CommsDat@@0@Z @ 8 NONAME ; void CCmPluginBaseEng::CheckIfNameModifiedL(class CommsDat::CCDRecordBase *, class CommsDat::CCDRecordBase *) const
+	??1CCmPluginBaseEng@@UAE@XZ @ 9 NONAME ; CCmPluginBaseEng::~CCmPluginBaseEng(void)
+	?CreateCopyL@CCmPluginBaseEng@@QAEPAV1@PAVCCmClientPluginInstance@@@Z @ 10 NONAME ; class CCmPluginBaseEng * CCmPluginBaseEng::CreateCopyL(class CCmClientPluginInstance *)
+	?SetIntAttributeL@CCmPluginBaseEng@@QAEXKKPAVCCmClientPluginInstance@@@Z @ 11 NONAME ; void CCmPluginBaseEng::SetIntAttributeL(unsigned long, unsigned long, class CCmClientPluginInstance *)
+	?ReLoadL@CCmPluginBaseEng@@QAEXXZ @ 12 NONAME ; void CCmPluginBaseEng::ReLoadL(void)
+	?NewL@CCmClientPluginInstance@@SAPAV1@XZ @ 13 NONAME ; class CCmClientPluginInstance * CCmClientPluginInstance::NewL(void)
+	?ConstructL@CCmPluginBaseEng@@MAEXXZ @ 14 NONAME ; void CCmPluginBaseEng::ConstructL(void)
+	??0CCmPluginBaseEng@@IAE@PAVTCmPluginInitParam@@@Z @ 15 NONAME ; CCmPluginBaseEng::CCmPluginBaseEng(class TCmPluginInitParam *)
+	?NewLC@CCmClientPluginInstance@@SAPAV1@XZ @ 16 NONAME ; class CCmClientPluginInstance * CCmClientPluginInstance::NewLC(void)
+	?SetBoolAttributeL@CCmPluginBaseEng@@QAEXKHPAVCCmClientPluginInstance@@@Z @ 17 NONAME ; void CCmPluginBaseEng::SetBoolAttributeL(unsigned long, int, class CCmClientPluginInstance *)
+	?LoadL@CCmPluginBaseEng@@QAEXK@Z @ 18 NONAME ; void CCmPluginBaseEng::LoadL(unsigned long)
+	?DeleteL@CCmPluginBaseEng@@UAEXXZ @ 19 NONAME ; void CCmPluginBaseEng::DeleteL(void)
+	?CheckDNSServerAddressL@CCmPluginBaseEng@@IAEXHAAV?$CMDBField@VTDesC16@@@CommsDat@@0AAV?$CMDBField@H@3@@Z @ 20 NONAME ; void CCmPluginBaseEng::CheckDNSServerAddressL(int, class CommsDat::CMDBField<class TDesC16> &, class CommsDat::CMDBField<class TDesC16> &, class CommsDat::CMDBField<int> &)
+	??0TCmPluginInitParam@@QAE@AAVCMDBSession@CommsDat@@@Z @ 21 NONAME ; TCmPluginInitParam::TCmPluginInitParam(class CommsDat::CMDBSession &)
+	?GetString8AttributeL@CCmPluginBaseEng@@QAEPAVHBufC8@@KPAVCCmClientPluginInstance@@@Z @ 22 NONAME ; class HBufC8 * CCmPluginBaseEng::GetString8AttributeL(unsigned long, class CCmClientPluginInstance *)
+	?UpdateL@CCmPluginBaseEng@@UAEXPAVCCmClientPluginInstance@@@Z @ 23 NONAME ; void CCmPluginBaseEng::UpdateL(class CCmClientPluginInstance *)
+	?GetStringAttributeL@CCmPluginBaseEng@@QAEPAVHBufC16@@KPAVCCmClientPluginInstance@@@Z @ 24 NONAME ; class HBufC16 * CCmPluginBaseEng::GetStringAttributeL(unsigned long, class CCmClientPluginInstance *)
+	??1CCmClientPluginInstance@@UAE@XZ @ 25 NONAME ; CCmClientPluginInstance::~CCmClientPluginInstance(void)
+

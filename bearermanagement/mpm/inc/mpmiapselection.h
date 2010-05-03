@@ -23,17 +23,9 @@
 #include "mpmserversession.h"
 #include "mpmcommsdataccess.h"
 
-class CMPMDialog;
 class CMPMWlanQueryDialog;
 class CMPMConfirmDlgStarting;
 class TMpmConnPref;
-
-enum TOfflineNoteResponse
-    {
-    EOfflineResponseUndefined,
-    EOfflineResponseYes,
-    EOfflineResponseNo
-    };
 
 /**
  * Handles IAP selection. MPM Server session
@@ -73,7 +65,8 @@ public: // CMPMServerSession interface
      * Two-phased constructor.
      */
     static CMPMIapSelection* NewL( CMPMCommsDatAccess*  aCommsDatAccess,
-                                   CMPMServerSession*   aSession );
+                                   CMPMServerSession*   aSession,
+                                   CConnectionUiUtilities* aConnUiUtils );
     
     /**
      * Destructor.
@@ -95,14 +88,6 @@ public: // CMPMServerSession interface
      * @since S60 v3.2
      */
     void ExplicitConnectionL();
-
-    /**
-     * Updates connection dialog contents if 
-     * the dilog is shown
-     *
-     * @since S60 v3.2
-     */
-    void UpdateConnectionDialogL();
 
 public:
     /**
@@ -218,27 +203,6 @@ public:
     void HandleUserSelectionL( TBool aIsIap, TUint32 aId, TInt aError  );
 
     /**
-     * Returns the stored user response to the offline note
-     * @since 3.2
-     */
-    TOfflineNoteResponse OfflineNoteResponse();
-
-    /**
-     * Stores the user response to the offline note
-     * @since 3.2
-     * @param aResponse Offline note response
-     */
-    void SetOfflineNoteResponse( TOfflineNoteResponse aResponse );
-
-    /**
-     * Iap selection is notified that conenction is started. 
-     * Offline note response is reseted.
-     *
-     * @since 3.2
-     */
-    void ConnectionStarted();
-
-    /**
      * Get original MPM connection preferences
      * @since 5.2
      */
@@ -303,7 +267,8 @@ private:
      * C++ default constructor.
      */
     CMPMIapSelection( CMPMCommsDatAccess*   aCommsDatAccess,
-                      CMPMServerSession*    aSession );
+                      CMPMServerSession*    aSession,
+                      CConnectionUiUtilities* aConnUiUtils );
 
     /**
      * ConstructL
@@ -324,6 +289,9 @@ private:
     // Used for commsdat related functionalities
     CMPMCommsDatAccess* iCommsDatAccess;
 
+    // Handle to connection UI utilities
+    CConnectionUiUtilities* iConnUiUtils;
+
     // Contains state info whether PrefIapnotifs can be sent 
     // and saved IAP info structure.
     TStoredIapInfo iStoredIapInfo;
@@ -336,9 +304,6 @@ private:
 
     // Pointer to Confirmation dialog.
     CMPMConfirmDlgStarting* iConfirmDlgStarting;
-
-    // Pointer to the dialog active object.
-    CMPMDialog* iDialog;
 
     // Pointer to Wlan query dialog.
     CMPMWlanQueryDialog* iWlanDialog;
@@ -355,11 +320,6 @@ private:
 
     // State of impilict connection start
     TImplicitConnectionState iImplicitState;
-
-    // Offline note response for the connection. 
-    // Offline note must be displayed only once 
-    // during the connection (not for each wlan iap of a snap).
-    TOfflineNoteResponse iOfflineNoteResponse;
 
     // True if connection is roaming (set when displaying offline note)
     TBool iIsRoaming;

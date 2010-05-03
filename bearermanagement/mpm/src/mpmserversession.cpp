@@ -25,7 +25,6 @@ Mobility Policy Manager server session implementation.
 #include <gsmerror.h>     // KErrPacketDataTsyMaxPdpContextsReached 
 #include <etelpckt.h>     // KErrUmtsMaxNumOfContextExceededByNetwork
 #include <bldvariant.hrh>                // For feature flags
-#include <featmgr.h>                     // FeatureManager
 #include <centralrepository.h>           // CRepository 
 #include <CoreApplicationUIsSDKCRKeys.h> // KCRUidCoreApplicationUIs, 
                                          // KCoreAppUIsNetworkConnectionAllowed
@@ -39,7 +38,6 @@ Mobility Policy Manager server session implementation.
 #include "mpmcommsdataccess.h"
 #include "mpmserversession.h"
 #include "mpmconnmonevents.h"
-#include "mpmdialog.h"
 #include "mpmdisconnectdlg.h"
 #include "mpmconfirmdlgstarting.h"
 #include "mpmconfirmdlgroaming.h"
@@ -76,7 +74,8 @@ CMPMServerSession::CMPMServerSession(CMPMServer& aServer)
       iConfirmDlgRoaming( NULL ),
       iStoredIapInfo(),
       iIapSelection( NULL ),
-      iMigrateState( EMigrateNone )
+      iMigrateState( EMigrateNone ),
+      iDisconnectDialogShown( EFalse )
     {
     }
 
@@ -94,12 +93,6 @@ void CMPMServerSession::ConstructL()
             *const_cast<CMPMServer*>( &iMyServer ), *this ));
         }
 
-    FeatureManager::InitializeLibL();
-    iOfflineFeatureSupported = FeatureManager::FeatureSupported( 
-                                   KFeatureIdOfflineMode );
- 
-     FeatureManager::UnInitializeLib();
-                                       
     // Append session pointer to server
     // 
     iMyServer.AppendSessionL( this );
@@ -125,15 +118,6 @@ CMPMServerSession::~CMPMServerSession()
         iMyServer.ClearUserConnection();
         ClearUserConnection();
         
-        // Set PS keys to zero
-        RProperty::Set( KMPMUserConnectionCategory,
-                        KMPMPSKeyUserConnectionSnap,
-                        0 );
-        
-        RProperty::Set( KMPMUserConnectionCategory,
-                        KMPMPSKeyUserConnectionIap,
-                        0 );
-        
         MPMLOGSTRING( "CMPMServerSession::HandleServerApplicationConnectionEnds -\
 User connection deactivated" )
         }   
@@ -143,6 +127,9 @@ User connection deactivated" )
 
     // Make sure the connection is removed from server's information array.
     iMyServer.RemoveBMConnection( iConnId, *this );
+    
+    // Cancel discreet popup
+    iMyServer.ConnUiUtils()->CancelConnectingViaDiscreetPopup();
     }
 
 
@@ -424,16 +411,7 @@ ChooseBestIAP() already completed or in progress %d", KErrAlreadyExists )
         if ( ! ( mpmConnPref.NoteBehaviour() &
             TExtendedConnPref::ENoteBehaviourConnDisableNotes ) )
             {
-            CConnectionUiUtilities* connUiUtils = NULL;
-        
-            TRAP_IGNORE( connUiUtils = CConnectionUiUtilities::NewL() );
-            
-            if ( connUiUtils )
-                {
-                connUiUtils->ConnectionErrorDiscreetPopup( error );
-                delete connUiUtils;
-                connUiUtils = NULL;
-                }
+            iMyServer.ConnUiUtils()->ConnectionErrorDiscreetPopup( error );
             }    	
         	
         MPMLOGSTRING( "CMPMServerSession::HandleServerChooseIapL - Error \
@@ -448,18 +426,22 @@ while extracting TCommDbConnPref from TConnPref" )
     // 
     iAppUid = aMessage.Int2();
 
-    MPMLOGSTRING2( "CMPMServerSession::HandleServerChooseIapL: \
-Client UID = 0x%x", iAppUid )
-
     if ( !iIapSelection )
         {
         iIapSelection = CMPMIapSelection::NewL( iMyServer.CommsDatAccess(),
-                                                this ); 
+                                                this,
+                                                iMyServer.ConnUiUtils() ); 
         }
     
     MPMLOGSTRING3( "CMPMServerSession::HandleServerChooseIapL - iap %d \
 connType %d", mpmConnPref.IapId(), mpmConnPref.ConnType() )
 
+    if (!( mpmConnPref.NoteBehaviour() &
+            TExtendedConnPref::ENoteBehaviourConnDisableNotes ) )
+        {
+        iMyServer.ConnUiUtils()->ConnectingViaDiscreetPopup();
+        }
+    
     iIapSelection->ChooseIapL( mpmConnPref );
 
     if ( iAppUid == iMyServer.CsIdWatcher()->ConnectScreenId() )
@@ -471,16 +453,6 @@ connType %d", mpmConnPref.IapId(), mpmConnPref.ConnType() )
         iMyServer.SetUserConnection();
         SetUserConnection();
         iMyServer.SetUserConnPref( mpmConnPref );
-        
-        // Set PS keys according to user connection
-        // Do not check return values. Can do nothing in case of failing.
-        RProperty::Set( KMPMUserConnectionCategory,
-                        KMPMPSKeyUserConnectionSnap,
-                        mpmConnPref.SnapId() );
-        
-        RProperty::Set( KMPMUserConnectionCategory,
-                        KMPMPSKeyUserConnectionIap,
-                        mpmConnPref.IapId() );
         }
     }
 
@@ -713,7 +685,7 @@ void CMPMServerSession::HandleServerIapConnectionStartedL(
     // 
     aMessage.Complete( KErrNone );
     
-    IapSelectionL()->ConnectionStarted();
+    iMyServer.ConnUiUtils()->CancelConnectingViaDiscreetPopup();
     }
 
 
@@ -759,15 +731,6 @@ void CMPMServerSession::HandleServerApplicationConnectionEnds(
         {
         iMyServer.ClearUserConnection();
         ClearUserConnection();
-        
-        // Set PS keys to zero
-        RProperty::Set( KMPMUserConnectionCategory,
-                        KMPMPSKeyUserConnectionSnap,
-                        0 );
-        
-        RProperty::Set( KMPMUserConnectionCategory,
-                        KMPMPSKeyUserConnectionIap,
-                        0 );
         
         MPMLOGSTRING( "CMPMServerSession::HandleServerApplicationConnectionEnds -\
 User connection deactivated" )
@@ -823,7 +786,7 @@ TBool CMPMServerSession::IsConfirmFirstL( const TUint32 aIapId )
     // check whether a started connection exists which already 
     // uses this IAP. If so, it won't need to be confirmed again
     // 
-    if( iMyServer.CheckIfStarted( aIapId ) )
+    if( iMyServer.CheckIfStarted( aIapId, iConnId ) )
         {
         MPMLOGSTRING(
         "CMPMServerSession::IsConfirmFirstL - IAP already started, \
@@ -853,6 +816,21 @@ should not be confirmed - False" )
         {
         MPMLOGSTRING( "CMPMServerSession::IsConfirmFirstL - True" )
         isConfirmFirst = ETrue;
+        
+        // iDisconnectDialogShown is set when disconnect dialog is shown.
+        // Before the disconnect dialog is shown, data usage confirmation
+        // dialog is already shown for the new PDP context. If you choose
+        // to disconnect the active PDP context then data usage dialog is
+        // shown again for the new context. So, set isConfirmFirst to
+        // False to avoid duplicate cellular confirm dialog
+        //
+        if ( iDisconnectDialogShown )
+            {
+            MPMLOGSTRING( "CMPMServerSession::IsConfirmFirstL  - False; Data \
+confirmation dialog already shown for this IAP" )
+            isConfirmFirst = EFalse;
+            iDisconnectDialogShown = EFalse;
+            }
         }
     else 
         {
@@ -1420,20 +1398,16 @@ Warning: ChooseBestIap has not been called yet" )
         }
 
     // Show error popup if it's allowed per client request
+    // Don't show the pop up if error code is for disconnect dialog
+    //
     if ( !( iIapSelection->MpmConnPref().NoteBehaviour() &
-            TExtendedConnPref::ENoteBehaviourConnDisableNotes ) )
+            TExtendedConnPref::ENoteBehaviourConnDisableNotes ) &&
+         !DisconnectDlgErrorCode( error ) )
         {
-        CConnectionUiUtilities* connUiUtils = NULL;
-        TRAPD( popupCreateError, connUiUtils = CConnectionUiUtilities::NewL() );
-        if ( popupCreateError == KErrNone && connUiUtils )
-            {
-            // Note: Below function shows the discreet popup only if the error code
-            // belongs to the set of errors that are shown to the user.
-            // Otherwise the popup is not shown.
-            connUiUtils->ConnectionErrorDiscreetPopup( error );
-            delete connUiUtils;
-            connUiUtils = NULL;
-            }
+        // Note: Below function shows the discreet popup only if the error code
+        // belongs to the set of errors that are shown to the user.
+        // Otherwise the popup is not shown.
+        iMyServer.ConnUiUtils()->ConnectionErrorDiscreetPopup( error );
         }
 
     // Read the Connection Id of the application
@@ -1500,6 +1474,7 @@ Warning: ChooseBestIap has not been called yet" )
             iDisconnectDlg = CMPMDisconnectDlg::NewL( *const_cast<CMPMServerSession*>(this),
                                                       error,
                                                       *MyServer().DisconnectQueue() );
+            iDisconnectDialogShown = ETrue;
             return;
             }
         else
@@ -1654,7 +1629,7 @@ Tell BM to end the client connection with appropriate error code" )
                                                         ETemporary );
                     }
 
-                // current iap is either WLAN or EasyWlan
+                // current iap is WLAN
                 // 
                 if( ( iMyServer.CommsDatAccess()->CheckWlanL( currentIap ) != ENotWlanIap ) && 
                       iMyServer.CommsDatAccess()->SnapContainsWlanL( snapId, iapPath, KMPMNrWlansTwo ) )
@@ -1861,13 +1836,13 @@ void CMPMServerSession::HandleServerSortSNAPL( const RMessage2& aMessage )
         // Store message for later usage.
     iServerSortSNAPMessage = aMessage;
 
-    TUint32 aSeconds = static_cast<TUint32>( iServerSortSNAPMessage.Int2() );
+    TUint32 seconds = static_cast<TUint32>( iServerSortSNAPMessage.Int2() );
     
     // To display up to date information the WLAN scan should be done first
     iMyServer.Events()->ScanWLANNetworksL( this, 
                                            ConnectionId(), 
                                            EWlanScanCallbackSortSnap, 
-                                           aSeconds );
+                                           seconds );
     }
     
 // -----------------------------------------------------------------------------
@@ -2229,18 +2204,6 @@ Remove unavailable IAP = %i", embeddedIaps[m].iIapId )
     }
 
 // -----------------------------------------------------------------------------
-// CMPMServerSession::UpdateConnectionDialog
-// -----------------------------------------------------------------------------
-//
-void CMPMServerSession::UpdateConnectionDialogL()
-    {
-    if( iIapSelection )
-        {
-        iIapSelection->UpdateConnectionDialogL();
-        }
-    }
-
-// -----------------------------------------------------------------------------
 // CMPMServerSession::CompleteCarrierRejected
 // -----------------------------------------------------------------------------
 //
@@ -2330,6 +2293,39 @@ Unrecognised connection preference type" )
         }
 
     ResolveConnType( aMpmConnPref );
+
+    MPMLOGSTRING2( "CMPMServerSession::ExtractConnPref - \
+BearerSet = %d", aMpmConnPref.BearerSet());
+    
+    MPMLOGSTRING2( "CMPMServerSession::ExtractConnPref - \
+ConnSelectionDialog = %d", aMpmConnPref.ConnSelectionDialog());
+    
+    MPMLOGSTRING2( "CMPMServerSession::ExtractConnPref - \
+ConnType = %d", aMpmConnPref.ConnType());
+    
+    MPMLOGSTRING2( "CMPMServerSession::ExtractConnPref - \
+DisconnectDialog = %d", aMpmConnPref.DisconnectDialog());
+    
+    MPMLOGSTRING2( "CMPMServerSession::ExtractConnPref - \
+ForcedRoaming = %d", aMpmConnPref.ForcedRoaming() );
+    
+    MPMLOGSTRING2( "CMPMServerSession::ExtractConnPref - \
+IapId = %d", aMpmConnPref.IapId());
+    
+    MPMLOGSTRING2( "CMPMServerSession::ExtractConnPref - \
+MandateIap = %d", aMpmConnPref.MandateIap());
+    
+    MPMLOGSTRING2( "CMPMServerSession::ExtractConnPref - \
+NetId = %d", aMpmConnPref.NetId());
+    
+    MPMLOGSTRING2( "CMPMServerSession::ExtractConnPref - \
+NoteBehaviour = %d", aMpmConnPref.NoteBehaviour());
+    
+    MPMLOGSTRING2( "CMPMServerSession::ExtractConnPref - \
+SnapId = %d", aMpmConnPref.SnapId());
+    
+    MPMLOGSTRING2( "CMPMServerSession::ExtractConnPref - \
+SnapPurpose = %d", aMpmConnPref.SnapPurpose());
 
     MPMLOGSTRING2( "CMPMServerSession::ExtractConnPref - \
 Error code in the end: %d", error )
@@ -2666,16 +2662,9 @@ Mobility ongoing, notification will be handled later" )
             }
         }
 
-    TInt err(0);
     TInt currentIap = MyServer().GetBMIap( iConnId );
-    MPMLOGSTRING4( "CMPMServerSession::PrefIAPNotificationL - \
-current iap %d, last notified %d, err %d ", currentIap, iLastNotifiedIap, err )
-    if( err != KErrNone )
-        {
-        MPMLOGSTRING( "CMPMServerSession::PrefIAPNotificationL: Connection is not \
-registered for notifications" )
-        return;
-        }
+    MPMLOGSTRING3( "CMPMServerSession::PrefIAPNotificationL - \
+current iap %d, last notified %d ", currentIap, iLastNotifiedIap )
         
     TBool iapTypeLanOrWlan( EFalse );
     RAvailableIAPList  availableIAPList;
@@ -2732,9 +2721,9 @@ registered for notifications" )
                                        iapTypeLanOrWlan,
                                        *this );
         
-        if ( CheckNotifNeed( currentIap,
-                             iLastNotifiedIap,
-                             validateIapId ) )
+        if ( CheckNotifNeedL( currentIap,
+                              iLastNotifiedIap,
+                              validateIapId ) )
             {
             MPMLOGSTRING2( "CMPMServerSession::PrefIAPNotificationL: \
 Sending pref iap notification connId: 0x%x", iConnId )
@@ -2798,7 +2787,7 @@ Send preferred IAP notification" )
         // 
     else 
         {
-        err = availableIAPList.Find( oldIapId );
+        TInt err = availableIAPList.Find( oldIapId );
         if( err == KErrNotFound )
             {
             MPMLOGSTRING2( "CMPMServerSession::PrefIAPNotificationL: \
@@ -2836,18 +2825,10 @@ No notification requested" )
     if ( !( iIapSelection->MpmConnPref().NoteBehaviour() &
             TExtendedConnPref::ENoteBehaviourConnDisableNotes) )
         {
-        TBool connectionAlreadyActive = iMyServer.CheckIfStarted( aIapId );
-        CConnectionUiUtilities* connUiUtils = NULL;
-        TRAPD( popupError,
-               connUiUtils = CConnectionUiUtilities::NewL();
-               connUiUtils->ConnectingViaDiscreetPopup(
-                   aIapId,
-                   connectionAlreadyActive );
-               delete connUiUtils; );
-        if ( popupError && connUiUtils )
-            {
-            delete connUiUtils;
-            }
+        TBool connectionAlreadyActive = iMyServer.CheckIfStarted( aIapId, iConnId );
+        
+        iMyServer.ConnUiUtils()->ConnectingViaDiscreetPopup( aIapId,
+                                                  connectionAlreadyActive );
         }
 
     TMpmNotificationStartIAP notifInfo;
@@ -2974,35 +2955,6 @@ No notification requested" )
     }
 
 // -----------------------------------------------------------------------------
-// CMPMServerSession::IsPhoneOfflineL
-// 
-// Checks if phone is in offline mode or not.
-// Return ETrue if phone is in offline mode.
-// Return EFalse if phone is not in offline mode.
-// -----------------------------------------------------------------------------
-//
-TBool CMPMServerSession::IsPhoneOfflineL() const
-    {
-    MPMLOGSTRING( "CMPMServerSession::IsPhoneOfflineL" )
-    if ( iOfflineFeatureSupported )
-        {
-        CRepository* repository = CRepository::NewLC(KCRUidCoreApplicationUIs);
-        TInt connAllowed = ECoreAppUIsNetworkConnectionAllowed;
-        repository->Get( KCoreAppUIsNetworkConnectionAllowed, connAllowed );
-        CleanupStack::PopAndDestroy( repository ); 
-        if ( !connAllowed )
-            {
-            MPMLOGSTRING(
-                "CMPMServerSession::IsPhoneOfflineL Phone is in offline mode" )
-            return ETrue;
-            }
-        }
-    MPMLOGSTRING(
-        "CMPMServerSession::IsPhoneOfflineL Phone is not in offline mode" )
-    return EFalse;
-    }
-
-// -----------------------------------------------------------------------------
 // CMPMServerSession::AvailableUnblacklistedIapsL
 // -----------------------------------------------------------------------------
 //
@@ -3078,23 +3030,20 @@ void CMPMServerSession::AvailableUnblacklistedIapsL(
                 //
                 TBool usesSame( EFalse ); 
 
-                if ( !iMyServer.CommsDatAccess()->CheckEasyWLanL( unavailableIAPs[i] ) )
-                    {
-                    TRAP_IGNORE( iMyServer.CommsDatAccess()->MatchSSIDL( ssid, 
-                                                              unavailableIAPs[i], 
-                                                              usesSame,
-                                                              *this ) )
+                TRAP_IGNORE( iMyServer.CommsDatAccess()->MatchSSIDL( ssid, 
+                                                                     unavailableIAPs[i], 
+                                                                     usesSame,
+                                                                     *this ) )
                                                               
-                    if ( usesSame )
-                        {
-                        // Append unavailable IAP to list of available IAPs
-                        // if it uses same SSID as active WLAN connection.
-                        // 
-                        MPMLOGSTRING2(
-                            "CMPMServerSession::AvailableUnblacklistedIapsL:\
+                if ( usesSame )
+                    {
+                    // Append unavailable IAP to list of available IAPs
+                    // if it uses same SSID as active WLAN connection.
+                    // 
+                    MPMLOGSTRING2(
+                        "CMPMServerSession::AvailableUnblacklistedIapsL:\
  Append unavailable IapId = %i", unavailableIAPs[i] )
-                        aAvailableIAPs.AppendL( unavailableIAPs[i] );
-                        }
+                    aAvailableIAPs.AppendL( unavailableIAPs[i] );
                     }
                 }
             }
@@ -3158,12 +3107,12 @@ TBool CMPMServerSession::IsUpgrade(
     }
 
 // -----------------------------------------------------------------------------
-// CMPMServerSession::CheckNotifNeed
+// CMPMServerSession::CheckNotifNeedL
 // -----------------------------------------------------------------------------
 //
-TBool CMPMServerSession::CheckNotifNeed( const TUint32       aCurrentIap,
-                                         const TUint32       aLastNotifiedIap,
-                                         const TUint32       aValidatedIap )
+TBool CMPMServerSession::CheckNotifNeedL( const TUint32       aCurrentIap,
+                                          const TUint32       aLastNotifiedIap,
+                                          const TUint32       aValidatedIap )
     {
     TBool retValue( EFalse );
 
@@ -3182,8 +3131,19 @@ TBool CMPMServerSession::CheckNotifNeed( const TUint32       aCurrentIap,
             }
         else
             {
-            MPMLOGSTRING( "CMPMServerSession::CheckNotifNeed: notif needed" )
-            retValue = ETrue;
+            TCmUsageOfWlan usageOfWlan = MyServer().CommsDatAccess()->ForcedRoamingL();
+            
+            if ( usageOfWlan == ECmUsageOfWlanManual &&
+                 MyServer().CommsDatAccess()->CheckWlanL( aValidatedIap ) != ENotWlanIap  )
+                {
+                MPMLOGSTRING( "CMPMServerSession::CheckNotifNeed: WLAN IAP, Switch to WLAN is Manual, no need to send notification" )
+                retValue = EFalse;
+                }
+            else
+                {
+                MPMLOGSTRING( "CMPMServerSession::CheckNotifNeed: notif needed" )
+                retValue = ETrue;             
+                }
             }
        }
     else
@@ -3301,23 +3261,6 @@ void CMPMServerSession::ChooseIapComplete(
     {
     MPMLOGSTRING2( "CMPMServerSession::ChooseIapComplete aError = %d", aError )
 
-    // Show error popup if it's allowed per client request
-    if ( ChooseBestIapCalled() && (!( iIapSelection->MpmConnPref().NoteBehaviour() &
-            TExtendedConnPref::ENoteBehaviourConnDisableNotes ))
-            && ( aError != KErrNone ) )
-        {
-        CConnectionUiUtilities* connUiUtils = NULL;
-        TRAPD( error, connUiUtils = CConnectionUiUtilities::NewL() );
-        if ( error == KErrNone && connUiUtils )
-            {
-            // Note: Below function shows the discreet popup only if the error code
-            // belongs to the set of errors that are shown to the user.
-            // Otherwise the popup is not shown.
-            connUiUtils->ConnectionErrorDiscreetPopup( aError );
-            delete connUiUtils;
-            connUiUtils = NULL;
-            }
-        }
     
     // Try to write back arguments and complete message.
     // 
@@ -3372,6 +3315,29 @@ Inconsistent state %d", KErrGeneral )
             }
         MPMLOGSTRING( "CMPMServerSession::ChooseIapComplete Message completed" )
         iChooseIapMessage.Complete( aError );
+        }
+
+    // Show error popup if it's allowed per client request
+    if ( ChooseBestIapCalled() && (!( iIapSelection->MpmConnPref().NoteBehaviour() &
+            TExtendedConnPref::ENoteBehaviourConnDisableNotes ))
+            && ( aError != KErrNone ) )
+        {
+        // Note: Below function shows the discreet popup only if the error code
+        // belongs to the set of errors that are shown to the user.
+        // Otherwise the popup is not shown.
+        iMyServer.ConnUiUtils()->ConnectionErrorDiscreetPopup( aError );
+        }
+    else
+        {
+        if (!( iIapSelection->MpmConnPref().NoteBehaviour() &
+            TExtendedConnPref::ENoteBehaviourConnDisableNotes ) )
+            {
+            TBool connectionAlreadyActive =
+                MyServer().CheckIfStarted( aPolicyPref->IapId(), iConnId );
+
+            iMyServer.ConnUiUtils()->ConnectingViaDiscreetPopup( aPolicyPref->IapId(),
+                                                      connectionAlreadyActive );
+            }            
         }
     }
 
@@ -3578,7 +3544,7 @@ TBool CMPMServerSession::IsWlanOnlyL( TBool& aNewWlansAllowed )
 TBool CMPMServerSession::ForcedRoaming()
     {
     TBool forcedRoaming( EFalse );
-    if ( iIapSelection != NULL )
+    if ( iIapSelection )
         {
         forcedRoaming = iIapSelection->MpmConnPref().ForcedRoaming();
         }
@@ -3658,7 +3624,8 @@ void CMPMServerSession::RemoveIapsAccordingToBearerSetL( TConnMonIapInfo& aIapIn
         // be filtered.
         index = 0;
         RAvailableIAPList availableIaps; 
-            
+        CleanupClosePushL( availableIaps );
+		
         for ( TUint i = 0; i < aIapInfo.iCount; i++ )
             {
             availableIaps.AppendL( aIapInfo.iIap[i].iIapId );
@@ -3703,7 +3670,8 @@ Filtered away VPN IAP: %d", aIapInfo.iIap[index].iIapId );
                 aIapInfo.iCount--;                               
                 }
             index++;
-            }        
+            }
+        CleanupStack::PopAndDestroy( &availableIaps );
         }
     }
 

@@ -18,7 +18,10 @@
 #ifndef C_CMAPPLICATIONSETTINGSUI_H
 #define C_CMAPPLICATIONSETTINGSUI_H
 
-#include <E32def.h>
+// Deprecation warning
+#warning This header file is deprecated and will be fully removed in Symbian^4. See Polonium CRs #533 and #532 for details.
+
+#include <e32def.h>
 #include <e32base.h>
 
 class CCmConnSettingsUiImpl;

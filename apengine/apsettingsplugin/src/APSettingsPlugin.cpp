@@ -248,16 +248,17 @@ TAny CApSettingsPlugin::ConstructL()
 // ---------------------------------------------------------
 void CApSettingsPlugin::DoSettingsL()
     {
-    CCmSettingsUi* settings = CCmSettingsUi::NewL();
-    CleanupStack::PushL( settings );
+    // RunSettingsL API removed from new cmmgr implementation
+    //CCmSettingsUi* settings = CCmSettingsUi::NewL();
+    //CleanupStack::PushL( settings );
     
-    if( settings->RunSettingsL() == CCmSettingsUi::EExit )
-        {
+    //if( settings->RunSettingsL() == CCmSettingsUi::EExit )
+    //    {
         //exit from General Settings
-        ProcessCommandL( EAknCmdExit );
-        }
+    //    ProcessCommandL( EAknCmdExit );
+    //    }
     
-    CleanupStack::PopAndDestroy( settings );
+    //CleanupStack::PopAndDestroy( settings );
     }
     
 

@@ -187,17 +187,18 @@ void CProcessorDN::ProcessTagL( TBool /*aFieldIDPresent*/ )
                         }
                     }
                 break;
-                case EDN_Icon:
-                    {
-                    TPtrC16 iconPtr = ptrTag->Right( ptrTag->Length() );
-                    TLex16 lex( iconPtr );
-                    TUint32 icon( 0 );
-                    if ( lex.Val( icon, EDecimal ) == KErrNone )
-                        {
-                        iDestination.SetIconL( icon );
-                        }
-                    }
-                break;
+                // SetIconL API removed from new cmmgr implementation
+                //case EDN_Icon:
+                //    {
+                //    TPtrC16 iconPtr = ptrTag->Right( ptrTag->Length() );
+                //    TLex16 lex( iconPtr );
+                //    TUint32 icon( 0 );
+                //    if ( lex.Val( icon, EDecimal ) == KErrNone )
+                //        {
+                //        iDestination.SetIconL( icon );
+                //        }
+                //    }
+                //break;
                 case EDN_Metadata:
                     {
                     if( !ptrTag->Compare( KPurposeUnknown ) )

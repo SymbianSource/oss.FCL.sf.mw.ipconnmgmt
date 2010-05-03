@@ -1,0 +1,69 @@
+/*
+* Copyright (c) 2006-2010 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:
+* Makefile of Connection Method Manager's framework.
+*
+*/
+
+
+#include <data_caging_paths.hrh>
+#include <platform_paths.hrh>
+
+TARGET          cmmanager.dll
+TARGETTYPE      dll
+UID             0x1000008d 0x10207376
+CAPABILITY      CAP_GENERAL_DLL
+VENDORID VID_DEFAULT
+
+SOURCEPATH      ../../cmmcommon/Src
+SOURCE          cmmclistatic.cpp
+
+SOURCEPATH      ../Src
+SOURCE          cmmanager.cpp
+SOURCE          cmmanagerapi.cpp
+SOURCE          cmdestination.cpp
+SOURCE          cmdestinationwrapper.cpp
+SOURCE          cmdestinationapi.cpp
+SOURCE          cmconnectionmethod.cpp
+SOURCE          cmconnectionmethodwrapper.cpp
+SOURCE          cmconnectionmethodapi.cpp
+SOURCE          cmmanagerext.cpp
+SOURCE          cmdestinationext.cpp
+SOURCE          cmconnectionmethodext.cpp
+SOURCE          cmapplicationsettingsui.cpp
+
+// Component specific internal headers
+USERINCLUDE         ../inc
+USERINCLUDE         ../../cmmcommon/inc
+USERINCLUDE         ../traces
+
+// ADO specific internal headers
+SYSTEMINCLUDE       ../../../../inc
+
+//Macro to /epoc32 headers
+MW_LAYER_SYSTEMINCLUDE
+
+LIBRARY         euser.lib
+
+DEBUGLIBRARY    flogger.lib
+
+#if defined(ARMCC)
+DEFFILE ../EABI/CmManager_prot_setup.def
+#elif defined( WINSCW )
+DEFFILE ../BWinsCw/CmManager_prot_setup.def
+#elif defined( WINS )
+DEFFILE ../BWins/CmManager_prot_setup.def
+#else
+DEFFILE ../BMarm/CmManager_prot_setup.def
+#endif
