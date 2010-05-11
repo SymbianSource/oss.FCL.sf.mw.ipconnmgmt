@@ -112,6 +112,7 @@ CCmDlg::CCmDlg( CCmManagerImpl* aCmManager, TUint32 aDestUid,
     , iExitduringProcessing( EFalse )
     , iBackduringProcessing( EFalse )
     , iDestDlg( aDestDlg )
+    , iPluginExitExceptionally( EFalse )
     {
     }
     
@@ -136,7 +137,7 @@ CCmDlg::~CCmDlg()
         // set old text back, if we have it...
         if ( iOldTitleText )
             {
-            if ( iExitReason == KDialogUserBack )
+            if ( iExitReason == KDialogUserBack || iPluginExitExceptionally  )
                 {
                 TRAP_IGNORE( iTitlePane->SetTextL( *iOldTitleText ) );
                 }
@@ -482,6 +483,11 @@ TBool CCmDlg::OkToExitL( TInt aButtonId )
                     {
                     retVal = ETrue;
                     } 
+                
+                if ( iPluginExitExceptionally )
+                    {
+                    retVal = ETrue;
+                    }
                 }
             break;
             }
@@ -1141,11 +1147,6 @@ void CCmDlg::CopyConnectionMethodL()
         CleanupStack::PopAndDestroy( dest );
         HandleListboxDataChangeL();                             
         }
-    else
-        {
-        CleanupStack::PopAndDestroy( &destArray );
-        User::Leave( KErrCancel );
-        }
 
     CleanupStack::PopAndDestroy( &destArray );
     }
@@ -1226,6 +1227,7 @@ void CCmDlg::MoveConnectionMethodL()
         iCmDestinationImpl->UpdateL();                            
 
         HandleListboxDataChangeL();
+        iListbox->HandleItemRemovalL();
         }
 
     CleanupStack::PopAndDestroy( &destArray );
@@ -1275,7 +1277,15 @@ void CCmDlg::EditConnectionMethodL()
             TInt ret = cm->RunSettingsL();
             if ( ret == KDialogUserExit )
                 {
-                TryExitL( KDialogUserExit );
+                if( IsExceptionExitL() )
+                    {
+                    iPluginExitExceptionally = ETrue;
+                    TryExitL( KDialogUserBack );
+                    }
+                else
+                    {
+                    TryExitL( KDialogUserExit );
+                    }
                 }
             else
                 {
@@ -1675,7 +1685,6 @@ void CCmDlg::HandleListboxDataChangeL()
         if ( selected >= 0 )
             {
             iListbox->ScrollToMakeItemVisible( selected);
-            iListbox->SetCurrentItemIndexAndDraw( selected );            
             }
         }
     }
@@ -2002,4 +2011,25 @@ void CCmDlg::CommsDatChangesL()
     
     // Update list box
     HandleListboxDataChangeL();
+    }
+
+// --------------------------------------------------------------------------
+// CCmDlg::IsExceptionExitL
+// --------------------------------------------------------------------------
+//
+TBool CCmDlg::IsExceptionExitL()
+    {
+    TBool retV( EFalse );
+ 
+    if (iCmDestinationImpl)
+        {
+        // If the destination that is currently working on disappears
+        // with some reason then go back to parent view
+        if( !iCmManager->DestinationStillExistedL( iCmDestinationImpl ) )
+            {
+            retV = ETrue;
+            }
+        }
+    
+    return retV;
     }

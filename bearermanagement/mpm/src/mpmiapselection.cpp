@@ -122,6 +122,11 @@ void CMPMIapSelection::ChooseIapL( const TMpmConnPref& aChooseIapPref )
             snap )
         iChooseIapPref.SetSnapId( snap );
         iChooseIapPref.SetIapId( 0 );
+        if ( iChooseIapPref.ConnType() == TMpmConnPref::EConnTypeImplicit )
+            {
+            // No Connection selection dialog on reselection.
+            iChooseIapPref.SetConnType( TMpmConnPref::EConnTypeExplicit );
+            }
         }
     else if ( iap ) 
         {      
@@ -129,6 +134,11 @@ void CMPMIapSelection::ChooseIapL( const TMpmConnPref& aChooseIapPref )
                 iap )
         iChooseIapPref.SetIapId( iap );
         iChooseIapPref.SetSnapId( 0 );
+        if ( iChooseIapPref.ConnType() == TMpmConnPref::EConnTypeImplicit )
+            {
+            // No Connection selection dialog on reselection.
+            iChooseIapPref.SetConnType( TMpmConnPref::EConnTypeExplicit );
+            }
         }
 
     MPMLOGSTRING3( "CMPMIapSelection::ChooseIapL: IapID: %i SnapId: %i",
@@ -343,7 +353,8 @@ void CMPMIapSelection::ExplicitConnectionL()
         // KErrGprsOfflineMode should be returned instead of KErrNone.
         // 
         
-        if ( !iapTypeLanOrWlan && iSession->MyServer().IsPhoneOffline() )
+        if ( !iapTypeLanOrWlan && ( iSession->MyServer().IsPhoneOffline() ||                 
+             iSession->MyServer().RoamingWatcher()->RoamingStatus() == EMPMRoamingStatusUnknown ) )
             {
             ChooseIapComplete( KErrGprsOfflineMode, &iChooseIapPref );
             }
@@ -514,7 +525,8 @@ void CMPMIapSelection::CompleteExplicitSnapConnectionL()
         {
         ChooseIapComplete( KErrGprsServicesNotAllowed, NULL );
         }
-    else if ( !iapTypeLanOrWlan && iSession->MyServer().IsPhoneOffline() )
+    else if ( !iapTypeLanOrWlan && ( iSession->MyServer().IsPhoneOffline() ||                 
+               iSession->MyServer().RoamingWatcher()->RoamingStatus() == EMPMRoamingStatusUnknown ) )
         {
         // In case offline mode is enabled, only LAN or WLAN is allowed.
         // If some other bearer has been requested, then error code 
@@ -968,7 +980,8 @@ void CMPMIapSelection::CompleteImplicitConnectionL()
                                    iapTypeLanOrWlan,
                                    *iSession );
                                    
-    if ( !iapTypeLanOrWlan && iSession->MyServer().IsPhoneOffline() )
+    if ( !iapTypeLanOrWlan && ( iSession->MyServer().IsPhoneOffline() ||            
+            iSession->MyServer().RoamingWatcher()->RoamingStatus() == EMPMRoamingStatusUnknown ) )
         {
         MPMLOGSTRING2( "CMPMIapSelection::CompleteImplicitConnectionL: Completing with code = %i",
                 KErrGprsOfflineMode )

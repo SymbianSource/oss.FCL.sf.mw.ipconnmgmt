@@ -129,7 +129,6 @@ void TRequestReConnect::DoL() // codescanner::leave
         iContext.Node().GetClientIter<TDefaultClientMatchPolicy>(TClientType(TCFClientType::EServProvider));
     
     RMetaServiceProviderInterface* itf = NULL;
-    //RNodeInterface* itf = NULL;
     
     for ( itf = (RMetaServiceProviderInterface*)iter++;
              ( itf != NULL && ( stoppingSP == NULL || startingSP == NULL ) );
@@ -155,13 +154,13 @@ void TRequestReConnect::DoL() // codescanner::leave
             //
             }
         }
-    // One must be started since this is already a reconnection
-    if ( stoppingSP==NULL )
+    
+    if ( stoppingSP == NULL )
         { 
-        // Indication of a serious problem.
-        S60MCPRLOGSTRING1("S60MCPR<%x>::TRequestReConnect::DoL() - started service provider not found.",(TInt*)&iContext.Node())
-        ASSERT( EFalse );
-        User::Leave( KErrCorrupt );  // codescanner::leave
+        // If the above loop did not select a stoppingSP, the only reasonable chance is that
+        // this is one of the rare cases where reconnection is done to the same service provider.
+        S60MCPRLOGSTRING1("S60MCPR<%x>::TRequestReConnect::DoL() - reconnection to same service provider",(TInt*)&iContext.Node())
+        stoppingSP = startingSP;
         }
 
     //If there is no other Service Provider to try, return KErrNotFound
@@ -180,28 +179,7 @@ void TRequestReConnect::DoL() // codescanner::leave
                                                                 startingSP->RecipientId()).CRef() );
     }
 
-// -----------------------------------------------------------------------------
-// TRequestReConnectToCurrentSP::DoL
-// -----------------------------------------------------------------------------
-//
-DEFINE_SMELEMENT( TRequestReConnectToCurrentSP, NetStateMachine::MStateTransition, TContext )
-void TRequestReConnectToCurrentSP::DoL() // codescanner::leave
-    {
-    __ASSERT_DEBUG(iContext.iNodeActivity, User::Panic(KS60MCprPanic, KPanicNoActivity));
-    S60MCPRLOGSTRING1("S60MCPR<%x>::TRequestReConnectToCurrentSP::DoL()",(TInt*)&iContext.Node())
-    RNodeInterface* currentSP = iContext.Node().ServiceProvider();
 
-    // There MUST be a service provider
-    __ASSERT_DEBUG( currentSP != NULL, User::Panic(KS60MCprPanic, KPanicNoServiceProvider));
-    
-    // Diagnostic - there must be a data client or we cannot be here
-    __ASSERT_DEBUG(iContext.Node().GetFirstClient<TDefaultClientMatchPolicy>(TClientType(TCFClientType::EData)),
-                   User::Panic(KS60MCprPanic, KPanicNoDataClient));    
-    
-    iContext.iNodeActivity->PostRequestTo( iContext.NodeId(),
-                                           TCFMcpr::TReConnect( currentSP->RecipientId(), 
-                                                                currentSP->RecipientId()).CRef() );
-    }
 // -----------------------------------------------------------------------------
 // TProcessError::DoL
 // -----------------------------------------------------------------------------

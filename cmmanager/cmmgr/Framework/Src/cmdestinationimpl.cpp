@@ -1065,12 +1065,11 @@ TInt CCmDestinationImpl::AddConnectionMethodL(
     CleanupStack::PushL( connMethod );// 2           
     connMethod->IncrementRefCounter();    
     item->iPlugin = connMethod;
-        
-    CleanupStack::PushL( item->iPlugin ); // 3         
+
     // create the new record
     item->iDNRecord = iCmMgr.SNAPRecordL( 0 );
 
-    CleanupStack::PushL( item->iDNRecord ); // 4
+    CleanupStack::PushL( item->iDNRecord ); // 3
     
     // if the destination is protection level 1, the connection method must be protected
     if ( ProtectionLevel() == EProtLevel1 )
@@ -1081,7 +1080,7 @@ TInt CCmDestinationImpl::AddConnectionMethodL(
     TInt index = AddToArrayL( item );
     index = index - KCmInitIndex; //the array contains one initial item, so subtract KCmInitIndex from the index to get cm index!
     
-    CleanupStack::Pop( 4, item ); // item, connMethod, iDNRecord, iPlugin
+    CleanupStack::Pop( 3, item ); // item, connMethod, iDNRecord
     
     return index;
     }

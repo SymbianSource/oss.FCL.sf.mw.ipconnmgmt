@@ -83,32 +83,30 @@ RESOURCE DIALOG r_query_dialog
     }    
 
 RESOURCE DIALOG r_easy_wep_wpa_dlg
-	{
+    {
     flags = EEikDialogFlagNotifyEsc | EEikDialogFlagCbaButtons | 
-            EEikDialogFlagNoDrag | EEikDialogFlagNoTitleBar |
-            EEikDialogFlagVirtualInput;
-	buttons=R_AVKON_SOFTKEYS_OK_CANCEL__OK;
+            EEikDialogFlagNoDrag | EEikDialogFlagNoTitleBar;
+    buttons=R_AVKON_SOFTKEYS_OK_CANCEL__OK;
     items=
-		{
-		DLG_LINE
-			{
-			type=EAknCtQuery;
-			id=EGeneralQuery;
-			control= AVKON_DATA_QUERY
-				{ 
-				layout=EDataLayout;
+        {
+        DLG_LINE
+            {
+            type=EAknCtQuery;
+            id=EGeneralQuery;
+            control= AVKON_DATA_QUERY
+                { 
+                layout=EDataLayout;
                 control = EDWIN
                     {
                     avkon_flags = EAknEditorFlagLatinInputModesOnly;
                     default_case = EAknEditorLowerCase;
-					default_input_mode = EAknEditorTextInputMode;
+                    default_input_mode = EAknEditorTextInputMode;
                     allowed_input_modes = EAknEditorAllInputModes;
                     };
-				};
-			}
-		};
-
-	}
+                };
+             }
+        };
+    }
 
 RESOURCE TBUF r_info_no_networks_found
     { 

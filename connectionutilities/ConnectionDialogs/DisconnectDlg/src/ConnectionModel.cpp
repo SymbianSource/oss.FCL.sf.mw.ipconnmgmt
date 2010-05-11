@@ -308,8 +308,12 @@ void CConnectionModel::EventL( const CConnMonEventBase& aConnMonEvent )
         {
         // notifier will finish, so cancel all other notifications
         iMonitor.CancelNotifications();     
-        SelectedConnectionClosedL();
-        
+
+        // Bring back the 3s delay to avoid possible problems.
+        // (GPRS Detach and Attach overlapping, when only 1 context allowed,
+        // causing 15s delay.)
+        User::After( CAknNoteDialog::ELongTimeout );
+
         iDisconnectDialogUi->CompleteL( KErrNone );
         }
     else if( iDisconnectDialogUi  && 
@@ -344,21 +348,6 @@ void CConnectionModel::EventL( const CConnMonEventBase& aConnMonEvent )
 CConnectionCArray* CConnectionModel::GetConnArray() const
     {
     return iConnArray;
-    }
-
-
-// ---------------------------------------------------------
-// CConnectionModel::SelectedConnectionClosedL
-// ---------------------------------------------------------
-//
-void CConnectionModel::SelectedConnectionClosedL()
-    {
-    CLOG_ENTERFN("CConnectionModel::SelectedConnectionClosedL");    
-    
-    // the connection is succesfully closed
-    CConnectionInfo* info = iConnArray->At( iClosingConnectionIndex );
-
-    CLOG_LEAVEFN("CConnectionModel::SelectedConnectionClosedL");    
     }
 
 

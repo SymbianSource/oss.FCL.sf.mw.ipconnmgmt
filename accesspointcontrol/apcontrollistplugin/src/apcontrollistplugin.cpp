@@ -193,24 +193,24 @@ void CAPControlListPlugin::DoActivateL( const TVwsViewId& aPrevViewId,
             iContainer = NULL;
             User::Leave( error );
             }
-        
-	    if (!iAPIWrapper)  
-		    {
-	    	iAPIWrapper = new( ELeave ) CAPControlListAPIWrapper(*this);
-	    	iAPIWrapper->ConstructL();
-	    	}
-	    if (!iChangeNotifier)  
-		    {
-	    	iChangeNotifier = new( ELeave ) CAPControlListCapsChange(*this);
-            iChangeNotifier->NotifyCapsChange();
-	    	}
-	    				
-		    ShowInfoNoteL(R_QTN_ACL_WAIT_READING_SIM);
-    	  iAPIWrapper->ReadData();  
-        iContainer->HandleResourceChange(KEikDynamicLayoutVariantSwitch);
-    	  		
-	    
+            
         AppUi()->AddToViewStackL( *this, iContainer );
+        iContainer->HandleResourceChange(KEikDynamicLayoutVariantSwitch);
+        
+        if (!iAPIWrapper)  
+            {
+            iAPIWrapper = new( ELeave ) CAPControlListAPIWrapper(*this);
+            iAPIWrapper->ConstructL();
+            }
+        if (!iChangeNotifier)  
+            {
+            iChangeNotifier = new( ELeave ) CAPControlListCapsChange(*this);
+            iChangeNotifier->NotifyCapsChange();
+            }
+	    				
+        ShowInfoNoteL(R_QTN_ACL_WAIT_READING_SIM);
+        iAPIWrapper->ReadData();  
+        iContainer->HandleResourceChange(KEikDynamicLayoutVariantSwitch);
         }
     CLOG( ( ESelector, 0, _L( "<- CAPControlListPlugin::DoActivateL" ) ) );
     }

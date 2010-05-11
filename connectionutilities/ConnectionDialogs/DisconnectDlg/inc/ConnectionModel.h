@@ -75,13 +75,6 @@ NONSHARABLE_CLASS( CConnectionModel ) : public CBase,
         */
         void InitConnectionArrayL();
 
-        /**
-        * It is called when RConnectionMonitor has sent its event after ending
-        * connection
-        * @return -
-        */
-        void SelectedConnectionClosedL();
-
 
     public:
 

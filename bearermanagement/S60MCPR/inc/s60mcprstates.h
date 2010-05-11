@@ -106,17 +106,6 @@ namespace S60MCprStates
                               TContext )
     virtual void DoL();
     DECLARE_SMELEMENT_FOOTER( TRequestReConnect )
-
-    /**
-     * TRANSITION/ACTION: Starts ReConnect -activity to current service provider
-     */
-    DECLARE_SMELEMENT_HEADER( TRequestReConnectToCurrentSP, 
-                              MeshMachine::TStateTransition<TContext>, 
-                              NetStateMachine::MStateTransition, 
-                              TContext )
-    virtual void DoL();
-    DECLARE_SMELEMENT_FOOTER( TRequestReConnectToCurrentSP )
-    
     
     /**
      * TRANSITION/ACTION: Requests Policy Server to process the error.

@@ -83,7 +83,7 @@ NONSHARABLE_CLASS( CmPluginPacketDataSettingsDlg ) :
         *
         * @since S60 3.2
         */
-        virtual void RunAdvancedSettingsL();        
+        virtual void RunAdvancedSettingsL();
         
     public: // from class MCmCommsDatWatcher
         

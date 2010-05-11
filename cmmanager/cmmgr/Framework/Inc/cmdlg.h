@@ -226,6 +226,11 @@ NONSHARABLE_CLASS( CCmDlg ) : public CAknDialog
          */
         TInt GetInsertIndexL( TInt aCount, TUint32 aPriority );
         
+        /**
+         * Check if plugin exits exceptionally
+         */
+        TBool IsExceptionExitL();
+        
     protected:
         CCmListboxModel*    iModel;
         TUint32             iHighlight;
@@ -263,6 +268,11 @@ NONSHARABLE_CLASS( CCmDlg ) : public CAknDialog
         TBool               iExitduringProcessing;
         TBool               iBackduringProcessing;
         CDestDlg*           iDestDlg;
+        
+        /**
+         * Indicate if exiting from plugin normally or exceptionally
+         */
+        TBool                iPluginExitExceptionally;
         
     protected:
         // This is nescessary becaue in case of not supported CMs the data base 

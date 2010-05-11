@@ -553,10 +553,10 @@ EXPORT_C TBool CmPluginBaseSettingsDlg::OkToExitL( TInt aButtonId )
             {
             
             if ( iIsPossibleToSaveSetting && iHasSettingChanged )
-            {
+                {
                 iCmPluginBaseEng.UpdateL();
                 iHasSettingChanged = EFalse;
-            }
+                }
             retval = ETrue;
             break;
             }

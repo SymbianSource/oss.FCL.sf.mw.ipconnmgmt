@@ -291,6 +291,7 @@ void CUncatDlg::ProcessCommandL( TInt aCommandId )
                     case KErrNone:
                         {
                         HandleListboxDataChangeL();
+                        iListbox->HandleItemRemovalL();
 
                         if ( !iListbox->Model()->NumberOfItems() )
                             {

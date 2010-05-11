@@ -118,7 +118,12 @@ CmPluginWlanSettingsDlg::CmPluginWlanSettingsDlg(
 //
 TInt CmPluginWlanSettingsDlg::ConstructAndRunLD( )
     {
+    // Set this flag to allow edit continue
+    iCanEditingContinue = ETrue;
+    
+    CleanupStack::PushL( this );
     LoadResourceL( KPluginWlanResDirAndFileName );
+    CleanupStack::Pop( this );
     
     CCmManagerImpl& cmMgr = iCmPluginBaseEng.CmMgr();
     cmMgr.WatcherRegisterL( this );
@@ -769,6 +774,29 @@ void CmPluginWlanSettingsDlg::ExitSettingsL( TBool aConfirm )
 //
 TBool CmPluginWlanSettingsDlg::OkToExitL( TInt aButtonId )
     {
+    // Database has been changed by other application so exit from this view
+    // without update editings to database
+    if ( !iCanEditingContinue )
+        {
+        if ( iExitReason == KDialogUserExit )
+            {
+            iCmPluginBaseEng.CmMgr().WatcherUnRegister();
+            
+            // Set iExitReason back to KDialogUserBack so as to exit from this view through else in the next call
+            TInt exitValue = KDialogUserExit;
+            iExitReason = KDialogUserBack;
+            // If destination has been deleted by other application
+            // then we may have to exit from Cmmgr
+            TryExitL( exitValue );
+            return EFalse;
+            }
+        else
+            {
+            // Exit from this view here to avoid possible update to databse
+            return ETrue;
+            }
+        }
+    
     // Translate the button presses into commands for the appui & current
     // view to handle
     TBool retval( EFalse );
@@ -817,11 +845,18 @@ TBool CmPluginWlanSettingsDlg::OkToExitL( TInt aButtonId )
 //
 void CmPluginWlanSettingsDlg::ProcessCommandL( TInt aCommandId )
     {
+    if ( !iCanEditingContinue )
+        {
+        // We have to block all editing activity if database changed by
+        // other application
+        return;
+        }
+
     if ( MenuShowing() )
         {
         HideMenu();
         }
-
+    
     switch ( aCommandId )
         {
         case EPluginBaseCmdExit:
@@ -873,6 +908,11 @@ void CmPluginWlanSettingsDlg::GetHelpContext( TCoeHelpContext& aContext ) const
 //
 void CmPluginWlanSettingsDlg::CommsDatChangesL()
     {
+    if ( !iCanEditingContinue )
+        {
+        return;
+        }
+    
     CCmManagerImpl& cmMgr = iCmPluginBaseEng.CmMgr();
     CCmDestinationImpl* parentDest = iCmPluginBaseEng.ParentDestination();
 
@@ -880,51 +920,25 @@ void CmPluginWlanSettingsDlg::CommsDatChangesL()
         {
         if( !cmMgr.DestinationStillExistedL( parentDest ) )
             {
-            cmMgr.WatcherUnRegister();
             // If parent destination is deleted by somebody then the dialog must exit back to main view
             iExitReason = KDialogUserExit;
-            TryExitL( iExitReason );
-            
+            iCanEditingContinue = EFalse;
+
             cmMgr.RemoveDestFromPool( parentDest );
             delete parentDest;
             return;
             }
         
-        if( !cmMgr.IsIapStillInDestL( parentDest, iCmPluginBaseEng ) )
-            {
-            cmMgr.WatcherUnRegister();
-            // In this case, the dialog can go back to the parent view
-            TryExitL( iExitReason );
-            
-            cmMgr.RemoveDestFromPool( parentDest );
-            delete parentDest;
-            return;            
-            }
+        // We may have to go back to parent view if database is changed by other application
+        iCanEditingContinue = EFalse;
 
-        // We may have to go back to parent view even though this Iap is still in CommsDat
-        // for cmMgr ( = iCmPluginBaseEng.CmMgr() ) can not be accessed any more
-        // after this call when some Iap is deleted.
-        cmMgr.WatcherUnRegister();
-        TryExitL( iExitReason );
-                
         cmMgr.RemoveDestFromPool( parentDest );
         delete parentDest;
         }
-    else
+    else // Legacy
         {
-        if( !cmMgr.IapStillExistedL( iCmPluginBaseEng ) )
-            {
-            cmMgr.WatcherUnRegister();
-            // In this case, the dialog can go back to the parent view
-            TryExitL( iExitReason );
-            return;
-            }
-            
-        // We may have to go back to parent view even though this Iap is still in CommsDat
-        // for cmMgr ( = iCmPluginBaseEng.CmMgr() ) can not be accessed any more
-        // after this call when some Iap is deleted.
-        cmMgr.WatcherUnRegister();
-        TryExitL( iExitReason );
+        // We may have to go back to parent view if database is changed by other application
+        iCanEditingContinue = EFalse;
         }
     }
 
@@ -943,7 +957,11 @@ void CmPluginWlanSettingsDlg::NotifyParentView( TInt aValue )
 //
 void CmPluginWlanSettingsDlg::HandleCommsDatChangeL()
     {
-    //CCmManagerImpl& cmMgr = iCmPluginBaseEng.CmMgr();
+    if ( iCanEditingContinue )
+        {
+        // Set iCanEditingContinue to False so that exit fromn this view without update editings
+        iCanEditingContinue = EFalse;
+        }
     
     if( iNotifyFromAdv == KCmNotifiedIapIsNotInThisDestination || 
             iNotifyFromAdv == KCmNotifiedIapDisappear )
