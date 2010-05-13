@@ -162,6 +162,7 @@ void TestCmMgrShim::tcResetSettings()
         QVERIFY(cm != NULL);
         bool ok = cm->deleteConnectionMethod();
         QVERIFY(ok == true);
+        cm->update();
         delete cm;
     }
     
@@ -640,7 +641,7 @@ void TestCmMgrShim::tcConnectionMethodRefresh()
         
     // Check the default name
     QString name = cm->getStringAttribute(CMManagerShim::CmName);
-    QCOMPARE(name, QString("Connection Method"));
+    QVERIFY(name != QString(""));
         
     // Change name
     cm->setStringAttribute(CMManagerShim::CmName, "WlanBlaaBlaa");
@@ -795,7 +796,7 @@ void TestCmMgrShim::tcDestinationRemoveConnectionMethod()
     QVERIFY(cmWlan != NULL);
     // Update to CommsDat
     cmWlan->update();
-    
+
     uint cmWlanId = cmWlan->getIntAttribute(CMManagerShim::CmId);
     QCOMPARE(cmWlanId, (uint)1);
 
@@ -1099,6 +1100,7 @@ void TestCmMgrShim::deleteConnectionMethods()
         QVERIFY(cm != NULL);
         bool ok = cm->deleteConnectionMethod();
         QVERIFY(ok == true);
+        cm->update();
         delete cm;
     }
 }

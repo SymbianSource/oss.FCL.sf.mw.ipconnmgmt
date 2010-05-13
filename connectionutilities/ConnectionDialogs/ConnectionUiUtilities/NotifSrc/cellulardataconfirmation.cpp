@@ -95,7 +95,7 @@ void CCellularDataConfirmation::StartL( const TDesC8& aBuffer,
     
     // Observer is needed in order to get the user inputs
     iObserver = CDeviceDialogObserver::NewL( this );
-    iDialog = CHbDeviceDialog::NewL();
+    iDialog = CHbDeviceDialogSymbian::NewL();
     
     // The variant map is needed to construct the dialog correctly,
     // information whether we are in home network is needed

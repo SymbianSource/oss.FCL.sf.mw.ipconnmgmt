@@ -436,12 +436,6 @@ while extracting TCommDbConnPref from TConnPref" )
     MPMLOGSTRING3( "CMPMServerSession::HandleServerChooseIapL - iap %d \
 connType %d", mpmConnPref.IapId(), mpmConnPref.ConnType() )
 
-    if (!( mpmConnPref.NoteBehaviour() &
-            TExtendedConnPref::ENoteBehaviourConnDisableNotes ) )
-        {
-        iMyServer.ConnUiUtils()->ConnectingViaDiscreetPopup();
-        }
-    
     iIapSelection->ChooseIapL( mpmConnPref );
 
     if ( iAppUid == iMyServer.CsIdWatcher()->ConnectScreenId() )

@@ -36,6 +36,10 @@ class CCmmCache;
 class CCDSNAPMetadataRecord;
 
 
+/**
+ * Cache side object representing a destination. Reflects the current state in
+ * database.
+ */
 NONSHARABLE_CLASS( CCmmDestinationStruct ) : public CBase
     {
 public:

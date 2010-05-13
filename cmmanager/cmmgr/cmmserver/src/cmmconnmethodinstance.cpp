@@ -44,7 +44,6 @@ CCmmConnMethodInstance* CCmmConnMethodInstance::NewL( CCmmSession* aCmmSession, 
     CleanupStack::Pop( self );
 
     OstTraceFunctionExit0( CCMMCONNMETHODINSTANCE_NEWL_EXIT );
-
     return self;
     }
 
@@ -61,7 +60,6 @@ CCmmConnMethodInstance* CCmmConnMethodInstance::NewLC( CCmmSession* aCmmSession,
     self->ConstructL();
 
     OstTraceFunctionExit0( CCMMCONNMETHODINSTANCE_NEWLC_EXIT );
-
     return self;
     }
 

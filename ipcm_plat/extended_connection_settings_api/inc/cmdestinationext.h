@@ -20,6 +20,9 @@
 #ifndef CMDESTINATIONEXT_H
 #define CMDESTINATIONEXT_H
 
+// Deprecation warning
+#warning This header file is deprecated and shall not be used anymore. Please use cmdestination.h instead. See Polonium CR #461 for details.
+
 #include <e32base.h>
 #include <metadatabase.h>
 #include <cmmanagerdef.h>

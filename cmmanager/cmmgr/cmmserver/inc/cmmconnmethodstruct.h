@@ -29,7 +29,8 @@ class CCmPluginBaseEng;
 
 
 /**
- * TODO
+ * Cache side object representing a connection method. Reflects the current
+ * state in database.
  */
 NONSHARABLE_CLASS( CCmmConnMethodStruct ) : public CBase
     {

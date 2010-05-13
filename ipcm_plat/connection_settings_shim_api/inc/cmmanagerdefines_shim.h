@@ -40,10 +40,25 @@
  */
 namespace CMManagerShim
 {
+    /*!
+     *  Constants for bearer types.
+     */
     //! Wlan bearer type
     const uint BearerTypeWlan           = KUidWlanBearerType;
     //! Packet data bearer type
     const uint BearerTypePacketData     = KUidPacketDataBearerType;
+
+    /*!
+     *  Constants for IPv4 and IPv6 addresses.
+     */
+    //! Unspecified IPv4 address
+    const QString UnspecifiedIpv4Address("0.0.0.0");
+    //! Known IPv6 name server 1
+    const QString KnownIpv6NameServer1("fec0:000:0000:ffff::1");
+    //! Known IPv6 name server 2
+    const QString KnownIpv6NameServer2("fec0:000:0000:ffff::2");
+    //! Dynamic IPv6 address
+    const QString DynamicIpv6Address("0:0:0:0:0:0:0:0");
 
     /*!
      *  Constants for maximum string lengths.
@@ -52,6 +67,8 @@ namespace CMManagerShim
     const uint CmNameLength                 = 30;
     //! Homepage address length
     const uint CmStartPageLength            = 1024;
+    //! IPv4 IP address length
+    const uint CmIP4AddressLength           = 15;
     //! IPv6 DNS address length
     const uint CmIP6NameServerLength        = 50;
     //! Proxy server address length
@@ -85,6 +102,8 @@ namespace CMManagerShim
         //! From TConnectionMethodCommonAttributes in cmconnectionmethoddef.h
         CmNetworkId                     = CMManager::ECmNetworkId,
         //! From TConnectionMethodCommonAttributes in cmconnectionmethoddef.h
+        CmConnected                     = CMManager::ECmConnected,
+        //! From TConnectionMethodCommonAttributes in cmconnectionmethoddef.h
         CmId                            = CMManager::ECmId,
         //! From TConnectionMethodCommonAttributes in cmconnectionmethoddef.h
         CmStartPage                     = CMManager::ECmStartPage,
@@ -94,6 +113,12 @@ namespace CMManagerShim
         CmIPDNSAddrFromServer           = CMManager::ECmIPDNSAddrFromServer,
         //! From TConnectionMethodCommonAttributes in cmconnectionmethoddef.h
         CmIPAddress                     = CMManager::ECmIPAddress,
+        //! From TConnectionMethodCommonAttributes in cmconnectionmethoddef.h
+        CmIPAddrFromServer              = CMManager::ECmIPAddFromServer,
+        //! From TConnectionMethodCommonAttributes in cmconnectionmethoddef.h
+        CmIPNetmask                     = CMManager::ECmIPNetmask,
+        //! From TConnectionMethodCommonAttributes in cmconnectionmethoddef.h
+        CmIPGateway                     = CMManager::ECmIPGateway,
         //! From TConnectionMethodCommonAttributes in cmconnectionmethoddef.h
         CmIPNameServer1                 = CMManager::ECmIPNameServer1,
         //! From TConnectionMethodCommonAttributes in cmconnectionmethoddef.h
@@ -123,12 +148,57 @@ namespace CMManagerShim
          * From TConnectionMethodPacketDataSpecificAttributes in
          * cmpluginpacketdatadef.h
          */
+        PacketDataPDPType               = CMManager::EPacketDataPDPType,
+        /*!
+         * From TConnectionMethodPacketDataSpecificAttributes in
+         * cmpluginpacketdatadef.h
+         */
         PacketDataIFPromptForAuth       = CMManager::EPacketDataIFPromptForAuth,
         /*!
          * From TConnectionMethodPacketDataSpecificAttributes in
          * cmpluginpacketdatadef.h
          */
         PacketDataIFAuthName            = CMManager::EPacketDataIFAuthName,
+        /*!
+         * From TConnectionMethodPacketDataSpecificAttributes in
+         * cmpluginpacketdatadef.h
+         */
+        PacketDataIPAddrFromServer      = CMManager::EPacketDataIPAddrFromServer,
+        /*!
+         * From TConnectionMethodPacketDataSpecificAttributes in
+         * cmpluginpacketdatadef.h
+         */
+        PacketDataIPAddr                = CMManager::EPacketDataIPAddr,
+        /*!
+         * From TConnectionMethodPacketDataSpecificAttributes in
+         * cmpluginpacketdatadef.h
+         */
+        PacketDataIPDNSAddrFromServer   = CMManager::EPacketDataIPDNSAddrFromServer,
+        /*!
+         * From TConnectionMethodPacketDataSpecificAttributes in
+         * cmpluginpacketdatadef.h
+         */
+        PacketDataIPNameServer1         = CMManager::EPacketDataIPNameServer1,
+        /*!
+         * From TConnectionMethodPacketDataSpecificAttributes in
+         * cmpluginpacketdatadef.h
+         */
+        PacketDataIPNameServer2         = CMManager::EPacketDataIPNameServer2,
+        /*!
+         * From TConnectionMethodPacketDataSpecificAttributes in
+         * cmpluginpacketdatadef.h
+         */
+        PacketDataIPIP6DNSAddrFromServer = CMManager::EPacketDataIPIP6DNSAddrFromServer,
+        /*!
+         * From TConnectionMethodPacketDataSpecificAttributes in
+         * cmpluginpacketdatadef.h
+         */
+        PacketDataIPIP6NameServer1      = CMManager::EPacketDataIPIP6NameServer1,
+        /*!
+         * From TConnectionMethodPacketDataSpecificAttributes in
+         * cmpluginpacketdatadef.h
+         */
+        PacketDataIPIP6NameServer2      = CMManager::EPacketDataIPIP6NameServer2,
         /*!
          * From TConnectionMethodPacketDataSpecificAttributes in
          * cmpluginpacketdatadef.h
@@ -168,9 +238,15 @@ namespace CMManagerShim
         //!  From TConnectionMethodWlanSpecificAttributes in cmpluginwlandef.h
         WlanWepKeyIndex                 = CMManager::EWlanWepKeyIndex,
         //!  From TConnectionMethodWlanSpecificAttributes in cmpluginwlandef.h
+        Wlan802_1xAllowUnencrypted      = CMManager::EWlan802_1xAllowUnencrypted,
+        //!  From TConnectionMethodWlanSpecificAttributes in cmpluginwlandef.h
         WlanEnableWpaPsk                = CMManager::EWlanEnableWpaPsk,
         //!  From TConnectionMethodWlanSpecificAttributes in cmpluginwlandef.h
-        WlanWpaPreSharedKey             = CMManager::EWlanWpaPreSharedKey
+        WlanWpaPreSharedKey             = CMManager::EWlanWpaPreSharedKey,
+        //!  From TConnectionMethodWlanSpecificAttributes in cmpluginwlandef.h
+        WlanWapiPsk                     = CMManager::EWlanWapiPsk,
+        //!  From TConnectionMethodWlanSpecificAttributes in cmpluginwlandef.h
+        WlanWapiPskFormat               = CMManager::EWlanWapiPskFormat
     };
     
     /*!

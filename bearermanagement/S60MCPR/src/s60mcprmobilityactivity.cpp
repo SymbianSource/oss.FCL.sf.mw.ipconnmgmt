@@ -198,24 +198,6 @@ namespace S60MCprMobilityActivity
         // else cancel
         return KCancelTag | NetStateMachine::EForward;
         }
-
-    // -----------------------------------------------------------------------------
-    // S60MCprMobilityActivity::TInformMigrationCompletedOrError::TransitionTag
-    // -----------------------------------------------------------------------------
-    //
-    DEFINE_SMELEMENT( TInformMigrationCompletedOrError, NetStateMachine::MStateFork, TContext )
-    TBool TInformMigrationCompletedOrError::TransitionTag()
-        {    
-        // Error notification falls into the error -case.
-        if ( iContext.iNodeActivity->Error() ) 
-            {   
-            return MeshMachine::KErrorTag | NetStateMachine::EForward;
-            }
-        else
-            {
-            return S60MCprStates::KInformMigrationCompleted;
-            }
-        }
         
     // -----------------------------------------------------------------------------
     // S60MCprMobilityActivity::TStartMobilityHandshakeBackwardsOrError::TransitionTag
@@ -694,36 +676,6 @@ namespace S60MCprMobilityActivity
         return MeshMachine::KErrorTag | NetStateMachine::EForward;
         }
 
-    // -----------------------------------------------------------------------------
-    // CS60MobilityActivity::TNoTagOrRequestReConnectToCurrentSPOrErrorTag::DoL
-    // -----------------------------------------------------------------------------
-    //
-    DEFINE_SMELEMENT( CS60MobilityActivity::TNoTagOrRequestReConnectToCurrentSPOrErrorTag, 
-                      NetStateMachine::MStateFork, CS60MobilityActivity::TContext )
-    TInt CS60MobilityActivity::TNoTagOrRequestReConnectToCurrentSPOrErrorTag::TransitionTag()
-        {
-        CS60MetaConnectionProvider& node = (CS60MetaConnectionProvider&)iContext.Node();
-        RMetaServiceProviderInterface* sp = (RMetaServiceProviderInterface*)node.ServiceProvider();
-
-        if ( iContext.iNodeActivity->Error() )
-            {
-            S60MCPRLOGSTRING1("S60MCPR<%x>::TNoTagOrBearerPresentOrError::TransitionTag() KErrorTag",(TInt*)&iContext.Node())
-            return MeshMachine::KErrorTag | NetStateMachine::EForward;
-            }
-            // Check whether we're bound to a provider for the given IAP ID already
-        else if (sp && sp->ProviderInfo().APId() == node.PolicyPrefs().IapId())
-            {
-            // Restart the whole layer
-            S60MCPRLOGSTRING1("S60MCPR<%x>::TNoTagOrBearerPresentOrError::TransitionTag() Re-establishment",(TInt*)&iContext.Node());
-            return S60MCprStates::KRequestReConnectToCurrentSP | NetStateMachine::EForward;
-            }
-        else
-            {
-            S60MCPRLOGSTRING1("S60MCPR<%x>::TNoTagOrBearerPresentOrError::TransitionTag() KNoTag",(TInt*)&iContext.Node())
-            return MeshMachine::KNoTag | NetStateMachine::EForward;
-            }
-        }    
-    
     // -----------------------------------------------------------------------------
     // CS60MobilityActivity::ClearHandshakingFlag
     // -----------------------------------------------------------------------------

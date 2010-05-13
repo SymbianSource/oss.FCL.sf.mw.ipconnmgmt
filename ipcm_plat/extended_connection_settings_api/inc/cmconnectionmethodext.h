@@ -16,9 +16,11 @@
 *
 */
 
-
 #ifndef CMCONNECTIONMETHODEXT_H
 #define CMCONNECTIONMETHODEXT_H
+
+// Deprecation warning
+#warning This header file is deprecated and shall not be used anymore. Please use cmconnectionmethod.h instead. See Polonium CR #461 for details.
 
 #include <e32base.h>
 #include <cmconnectionmethoddef.h>

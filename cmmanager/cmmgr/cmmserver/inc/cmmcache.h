@@ -456,7 +456,9 @@ public:
     /**
      * Enumerates connections and checks if any of the connection methods in
      * the given destination is connected.
-     * //TODO, update comments with second parameter.
+     * If pointer to destination instance is given, then information about
+     * relevant connection methods is retrieved from that. Otherwise the
+     * information is retrieved from instance mapping using the given ID.
      */
     TBool DestinationConnectedL(
             const TUint32 aDestinationId,
@@ -559,7 +561,8 @@ private:
     void DeletePluginL( CCmmConnMethodStruct& aConnMethodStruct );
 
     /**
-     * TODO
+     * Initiate the deletion of given destination if none of the connection
+     * methods inside it are connected.
      */
     void DeleteDestinationForcedL( CCmmDestinationInstance& aDestinationInstance );
 

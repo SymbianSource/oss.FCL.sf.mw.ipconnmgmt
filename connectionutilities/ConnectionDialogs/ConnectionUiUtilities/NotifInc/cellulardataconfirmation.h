@@ -20,7 +20,7 @@
 
 #include <e32base.h>
 #include <ConnectionUiUtilities.h>
-#include <hb/hbcore/hbsymbiandevicedialog.h>
+#include <hb/hbcore/hbdevicedialogsymbian.h>
 #include "ConnectionDialogsNotifBase.h"
 #include "ConnectionUiUtilitiesCommon.h"
 
@@ -90,7 +90,7 @@ NONSHARABLE_CLASS ( CCellularDataConfirmation ) : public CConnectionDialogsNotif
     
     private:
         /** Pointer to the device dialog interface for handling the dialog */
-        CHbDeviceDialog* iDialog;
+        CHbDeviceDialogSymbian* iDialog;
         /** The observer to handle the data received from the orbit dialog */
         CDeviceDialogObserver* iObserver;
         /* The choice selected by the user from the dialog */

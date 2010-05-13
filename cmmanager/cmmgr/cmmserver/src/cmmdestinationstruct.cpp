@@ -537,6 +537,23 @@ void CCmmDestinationStruct::LoadRecordL(
     // ECmmRecordStatusModified  Error, session side only status
     // ECmmRecordStatusUnsaved   Skip load, not in database
 
+    //TODO, temporary block start
+    // Remove this codeblock after database change listeners are in place. This
+    // will force a database reload.
+    if ( iNetworkRecordStatus == ECmmRecordStatusLoaded )
+        {
+        iNetworkRecordStatus = ECmmRecordStatusExpired;
+        }
+    if ( iDestApRecordStatus == ECmmRecordStatusLoaded )
+        {
+        iDestApRecordStatus = ECmmRecordStatusExpired;
+        }
+    if ( iMetadataRecordStatus == ECmmRecordStatusLoaded )
+        {
+        iMetadataRecordStatus = ECmmRecordStatusExpired;
+        }
+    //TODO, temporary block end
+
     CommsDat::CCDRecordBase* aRecordPointer;
 
     switch ( aRecordType )

@@ -2,7 +2,7 @@
 * Copyright (c) 2010 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
-* under the terms of "Eclipse Public License v1.0""
+* under the terms of "Eclipse Public License v1.0"
 * which accompanies this distribution, and is available
 * at the URL "http://www.eclipse.org/legal/epl-v10.html".
 *
@@ -13,21 +13,20 @@
 *
 * Description:
 * CM Manager Application Settings UI private implementation.  
-*
 */
 
 // System includes
 
-#include <QTranslator>
+#include <HbTranslator>
 #include <HbApplication>
 #include <HbLabel>
-#include <HbListDialog>
 #include <cmmanager_shim.h>
 
 // User includes
 
 #include "cmradiodialog.h"
 #include "cmapplsettingsui_p.h"
+
 #include "OstTraceDefinitions.h"
 #ifdef OST_TRACE_COMPILER_IN_USE
 #include "cmapplsettingsui_pTraces.h"
@@ -40,7 +39,6 @@
 
     Displays a radio button list dialog for an application that can be used
     to select a destination or connection method.
-
 */
 
 // External function prototypes
@@ -59,8 +57,7 @@
 CmApplSettingsUiPrivate::CmApplSettingsUiPrivate(CmApplSettingsUi *q_pointer) :
     QObject(q_pointer),
     q_ptr(q_pointer),
-    mAppTranslator(new QTranslator(this)),
-    mCommonTranslator(new QTranslator(this)),
+    mTranslator(new HbTranslator("cmapplsettingsui")),
     mListItems(
         CmApplSettingsUi::ShowDestinations |
         CmApplSettingsUi::ShowConnectionMethods),
@@ -77,15 +74,8 @@ CmApplSettingsUiPrivate::CmApplSettingsUiPrivate(CmApplSettingsUi *q_pointer) :
     mSelection.result = CmApplSettingsUi::SelectionTypeDestination;
     mSelection.id = 0;
         
-    // Install common localization
-    QString lang = QLocale::system().name(); 
-    QString path = "Z:/resource/qt/translations/"; 
-    bool loadStatus = mCommonTranslator->load("common_" + lang, path);
-    qApp->installTranslator(mCommonTranslator);
-    
-    // Install this library's localization
-    loadStatus = mAppTranslator->load("cmapplsettingsui_" + lang, path);
-    qApp->installTranslator(mAppTranslator);
+    // Install also common localization
+    mTranslator->loadCommon();
 
     OstTraceFunctionExit0(CMAPPLSETTINGSUIPRIVATE_CMAPPLSETTINGSUIPRIVATE_EXIT);
 }

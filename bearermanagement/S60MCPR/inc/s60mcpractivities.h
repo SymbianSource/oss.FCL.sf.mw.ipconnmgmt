@@ -608,22 +608,7 @@ namespace S60MCprMobilityActivity
                               NetStateMachine::MStateFork, 
                               TContext )
     virtual TInt TransitionTag();
-    DECLARE_SMELEMENT_FOOTER( TNoTagOrInformMigrationAvailableBackwardsOrErrorOrCancel )
-
-    /**
-     * FORK/DECISION: 
-     * 1. Inform that the migration complete or go to error
-     * 2. Error
-     * @return
-     */
-    DECLARE_SMELEMENT_HEADER( TInformMigrationCompletedOrError, 
-                              MeshMachine::TStateFork<TContext>, 
-                              NetStateMachine::MStateFork, 
-                              TContext )
-    virtual TInt TransitionTag();
-    DECLARE_SMELEMENT_FOOTER( TInformMigrationCompletedOrError )
-
-        
+    DECLARE_SMELEMENT_FOOTER( TNoTagOrInformMigrationAvailableBackwardsOrErrorOrCancel )   
     
     /**
      * Class that is responsible for managing mobility on MCPR side.
@@ -802,21 +787,6 @@ namespace S60MCprMobilityActivity
                                       CS60MobilityActivity::TContext )
             virtual TInt TransitionTag();
             DECLARE_SMELEMENT_FOOTER( TNoTagOrApplicationRejectedMigrationOrCancel )
-
-            /**
-             * FORK/DECISION: 
-             * 1. Proceed to reconnection
-             * 2. Re-establish connection to the same IAP, inform data client that migration is complete
-             * 3. Error
-             * @return
-             */
-            DECLARE_SMELEMENT_HEADER( TNoTagOrRequestReConnectToCurrentSPOrErrorTag, 
-                                      MeshMachine::TStateFork<TContext>, 
-                                      NetStateMachine::MStateFork, 
-                                      TContext )
-            virtual TInt TransitionTag();
-            DECLARE_SMELEMENT_FOOTER( TNoTagOrRequestReConnectToCurrentSPOrErrorTag )
-            
             
             /**
              * Mutex protected TRANSITION.

@@ -294,22 +294,17 @@ namespace S60MCprMobilityActivity
     NODEACTIVITY_ENTRY( KNoTag, 
                         MCprStates::TSelectNextLayer,
                         MCprStates::TAwaitingSelectNextLayerCompleted, // Ok. Error is fatal.
-                        CS60MobilityActivity::TNoTagOrRequestReConnectToCurrentSPOrErrorTag )              
+                        MeshMachine::TNoTagOrErrorTag )       
                         
     // For the moment it is sufficient to use the re-connect activity, in the future we may want to
     // customise the behavior, for example start the new layer before rebinding it, etc.
     NODEACTIVITY_ENTRY( KNoTag, 
                         S60MCprStates::TRequestReConnect,
                         MCprStates::TAwaitingReConnectCompleteOrError,  // Ok. Error is fatal.
-                        S60MCprMobilityActivity::TInformMigrationCompletedOrError ) //Own error handling MPM must be informed when error happens.
+                        MeshMachine::TNoTagOrErrorTag ) //Own error handling MPM must be informed when error happens.
 
-    NODEACTIVITY_ENTRY( S60MCprStates::KRequestReConnectToCurrentSP,
-                        S60MCprStates::TRequestReConnectToCurrentSP,
-                        MCprStates::TAwaitingReConnectCompleteOrError,
-                        S60MCprMobilityActivity::TInformMigrationCompletedOrError )
-                        
     // If the migration was acepted we loop again waiting for a new, preferred one
-    NODEACTIVITY_ENTRY( S60MCprStates::KInformMigrationCompleted, 
+    NODEACTIVITY_ENTRY( KNoTag, 
                         CS60MobilityActivity::TInformMigrationCompleted, 
                         S60MCprMobilityActivity::TAwaitingMigrationAcceptedOrRejectedOrStartupErrorIgnoredOrCancel,
                         S60MCprMobilityActivity::TNoTagOrErrorTagOrApplicationRejectedOrConsumeRejected )

@@ -22,7 +22,6 @@
 
 #include <ecom/implementationproxy.h>
 #include <AknNotifierWrapper.h> // link against aknnotifierwrapper.lib
-#include <wifiprotuiddefs.h>
 
 
 // CONSTANTS
@@ -101,19 +100,6 @@ CArrayPtr<MEikSrvNotifierBase2>* DoCreateNotifierArrayL()
                                             KUidCConnDlgSelectConn,
                                             KUidCConnDlgSelectConn,
                                             KMyPriority ) );
-
-_LIT( KWiFiProtSetupPluginName , "wifiprotplugin.dll" );
-   master = 
-        CAknCommonNotifierWrapper::NewL( KUidWiFiProtSetup,
-                                         KUidWiFiProtSetup,
-                                         KMyPriority,
-                                         KWiFiProtSetupPluginName,
-                                         1 ); // we don't use synch reply
-
-    CleanupStack::PushL( master );   
-    subjects->AppendL( master );
-    CleanupStack::Pop( master );
-
 
     // Disconnect dialog
     subjects->AppendL( CAknCommonNotifierWrapper::NewL( KUidDisconnectDlg,

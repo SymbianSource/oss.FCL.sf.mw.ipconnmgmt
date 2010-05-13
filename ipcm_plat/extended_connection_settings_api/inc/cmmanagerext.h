@@ -20,6 +20,9 @@
 #ifndef CMMANAGEREXT_H
 #define CMMANAGEREXT_H
 
+// Deprecation warning
+#warning This header file is deprecated and shall not be used anymore. Please use cmmanager.h instead. See Polonium CR #461 for details.
+
 #include <e32base.h>
 #include <metadatabase.h>
 #include <cmmanagerdef.h>

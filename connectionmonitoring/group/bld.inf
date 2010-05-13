@@ -22,7 +22,6 @@ DEFAULT
 PRJ_EXPORTS
 
 PRJ_MMPFILES
-#include "../connectionmonitorplugin/group/bld.inf"
 #include "../connectionmonitorui/group/bld.inf"
 #include "../connmon/connectionmonitor/group/bld.inf"
 #include "../connmon/dataconnectionlogger/group/bld.inf"

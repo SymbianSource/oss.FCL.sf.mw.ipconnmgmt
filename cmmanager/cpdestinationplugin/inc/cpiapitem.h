@@ -56,8 +56,6 @@ public:
     
     ~CpIapItem();
     
-    int getIapId() const;
-    
 signals:
     void iapChanged();
     
@@ -81,7 +79,7 @@ private:
     void saveShare(int id);
     bool isCmManagerAvailable();
     HbMenu *createItemMenu(
-        CMManagerShim::CmmProtectionLevel protLvl,
+        bool cmConnected,
         const QPointF &position);
     void showErrorNote(const QString &info);
 
@@ -94,8 +92,6 @@ private: // data
     QString                     mIapName;
     //! ID of the destination referencing this access point
     int                         mDestId;
-    //! Boolean showing if access point is protected.
-    bool                        mProtected;
     //! Helper for connecting signals to underlying widgets
     CpItemDataHelper            *mItemDataHelper;
     //! Pointer to CmManager for commsdat operations

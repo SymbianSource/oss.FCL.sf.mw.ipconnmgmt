@@ -50,16 +50,14 @@ CpWlanApAdvancedView::CpWlanApAdvancedView(
         mModel(0),
         mCmConnectionMethod(cmConnectionMethod)
 {
-    // Construct packet data AP settings UI
-    mForm = settingForm();
-    if (mForm) {
-        mModel = new HbDataFormModel(mForm);
+    // Construct WLAN AP advanced settings UI
+    mForm = new HbDataForm();
+    this->setWidget(mForm);
+    mModel = new HbDataFormModel(mForm);
+    mForm->setModel(mModel);
 
-        // Add advanced settings groups
-        createAdvancedSettings();
-        
-        mForm->setModel(mModel);
-    }
+    // Add advanced settings groups
+    createAdvancedSettings();
 }
 
 /*!

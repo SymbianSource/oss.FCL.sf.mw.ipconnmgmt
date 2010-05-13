@@ -135,7 +135,7 @@ void CpDestinationGroup::addDestination(const QString &dest, int destId)
     connect(destDataItem, SIGNAL(destChanged()), this, SLOT(updateDestinationInformation()));
     
     // Use ItemDataHelper to make connections
-    QObject* form = this->model()->parent();
+    QObject* form = QObject::parent()->parent();
     mItemDataHelper->bindToForm(static_cast<HbDataForm*>(form));
     
     // Insert Child to correct position
@@ -237,10 +237,10 @@ void CpDestinationGroup::updateDestinationInformation()
         destDataItem->setContentWidgetData(QString("text"), destDataItem->destinationName());
     }
     // Update UI
-    HbDataForm *form = static_cast<HbDataForm*>(this->model()->parent());
-    HbDataFormModel* model = static_cast<HbDataFormModel*>(this->model());
+    HbDataForm *form = static_cast<HbDataForm*>(QObject::parent()->parent());
+    HbDataFormModel* model = static_cast<HbDataFormModel*>(QObject::parent());
     QModelIndex index = model->indexFromItem(this);
-    HbDataFormViewItem *viewItem = form->dataFormViewItem(index);
+    HbDataFormViewItem *viewItem = static_cast<HbDataFormViewItem *>(form->itemByIndex(index));
     viewItem->setExpanded(false);
     viewItem->setExpanded(true);
     OstTraceFunctionExit0(CPDESTINATIONGROUP_UPDATEDESTINATIONINFORMATION_EXIT);

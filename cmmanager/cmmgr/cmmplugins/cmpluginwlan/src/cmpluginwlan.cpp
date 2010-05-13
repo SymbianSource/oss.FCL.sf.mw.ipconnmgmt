@@ -1261,16 +1261,14 @@ TBool CCmPluginWlan::CanHandleIapIdL( CCDIAPRecord *aIapRecord ) const
 
     TBool retVal( EFalse );
 
-    if ( (TPtrC(aIapRecord->iServiceType) == TPtrC(KCDTypeNameLANService) ) &&
-            TPtrC(aIapRecord->iBearerType) == TPtrC(KCDTypeNameLANBearer) )
+    if ( ( TPtrC( aIapRecord->iServiceType ) == TPtrC( KCDTypeNameLANService ) ) &&
+            TPtrC( aIapRecord->iBearerType ) == TPtrC( KCDTypeNameLANBearer ) )
         {
         // Check if there is a WLAN record with an iServiceId == iIapRecord->iService.
         CCDWlanServiceRecord* tmprec = new( ELeave ) CCDWlanServiceRecord ( iWlanTableId );
         CleanupStack::PushL( tmprec );
 
-        TInt service = aIapRecord->iService;
-
-        tmprec->iWlanServiceId.SetL( (TUint32)service );
+        tmprec->iWlanServiceId.SetL( ( TUint32 )( aIapRecord->iService ) );
         if ( tmprec->FindL( iSession ) )
             {
             // we found at least one WLAN using this IAP,
@@ -1292,10 +1290,9 @@ void CCmPluginWlan::DeleteBearerRecordsL()
     {
     OstTraceFunctionEntry0( CCMPLUGINWLAN_DELETEBEARERRECORDSL_ENTRY );
 
-    // as base class deletes service record, in this case LAN,
-    // only WLAN related stuff needs to be deleted
+    // As base class deletes service record, in this case LAN, only WLAN
+    // related stuff needs to be deleted.
     iWlanServiceRecord->DeleteL( iSession );
-    iWlanServiceRecord = NULL;
 
     OstTraceFunctionExit0( CCMPLUGINWLAN_DELETEBEARERRECORDSL_EXIT );
     }
@@ -1463,7 +1460,7 @@ void CCmPluginWlan::PreparePluginToUpdateRecordsL(
                     aGenRecordArray[KIapRecordIndex] );
 
     CheckIfNameModifiedL( iapRecord, wlanServiceRecord );
-    wlanServiceRecord->iWlanServiceId.SetL( iapRecord->iService );
+    wlanServiceRecord->iWlanServiceId.SetL( ( TUint32 )( iapRecord->iService ) );
 
     CCDLANServiceRecord* serviceRecord =
             static_cast<CCDLANServiceRecord*>(
@@ -1491,101 +1488,125 @@ void CCmPluginWlan::PreparePluginToUpdateRecordsL(
 // ----------------------------------------------------------------------------
 //
 void CCmPluginWlan::UpdateServiceRecordL(
-    RPointerArray<CommsDat::CCDRecordBase>& aGenRecordArray,
-    RPointerArray<CommsDat::CCDRecordBase>& aBearerSpecRecordArray )
+        RPointerArray<CommsDat::CCDRecordBase>& aGenRecordArray,
+        RPointerArray<CommsDat::CCDRecordBase>& aBearerSpecRecordArray )
     {
     OstTraceFunctionEntry0( CCMPLUGINWLAN_UPDATESERVICERECORDL_ENTRY );
 
-    // Delete the original record and create a copy from the parameter
+    // Delete the original record and create a copy from the client's copy.
     delete iServiceRecord;
     iServiceRecord = NULL;
 
-    iServiceRecord = static_cast<CCDLANServiceRecord*>
-                    (CCDRecordBase::RecordFactoryL( KCDTIdLANServiceRecord ) );
+    iServiceRecord = static_cast<CCDLANServiceRecord *>(
+            CCDRecordBase::RecordFactoryL( KCDTIdLANServiceRecord ) );
 
-    // LAN Service copy does not work so we have to copy it manually
+    // LAN Service copy does not work so we have to copy it manually.
 
-    CCDLANServiceRecord* lanServiceRecordTo =
-            static_cast<CCDLANServiceRecord *>(
-                    iServiceRecord );
+    // Plugin's commsdat copy.
+    CCDLANServiceRecord* origServiceRecord = static_cast<CCDLANServiceRecord*>( iServiceRecord );
 
-    CCDLANServiceRecord* lanServiceRecordFrom =
-            static_cast<CCDLANServiceRecord *>(
-                    aGenRecordArray[KServiceRecordIndex] );
+    // Client's copy of lan service record.
+    CCDLANServiceRecord* clientServiceRecordCopy =
+            static_cast<CCDLANServiceRecord*>( aGenRecordArray[KServiceRecordIndex] );
 
-    if ( !lanServiceRecordFrom->iRecordName.IsNull() )
+    if ( !clientServiceRecordCopy->iRecordTag.IsNull() )
         {
-        lanServiceRecordTo->iRecordName.SetL( lanServiceRecordFrom->iRecordName );
+        origServiceRecord->iRecordTag.SetL( clientServiceRecordCopy->iRecordTag );
         }
-    if ( !lanServiceRecordFrom->iIfNetworks.IsNull() )
+    if ( !clientServiceRecordCopy->iRecordName.IsNull() )
         {
-        lanServiceRecordTo->iIfNetworks.SetL( lanServiceRecordFrom->iIfNetworks );
+        origServiceRecord->iRecordName.SetL( clientServiceRecordCopy->iRecordName );
         }
-    if ( !lanServiceRecordFrom->iIpGateway.IsNull() )
+    if ( !clientServiceRecordCopy->iServiceEnableLlmnr.IsNull() )
         {
-        lanServiceRecordTo->iIpGateway.SetL( lanServiceRecordFrom->iIpGateway );
+        origServiceRecord->iServiceEnableLlmnr.SetL( clientServiceRecordCopy->iServiceEnableLlmnr );
         }
-    if ( !lanServiceRecordFrom->iIpAddrFromServer.IsNull() )
+    if ( !clientServiceRecordCopy->iIfNetworks.IsNull() )
         {
-        lanServiceRecordTo->iIpAddrFromServer.SetL( lanServiceRecordFrom->iIpAddrFromServer );
+        origServiceRecord->iIfNetworks.SetL( clientServiceRecordCopy->iIfNetworks );
         }
-    if ( !lanServiceRecordFrom->iIpAddr.IsNull() )
+    if ( !clientServiceRecordCopy->iIpNetmask.IsNull() )
         {
-        lanServiceRecordTo->iIpAddr.SetL( lanServiceRecordFrom->iIpAddr );
+        origServiceRecord->iIpNetmask.SetL( clientServiceRecordCopy->iIpNetmask );
         }
-    if ( !lanServiceRecordFrom->iIpDnsAddrFromServer.IsNull() )
+    if ( !clientServiceRecordCopy->iIpGateway.IsNull() )
         {
-        lanServiceRecordTo->iIpDnsAddrFromServer.SetL( lanServiceRecordFrom->iIpDnsAddrFromServer );
+        origServiceRecord->iIpGateway.SetL( clientServiceRecordCopy->iIpGateway );
         }
-    if ( !lanServiceRecordFrom->iIpNameServer1.IsNull() )
+    if ( !clientServiceRecordCopy->iIpAddrFromServer.IsNull() )
         {
-        lanServiceRecordTo->iIpNameServer1.SetL( lanServiceRecordFrom->iIpNameServer1 );
+        origServiceRecord->iIpAddrFromServer.SetL( clientServiceRecordCopy->iIpAddrFromServer );
         }
-    if ( !lanServiceRecordFrom->iIpNameServer2.IsNull() )
+    if ( !clientServiceRecordCopy->iIpAddr.IsNull() )
         {
-        lanServiceRecordTo->iIpNameServer2.SetL( lanServiceRecordFrom->iIpNameServer2 );
+        origServiceRecord->iIpAddr.SetL( clientServiceRecordCopy->iIpAddr );
         }
-    if ( !lanServiceRecordFrom->iIp6DnsAddrFromServer.IsNull() )
+    if ( !clientServiceRecordCopy->iIpDnsAddrFromServer.IsNull() )
         {
-        lanServiceRecordTo->iIp6DnsAddrFromServer.SetL( lanServiceRecordFrom->iIp6DnsAddrFromServer );
+        origServiceRecord->iIpDnsAddrFromServer.SetL( clientServiceRecordCopy->iIpDnsAddrFromServer );
         }
-    if ( !lanServiceRecordFrom->iIp6NameServer1.IsNull() )
+    if ( !clientServiceRecordCopy->iIpNameServer1.IsNull() )
         {
-        lanServiceRecordTo->iIp6NameServer1.SetL( lanServiceRecordFrom->iIp6NameServer1 );
+        origServiceRecord->iIpNameServer1.SetL( clientServiceRecordCopy->iIpNameServer1 );
         }
-    if ( !lanServiceRecordFrom->iIp6NameServer2.IsNull() )
+    if ( !clientServiceRecordCopy->iIpNameServer2.IsNull() )
         {
-        lanServiceRecordTo->iIp6NameServer2.SetL( lanServiceRecordFrom->iIp6NameServer2 );
+        origServiceRecord->iIpNameServer2.SetL( clientServiceRecordCopy->iIpNameServer2 );
         }
-    if ( !lanServiceRecordFrom->iConfigDaemonManagerName.IsNull() )
+    if ( !clientServiceRecordCopy->iIp6DnsAddrFromServer.IsNull() )
         {
-        lanServiceRecordTo->iConfigDaemonManagerName.SetL( lanServiceRecordFrom->iConfigDaemonManagerName );
+        origServiceRecord->iIp6DnsAddrFromServer.SetL( clientServiceRecordCopy->iIp6DnsAddrFromServer );
         }
-    if ( !lanServiceRecordFrom->iConfigDaemonName.IsNull() )
+    if ( !clientServiceRecordCopy->iIp6NameServer1.IsNull() )
         {
-        lanServiceRecordTo->iConfigDaemonName.SetL( lanServiceRecordFrom->iConfigDaemonName );
+        origServiceRecord->iIp6NameServer1.SetL( clientServiceRecordCopy->iIp6NameServer1 );
+        }
+    if ( !clientServiceRecordCopy->iIp6NameServer2.IsNull() )
+        {
+        origServiceRecord->iIp6NameServer2.SetL( clientServiceRecordCopy->iIp6NameServer2 );
+        }
+    if ( !clientServiceRecordCopy->iIpAddrLeaseValidFrom.IsNull() )
+        {
+        origServiceRecord->iIpAddrLeaseValidFrom.SetL( clientServiceRecordCopy->iIpAddrLeaseValidFrom );
+        }
+    if ( !clientServiceRecordCopy->iIpAddrLeaseValidTo.IsNull() )
+        {
+        origServiceRecord->iIpAddrLeaseValidTo.SetL( clientServiceRecordCopy->iIpAddrLeaseValidTo );
+        }
+    if ( !clientServiceRecordCopy->iConfigDaemonManagerName.IsNull() )
+        {
+        origServiceRecord->iConfigDaemonManagerName.SetL( clientServiceRecordCopy->iConfigDaemonManagerName );
+        }
+    if ( !clientServiceRecordCopy->iConfigDaemonName.IsNull() )
+        {
+        origServiceRecord->iConfigDaemonName.SetL( clientServiceRecordCopy->iConfigDaemonName );
+        }
+    if ( !clientServiceRecordCopy->iServiceExtensionTableName.IsNull() )
+        {
+        origServiceRecord->iServiceExtensionTableName.SetL( clientServiceRecordCopy->iServiceExtensionTableName );
+        }
+    if ( !clientServiceRecordCopy->iServiceExtensionTableRecordId.IsNull() )
+        {
+        origServiceRecord->iServiceExtensionTableRecordId.SetL( clientServiceRecordCopy->iServiceExtensionTableRecordId ); //TODO, check this works ok.
         }
 
-    lanServiceRecordTo->SetElementId( lanServiceRecordFrom->ElementId() );
-    // this is shared between wlan iaps so it cannot be hidden or protected
-    lanServiceRecordTo->ClearAttributes( ECDHidden );
-    lanServiceRecordTo->ClearAttributes( ECDProtectedWrite );
+    origServiceRecord->SetElementId( clientServiceRecordCopy->ElementId() );
 
-    if ( !ServiceRecord().RecordId() )
+    if ( !origServiceRecord->RecordId() )
         {
-        ServiceRecord().SetRecordId( KCDNewRecordRequest );
-        ServiceRecord().StoreL( iSession );
+        origServiceRecord->SetRecordId( KCDNewRecordRequest );
+        origServiceRecord->StoreL( iSession );
 
-        // Update needed values to record tables too( lanservice and wlanservice )
-        lanServiceRecordFrom->SetElementId( ServiceRecord().ElementId() );
-        CCDWlanServiceRecord* wlanServiceRecord =
-                static_cast<CCDWlanServiceRecord *>(
-                        aBearerSpecRecordArray[KWlanServiceRecordIndex] );
-        wlanServiceRecord->iWlanServiceId.SetL( ServiceRecord().RecordId() );
+        // Update received element ID to client's copy too.
+        clientServiceRecordCopy->SetElementId( origServiceRecord->ElementId() );
+        // Update needed values to other table records too (wlanservice).
+        CCDWlanServiceRecord* wlanServiceRecord = static_cast<CCDWlanServiceRecord *>(
+                aBearerSpecRecordArray[KWlanServiceRecordIndex] );
+        wlanServiceRecord->iWlanServiceId.SetL( origServiceRecord->RecordId() );
         }
     else
         {
-        ServiceRecord().ModifyL( iSession );
+        origServiceRecord->ModifyL( iSession );
         }
 
     OstTraceFunctionExit0( CCMPLUGINWLAN_UPDATESERVICERECORDL_EXIT );
@@ -1601,114 +1622,156 @@ void CCmPluginWlan::UpdateBearerRecordsL(
     {
     OstTraceFunctionEntry0( CCMPLUGINWLAN_UPDATEBEARERRECORDSL_ENTRY );
 
+    // Delete the original record and create a copy from the client's copy.
     delete iWlanServiceRecord;
     iWlanServiceRecord = NULL;
 
-    CCDWlanServiceRecord* wlanServiceRecord =
-            static_cast<CCDWlanServiceRecord*>(
-                    aBearerSpecRecordArray[KWlanServiceRecordIndex] );
+    iWlanServiceRecord = new( ELeave ) CCDWlanServiceRecord( iWlanTableId );
 
-    iWlanServiceRecord = new( ELeave ) CCDWlanServiceRecord ( iWlanTableId );
+    // Client's copy of wlan service record.
+    CCDWlanServiceRecord* clientWlanServiceRecord = static_cast<CCDWlanServiceRecord*>(
+            aBearerSpecRecordArray[KWlanServiceRecordIndex] );
 
-    iWlanServiceRecord->SetElementId( wlanServiceRecord->ElementId() );
-    iWlanServiceRecord->iRecordName.SetL( wlanServiceRecord->iRecordName );
+    if ( !clientWlanServiceRecord->iRecordTag.IsNull() )
+        {
+        iWlanServiceRecord->iRecordTag.SetL(
+                clientWlanServiceRecord->iRecordTag );
+        }
+    if ( !clientWlanServiceRecord->iRecordName.IsNull() )
+        {
+        iWlanServiceRecord->iRecordName.SetL(
+                clientWlanServiceRecord->iRecordName );
+        }
+    if ( !clientWlanServiceRecord->iWlanServiceId.IsNull() )
+        {
+        iWlanServiceRecord->iWlanServiceId.SetL(
+                clientWlanServiceRecord->iWlanServiceId );
+        }
+    if ( !clientWlanServiceRecord->iWlanConnMode.IsNull() )
+        {
+        iWlanServiceRecord->iWlanConnMode.SetL(
+                clientWlanServiceRecord->iWlanConnMode );
+        }
+    if ( !clientWlanServiceRecord->iWLanSSID.IsNull() )
+        {
+        iWlanServiceRecord->iWLanSSID.SetL(
+                clientWlanServiceRecord->iWLanSSID );
+        }
+    if ( !clientWlanServiceRecord->iWLanUsedSSID.IsNull() )
+        {
+        iWlanServiceRecord->iWLanUsedSSID.SetL(
+                clientWlanServiceRecord->iWLanUsedSSID );
+        }
+    if ( !clientWlanServiceRecord->iWLanWepKey1.IsNull() )
+        {
+        iWlanServiceRecord->iWLanWepKey1.SetL(
+                clientWlanServiceRecord->iWLanWepKey1 );
+        }
+    if ( !clientWlanServiceRecord->iWLanWepKey2.IsNull() )
+        {
+        iWlanServiceRecord->iWLanWepKey2.SetL(
+                clientWlanServiceRecord->iWLanWepKey2 );
+        }
+    if ( !clientWlanServiceRecord->iWLanWepKey3.IsNull() )
+        {
+        iWlanServiceRecord->iWLanWepKey3.SetL(
+                clientWlanServiceRecord->iWLanWepKey3 );
+        }
+    if ( !clientWlanServiceRecord->iWLanWepKey4.IsNull() )
+        {
+        iWlanServiceRecord->iWLanWepKey4.SetL(
+                clientWlanServiceRecord->iWLanWepKey4 );
+        }
+    if ( !clientWlanServiceRecord->iWlanWepIndex.IsNull() )
+        {
+        iWlanServiceRecord->iWlanWepIndex.SetL(
+                clientWlanServiceRecord->iWlanWepIndex );
+        }
+    if ( !clientWlanServiceRecord->iWlanSecMode.IsNull() )
+        {
+        iWlanServiceRecord->iWlanSecMode.SetL(
+                clientWlanServiceRecord->iWlanSecMode );
+        }
+    if ( !clientWlanServiceRecord->iWlanAuthMode.IsNull() )
+        {
+        iWlanServiceRecord->iWlanAuthMode.SetL(
+                clientWlanServiceRecord->iWlanAuthMode );
+        }
+    if ( !clientWlanServiceRecord->iWlanEnableWpaPsk.IsNull() )
+        {
+        iWlanServiceRecord->iWlanEnableWpaPsk.SetL(
+                clientWlanServiceRecord->iWlanEnableWpaPsk );
+        }
+    if ( !clientWlanServiceRecord->iWLanWpaPreSharedKey.IsNull() )
+        {
+        iWlanServiceRecord->iWLanWpaPreSharedKey.SetL(
+                clientWlanServiceRecord->iWLanWpaPreSharedKey );
+        }
+    if ( !clientWlanServiceRecord->iWlanWpaKeyLength.IsNull() )
+        {
+        iWlanServiceRecord->iWlanWpaKeyLength.SetL(
+                clientWlanServiceRecord->iWlanWpaKeyLength );
+        }
+    if ( !clientWlanServiceRecord->iWLanEaps.IsNull() )
+        {
+        iWlanServiceRecord->iWLanEaps.SetL(
+                clientWlanServiceRecord->iWLanEaps );
+        }
+    if ( !clientWlanServiceRecord->iWlanScanSSID.IsNull() )
+        {
+        iWlanServiceRecord->iWlanScanSSID.SetL(
+                clientWlanServiceRecord->iWlanScanSSID );
+        }
+    if ( !clientWlanServiceRecord->iWlanChannelID.IsNull() )
+        {
+        iWlanServiceRecord->iWlanChannelID.SetL(
+                clientWlanServiceRecord->iWlanChannelID );
+        }
+    if ( !clientWlanServiceRecord->iWlanFormatKey1.IsNull() )
+        {
+        iWlanServiceRecord->iWlanFormatKey1.SetL(
+                clientWlanServiceRecord->iWlanFormatKey1 );
+        }
+    if ( !clientWlanServiceRecord->iWlanFormatKey2.IsNull() )
+        {
+        iWlanServiceRecord->iWlanFormatKey2.SetL(
+                clientWlanServiceRecord->iWlanFormatKey2 );
+        }
+    if ( !clientWlanServiceRecord->iWlanFormatKey3.IsNull() )
+        {
+        iWlanServiceRecord->iWlanFormatKey3.SetL(
+                clientWlanServiceRecord->iWlanFormatKey3 );
+        }
+    if ( !clientWlanServiceRecord->iWlanFormatKey4.IsNull() )
+        {
+        iWlanServiceRecord->iWlanFormatKey4.SetL(
+                clientWlanServiceRecord->iWlanFormatKey4 );
+        }
+    if ( !clientWlanServiceRecord->iWlanAllowSSIDRoaming.IsNull() )
+        {
+        iWlanServiceRecord->iWlanAllowSSIDRoaming.SetL(
+                clientWlanServiceRecord->iWlanAllowSSIDRoaming );
+        }
+    if ( !clientWlanServiceRecord->iWLanEnabledEaps.IsNull() )
+        {
+        iWlanServiceRecord->iWLanEnabledEaps.SetL(
+                clientWlanServiceRecord->iWLanEnabledEaps );
+        }
+    if ( !clientWlanServiceRecord->iWLanDisabledEaps.IsNull() )
+        {
+        iWlanServiceRecord->iWLanDisabledEaps.SetL(
+                clientWlanServiceRecord->iWLanDisabledEaps );
+        }
 
-    iWlanServiceRecord->iWlanServiceId.SetL( wlanServiceRecord->iWlanServiceId );
-    iWlanServiceRecord->iWlanConnMode.SetL( wlanServiceRecord->iWlanConnMode );
-    if ( !wlanServiceRecord->iWLanSSID.IsNull() )
-        {
-        iWlanServiceRecord->iWLanSSID.SetL( wlanServiceRecord->iWLanSSID );
-        }
-    if ( !wlanServiceRecord->iWLanUsedSSID.IsNull() )
-        {
-        iWlanServiceRecord->iWLanUsedSSID.SetL( wlanServiceRecord->iWLanUsedSSID );
-        }
-    if ( !wlanServiceRecord->iWLanWepKey1.IsNull() )
-        {
-        iWlanServiceRecord->iWLanWepKey1.SetL( wlanServiceRecord->iWLanWepKey1 );
-        }
-    if ( !wlanServiceRecord->iWLanWepKey2.IsNull() )
-        {
-        iWlanServiceRecord->iWLanWepKey2.SetL( wlanServiceRecord->iWLanWepKey2 );
-        }
-    if ( !wlanServiceRecord->iWLanWepKey3.IsNull() )
-        {
-        iWlanServiceRecord->iWLanWepKey3.SetL( wlanServiceRecord->iWLanWepKey3 );
-        }
-    if ( !wlanServiceRecord->iWLanWepKey4.IsNull() )
-        {
-        iWlanServiceRecord->iWLanWepKey4.SetL( wlanServiceRecord->iWLanWepKey4 );
-        }
-    if ( !wlanServiceRecord->iWlanWepIndex.IsNull() )
-        {
-        iWlanServiceRecord->iWlanWepIndex.SetL( wlanServiceRecord->iWlanWepIndex );
-        }
-    if ( !wlanServiceRecord->iWlanSecMode.IsNull() )
-        {
-        iWlanServiceRecord->iWlanSecMode.SetL( wlanServiceRecord->iWlanSecMode );
-        }
-    if ( !wlanServiceRecord->iWlanAuthMode.IsNull() )
-        {
-        iWlanServiceRecord->iWlanAuthMode.SetL( wlanServiceRecord->iWlanAuthMode );
-        }
-    if ( !wlanServiceRecord->iWlanEnableWpaPsk.IsNull() )
-        {
-        iWlanServiceRecord->iWlanEnableWpaPsk.SetL( wlanServiceRecord->iWlanEnableWpaPsk );
-        }
-    if ( !wlanServiceRecord->iWLanWpaPreSharedKey.IsNull() )
-        {
-        iWlanServiceRecord->iWLanWpaPreSharedKey.SetL( wlanServiceRecord->iWLanWpaPreSharedKey );
-        }
-    if ( !wlanServiceRecord->iWlanWpaKeyLength.IsNull() )
-        {
-        iWlanServiceRecord->iWlanWpaKeyLength.SetL( wlanServiceRecord->iWlanWpaKeyLength );
-        }
-    if ( !wlanServiceRecord->iWLanEaps.IsNull() )
-        {
-        iWlanServiceRecord->iWLanEaps.SetL( wlanServiceRecord->iWLanEaps );
-        }
-    if ( !wlanServiceRecord->iWlanScanSSID.IsNull() )
-        {
-        iWlanServiceRecord->iWlanScanSSID.SetL( wlanServiceRecord->iWlanScanSSID );
-        }
-    if ( !wlanServiceRecord->iWlanChannelID.IsNull() )
-        {
-        iWlanServiceRecord->iWlanChannelID.SetL( wlanServiceRecord->iWlanChannelID );
-        }
-    if ( !wlanServiceRecord->iWlanFormatKey1.IsNull() )
-        {
-        iWlanServiceRecord->iWlanFormatKey1.SetL( wlanServiceRecord->iWlanFormatKey1 );
-        }
-    if ( !wlanServiceRecord->iWlanFormatKey2.IsNull() )
-        {
-        iWlanServiceRecord->iWlanFormatKey2.SetL( wlanServiceRecord->iWlanFormatKey2 );
-        }
-    if ( !wlanServiceRecord->iWlanFormatKey3.IsNull() )
-        {
-        iWlanServiceRecord->iWlanFormatKey3.SetL( wlanServiceRecord->iWlanFormatKey3 );
-        }
-    if ( !wlanServiceRecord->iWlanFormatKey4.IsNull() )
-        {
-        iWlanServiceRecord->iWlanFormatKey4.SetL( wlanServiceRecord->iWlanFormatKey4 );
-        }
-    if ( !wlanServiceRecord->iWlanAllowSSIDRoaming.IsNull() )
-        {
-        iWlanServiceRecord->iWlanAllowSSIDRoaming.SetL( wlanServiceRecord->iWlanAllowSSIDRoaming );
-        }
-    if ( !wlanServiceRecord->iWLanEnabledEaps.IsNull() )
-        {
-        iWlanServiceRecord->iWLanEnabledEaps.SetL( wlanServiceRecord->iWLanEnabledEaps );
-        }
-    if ( !wlanServiceRecord->iWLanDisabledEaps.IsNull() )
-        {
-        iWlanServiceRecord->iWLanDisabledEaps.SetL( wlanServiceRecord->iWLanDisabledEaps );
-        }
+    iWlanServiceRecord->SetElementId( clientWlanServiceRecord->ElementId() );
 
     if ( !iWlanServiceRecord->RecordId() )
         {
         iWlanServiceRecord->SetRecordId( KCDNewRecordRequest );
         iWlanServiceRecord->StoreL( iSession );
-        wlanServiceRecord->SetElementId( iWlanServiceRecord->ElementId() );
+
+        // Update received element ID to client's copy too.
+        clientWlanServiceRecord->SetElementId( iWlanServiceRecord->ElementId() );
         }
     else
         {
@@ -1729,7 +1792,7 @@ void CCmPluginWlan::GetBearerSpecificRecordsL(
 
     if ( !iWlanServiceRecord )
         {
-        // IAP not yet in CommDat
+        // IAP not yet in CommsDat.
         GetDefaultWlanServiceRecordL( aRecordArray );
         }
     else
@@ -1738,7 +1801,6 @@ void CCmPluginWlan::GetBearerSpecificRecordsL(
         CleanupStack::PushL( wlanServiceRecord );
         CopyWlanServiceRecordL( iWlanServiceRecord, wlanServiceRecord );
         wlanServiceRecord->SetElementId( iWlanServiceRecord->ElementId() );
-        wlanServiceRecord->iWlanServiceId.SetL( iWlanServiceRecord->iWlanServiceId );
         aRecordArray.AppendL( wlanServiceRecord );
         CleanupStack::Pop( wlanServiceRecord );
         }
@@ -1754,11 +1816,120 @@ CommsDat::CCDRecordBase* CCmPluginWlan::CopyServiceRecordL()
     {
     OstTraceFunctionEntry0( CCMPLUGINWLAN_COPYSERVICERECORDL_ENTRY );
 
-    __ASSERT_DEBUG( iServiceRecord != NULL, User::Leave( KErrNotFound ));
+    // New service record to be returned.
+    CCDRecordBase* serviceRecord = static_cast<CCDLANServiceRecord*>(
+            CCDRecordBase::RecordFactoryL( KCDTIdLANServiceRecord ) );
+    CleanupStack::PushL( serviceRecord );
 
-    CCDRecordBase* serviceRecord =
-            static_cast<CCDLANServiceRecord*>(
-                    CCDRecordBase::CreateCopyRecordL( *iServiceRecord ) );
+    CCDLANServiceRecord* tempServiceRecordPtrToNew =
+            static_cast<CCDLANServiceRecord*>( serviceRecord );
+
+    // CommsDat version of service record.
+    CCDLANServiceRecord* origServiceRecord =
+            static_cast<CCDLANServiceRecord*>( iServiceRecord );
+
+    if ( !origServiceRecord->iRecordTag.IsNull() )
+        {
+        tempServiceRecordPtrToNew->iRecordTag.SetL(
+                origServiceRecord->iRecordTag );
+        }
+    if ( !origServiceRecord->iRecordName.IsNull() )
+        {
+        tempServiceRecordPtrToNew->iRecordName.SetL(
+                origServiceRecord->iRecordName );
+        }
+    if ( !origServiceRecord->iServiceEnableLlmnr.IsNull() )
+        {
+        tempServiceRecordPtrToNew->iServiceEnableLlmnr.SetL(
+                origServiceRecord->iServiceEnableLlmnr );
+        }
+    if ( !origServiceRecord->iIfNetworks.IsNull() )
+        {
+        tempServiceRecordPtrToNew->iIfNetworks.SetL(
+                origServiceRecord->iIfNetworks );
+        }
+    if ( !origServiceRecord->iIpNetmask.IsNull() )
+        {
+        tempServiceRecordPtrToNew->iIpNetmask.SetL(
+                origServiceRecord->iIpNetmask );
+        }
+    if ( !origServiceRecord->iIpGateway.IsNull() )
+        {
+        tempServiceRecordPtrToNew->iIpGateway.SetL(
+                origServiceRecord->iIpGateway );
+        }
+    if ( !origServiceRecord->iIpAddrFromServer.IsNull() )
+        {
+        tempServiceRecordPtrToNew->iIpAddrFromServer.SetL(
+                origServiceRecord->iIpAddrFromServer );
+        }
+    if ( !origServiceRecord->iIpAddr.IsNull() )
+        {
+        tempServiceRecordPtrToNew->iIpAddr.SetL(
+                origServiceRecord->iIpAddr );
+        }
+    if ( !origServiceRecord->iIpDnsAddrFromServer.IsNull() )
+        {
+        tempServiceRecordPtrToNew->iIpDnsAddrFromServer.SetL(
+                origServiceRecord->iIpDnsAddrFromServer );
+        }
+    if ( !origServiceRecord->iIpNameServer1.IsNull() )
+        {
+        tempServiceRecordPtrToNew->iIpNameServer1.SetL(
+                origServiceRecord->iIpNameServer1 );
+        }
+    if ( !origServiceRecord->iIpNameServer2.IsNull() )
+        {
+        tempServiceRecordPtrToNew->iIpNameServer2.SetL(
+                origServiceRecord->iIpNameServer2 );
+        }
+    if ( !origServiceRecord->iIp6DnsAddrFromServer.IsNull() )
+        {
+        tempServiceRecordPtrToNew->iIp6DnsAddrFromServer.SetL(
+                origServiceRecord->iIp6DnsAddrFromServer );
+        }
+    if ( !origServiceRecord->iIp6NameServer1.IsNull() )
+        {
+        tempServiceRecordPtrToNew->iIp6NameServer1.SetL(
+                origServiceRecord->iIp6NameServer1 );
+        }
+    if ( !origServiceRecord->iIp6NameServer2.IsNull() )
+        {
+        tempServiceRecordPtrToNew->iIp6NameServer2.SetL(
+                origServiceRecord->iIp6NameServer2 );
+        }
+    if ( !origServiceRecord->iIpAddrLeaseValidFrom.IsNull() )
+        {
+        tempServiceRecordPtrToNew->iIpAddrLeaseValidFrom.SetL(
+                origServiceRecord->iIpAddrLeaseValidFrom );
+        }
+    if ( !origServiceRecord->iIpAddrLeaseValidTo.IsNull() )
+        {
+        tempServiceRecordPtrToNew->iIpAddrLeaseValidTo.SetL(
+                origServiceRecord->iIpAddrLeaseValidTo );
+        }
+    if ( !origServiceRecord->iConfigDaemonManagerName.IsNull() )
+        {
+        tempServiceRecordPtrToNew->iConfigDaemonManagerName.SetL(
+                origServiceRecord->iConfigDaemonManagerName );
+        }
+    if ( !origServiceRecord->iConfigDaemonName.IsNull() )
+        {
+        tempServiceRecordPtrToNew->iConfigDaemonName.SetL(
+                origServiceRecord->iConfigDaemonName );
+        }
+    if ( !origServiceRecord->iServiceExtensionTableName.IsNull() )
+        {
+        tempServiceRecordPtrToNew->iServiceExtensionTableName.SetL(
+                origServiceRecord->iServiceExtensionTableName );
+        }
+    if ( !origServiceRecord->iServiceExtensionTableRecordId.IsNull() )
+        {
+        tempServiceRecordPtrToNew->iServiceExtensionTableRecordId.SetL(
+                origServiceRecord->iServiceExtensionTableRecordId );
+        }
+
+    CleanupStack::Pop( serviceRecord );
 
     OstTraceFunctionExit0( CCMPLUGINWLAN_COPYSERVICERECORDL_EXIT );
     return serviceRecord;
@@ -1897,10 +2068,23 @@ void CCmPluginWlan::CopyWlanServiceRecordL(
         User::Leave( KErrArgument );
         }
 
-    aDestRecord->iRecordName.SetL( aSourceRecord->iRecordName );
-    aDestRecord->iRecordTag.SetL( aSourceRecord->iRecordTag );
-    aDestRecord->iWlanConnMode.SetL( aSourceRecord->iWlanConnMode );
+    if ( !aSourceRecord->iRecordTag.IsNull() )
+        {
+        aDestRecord->iRecordTag.SetL( aSourceRecord->iRecordTag );
+        }
+    if ( !aSourceRecord->iRecordName.IsNull() )
+        {
+        aDestRecord->iRecordName.SetL( aSourceRecord->iRecordName );
+        }
 
+    if ( !aSourceRecord->iWlanServiceId.IsNull() )
+        {
+        aDestRecord->iWlanServiceId.SetL( aSourceRecord->iWlanServiceId );
+        }
+    if ( !aSourceRecord->iWlanConnMode.IsNull() )
+        {
+        aDestRecord->iWlanConnMode.SetL( aSourceRecord->iWlanConnMode );
+        }
     if ( !aSourceRecord->iWLanSSID.IsNull() )
         {
         aDestRecord->iWLanSSID.SetL( aSourceRecord->iWLanSSID );
@@ -2290,9 +2474,10 @@ void CCmPluginWlan::CopyBearerRecordsL( CCmPluginBaseEng* aCopyInstance )
     OstTraceFunctionEntry0( CCMPLUGINWLAN_COPYBEARERRECORDSL_ENTRY );
 
     CCmPluginWlan* plugin = static_cast<CCmPluginWlan*>( aCopyInstance );
-    plugin->iWlanServiceRecord = new( ELeave ) CCDWlanServiceRecord ( iWlanTableId );
+    plugin->iWlanServiceRecord = new( ELeave ) CCDWlanServiceRecord( iWlanTableId );
 
     CopyWlanServiceRecordL( iWlanServiceRecord, plugin->iWlanServiceRecord );
+    plugin->iWlanServiceRecord->iWlanServiceId.SetL( 0 );
     plugin->iWAPISupported = iWAPISupported;
 
     OstTraceFunctionExit0( CCMPLUGINWLAN_COPYBEARERRECORDSL_EXIT );
