@@ -76,7 +76,8 @@ CpIapItem::CpIapItem(
     int destId,
     bool apProtected,
     CpBearerApPluginInterface *bearerPlugin) :
-    CpSettingFormEntryItemData(itemDataHelper), 
+    CpSettingFormEntryItemData(CpSettingFormEntryItemData::ButtonEntryItem, itemDataHelper), 
+    mItemDataHelper(&itemDataHelper),
     mIapId(iapId), 
     mIapName(iapName),
     mDestId(destId),
@@ -233,10 +234,7 @@ void CpIapItem::deleteConfirmed()
         deleteSuccessful = false;
     }
     if (deleteSuccessful) {
-        HbDataForm *form = static_cast<HbDataForm*>(QObject::parent()->parent());
-        QModelIndex index = static_cast<HbDataFormModel*>(QObject::parent())->indexFromItem(this);
-        HbAbstractViewItem *viewItem = form->itemByIndex(index);
-        viewItem->deleteLater();
+        this->deleteLater();
         OstTrace0(TRACE_NORMAL, CPIAPITEM_DELETECONFIRMED, "CpIapItem::deleteConfirmed: Emit access point changed signal");
         emit iapChanged();
     } else {
@@ -261,12 +259,12 @@ void CpIapItem::updateIap(const QModelIndex index)
     }
     // Disconnect because we need to do this only after returning
     // from accees point settings view
-    HbDataForm *form = static_cast<HbDataForm*>(QObject::parent()->parent());
-    disconnect(
-        form, 
+    CpItemDataHelper *itemDataHelper = new CpItemDataHelper();
+    itemDataHelper->disconnectFromForm( 
         SIGNAL(itemShown(const QModelIndex)),
         this, 
         SLOT(updateIap(const QModelIndex)));
+    delete itemDataHelper;
     OstTrace0( TRACE_FLOW, DUP1_CPIAPITEM_UPDATEIAP_EXIT, "CpIapItem::updateIap exit" );
 }
 
@@ -279,16 +277,16 @@ CpBaseSettingView *CpIapItem::createSettingView() const
 {
     OstTraceFunctionEntry0(CPIAPITEM_CREATESETTINGVIEW_ENTRY);
     CpBaseSettingView *view = NULL;
+    CpItemDataHelper *itemDataHelper = new CpItemDataHelper();
     if (mBearerPlugin != NULL) {
-        HbDataForm *form = static_cast<HbDataForm*>(QObject::parent()->parent()); 
-        bool connected = connect(
-            form, 
+        CpIapItem *iap = const_cast<CpIapItem*>(this);
+        itemDataHelper->connectToForm( 
             SIGNAL(itemShown(const QModelIndex)),
-            this, 
+            iap, 
             SLOT(updateIap(const QModelIndex)));
-        Q_ASSERT(connected);
         view = mBearerPlugin->createSettingView(mIapId);
     }
+    delete itemDataHelper;
     OstTraceFunctionExit0(CPIAPITEM_CREATESETTINGVIEW_EXIT);
     return view;
 }

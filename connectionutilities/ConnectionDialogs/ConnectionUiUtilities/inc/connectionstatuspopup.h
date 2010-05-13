@@ -19,7 +19,7 @@
 
 // INCLUDES
 #include <e32base.h>
-#include "HbDeviceNotificationDialogSymbian.h"
+#include "hbdevicenotificationdialogsymbian.h"
 
 /**
  * CConnectionStatusPopup

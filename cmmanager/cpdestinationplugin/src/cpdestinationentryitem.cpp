@@ -28,6 +28,7 @@
 #include <HbListWidget>
 #include <HbListWidgetItem>
 #include <HbMainWindow>
+#include <HbInstance>
 #include <cppluginutility.h>
 #include <cpitemdatahelper.h>
 #include <cpbasesettingview.h>
@@ -63,7 +64,7 @@
     @param[in] itemDataHelper Helper for connecting signals and slots.
  */
 CpDestinationEntryItemData::CpDestinationEntryItemData(CpItemDataHelper &itemDataHelper)
-    : CpSettingFormEntryItemData(itemDataHelper),
+    : CpSettingFormEntryItemData(CpSettingFormEntryItemData::ButtonEntryItem, itemDataHelper),
     mList(0),
     mDialog(0),
     mOkAction(0)
@@ -235,7 +236,6 @@ void CpDestinationEntryItemData::constructSettingView(CpBaseSettingView *view) c
     }
     
     itemDataHelper->bindToForm(form);
-    delete itemDataHelper;
     OstTraceFunctionExit0(CPDESTINATIONENTRYITEMDATA_CONSTRUCTSETTINGVIEW_EXIT);
 }
 
@@ -245,8 +245,8 @@ void CpDestinationEntryItemData::constructSettingView(CpBaseSettingView *view) c
 void CpDestinationEntryItemData::updateDestinationView()
 {
     OstTraceFunctionEntry0(CPDESTINATIONENTRYITEMDATA_UPDATEDESTINATIONVIEW_ENTRY);
-    HbDataForm *form = static_cast<HbDataForm*>(QObject::parent()->parent()); 
-    HbMainWindow *mainWnd = form->mainWindow();
+    QList< HbMainWindow* > mainWindows = hbInstance->allMainWindows();            
+    HbMainWindow *mainWnd = mainWindows.front();
        
     if (mainWnd) {
         HbView *view = mainWnd->currentView();
@@ -393,8 +393,8 @@ void CpDestinationEntryItemData::deleteDestination()
 void CpDestinationEntryItemData::activateArrangeMode()
 {
     OstTraceFunctionEntry0(CPDESTINATIONENTRYITEMDATA_ACTIVATEARRANGEMODE_ENTRY);
-    HbDataForm *form = static_cast<HbDataForm*>(QObject::parent()->parent());             
-    HbMainWindow *mainWnd = form->mainWindow();
+    QList< HbMainWindow* > mainWindows = hbInstance->allMainWindows();            
+    HbMainWindow *mainWnd = mainWindows.front();
     HbView *view = new HbView();
     createArrangeModeView(view);
     
@@ -448,8 +448,8 @@ void CpDestinationEntryItemData::viewDone()
         return;
     }
     
-    HbDataForm *form = static_cast<HbDataForm*>(QObject::parent()->parent());
-    HbMainWindow *mainWnd = form->mainWindow();
+    QList< HbMainWindow* > mainWindows = hbInstance->allMainWindows();            
+    HbMainWindow *mainWnd = mainWindows.front();
     HbView* view = mainWnd->currentView();
     
     if (mainWnd && view)  {
@@ -468,8 +468,8 @@ void CpDestinationEntryItemData::viewDone()
 void CpDestinationEntryItemData::viewCancel()
 {
     OstTraceFunctionEntry0(CPDESTINATIONENTRYITEMDATA_VIEWCANCEL_ENTRY);
-    HbDataForm *form = static_cast<HbDataForm*>(QObject::parent()->parent());
-    HbMainWindow *mainWnd = form->mainWindow();
+    QList< HbMainWindow* > mainWindows = hbInstance->allMainWindows();            
+    HbMainWindow *mainWnd = mainWindows.front();
     HbView* view = mainWnd->currentView();
     
     if (mainWnd && view) {
