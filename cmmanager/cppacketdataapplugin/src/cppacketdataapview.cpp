@@ -90,25 +90,23 @@ CpPacketDataApView::CpPacketDataApView(
     Q_ASSERT(status);
 
     // Construct packet data AP settings UI
-    mForm = settingForm();
-    if (mForm) {
-        mModel = new HbDataFormModel(mForm);
-
-        // Add access point settings group
-        createAccessPointSettingsGroup();
+    mForm = new HbDataForm();
+    this->setWidget(mForm);
+    mModel = new HbDataFormModel(mForm);
+    mForm->setModel(mModel);
+    
+    // Add access point settings group
+    createAccessPointSettingsGroup();
         
-        mForm->setModel(mModel);
-        
-        status = connect(
-            mForm,
-            SIGNAL(itemShown(const QModelIndex)),
-            this,
-            SLOT(setEditorPreferences(const QModelIndex)));
-        Q_ASSERT(status);
+    status = connect(
+        mForm,
+        SIGNAL(itemShown(const QModelIndex)),
+        this,
+        SLOT(setEditorPreferences(const QModelIndex)));
+    Q_ASSERT(status);
 
-        // Expand Access point settings group
-        mForm->setExpanded(mModel->indexFromItem(mApSettingsGroupItem), true);
-    }
+    // Expand Access point settings group
+    mForm->setExpanded(mModel->indexFromItem(mApSettingsGroupItem), true);
     
     OstTraceFunctionExit0(CPPACKETDATAAPVIEW_CPPACKETDATAAPVIEW_EXIT);
 }
@@ -577,7 +575,8 @@ void CpPacketDataApView::setEditorPreferences(const QModelIndex modelIndex)
 {
     OstTraceFunctionEntry0(CPPACKETDATAAPVIEW_SETEDITORPREFERENCES_ENTRY);
     
-    HbDataFormViewItem *viewItem = mForm->dataFormViewItem(modelIndex);
+    HbDataFormViewItem *viewItem = qobject_cast<HbDataFormViewItem *>
+        (mForm->itemByIndex(modelIndex));
     HbDataFormModelItem *modelItem = mModel->itemFromIndex(modelIndex);
     
     if (modelItem == mConnectionNameItem
@@ -592,45 +591,45 @@ void CpPacketDataApView::setEditorPreferences(const QModelIndex modelIndex)
         
         if (modelItem == mConnectionNameItem) {
             // Setup editor for connection name
-            editInterface.setConstraints(HbEditorConstraintLatinAlphabetOnly);
+            editInterface.setInputConstraints(HbEditorConstraintLatinAlphabetOnly);
             edit->setInputMethodHints(Qt::ImhNoPredictiveText); 
             edit->setMaxLength(CMManagerShim::CmNameLength);
         } else if (modelItem == mAccessPointNameItem) {
             // Setup editor for packet data AP name
-            editInterface.setInputMode(HbInputModeNone);
-            editInterface.setConstraints(HbEditorConstraintLatinAlphabetOnly);
-            editInterface.setLocalDigitType(HbDigitTypeNone);
+            editInterface.setMode(HbInputModeNone);
+            editInterface.setInputConstraints(HbEditorConstraintLatinAlphabetOnly);
+            editInterface.setDigitType(HbDigitTypeNone);
             edit->setInputMethodHints(
                 Qt::ImhNoPredictiveText
                 | Qt::ImhPreferLowercase);
             edit->setMaxLength(CMManagerShim::PacketDataAPNameLength);
         } else if (modelItem == mUserNameItem) {
             // Setup editor for user name
-            editInterface.setInputMode(HbInputModeNone);
-            editInterface.setConstraints(HbEditorConstraintLatinAlphabetOnly);
+            editInterface.setMode(HbInputModeNone);
+            editInterface.setInputConstraints(HbEditorConstraintLatinAlphabetOnly);
             editInterface.setEditorClass(HbInputEditorClassUsername);
-            editInterface.setLocalDigitType(HbDigitTypeNone);
+            editInterface.setDigitType(HbDigitTypeNone);
             edit->setInputMethodHints(
                 Qt::ImhNoPredictiveText
                 | Qt::ImhPreferLowercase);
             edit->setMaxLength(CMManagerShim::PacketDataIFAuthNameLength);
         } else if (modelItem == mPasswordItem) {
             // Setup editor for password
-            editInterface.setInputMode(HbInputModeNone);
-            editInterface.setConstraints(HbEditorConstraintLatinAlphabetOnly);
+            editInterface.setMode(HbInputModeNone);
+            editInterface.setInputConstraints(HbEditorConstraintLatinAlphabetOnly);
             editInterface.setEditorClass(HbInputEditorClassPassword);
-            editInterface.setLocalDigitType(HbDigitTypeNone);
+            editInterface.setDigitType(HbDigitTypeNone);
             edit->setInputMethodHints(
                 Qt::ImhNoPredictiveText
                 | Qt::ImhPreferLowercase);
             edit->setMaxLength(CMManagerShim::PacketDataIFAuthPassLength);
         } else { /* mHomepageItem */
             // Setup editor for URL
-            editInterface.setInputMode(HbInputModeNone);
-            editInterface.setConstraints(HbEditorConstraintLatinAlphabetOnly);
+            editInterface.setMode(HbInputModeNone);
+            editInterface.setInputConstraints(HbEditorConstraintLatinAlphabetOnly);
             editInterface.setFilter(HbUrlFilter::instance());
             editInterface.setEditorClass(HbInputEditorClassUrl);
-            editInterface.setLocalDigitType(HbDigitTypeNone);
+            editInterface.setDigitType(HbDigitTypeNone);
             edit->setInputMethodHints(
                 Qt::ImhNoPredictiveText
                 | Qt::ImhPreferLowercase);

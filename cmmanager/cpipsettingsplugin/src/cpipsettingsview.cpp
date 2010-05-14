@@ -20,6 +20,7 @@
 #include <HbDataForm>
 #include <HbDataFormModel>
 #include <cpplugininterface.h>
+#include <cppluginutility.h>
 #include <cpsettingformitemdata.h>
 #include <cpitemdatahelper.h>
 
@@ -51,38 +52,38 @@ static const QString ipSettingsPlugins[] = {
 CpIpSettingsView::CpIpSettingsView(QGraphicsItem *parent) :
     CpBaseSettingView(0, parent)
 {
-    HbDataForm *form = settingForm();
-    if (form) {
-        HbDataFormModelItem *modelItem;
-        CpPluginInterface *plugin = NULL;
-        QDir pluginsDir("\\resource\\qt\\plugins\\controlpanel");
-        QPluginLoader pluginLoader;
+    HbDataForm *form = new HbDataForm();
+    this->setWidget(form);
+    CpPluginUtility::addCpItemPrototype(form);
+    HbDataFormModel *model = new HbDataFormModel(form);
 
-        HbDataFormModel *model = new HbDataFormModel;
-
-        mItemDataHelper = new CpItemDataHelper();
-        mItemDataHelper->setParent(this);
+    // The parameter given as 0 is a HbDataForm pointer, not parent
+    mItemDataHelper = new CpItemDataHelper(0);
+    mItemDataHelper->setParent(this);
+    
+    HbDataFormModelItem *modelItem;
+    CpPluginInterface *plugin = NULL;
+    QDir pluginsDir("\\resource\\qt\\plugins\\controlpanel");
+    QPluginLoader pluginLoader;
         
-        // Load listed child plugins
-        for (int i = 0; !ipSettingsPlugins[i].isEmpty(); i++) {
-            pluginLoader.setFileName(pluginsDir.absoluteFilePath(ipSettingsPlugins[i]));
-            plugin = qobject_cast<CpPluginInterface *>(pluginLoader.instance());
-            if (plugin) {
-                QList<CpSettingFormItemData*> formDataItemList =
-                    plugin->createSettingFormItemData(*mItemDataHelper);
-                for (int j = 0; j < formDataItemList.count(); j++) {
-                    modelItem = formDataItemList.at(j);
-                    if (modelItem) {
-                        model->appendDataFormItem(modelItem);
-                    }
+    // Load listed child plugins
+    for (int i = 0; !ipSettingsPlugins[i].isEmpty(); i++) {
+        pluginLoader.setFileName(pluginsDir.absoluteFilePath(ipSettingsPlugins[i]));
+        plugin = qobject_cast<CpPluginInterface *>(pluginLoader.instance());
+        if (plugin) {
+            QList<CpSettingFormItemData*> formDataItemList =
+                plugin->createSettingFormItemData(*mItemDataHelper);
+            for (int j = 0; j < formDataItemList.count(); j++) {
+                modelItem = formDataItemList.at(j);
+                if (modelItem) {
+                    model->appendDataFormItem(modelItem);
                 }
             }
         }
-
-        form->setModel(model);
-        model->setParent(form);
-        mItemDataHelper->bindToForm(form);
     }
+
+    mItemDataHelper->bindToForm(form);
+    form->setModel(model);
 }
 
 /*!

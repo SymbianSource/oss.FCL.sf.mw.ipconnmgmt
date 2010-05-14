@@ -60,12 +60,13 @@ TInt TConnMonBearerGPRS::GetAvailability( TBool& aAvailable ) const
             {
             switch ( mode )
                 {
-                case RMobilePhone::ENetworkModeGsm:
-                case RMobilePhone::ENetworkModeUnknown: // Emulator default
+                case RMobilePhone::ENetworkModeGsm:                
                     err = iConnMonIAP->GetBearerSupportInfo( EBearerIdGPRS, byCell, byPhone );
                     break;
                 case RMobilePhone::ENetworkModeWcdma:
                     err = iConnMonIAP->GetBearerSupportInfo( EBearerIdWCDMA, byCell, byPhone );
+                    break;
+                case RMobilePhone::ENetworkModeUnknown: // Emulator default
                     break;
                 default:
                     LOGEXITFN1("TConnMonBearerGPRS::GetAvailability()", err)

@@ -51,7 +51,7 @@ public:
     ~CCmmServer();
 
     /**
-     * Increments the count of the active sessions for this server
+     * Increments the count of active sessions for this server.
      */
     void IncrementSessions();
 

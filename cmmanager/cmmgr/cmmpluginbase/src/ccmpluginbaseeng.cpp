@@ -482,17 +482,18 @@ void CCmPluginBaseEng::CopyRecordsL( CCmPluginBaseEng* aCopyInstance )
 // CCmPluginBaseEng::CopyRecordDataL
 // ---------------------------------------------------------------------------
 //
-void CCmPluginBaseEng::CopyRecordDataL( TUint32 aRecordIdentifier,
-                                        CCmPluginBaseEng* aCopyInstance )
+void CCmPluginBaseEng::CopyRecordDataL(
+        TUint32 aRecordIdentifier,
+        CCmPluginBaseEng* aCopyInstance )
     {
     OstTraceFunctionEntry0( CCMPLUGINBASEENG_COPYRECORDDATAL_ENTRY );
 
-    switch( aRecordIdentifier )
+    switch ( aRecordIdentifier )
         {
         case KIapRecordIndex:
             {
-            aCopyInstance->iIapRecord =
-                static_cast<CCDIAPRecord*>( CCDRecordBase::CreateCopyRecordL( *iIapRecord ) );
+            aCopyInstance->iIapRecord = static_cast<CCDIAPRecord*>(
+                    CCDRecordBase::CreateCopyRecordL( *iIapRecord ) );
             }
             break;
         case KServiceRecordIndex:
@@ -502,25 +503,26 @@ void CCmPluginBaseEng::CopyRecordDataL( TUint32 aRecordIdentifier,
             break;
         case KNetworkRecordIndex:
             {
-            aCopyInstance->iNetworkRecord =
-                static_cast<CCDNetworkRecord*>( CCDRecordBase::CreateCopyRecordL( *iNetworkRecord ) );
+            aCopyInstance->iNetworkRecord = static_cast<CCDNetworkRecord*>(
+                    CCDRecordBase::CreateCopyRecordL( *iNetworkRecord ) );
             }
             break;
         case KWAPAPRecordIndex:
             {
-            aCopyInstance->iWapAPRecord =
-                static_cast<CCDWAPAccessPointRecord*>( CCDRecordBase::CreateCopyRecordL( *iWapAPRecord ) );
+            aCopyInstance->iWapAPRecord = static_cast<CCDWAPAccessPointRecord*>(
+                    CCDRecordBase::CreateCopyRecordL( *iWapAPRecord ) );
             }
             break;
         case KWAPBearerRecordIndex:
             {
-            aCopyInstance->iWapIPBearerRecord =
-                static_cast<CCDWAPIPBearerRecord*>( CCDRecordBase::CreateCopyRecordL( *iWapIPBearerRecord ) );
+            aCopyInstance->iWapIPBearerRecord = static_cast<CCDWAPIPBearerRecord*>(
+                    CCDRecordBase::CreateCopyRecordL( *iWapIPBearerRecord ) );
             }
             break;
         case KMetaDataRecordIndex:
             {
-            aCopyInstance->iMetaDataRecord = new (ELeave) CCDIAPMetadataRecord( iMetadataTableId );
+            aCopyInstance->iMetaDataRecord =
+                    new( ELeave ) CCDIAPMetadataRecord( iMetadataTableId );
             aCopyInstance->iMetaDataRecord->iIAP = IAPRecordElementId();
             aCopyInstance->iMetaDataRecord->iMetadata.SetL( iMetaDataRecord->iMetadata );
             aCopyInstance->iMetaDataRecord->iSeamlessness.SetL( iMetaDataRecord->iSeamlessness );
@@ -537,8 +539,8 @@ void CCmPluginBaseEng::CopyRecordDataL( TUint32 aRecordIdentifier,
             {
             if ( iProxyRecord )
                 {
-                aCopyInstance->iProxyRecord = static_cast<CCDProxiesRecord*>
-                                        ( CCDRecordBase::CreateCopyRecordL( *iProxyRecord ) );
+                aCopyInstance->iProxyRecord = static_cast<CCDProxiesRecord*>(
+                        CCDRecordBase::CreateCopyRecordL( *iProxyRecord ) );
                 }
             }
             break;
@@ -546,7 +548,9 @@ void CCmPluginBaseEng::CopyRecordDataL( TUint32 aRecordIdentifier,
             {
             User::Leave( KErrArgument );
             }
+            break;
         }
+
     OstTraceFunctionExit0( CCMPLUGINBASEENG_COPYRECORDDATAL_EXIT );
     }
 
@@ -1863,6 +1867,7 @@ void CCmPluginBaseEng::SetNameL(
         {
         User::Leave( KErrCorrupt );
         }
+
     OstTraceFunctionExit0( CCMPLUGINBASEENG_SETNAMEL_EXIT );
     }
 
@@ -1870,8 +1875,8 @@ void CCmPluginBaseEng::SetNameL(
 // CCmPluginBaseEng::CheckIfNameModifiedL
 // ---------------------------------------------------------------------------
 EXPORT_C void CCmPluginBaseEng::CheckIfNameModifiedL(
-    CCDRecordBase* aSrcRecord,
-    CCDRecordBase* aDestRecord ) const
+        CCDRecordBase* aSrcRecord,
+        CCDRecordBase* aDestRecord ) const
     {
     OstTraceFunctionEntry0( CCMPLUGINBASEENG_CHECKIFNAMEMODIFIEDL_ENTRY );
 
@@ -2165,8 +2170,8 @@ EXPORT_C void CCmPluginBaseEng::GetPluginDataL(
 // CCmPluginBaseEng::GetIntAttributeL
 // -----------------------------------------------------------------------------
 EXPORT_C TUint32 CCmPluginBaseEng::GetIntAttributeL(
-    TUint32 aAttribute,
-    CCmClientPluginInstance* aClientPluginInstance )
+        TUint32 aAttribute,
+        CCmClientPluginInstance* aClientPluginInstance )
     {
     OstTraceFunctionEntry0( CCMPLUGINBASEENG_GETINTATTRIBUTEL_ENTRY );
 
@@ -2275,15 +2280,15 @@ EXPORT_C TUint32 CCmPluginBaseEng::GetIntAttributeL(
             break;
         default:
             {
-            retVal = GetBearerIntAttributeL( aAttribute,
-                                             aClientPluginInstance->iGenRecordArray,
-                                             aClientPluginInstance->iBearerSpecRecordArray );
+            retVal = GetBearerIntAttributeL(
+                    aAttribute,
+                    aClientPluginInstance->iGenRecordArray,
+                    aClientPluginInstance->iBearerSpecRecordArray );
             }
             break;
         }
 
     OstTraceFunctionExit0( CCMPLUGINBASEENG_GETINTATTRIBUTEL_EXIT );
-
     return retVal;
     }
 
@@ -2291,8 +2296,8 @@ EXPORT_C TUint32 CCmPluginBaseEng::GetIntAttributeL(
 // CCmPluginBaseEng::GetBoolAttributeL
 // -----------------------------------------------------------------------------
 EXPORT_C TBool CCmPluginBaseEng::GetBoolAttributeL(
-    TUint32 aAttribute,
-    CCmClientPluginInstance* aClientPluginInstance )
+        TUint32 aAttribute,
+        CCmClientPluginInstance* aClientPluginInstance )
     {
     OstTraceFunctionEntry0( CCMPLUGINBASEENG_GETBOOLATTRIBUTEL_ENTRY );
 
@@ -2308,7 +2313,7 @@ EXPORT_C TBool CCmPluginBaseEng::GetBoolAttributeL(
         case ECmHidden:
             {
             CCDIAPRecord* iapRecord = static_cast<CCDIAPRecord*>(
-                                aClientPluginInstance->iGenRecordArray[KIapRecordIndex] );
+                    aClientPluginInstance->iGenRecordArray[KIapRecordIndex] );
             retVal = iapRecord->Attributes() & ECDHidden;
             }
             break;
@@ -2347,7 +2352,7 @@ EXPORT_C TBool CCmPluginBaseEng::GetBoolAttributeL(
             }
             break;
         case ECmCoverage:
-            // In default the plugin has no network coverage
+            // By default the plugin has no network coverage.
             {
             TRAPD( err, retVal = GetBearerBoolAttributeL( aAttribute,
                                                           aClientPluginInstance->iGenRecordArray,
@@ -2394,14 +2399,14 @@ EXPORT_C TBool CCmPluginBaseEng::GetBoolAttributeL(
             break;
         default:
             {
-            retVal = GetBearerBoolAttributeL( aAttribute,
-                                              aClientPluginInstance->iGenRecordArray,
-                                              aClientPluginInstance->iBearerSpecRecordArray );
+            retVal = GetBearerBoolAttributeL(
+                    aAttribute,
+                    aClientPluginInstance->iGenRecordArray,
+                    aClientPluginInstance->iBearerSpecRecordArray );
             }
         }
 
     OstTraceFunctionExit0( CCMPLUGINBASEENG_GETBOOLATTRIBUTEL_EXIT );
-
     return retVal;
     }
 
@@ -2410,8 +2415,8 @@ EXPORT_C TBool CCmPluginBaseEng::GetBoolAttributeL(
 // -----------------------------------------------------------------------------
 //
 EXPORT_C HBufC* CCmPluginBaseEng::GetStringAttributeL(
-    TUint32 aAttribute,
-    CCmClientPluginInstance* aClientPluginInstance )
+        TUint32 aAttribute,
+        CCmClientPluginInstance* aClientPluginInstance )
     {
     OstTraceFunctionEntry0( CCMPLUGINBASEENG_GETSTRINGATTRIBUTEL_ENTRY );
 
@@ -2425,13 +2430,14 @@ EXPORT_C HBufC* CCmPluginBaseEng::GetStringAttributeL(
                 static_cast<CCDWAPAccessPointRecord*>(
                     aClientPluginInstance->iGenRecordArray[KWAPAPRecordIndex] );
 
-            retVal = TPtrC( wapAPRecord->iWAPStartPage).AllocL();
+            retVal = TPtrC( wapAPRecord->iWAPStartPage ).AllocL();
             }
             break;
         case ECmName:
             {
             CCDIAPRecord* iapRecord = static_cast<CCDIAPRecord*>(
-                                aClientPluginInstance->iGenRecordArray[KIapRecordIndex] );
+                    aClientPluginInstance->iGenRecordArray[KIapRecordIndex] );
+
             retVal = TPtrC( iapRecord->iRecordName ).AllocL();
             }
             break;
@@ -2515,14 +2521,15 @@ EXPORT_C HBufC* CCmPluginBaseEng::GetStringAttributeL(
             break;
         default:
             {
-            retVal = GetBearerStringAttributeL( aAttribute,
-                                                aClientPluginInstance->iGenRecordArray,
-                                                aClientPluginInstance->iBearerSpecRecordArray );
+            retVal = GetBearerStringAttributeL(
+                    aAttribute,
+                    aClientPluginInstance->iGenRecordArray,
+                    aClientPluginInstance->iBearerSpecRecordArray );
             }
+            break;
         }
 
     OstTraceFunctionExit0( CCMPLUGINBASEENG_GETSTRINGATTRIBUTEL_EXIT );
-
     return retVal;
     }
 
@@ -2531,8 +2538,8 @@ EXPORT_C HBufC* CCmPluginBaseEng::GetStringAttributeL(
 // -----------------------------------------------------------------------------
 //
 EXPORT_C HBufC8* CCmPluginBaseEng::GetString8AttributeL(
-    TUint32 aAttribute,
-    CCmClientPluginInstance* aClientPluginInstance )
+        TUint32 aAttribute,
+        CCmClientPluginInstance* aClientPluginInstance )
     {
     OstTraceFunctionEntry0( CCMPLUGINBASEENG_GETSTRING8ATTRIBUTEL_ENTRY );
 
@@ -2542,14 +2549,14 @@ EXPORT_C HBufC8* CCmPluginBaseEng::GetString8AttributeL(
         {
         default:
             {
-            retVal = GetBearerString8AttributeL( aAttribute,
-                                                 aClientPluginInstance->iGenRecordArray,
-                                                 aClientPluginInstance->iBearerSpecRecordArray );
+            retVal = GetBearerString8AttributeL(
+                    aAttribute,
+                    aClientPluginInstance->iGenRecordArray,
+                    aClientPluginInstance->iBearerSpecRecordArray );
             }
         }
 
     OstTraceFunctionExit0( CCMPLUGINBASEENG_GETSTRING8ATTRIBUTEL_EXIT );
-
     return retVal;
     }
 

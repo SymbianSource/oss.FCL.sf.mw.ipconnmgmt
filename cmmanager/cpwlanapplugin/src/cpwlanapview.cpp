@@ -35,6 +35,7 @@
 #include <wlanmgmtcommon.h>
 #include <cpitemdatahelper.h>
 #include <cpsettingformitemdata.h>
+#include <cppluginutility.h>
 #include <cmconnectionmethod_shim.h>
 #include <cpwlansecurityplugininterface.h>
 
@@ -99,34 +100,34 @@ CpWlanApView::CpWlanApView(
     Q_ASSERT(status);
 
     // Construct WLAN AP settings UI
-    mForm = settingForm();
-    if (mForm) {
-        mModel = new HbDataFormModel(mForm);
+    mForm = new HbDataForm();
+    this->setWidget(mForm);
+    CpPluginUtility::addCpItemPrototype(mForm);
+    mModel = new HbDataFormModel(mForm);
+    
+    // The parameter given as 0 is a HbDataForm pointer, not parent
+    mItemDataHelper = new CpItemDataHelper(0);
+    mItemDataHelper->setParent(this);
 
-        // The parameter given as 0 is a HbDataForm pointer, not parent
-        mItemDataHelper = new CpItemDataHelper(0);
-        mItemDataHelper->setParent(this);
-
-        // Add access point settings group
-        createAccessPointSettingsGroup();
+    // Add access point settings group
+    createAccessPointSettingsGroup();
         
-        mItemDataHelper->bindToForm(mForm);
-        mForm->setModel(mModel);
+    mItemDataHelper->bindToForm(mForm);
+    mForm->setModel(mModel);
 
-        status = connect(
-            mForm,
-            SIGNAL(itemShown(const QModelIndex)),
-            this,
-            SLOT(setEditorPreferences(const QModelIndex)));
-        Q_ASSERT(status);
+    status = connect(
+        mForm,
+        SIGNAL(itemShown(const QModelIndex)),
+        this,
+        SLOT(setEditorPreferences(const QModelIndex)));
+    Q_ASSERT(status);
 
-        // Expand access point settings group
-        mForm->setExpanded(mModel->indexFromItem(mApSettingsGroupItem), TRUE);
+    // Expand access point settings group
+    mForm->setExpanded(mModel->indexFromItem(mApSettingsGroupItem), TRUE);
         
-        // Add security settings group if necessary
-        updateSecurityGroup(
-            mSecurityModeItem->contentWidgetData("currentIndex").toInt());
-    }
+    // Add security settings group if necessary
+    updateSecurityGroup(
+        mSecurityModeItem->contentWidgetData("currentIndex").toInt());
     
     OstTraceFunctionExit0(CPWLANAPVIEW_CPWLANAPVIEW_EXIT);
 }
@@ -667,7 +668,8 @@ void CpWlanApView::setEditorPreferences(const QModelIndex modelIndex)
 {
     OstTraceFunctionEntry0(CPWLANAPVIEW_SETEDITORPREFERENCES_ENTRY);
     
-    HbDataFormViewItem *viewItem = mForm->dataFormViewItem(modelIndex);
+    HbDataFormViewItem *viewItem = qobject_cast<HbDataFormViewItem *>
+        (mForm->itemByIndex(modelIndex));
     HbDataFormModelItem *modelItem = mModel->itemFromIndex(modelIndex);
     
     if (modelItem == mConnectionNameItem
@@ -680,26 +682,25 @@ void CpWlanApView::setEditorPreferences(const QModelIndex modelIndex)
         
         if (modelItem == mConnectionNameItem) {
             // Setup editor for connection name
-            editInterface.setConstraints(HbEditorConstraintLatinAlphabetOnly);
+            editInterface.setInputConstraints(HbEditorConstraintLatinAlphabetOnly);
             edit->setInputMethodHints(Qt::ImhNoPredictiveText); 
             edit->setMaxLength(CMManagerShim::CmNameLength);
         } else if (modelItem == mWlanNetworkNameItem) {
             // Setup editor for WLAN SSID
-            editInterface.setInputMode(HbInputModeNone);
-            editInterface.setConstraints(HbEditorConstraintLatinAlphabetOnly);
-            // TODO: Remove comment, should be in w12
-            //editInterface.setEditorClass(HbInputEditorClassNetworkName); 
-            editInterface.setLocalDigitType(HbDigitTypeNone);
+            editInterface.setMode(HbInputModeNone);
+            editInterface.setInputConstraints(HbEditorConstraintLatinAlphabetOnly);
+            editInterface.setEditorClass(HbInputEditorClassNetworkName); 
+            editInterface.setDigitType(HbDigitTypeNone);
             edit->setInputMethodHints(
                 Qt::ImhNoPredictiveText | Qt::ImhPreferLowercase);
             edit->setMaxLength(CMManagerShim::WlanSSIDLength);
         } else { /* mHomepageItem */
             // Setup editor for URL
-            editInterface.setInputMode(HbInputModeNone);
-            editInterface.setConstraints(HbEditorConstraintLatinAlphabetOnly);
+            editInterface.setMode(HbInputModeNone);
+            editInterface.setInputConstraints(HbEditorConstraintLatinAlphabetOnly);
             editInterface.setFilter(HbUrlFilter::instance());
             editInterface.setEditorClass(HbInputEditorClassUrl);
-            editInterface.setLocalDigitType(HbDigitTypeNone);
+            editInterface.setDigitType(HbDigitTypeNone);
             edit->setInputMethodHints(
                 Qt::ImhNoPredictiveText | Qt::ImhPreferLowercase);
             edit->setMaxLength(CMManagerShim::CmStartPageLength);

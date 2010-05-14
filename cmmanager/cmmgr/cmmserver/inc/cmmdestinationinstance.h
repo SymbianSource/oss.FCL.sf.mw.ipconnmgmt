@@ -269,7 +269,12 @@ public:
 
 private:
     TBool AllMandatoryRecordsContainData() const;
+
+    /**
+     * Loads a requested type of record from database if it is not yet loaded.
+     */
     void RefreshRecordL( TCmmDbRecords aRecordType );
+
     void LoadAllRecordsL();
     void SetMetadataInternetL( const TUint32& aMetadata );
     void SetMetadataHighlight( const TUint32& aMetadata );

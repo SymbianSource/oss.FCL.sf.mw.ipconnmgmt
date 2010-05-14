@@ -157,7 +157,7 @@ TBool CCmPluginLan::CanHandleIapIdL( TUint32 aIapId ) const
 
     TRAPD( err, iapRecord->LoadL( iSession ) );
 
-    if( !err )
+    if ( !err )
         {
         retVal = CanHandleIapIdL( iapRecord );
         }
@@ -179,7 +179,7 @@ TBool CCmPluginLan::CanHandleIapIdL( CCDIAPRecord *aIapRecord ) const
 
     TBool retVal( EFalse );
 
-    if( (TPtrC( aIapRecord->iServiceType ) == TPtrC( KCDTypeNameLANService ) ) &&
+    if ( (TPtrC( aIapRecord->iServiceType ) == TPtrC( KCDTypeNameLANService ) ) &&
         TPtrC( aIapRecord->iBearerType ) == TPtrC( KCDTypeNameLANBearer ) )
         {
         retVal = ETrue;
@@ -251,7 +251,7 @@ void CCmPluginLan::CreateServiceRecordL()
     CCDLANServiceRecord* lanServiceRecord = static_cast<CCDLANServiceRecord *>( iServiceRecord );
 
 
-    if( FeatureManager::FeatureSupported( KFeatureIdIPv6 ) )
+    if ( FeatureManager::FeatureSupported( KFeatureIdIPv6 ) )
         {
         lanServiceRecord->iIfNetworks.SetL( KDefIspIfNetworksIPv4IPv6LAN );
         }
@@ -294,19 +294,20 @@ void CCmPluginLan::LoadServiceRecordL()
     {
     OstTraceFunctionEntry0( CCMPLUGINLAN_LOADSERVICERECORDL_ENTRY );
 
-    if( TPtrC( KCDTypeNameLANService ) == iIapRecord->iServiceType )
+    if ( TPtrC( KCDTypeNameLANService ) == iIapRecord->iServiceType )
         {
-        iServiceRecord = static_cast<CCDLANServiceRecord *>
-                    (CCDRecordBase::RecordFactoryL(KCDTIdLANServiceRecord));
+        iServiceRecord = static_cast<CCDLANServiceRecord *>(
+                CCDRecordBase::RecordFactoryL( KCDTIdLANServiceRecord ) );
 
         ServiceRecord().SetRecordId( iIapRecord->iService );
         ServiceRecord().LoadL( iSession );
         }
     else
-        // this IAP service is not supported by this plugin.
         {
+        // This IAP service is not supported by this plugin.
         User::Leave( KErrNotSupported );
         }
+
     OstTraceFunctionExit0( CCMPLUGINLAN_LOADSERVICERECORDL_EXIT );
     }
 
@@ -317,7 +318,6 @@ void CCmPluginLan::LoadServiceRecordL()
 void CCmPluginLan::PrepareToCopyDataL( CCmPluginBaseEng* /*aCopyInstance*/ )
     {
     OstTraceFunctionEntry0( CCMPLUGINLAN_PREPARETOCOPYDATAL_ENTRY );
-
     OstTraceFunctionExit0( CCMPLUGINLAN_PREPARETOCOPYDATAL_EXIT );
     }
 
@@ -329,13 +329,122 @@ CommsDat::CCDRecordBase* CCmPluginLan::CopyServiceRecordL()
     {
     OstTraceFunctionEntry0( CCMPLUGINLAN_COPYSERVICERECORDL_ENTRY );
 
-    __ASSERT_DEBUG( iServiceRecord != NULL, User::Leave( KErrNotFound ));
+    // New service record to be returned.
+    CCDRecordBase* serviceRecord = static_cast<CCDLANServiceRecord*>(
+            CCDRecordBase::RecordFactoryL( KCDTIdLANServiceRecord ) );
+    CleanupStack::PushL( serviceRecord );
 
-    CCDRecordBase* serviceRecord = static_cast<CCDLANServiceRecord*>
-                                  ( CCDRecordBase::CreateCopyRecordL( *iServiceRecord ) );
+    CCDLANServiceRecord* tempServiceRecordPtrToNew =
+            static_cast<CCDLANServiceRecord*>( serviceRecord );
+
+    // CommsDat version of service record.
+    CCDLANServiceRecord* origServiceRecord =
+            static_cast<CCDLANServiceRecord*>( iServiceRecord );
+
+    if ( !origServiceRecord->iRecordTag.IsNull() )
+        {
+        tempServiceRecordPtrToNew->iRecordTag.SetL(
+                origServiceRecord->iRecordTag );
+        }
+    if ( !origServiceRecord->iRecordName.IsNull() )
+        {
+        tempServiceRecordPtrToNew->iRecordName.SetL(
+                origServiceRecord->iRecordName );
+        }
+    if ( !origServiceRecord->iServiceEnableLlmnr.IsNull() )
+        {
+        tempServiceRecordPtrToNew->iServiceEnableLlmnr.SetL(
+                origServiceRecord->iServiceEnableLlmnr );
+        }
+    if ( !origServiceRecord->iIfNetworks.IsNull() )
+        {
+        tempServiceRecordPtrToNew->iIfNetworks.SetL(
+                origServiceRecord->iIfNetworks );
+        }
+    if ( !origServiceRecord->iIpNetmask.IsNull() )
+        {
+        tempServiceRecordPtrToNew->iIpNetmask.SetL(
+                origServiceRecord->iIpNetmask );
+        }
+    if ( !origServiceRecord->iIpGateway.IsNull() )
+        {
+        tempServiceRecordPtrToNew->iIpGateway.SetL(
+                origServiceRecord->iIpGateway );
+        }
+    if ( !origServiceRecord->iIpAddrFromServer.IsNull() )
+        {
+        tempServiceRecordPtrToNew->iIpAddrFromServer.SetL(
+                origServiceRecord->iIpAddrFromServer );
+        }
+    if ( !origServiceRecord->iIpAddr.IsNull() )
+        {
+        tempServiceRecordPtrToNew->iIpAddr.SetL(
+                origServiceRecord->iIpAddr );
+        }
+    if ( !origServiceRecord->iIpDnsAddrFromServer.IsNull() )
+        {
+        tempServiceRecordPtrToNew->iIpDnsAddrFromServer.SetL(
+                origServiceRecord->iIpDnsAddrFromServer );
+        }
+    if ( !origServiceRecord->iIpNameServer1.IsNull() )
+        {
+        tempServiceRecordPtrToNew->iIpNameServer1.SetL(
+                origServiceRecord->iIpNameServer1 );
+        }
+    if ( !origServiceRecord->iIpNameServer2.IsNull() )
+        {
+        tempServiceRecordPtrToNew->iIpNameServer2.SetL(
+                origServiceRecord->iIpNameServer2 );
+        }
+    if ( !origServiceRecord->iIp6DnsAddrFromServer.IsNull() )
+        {
+        tempServiceRecordPtrToNew->iIp6DnsAddrFromServer.SetL(
+                origServiceRecord->iIp6DnsAddrFromServer );
+        }
+    if ( !origServiceRecord->iIp6NameServer1.IsNull() )
+        {
+        tempServiceRecordPtrToNew->iIp6NameServer1.SetL(
+                origServiceRecord->iIp6NameServer1 );
+        }
+    if ( !origServiceRecord->iIp6NameServer2.IsNull() )
+        {
+        tempServiceRecordPtrToNew->iIp6NameServer2.SetL(
+                origServiceRecord->iIp6NameServer2 );
+        }
+    if ( !origServiceRecord->iIpAddrLeaseValidFrom.IsNull() )
+        {
+        tempServiceRecordPtrToNew->iIpAddrLeaseValidFrom.SetL(
+                origServiceRecord->iIpAddrLeaseValidFrom );
+        }
+    if ( !origServiceRecord->iIpAddrLeaseValidTo.IsNull() )
+        {
+        tempServiceRecordPtrToNew->iIpAddrLeaseValidTo.SetL(
+                origServiceRecord->iIpAddrLeaseValidTo );
+        }
+    if ( !origServiceRecord->iConfigDaemonManagerName.IsNull() )
+        {
+        tempServiceRecordPtrToNew->iConfigDaemonManagerName.SetL(
+                origServiceRecord->iConfigDaemonManagerName );
+        }
+    if ( !origServiceRecord->iConfigDaemonName.IsNull() )
+        {
+        tempServiceRecordPtrToNew->iConfigDaemonName.SetL(
+                origServiceRecord->iConfigDaemonName );
+        }
+    if ( !origServiceRecord->iServiceExtensionTableName.IsNull() )
+        {
+        tempServiceRecordPtrToNew->iServiceExtensionTableName.SetL(
+                origServiceRecord->iServiceExtensionTableName );
+        }
+    if ( !origServiceRecord->iServiceExtensionTableRecordId.IsNull() )
+        {
+        tempServiceRecordPtrToNew->iServiceExtensionTableRecordId.SetL(
+                origServiceRecord->iServiceExtensionTableRecordId );
+        }
+
+    CleanupStack::Pop( serviceRecord );
 
     OstTraceFunctionExit0( CCMPLUGINLAN_COPYSERVICERECORDL_EXIT );
-
     return serviceRecord;
     }
 
@@ -344,102 +453,120 @@ CommsDat::CCDRecordBase* CCmPluginLan::CopyServiceRecordL()
 // ----------------------------------------------------------------------------
 //
 void CCmPluginLan::UpdateServiceRecordL(
-    RPointerArray<CommsDat::CCDRecordBase>& aGenRecordArray,
-    RPointerArray<CommsDat::CCDRecordBase>& /*aBearerSpecRecordArray*/ )
+        RPointerArray<CommsDat::CCDRecordBase>& aGenRecordArray,
+        RPointerArray<CommsDat::CCDRecordBase>& /*aBearerSpecRecordArray*/ )
     {
     OstTraceFunctionEntry0( CCMPLUGINLAN_UPDATESERVICERECORDL_ENTRY );
 
-    // Delete the original record and create a copy from the parameter
+    // Delete the original record and create a copy from the client's copy.
     delete iServiceRecord;
     iServiceRecord = NULL;
 
-    iServiceRecord = static_cast<CCDLANServiceRecord*>
-                    (CCDRecordBase::RecordFactoryL( KCDTIdLANServiceRecord ) );
+    iServiceRecord = static_cast<CCDLANServiceRecord*>(
+            CCDRecordBase::RecordFactoryL( KCDTIdLANServiceRecord ) );
 
-    // LAN Service copy does not work so we have to copy it manually
+    CCDLANServiceRecord* origServiceRecord = static_cast<CCDLANServiceRecord*>( iServiceRecord );
 
-    CCDLANServiceRecord* lanServiceRecordTo = static_cast<CCDLANServiceRecord *>( iServiceRecord );
-    CCDLANServiceRecord* lanServiceRecordFrom =
-                static_cast<CCDLANServiceRecord *>( aGenRecordArray[KServiceRecordIndex] );
+    // Client's copy of lan service record.
+    CCDLANServiceRecord* clientServiceRecordCopy =
+            static_cast<CCDLANServiceRecord*>( aGenRecordArray[KServiceRecordIndex] );
 
-    if( !lanServiceRecordFrom->iRecordName.IsNull() )
+    // LAN Service copy does not work so we have to copy it manually.
+
+    if ( !clientServiceRecordCopy->iRecordTag.IsNull() )
         {
-        lanServiceRecordTo->iRecordName.SetL( lanServiceRecordFrom->iRecordName );
+        origServiceRecord->iRecordTag.SetL( clientServiceRecordCopy->iRecordTag );
         }
-    if( !lanServiceRecordFrom->iIfNetworks.IsNull() )
+    if ( !clientServiceRecordCopy->iRecordName.IsNull() )
         {
-        lanServiceRecordTo->iIfNetworks.SetL( lanServiceRecordFrom->iIfNetworks );
+        origServiceRecord->iRecordName.SetL( clientServiceRecordCopy->iRecordName );
         }
-    if( !lanServiceRecordFrom->iIpNetmask.IsNull() )
+    if ( !clientServiceRecordCopy->iServiceEnableLlmnr.IsNull() )
         {
-        lanServiceRecordTo->iIpNetmask.SetL( lanServiceRecordFrom->iIpNetmask );
+        origServiceRecord->iServiceEnableLlmnr.SetL( clientServiceRecordCopy->iServiceEnableLlmnr );
         }
-    if( !lanServiceRecordFrom->iIpGateway.IsNull() )
+    if ( !clientServiceRecordCopy->iIfNetworks.IsNull() )
         {
-        lanServiceRecordTo->iIpGateway.SetL( lanServiceRecordFrom->iIpGateway );
+        origServiceRecord->iIfNetworks.SetL( clientServiceRecordCopy->iIfNetworks );
         }
-    if( !lanServiceRecordFrom->iIpAddrFromServer.IsNull() )
+    if ( !clientServiceRecordCopy->iIpNetmask.IsNull() )
         {
-        lanServiceRecordTo->iIpAddrFromServer.SetL( lanServiceRecordFrom->iIpAddrFromServer );
+        origServiceRecord->iIpNetmask.SetL( clientServiceRecordCopy->iIpNetmask );
         }
-    if( !lanServiceRecordFrom->iIpAddr.IsNull() )
+    if ( !clientServiceRecordCopy->iIpGateway.IsNull() )
         {
-        lanServiceRecordTo->iIpAddr.SetL( lanServiceRecordFrom->iIpAddr );
+        origServiceRecord->iIpGateway.SetL( clientServiceRecordCopy->iIpGateway );
         }
-    if( !lanServiceRecordFrom->iIpDnsAddrFromServer.IsNull() )
+    if ( !clientServiceRecordCopy->iIpAddrFromServer.IsNull() )
         {
-        lanServiceRecordTo->iIpDnsAddrFromServer.SetL( lanServiceRecordFrom->iIpDnsAddrFromServer );
+        origServiceRecord->iIpAddrFromServer.SetL( clientServiceRecordCopy->iIpAddrFromServer );
         }
-    if( !lanServiceRecordFrom->iIpNameServer1.IsNull() )
+    if ( !clientServiceRecordCopy->iIpAddr.IsNull() )
         {
-        lanServiceRecordTo->iIpNameServer1.SetL( lanServiceRecordFrom->iIpNameServer1 );
+        origServiceRecord->iIpAddr.SetL( clientServiceRecordCopy->iIpAddr );
         }
-    if( !lanServiceRecordFrom->iIpNameServer2.IsNull() )
+    if ( !clientServiceRecordCopy->iIpDnsAddrFromServer.IsNull() )
         {
-        lanServiceRecordTo->iIpNameServer2.SetL( lanServiceRecordFrom->iIpNameServer2 );
+        origServiceRecord->iIpDnsAddrFromServer.SetL( clientServiceRecordCopy->iIpDnsAddrFromServer );
         }
-    if( !lanServiceRecordFrom->iIp6DnsAddrFromServer.IsNull() )
+    if ( !clientServiceRecordCopy->iIpNameServer1.IsNull() )
         {
-        lanServiceRecordTo->iIp6DnsAddrFromServer.SetL( lanServiceRecordFrom->iIp6DnsAddrFromServer );
+        origServiceRecord->iIpNameServer1.SetL( clientServiceRecordCopy->iIpNameServer1 );
         }
-    if( !lanServiceRecordFrom->iIp6NameServer1.IsNull() )
+    if ( !clientServiceRecordCopy->iIpNameServer2.IsNull() )
         {
-        lanServiceRecordTo->iIp6NameServer1.SetL( lanServiceRecordFrom->iIp6NameServer1 );
+        origServiceRecord->iIpNameServer2.SetL( clientServiceRecordCopy->iIpNameServer2 );
         }
-    if( !lanServiceRecordFrom->iIp6NameServer2.IsNull() )
+    if ( !clientServiceRecordCopy->iIp6DnsAddrFromServer.IsNull() )
         {
-        lanServiceRecordTo->iIp6NameServer2.SetL( lanServiceRecordFrom->iIp6NameServer2 );
+        origServiceRecord->iIp6DnsAddrFromServer.SetL( clientServiceRecordCopy->iIp6DnsAddrFromServer );
         }
-    if( !lanServiceRecordFrom->iIpAddrLeaseValidFrom.IsNull() )
+    if ( !clientServiceRecordCopy->iIp6NameServer1.IsNull() )
         {
-        lanServiceRecordTo->iIpAddrLeaseValidFrom.SetL( lanServiceRecordFrom->iIpAddrLeaseValidFrom );
+        origServiceRecord->iIp6NameServer1.SetL( clientServiceRecordCopy->iIp6NameServer1 );
         }
-    if( !lanServiceRecordFrom->iIpAddrLeaseValidTo.IsNull() )
+    if ( !clientServiceRecordCopy->iIp6NameServer2.IsNull() )
         {
-        lanServiceRecordTo->iIpAddrLeaseValidTo.SetL( lanServiceRecordFrom->iIpAddrLeaseValidTo );
+        origServiceRecord->iIp6NameServer2.SetL( clientServiceRecordCopy->iIp6NameServer2 );
         }
-    if( !lanServiceRecordFrom->iConfigDaemonManagerName.IsNull() )
+    if ( !clientServiceRecordCopy->iIpAddrLeaseValidFrom.IsNull() )
         {
-        lanServiceRecordTo->iConfigDaemonManagerName.SetL( lanServiceRecordFrom->iConfigDaemonManagerName );
+        origServiceRecord->iIpAddrLeaseValidFrom.SetL( clientServiceRecordCopy->iIpAddrLeaseValidFrom );
         }
-    if( !lanServiceRecordFrom->iConfigDaemonName.IsNull() )
+    if ( !clientServiceRecordCopy->iIpAddrLeaseValidTo.IsNull() )
         {
-        lanServiceRecordTo->iConfigDaemonName.SetL( lanServiceRecordFrom->iConfigDaemonName );
+        origServiceRecord->iIpAddrLeaseValidTo.SetL( clientServiceRecordCopy->iIpAddrLeaseValidTo );
+        }
+    if ( !clientServiceRecordCopy->iConfigDaemonManagerName.IsNull() )
+        {
+        origServiceRecord->iConfigDaemonManagerName.SetL( clientServiceRecordCopy->iConfigDaemonManagerName );
+        }
+    if ( !clientServiceRecordCopy->iConfigDaemonName.IsNull() )
+        {
+        origServiceRecord->iConfigDaemonName.SetL( clientServiceRecordCopy->iConfigDaemonName );
+        }
+    if ( !clientServiceRecordCopy->iServiceExtensionTableName.IsNull() )
+        {
+        origServiceRecord->iServiceExtensionTableName.SetL( clientServiceRecordCopy->iServiceExtensionTableName );
+        }
+    if ( !clientServiceRecordCopy->iServiceExtensionTableRecordId.IsNull() )
+        {
+        origServiceRecord->iServiceExtensionTableRecordId.SetL( clientServiceRecordCopy->iServiceExtensionTableRecordId ); //TODO, check this works ok.
         }
 
-    lanServiceRecordTo->SetElementId( lanServiceRecordFrom->ElementId() );
+    origServiceRecord->SetElementId( clientServiceRecordCopy->ElementId() );
 
-    if ( !ServiceRecord().RecordId() )
+    if ( !origServiceRecord->RecordId() )
         {
-        ServiceRecord().SetRecordId( KCDNewRecordRequest );
-        ServiceRecord().StoreL( iSession );
+        origServiceRecord->SetRecordId( KCDNewRecordRequest );
+        origServiceRecord->StoreL( iSession );
 
-        // Update needed values to record tables too( lanservice and wlanservice )
-        lanServiceRecordFrom->SetElementId( ServiceRecord().ElementId() );
+        // Update received element ID to client's copy too.
+        clientServiceRecordCopy->SetElementId( origServiceRecord->ElementId() );
         }
     else
         {
-        ServiceRecord().ModifyL( iSession );
+        origServiceRecord->ModifyL( iSession );
         }
 
     OstTraceFunctionExit0( CCMPLUGINLAN_UPDATESERVICERECORDL_EXIT );
@@ -709,6 +836,18 @@ TUint32 CCmPluginLan::GetBearerIntAttributeL(
             retVal = KDefaultPriorityLAN;
             }
             break;
+        case ELanServiceExtensionTableRecordId:
+            {
+            if ( !serviceRecord->iServiceExtensionTableRecordId.IsNull() )
+                {
+                retVal = serviceRecord->iServiceExtensionTableRecordId.RecordId();
+                }
+            else
+                {
+                retVal = 0;
+                }
+            }
+            break;
         default:
             {
             User::Leave( KErrNotSupported );
@@ -808,117 +947,78 @@ HBufC* CCmPluginLan::GetBearerStringAttributeL(
         case ECmIFNetworks:
         case ELanIfNetworks:
             {
-            if ( !serviceRecord->iIfNetworks.IsNull() )
-                {
-                retVal = TPtrC( serviceRecord->iIfNetworks ).AllocL();
-                }
+            retVal = TPtrC( serviceRecord->iIfNetworks ).AllocL();
             }
             break;
         case ECmIPNetmask:
         case ELanIpNetMask:
             {
-            if ( !serviceRecord->iIpNetmask.IsNull() )
-                {
-                retVal = TPtrC( serviceRecord->iIpNetmask ).AllocL();
-                }
+            retVal = TPtrC( serviceRecord->iIpNetmask ).AllocL();
             }
             break;
         case ECmIPGateway:
         case ELanIpGateway:
             {
-            if ( !serviceRecord->iIpGateway.IsNull() )
-                {
-                retVal = TPtrC( serviceRecord->iIpGateway ).AllocL();
-                }
+            retVal = TPtrC( serviceRecord->iIpGateway ).AllocL();
             }
             break;
         case ECmIPAddress:
         case ELanIpAddr:
             {
-            if ( !serviceRecord->iIpAddr.IsNull() )
-                {
-                retVal = TPtrC( serviceRecord->iIpAddr ).AllocL();
-                }
+            retVal = TPtrC( serviceRecord->iIpAddr ).AllocL();
             }
             break;
         case ECmIPNameServer1:
         case ELanIpNameServer1:
             {
-            if ( !serviceRecord->iIpNameServer1.IsNull() )
-                {
-                retVal = TPtrC( serviceRecord->iIpNameServer1 ).AllocL();
-                }
+            retVal = TPtrC( serviceRecord->iIpNameServer1 ).AllocL();
             }
             break;
         case ECmIPNameServer2:
         case ELanIpNameServer2:
             {
-            if ( !serviceRecord->iIpNameServer2.IsNull() )
-                {
-                retVal = TPtrC( serviceRecord->iIpNameServer2 ).AllocL();
-                }
+            retVal = TPtrC( serviceRecord->iIpNameServer2 ).AllocL();
             }
             break;
         case ECmIP6NameServer1:
         case ELanIp6NameServer1:
             {
-            if ( !serviceRecord->iIp6NameServer1.IsNull() )
-                {
-                retVal = TPtrC( serviceRecord->iIp6NameServer1 ).AllocL();
-                }
+            retVal = TPtrC( serviceRecord->iIp6NameServer1 ).AllocL();
             }
             break;
         case ECmIP6NameServer2:
         case ELanIp6NameServer2:
             {
-            if ( !serviceRecord->iIp6NameServer2.IsNull() )
-                {
-                retVal = TPtrC( serviceRecord->iIp6NameServer2 ).AllocL();
-                }
+            retVal = TPtrC( serviceRecord->iIp6NameServer2 ).AllocL();
             }
             break;
         case ECmIPAddrLeaseValidFrom:
         case ELanIpAddrLeaseValidFrom:
             {
-            if ( !serviceRecord->iIpAddrLeaseValidFrom.IsNull() )
-                {
-                retVal = TPtrC( serviceRecord->iIpAddrLeaseValidFrom ).AllocL();
-                }
+            retVal = TPtrC( serviceRecord->iIpAddrLeaseValidFrom ).AllocL();
             }
             break;
         case ECmIPAddrLeaseValidTo:
         case ELanIpAddrLeaseValidTo:
             {
-            if ( !serviceRecord->iIpAddrLeaseValidTo.IsNull() )
-                {
-                retVal = TPtrC( serviceRecord->iIpAddrLeaseValidTo ).AllocL();
-                }
+            retVal = TPtrC( serviceRecord->iIpAddrLeaseValidTo ).AllocL();
             }
             break;
         case ECmConfigDaemonManagerName:
         case ELanConfigDaemonManagerName:
             {
-            if ( !serviceRecord->iConfigDaemonManagerName.IsNull() )
-                {
-                retVal = TPtrC( serviceRecord->iConfigDaemonManagerName ).AllocL();
-                }
+            retVal = TPtrC( serviceRecord->iConfigDaemonManagerName ).AllocL();
             }
             break;
         case ECmConfigDaemonName:
         case ELanConfigDaemonName:
             {
-            if ( !serviceRecord->iConfigDaemonName.IsNull() )
-                {
-                retVal = TPtrC( serviceRecord->iConfigDaemonName ).AllocL();
-                }
+            retVal = TPtrC( serviceRecord->iConfigDaemonName ).AllocL();
             }
             break;
         case ELanServiceExtensionTableName:
             {
-            if ( !serviceRecord->iServiceExtensionTableName.IsNull() )
-                {
-                retVal = TPtrC( serviceRecord->iServiceExtensionTableName ).AllocL();
-                }
+            retVal = TPtrC( serviceRecord->iServiceExtensionTableName ).AllocL();
             }
             break;
         default:
@@ -964,11 +1064,14 @@ HBufC8* CCmPluginLan::GetBearerString8AttributeL(
 //
 void CCmPluginLan::SetBearerIntAttributeL(
         TUint32 aAttribute,
-        TUint32 /*aValue*/,
-        RPointerArray<CommsDat::CCDRecordBase>& /*aGenRecordArray*/,
+        TUint32 aValue,
+        RPointerArray<CommsDat::CCDRecordBase>& aGenRecordArray,
         RPointerArray<CommsDat::CCDRecordBase>& /*aBearerSpecRecordArray*/ )
     {
     OstTraceFunctionEntry0( CCMPLUGINLAN_SETBEARERINTATTRIBUTEL_ENTRY );
+
+    CCDLANServiceRecord* serviceRecord =
+            static_cast<CCDLANServiceRecord*>( aGenRecordArray[KServiceRecordIndex] );
 
     switch ( aAttribute )
         {
@@ -978,6 +1081,11 @@ void CCmPluginLan::SetBearerIntAttributeL(
         case ECmDefaultPriority:
             {
             User::Leave( KErrArgument );
+            }
+            break;
+        case ELanServiceExtensionTableRecordId:
+            {
+            serviceRecord->iServiceExtensionTableRecordId = aValue;
             }
             break;
         default:

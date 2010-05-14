@@ -2,7 +2,7 @@
 * Copyright (c) 2010 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
-* under the terms of "Eclipse Public License v1.0""
+* under the terms of "Eclipse Public License v1.0"
 * which accompanies this distribution, and is available
 * at the URL "http://www.eclipse.org/legal/epl-v10.html".
 *
@@ -13,7 +13,6 @@
 *
 * Description:
 * CM Manager Application Settings UI private interface.  
-*
 */
 
 #ifndef CMAPPLSETTINGSUI_P_H
@@ -36,7 +35,7 @@
 
 // Forward declarations
 
-class QTranslator;
+class HbTranslator;
 class CmManagerShim;
 class CmRadioDialog;
 class TestCmApplSettingsUi;
@@ -106,8 +105,7 @@ private: // data
     // General member data
     CmApplSettingsUi *q_ptr;                //!< Public implementation
     QSharedPointer<CmManagerShim> mCmManagerShim;   //!< CM Manager client instance
-    QTranslator *mAppTranslator;            //!< Translator for application text ID's       
-    QTranslator *mCommonTranslator;         //!< Translator for common text ID's
+    QSharedPointer<HbTranslator> mTranslator;   //!< Translator for the dialog       
 
     // Configuration
     QFlags<CmApplSettingsUi::SelectionDialogItems> mListItems;  //!< Wanted dialog type's

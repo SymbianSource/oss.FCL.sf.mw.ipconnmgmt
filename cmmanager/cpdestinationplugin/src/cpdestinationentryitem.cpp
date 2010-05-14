@@ -22,13 +22,13 @@
 #include <HbAction>
 #include <HbDataFormViewItem>
 #include <HbMenu>
-#include <HbListDialog>
 #include <HbInputDialog>
 #include <HbMessageBox>
 #include <HbPopup>
 #include <HbListWidget>
 #include <HbListWidgetItem>
 #include <HbMainWindow>
+#include <HbInstance>
 #include <cppluginutility.h>
 #include <cpitemdatahelper.h>
 #include <cpbasesettingview.h>
@@ -64,7 +64,8 @@
     @param[in] itemDataHelper Helper for connecting signals and slots.
  */
 CpDestinationEntryItemData::CpDestinationEntryItemData(CpItemDataHelper &itemDataHelper)
-    : CpSettingFormEntryItemData(itemDataHelper),
+    : CpSettingFormEntryItemData(CpSettingFormEntryItemData::ButtonEntryItem, itemDataHelper),
+    mList(0),
     mDialog(0),
     mOkAction(0)
 {
@@ -76,14 +77,7 @@ CpDestinationEntryItemData::CpDestinationEntryItemData(CpItemDataHelper &itemDat
         OstTrace0(TRACE_NORMAL, CPDESTINATIONENTRYITEMDATA_CPDESTINATIONENTRYITEMDATA, "CpDestinationEntryItemData::CpDestinationEntryItemData: Exception caught");
         mCmm = NULL;
     }
-    mList = new HbListWidget();
-    bool connectionSuccessful = connect(
-        mList,
-        SIGNAL(released(HbListWidgetItem *)),
-        this,
-        SLOT(updateIndex(HbListWidgetItem*)));
-    Q_ASSERT(connectionSuccessful);
-    
+        
     // Fix connections
     itemDataHelper.removeConnection(this,SIGNAL(pressed()),this,SLOT(onLaunchView()));
     itemDataHelper.addConnection(this,SIGNAL(clicked()),this,SLOT(onLaunchView()));
@@ -97,7 +91,6 @@ CpDestinationEntryItemData::CpDestinationEntryItemData(CpItemDataHelper &itemDat
 CpDestinationEntryItemData::~CpDestinationEntryItemData()
 {
     OstTraceFunctionEntry0(DUP1_CPDESTINATIONENTRYITEMDATA_CPDESTINATIONENTRYITEMDATA_ENTRY);
-    delete mList;
     delete mCmm;
     delete mAps;
     delete mOkAction;
@@ -197,8 +190,11 @@ void CpDestinationEntryItemData::constructSettingView(CpBaseSettingView *view) c
         bool apProtected = false;
         if (mDestinationId != 0) {
             CmDestinationShim *destination = mCmm->destination(mDestinationId);
-            if (destination->protectionLevel() == CMManagerShim::ProtLevel3) {
+            CMManagerShim::CmmProtectionLevel level = destination->protectionLevel();
+            if (level == CMManagerShim::ProtLevel3) {
                 apProtected = apList[i]->getBoolAttribute(CMManagerShim::CmProtected);
+            } else if (level == CMManagerShim::ProtLevel1) {
+                apProtected = true;
             }
             delete destination;
         }
@@ -212,7 +208,7 @@ void CpDestinationEntryItemData::constructSettingView(CpBaseSettingView *view) c
             apProtected,
             bearerPlugin);
        
-        // Add name to item
+        // Add name to UI item
         iapDataItem->setContentWidgetData(
             QString("text"), 
             apList[i]->getStringAttribute(CMManagerShim::CmName));
@@ -240,7 +236,6 @@ void CpDestinationEntryItemData::constructSettingView(CpBaseSettingView *view) c
     }
     
     itemDataHelper->bindToForm(form);
-    delete itemDataHelper;
     OstTraceFunctionExit0(CPDESTINATIONENTRYITEMDATA_CONSTRUCTSETTINGVIEW_EXIT);
 }
 
@@ -250,8 +245,8 @@ void CpDestinationEntryItemData::constructSettingView(CpBaseSettingView *view) c
 void CpDestinationEntryItemData::updateDestinationView()
 {
     OstTraceFunctionEntry0(CPDESTINATIONENTRYITEMDATA_UPDATEDESTINATIONVIEW_ENTRY);
-    HbDataForm *form = static_cast<HbDataForm*>(model()->parent()); 
-    HbMainWindow *mainWnd = form->mainWindow();
+    QList< HbMainWindow* > mainWindows = hbInstance->allMainWindows();            
+    HbMainWindow *mainWnd = mainWindows.front();
        
     if (mainWnd) {
         HbView *view = mainWnd->currentView();
@@ -398,17 +393,23 @@ void CpDestinationEntryItemData::deleteDestination()
 void CpDestinationEntryItemData::activateArrangeMode()
 {
     OstTraceFunctionEntry0(CPDESTINATIONENTRYITEMDATA_ACTIVATEARRANGEMODE_ENTRY);
-    mList = new HbListWidget();
-    HbDataForm *form = static_cast<HbDataForm*>(model()->parent());             
-    HbMainWindow *mainWnd = form->mainWindow();
+    QList< HbMainWindow* > mainWindows = hbInstance->allMainWindows();            
+    HbMainWindow *mainWnd = mainWindows.front();
     HbView *view = new HbView();
     createArrangeModeView(view);
+    
+    bool connectionSuccessful = connect(
+            mList,
+            SIGNAL(released(HbListWidgetItem*)),
+            this,
+            SLOT(updateIndex(HbListWidgetItem*)));
+    Q_ASSERT(connectionSuccessful);
     
     if (mainWnd && view) {
         mPreView = mainWnd->currentView();
         mainWnd->addView(view);
         mainWnd->setCurrentView(view, false);
-        HbAction *arrangeViewBackAction = new HbAction(Hb::BackAction, view);
+        HbAction *arrangeViewBackAction = new HbAction(Hb::BackNaviAction, view);
         bool connected = connect(
             arrangeViewBackAction, 
             SIGNAL(triggered()), 
@@ -447,8 +448,8 @@ void CpDestinationEntryItemData::viewDone()
         return;
     }
     
-    HbDataForm *form = static_cast<HbDataForm*>(model()->parent());
-    HbMainWindow *mainWnd = form->mainWindow();
+    QList< HbMainWindow* > mainWindows = hbInstance->allMainWindows();            
+    HbMainWindow *mainWnd = mainWindows.front();
     HbView* view = mainWnd->currentView();
     
     if (mainWnd && view)  {
@@ -467,8 +468,8 @@ void CpDestinationEntryItemData::viewDone()
 void CpDestinationEntryItemData::viewCancel()
 {
     OstTraceFunctionEntry0(CPDESTINATIONENTRYITEMDATA_VIEWCANCEL_ENTRY);
-    HbDataForm *form = static_cast<HbDataForm*>(model()->parent());
-    HbMainWindow *mainWnd = form->mainWindow();
+    QList< HbMainWindow* > mainWindows = hbInstance->allMainWindows();            
+    HbMainWindow *mainWnd = mainWindows.front();
     HbView* view = mainWnd->currentView();
     
     if (mainWnd && view) {
@@ -596,6 +597,8 @@ void CpDestinationEntryItemData::createArrangeModeView(HbView *view)
     QList<QSharedPointer<CmConnectionMethodShim> >  apList;
     fetchReferencedAps(apList, mCmm);   
     CmDestinationShim *destination = NULL;
+    mList = new HbListWidget();
+    view->setWidget(mList);
     
     try {
         destination = mCmm->destination(mDestinationId);
@@ -611,17 +614,6 @@ void CpDestinationEntryItemData::createArrangeModeView(HbView *view)
             mList->addItem(item);
         }
         mList->setArrangeMode(true);
-        view->setWidget(mList);
-                
-        // Toolbar
-        HbToolBar *tb = view->toolBar();
-        HbAction *doneAction = tb->addAction(hbTrId("txt_common_button_ok"));
-        bool connected = connect(
-            doneAction, 
-            SIGNAL(triggered()), 
-            this, 
-            SLOT(viewDone()));
-        Q_ASSERT(connected);
         delete destination;
     } catch (const std::exception&) {
         OstTrace0(TRACE_NORMAL, CPDESTINATIONENTRYITEMDATA_CREATEARRANGEMODEVIEW, "CpDestinationEntryItemData::createArrangeModeView: Exception caught");
@@ -635,6 +627,15 @@ void CpDestinationEntryItemData::createArrangeModeView(HbView *view)
         }
         mList->clear();
     }
+    // Toolbar
+    HbToolBar *tb = view->toolBar();
+    HbAction *doneAction = tb->addAction(hbTrId("txt_common_button_ok"));
+    bool connected = connect(
+        doneAction, 
+        SIGNAL(triggered()), 
+        this, 
+        SLOT(viewDone()));
+    Q_ASSERT(connected);
     OstTraceFunctionExit0(CPDESTINATIONENTRYITEMDATA_CREATEARRANGEMODEVIEW_EXIT);
 }
 
@@ -692,7 +693,9 @@ void CpDestinationEntryItemData::saveNewDestinationName()
         cmm = new CmManagerShim();
         if (isDestinationNameValid(destinationName, cmm)) {
             cmm = new CmManagerShim();
-            cmm->destination(mDestinationId)->setName(destinationName);
+            destination = cmm->destination(mDestinationId);
+            destination->setName(destinationName);
+            destination->update();
             mDestinationName = destinationName;
             destinationNameInvalid = false;
         }
@@ -747,7 +750,7 @@ void CpDestinationEntryItemData::showRenameError(const QString &info)
 void CpDestinationEntryItemData::showErrorNote(const QString &info)
 {
     OstTraceFunctionEntry0(CPDESTINATIONENTRYITEMDATA_SHOWERRORNOTE_ENTRY);
-    HbMessageBox *note = new HbMessageBox(HbMessageBox::MessageTypeInformation);
+    HbMessageBox *note = new HbMessageBox(HbMessageBox::MessageTypeWarning);
     note->clearActions();
     note->setAttribute(Qt::WA_DeleteOnClose);
     note->setText(info);

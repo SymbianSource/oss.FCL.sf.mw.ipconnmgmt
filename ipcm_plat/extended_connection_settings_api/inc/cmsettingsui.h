@@ -18,6 +18,9 @@
 #ifndef C_CMSETTINGSUI_H
 #define C_CMSETTINGSUI_H
 
+// Deprecation warning
+#warning This header file is deprecated and will be removed. See Polonium CR #461 for details.
+
 #include <e32def.h>
 #include <e32base.h>
 

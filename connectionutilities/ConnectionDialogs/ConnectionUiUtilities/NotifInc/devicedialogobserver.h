@@ -18,7 +18,7 @@
 #ifndef __DEVICEDIALOGOBSERVER_H__
 #define __DEVICEDIALOGOBSERVER_H__
 
-#include "CellularDataConfirmation.h"
+#include "cellulardataconfirmation.h"
 
 NONSHARABLE_CLASS ( CDeviceDialogObserver ) : public CBase, public MHbDeviceDialogObserver
     {

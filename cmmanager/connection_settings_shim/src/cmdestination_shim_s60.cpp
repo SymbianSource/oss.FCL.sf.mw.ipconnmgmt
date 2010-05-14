@@ -1,19 +1,19 @@
 /*
- * Copyright (c) 2010 Nokia Corporation and/or its subsidiary(-ies).
- * All rights reserved.
- * This component and the accompanying materials are made available
- * under the terms of "Eclipse Public License v1.0""
- * which accompanies this distribution, and is available
- * at the URL "http://www.eclipse.org/legal/epl-v10.html".
- *
- * Initial Contributors:
- * Nokia Corporation - initial contribution.
- *
- * Contributors:
- *
- * Description:  
- * Private implementation of Wrapper for CM Manager Symbian interface.
- */
+* Copyright (c) 2010 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:  
+* Private implementation of Wrapper for CM Manager Symbian interface.
+*/
 
 // System includes
 
@@ -27,11 +27,11 @@
 
 #include "cmdestination_shim_s60_p.h"
 #include "cmconnectionmethod_shim_s60_p.h"
+
 #include "OstTraceDefinitions.h"
 #ifdef OST_TRACE_COMPILER_IN_USE
 #include "cmdestination_shim_s60Traces.h"
 #endif
-
 
 /*!
     \class CmDestinationShimPrivate
@@ -311,7 +311,6 @@ void CmDestinationShimPrivate::AddConnectionMethodL(
     int &index)
 {
     index = iDestination.AddConnectionMethodL(cmShim->d_ptr->iCm);
-    iDestination.UpdateL();
 }
        
 void CmDestinationShimPrivate::DeleteConnectionMethodL(
@@ -321,7 +320,6 @@ void CmDestinationShimPrivate::DeleteConnectionMethodL(
     cm = iDestination.ConnectionMethodByIDL(
         cmShim->getIntAttribute(CMManagerShim::CmId));
     iDestination.DeleteConnectionMethodL(cm);
-    iDestination.UpdateL();
 }
        
 void CmDestinationShimPrivate::RemoveConnectionMethodL(
@@ -331,7 +329,6 @@ void CmDestinationShimPrivate::RemoveConnectionMethodL(
     cm = iDestination.ConnectionMethodByIDL(
         cmShim->getIntAttribute(CMManagerShim::CmId));
     iDestination.RemoveConnectionMethodL(cm);
-    iDestination.UpdateL();
 }
              
 void CmDestinationShimPrivate::ModifyPriorityL(
@@ -342,14 +339,12 @@ void CmDestinationShimPrivate::ModifyPriorityL(
     cm = iDestination.ConnectionMethodByIDL(
         cmShim->getIntAttribute(CMManagerShim::CmId));
     iDestination.ModifyPriorityL(cm, index);
-    iDestination.UpdateL();
 }
            
 void CmDestinationShimPrivate::SetNameL(QString name)
 {
     TPtrC16 namePtr(reinterpret_cast<const TUint16*>(name.utf16()));
     iDestination.SetNameL(namePtr);
-    iDestination.UpdateL();
 }
 
 /*!

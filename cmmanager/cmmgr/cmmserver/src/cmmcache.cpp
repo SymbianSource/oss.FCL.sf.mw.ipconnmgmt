@@ -1640,10 +1640,6 @@ void CCmmCache::CloseDestination( CCmmDestinationInstance& aDestinationInstance 
                 // Delete the destination unless an active connection is using
                 // one of it's connection methods.
                 TRAP_IGNORE( DeleteDestinationForcedL( aDestinationInstance ) );
-                        //{
-                        //if ( !DestinationConnectedL( aDestinationInstance.GetId() ) ) DeleteDestinationL( aDestinationInstance, ETrue );
-                        //} ); //TODO, make helper function
-
                 // Destination is now removed from database. Tell instance
                 // mapping to stop ignoring the related ID.
                 iInstanceMapping->RemoveDestinationFromDeletedList( aDestinationInstance.GetId() );
@@ -1699,6 +1695,7 @@ void CCmmCache::CloseConnMethod( CCmmConnMethodInstance& aConnMethodInstance )
             iConnMethodArray.Remove( index );
             }
         }
+
     OstTraceFunctionExit0( CCMMCACHE_CLOSECONNMETHOD_EXIT );
     }
 
@@ -2146,7 +2143,6 @@ TUint32 CCmmCache::GetConnectionMethodInfoIntL(
 
     retVal = cmInstance->GetIntAttributeL( aAttribute );
 
-    CloseConnMethod( *cmInstance );
     CleanupStack::PopAndDestroy( cmInstance );
 
     OstTraceFunctionExit0( CCMMCACHE_GETCONNECTIONMETHODINFOINTL_EXIT );
@@ -2181,7 +2177,6 @@ TBool CCmmCache::GetConnectionMethodInfoBoolL(
 
     retVal = cmInstance->GetBoolAttributeL( aAttribute );
 
-    CloseConnMethod( *cmInstance );
     CleanupStack::PopAndDestroy( cmInstance );
 
     OstTraceFunctionExit0( CCMMCACHE_GETCONNECTIONMETHODINFOBOOLL_EXIT );
@@ -2216,7 +2211,6 @@ HBufC* CCmmCache::GetConnectionMethodInfoStringL(
 
     retVal = cmInstance->GetStringAttributeL( aAttribute );
 
-    CloseConnMethod( *cmInstance );
     CleanupStack::PopAndDestroy( cmInstance );
 
     OstTraceFunctionExit0( CCMMCACHE_GETCONNECTIONMETHODINFOSTRINGL_EXIT );
@@ -2251,7 +2245,6 @@ HBufC8* CCmmCache::GetConnectionMethodInfoString8L(
 
     retVal = cmInstance->GetString8AttributeL( aAttribute );
 
-    CloseConnMethod( *cmInstance );
     CleanupStack::PopAndDestroy( cmInstance );
 
     OstTraceFunctionExit0( CCMMCACHE_GETCONNECTIONMETHODINFOSTRING8L_EXIT );
@@ -2569,13 +2562,15 @@ TBool CCmmCache::CheckIfCmConnected( const TUint32& aCmId ) const
         }
 
     OstTraceFunctionExit0( CCMMCACHE_CHECKIFCMCONNECTED_EXIT );
-
     return result;
     }
 
 // ---------------------------------------------------------------------------
 // Enumerates connections and checks if any of the connection methods in the
 // given destination is connected.
+// If pointer to destination instance is given, then information about
+// relevant connection methods is retrieved from that. Otherwise the
+// information is retrieved from instance mapping using the given ID.
 // ---------------------------------------------------------------------------
 //
 TBool CCmmCache::DestinationConnectedL(
@@ -2659,7 +2654,6 @@ TBool CCmmCache::DestinationIsEmbedded( const TUint32& aDestinationId ) const
     TBool isEmbedded = iInstanceMapping->DestinationIsEmbedded( aDestinationId );
 
     OstTraceFunctionExit0( CCMMCACHE_DESTINATIONISEMBEDDED_EXIT );
-
     return isEmbedded;
     }
 
@@ -2674,7 +2668,6 @@ TBool CCmmCache::DestinationHasEmbedded( const TUint32& aDestinationId ) const
     TBool hasEmbedded = iInstanceMapping->DestinationHasEmbedded( aDestinationId );
 
     OstTraceFunctionExit0( CCMMCACHE_DESTINATIONHASEMBEDDED_EXIT );
-
     return hasEmbedded;
     }
 
@@ -2691,7 +2684,6 @@ TBool CCmmCache::DestinationPointedToByVirtualIap( const TUint32& aDestinationId
             iInstanceMapping->DestinationPointedToByVirtualIap( aDestinationId );
 
     OstTraceFunctionExit0( CCMMCACHE_DESTINATIONPOINTEDTOBYVIRTUALIAP_EXIT );
-
     return pointedByVirtual;
     }
 
@@ -2723,7 +2715,6 @@ TBool CCmmCache::ConnMethodInDestinationButLocked(
             ConnMethodInDestinationButLocked( aConnMethodId, aDestinationId );
 
     OstTraceFunctionExit0( CCMMCACHE_CONNMETHODINDESTINATIONBUTLOCKED_EXIT );
-
     return inAndlocked;
     }
 
@@ -2819,6 +2810,7 @@ void CCmmCache::RefreshDestinationId( const TCmmIdStruct& aIdStruct )
             break;
             }
         }
+
     OstTraceFunctionExit0( CCMMCACHE_REFRESHDESTINATIONID_EXIT );
     }
 
@@ -2840,6 +2832,7 @@ void CCmmCache::RefreshConnMethodId( const TCmmIdStruct& aIdStruct )
             break; // Can only be 1 match.
             }
         }
+
     OstTraceFunctionExit0( CCMMCACHE_REFRESHCONNMETHODID_EXIT );
     }
 
@@ -2870,6 +2863,7 @@ void CCmmCache::TranslateTemporaryId( const TUint32& aTemporaryId, TUint32& aRea
         {
         ASSERT( 0 );
         }
+
     OstTraceFunctionExit0( CCMMCACHE_TRANSLATETEMPORARYID_EXIT );
     }
 
@@ -3037,14 +3031,14 @@ CommsDat::TMDBElementId CCmmCache::TableId( TCmmDbRecords aRecord )
     }
 
 // ---------------------------------------------------------------------------
-// TODO
+// Initiate the deletion of given destination if none of the connection
+// methods inside it are connected.
 // ---------------------------------------------------------------------------
 //
 void CCmmCache::DeleteDestinationForcedL( CCmmDestinationInstance& aDestinationInstance ) //TODO, OST
     {
     //TODO
     if ( !DestinationConnectedL( 0, &aDestinationInstance ) )
-    //if ( !DestinationConnectedL( aDestinationInstance.GetId() ) ) //TODO
         {
         DeleteDestinationL( aDestinationInstance, ETrue );
         }

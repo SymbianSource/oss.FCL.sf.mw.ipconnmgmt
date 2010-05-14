@@ -56,7 +56,7 @@
  */
 CpAddDestinationEntryItemData::CpAddDestinationEntryItemData(CpItemDataHelper &itemDataHelper,
                                                              CpDestinationGroup *parent)
-    : CpSettingFormEntryItemData(itemDataHelper),
+    : CpSettingFormEntryItemData(CpSettingFormEntryItemData::ButtonEntryItem, itemDataHelper),
     mParent(parent),
     mDialog(0)
 {

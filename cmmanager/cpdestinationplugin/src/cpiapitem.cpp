@@ -76,11 +76,11 @@ CpIapItem::CpIapItem(
     int destId,
     bool apProtected,
     CpBearerApPluginInterface *bearerPlugin) :
-    CpSettingFormEntryItemData(itemDataHelper), 
+    CpSettingFormEntryItemData(CpSettingFormEntryItemData::ButtonEntryItem, itemDataHelper), 
+    mItemDataHelper(&itemDataHelper),
     mIapId(iapId), 
     mIapName(iapName),
     mDestId(destId),
-    mProtected(apProtected),
     mBearerPlugin(bearerPlugin),
     mMoveOngoing(false),
     mDialog(0),
@@ -96,12 +96,12 @@ CpIapItem::CpIapItem(
     
     // Fix connections
     itemDataHelper.removeConnection(this,SIGNAL(pressed()),this,SLOT(onLaunchView()));
-    itemDataHelper.addConnection(
-        this,
-        SIGNAL(longPress(QPointF)),
-        this,
-        SLOT(showItemMenu(QPointF)));
     if (!apProtected) {
+        itemDataHelper.addConnection(
+            this,
+            SIGNAL(longPress(QPointF)),
+            this,
+            SLOT(showItemMenu(QPointF)));
         itemDataHelper.addConnection(this,SIGNAL(clicked()),this,SLOT(onLaunchView()));
     }
     OstTraceFunctionExit0(CPIAPITEM_CPIAPITEM_EXIT);
@@ -118,16 +118,6 @@ CpIapItem::~CpIapItem()
 }
 
 /*!
-    \return Returns ID of this access point
- */
-int CpIapItem::getIapId() const
-{
-    OstTraceFunctionEntry0(CPIAPITEM_GETIAPID_ENTRY);
-    OstTraceFunctionExit0(CPIAPITEM_GETIAPID_EXIT);
-    return mIapId;
-}
-
-/*!
     Shows user the item specific menu. The menu is triggered by long pressing
     the access point item.
     
@@ -138,15 +128,11 @@ void CpIapItem::showItemMenu(QPointF position)
     OstTraceFunctionEntry0(CPIAPITEM_SHOWITEMMENU_ENTRY);
     if (isCmManagerAvailable()) {
         bool settingsReadSuccessful = true;
-        CMManagerShim::CmmProtectionLevel protLvl;
-        try {      
-            if (mDestId == 0) {
-                protLvl = CMManagerShim::ProtLevel0;
-            } else {
-                CmDestinationShim *destination = mCmm->destination(mDestId);
-                protLvl = destination->protectionLevel();
-                delete destination;
-            }              
+        bool cmConnected = false;
+        try {
+            CmConnectionMethodShim *cm = mCmm->connectionMethod(mIapId);
+            cmConnected = cm->getBoolAttribute(CMManagerShim::CmConnected);
+            delete cm;
         } 
         catch (const std::exception&)  {
             OstTrace0(TRACE_NORMAL, CPIAPITEM_SHOWITEMMENU, "CpIapItem::showItemMenu: Exception caught");
@@ -154,7 +140,7 @@ void CpIapItem::showItemMenu(QPointF position)
         }
         if (settingsReadSuccessful) {
             // Settings could be read from commsdat: show menu.
-            createItemMenu(protLvl, position)->show();
+            createItemMenu(cmConnected, position)->show();
         }    
     }
     OstTraceFunctionExit0(CPIAPITEM_SHOWITEMMENU_EXIT);
@@ -248,10 +234,7 @@ void CpIapItem::deleteConfirmed()
         deleteSuccessful = false;
     }
     if (deleteSuccessful) {
-        HbDataForm *form = static_cast<HbDataForm*>(model()->parent());
-        QModelIndex index = static_cast<HbDataFormModel*>(this->model())->indexFromItem(this);
-        HbDataFormViewItem *viewItem = form->dataFormViewItem(index);
-        viewItem->deleteLater();
+        this->deleteLater();
         OstTrace0(TRACE_NORMAL, CPIAPITEM_DELETECONFIRMED, "CpIapItem::deleteConfirmed: Emit access point changed signal");
         emit iapChanged();
     } else {
@@ -276,12 +259,12 @@ void CpIapItem::updateIap(const QModelIndex index)
     }
     // Disconnect because we need to do this only after returning
     // from accees point settings view
-    HbDataForm *form = static_cast<HbDataForm*>(model()->parent());
-    disconnect(
-        form, 
+    CpItemDataHelper *itemDataHelper = new CpItemDataHelper();
+    itemDataHelper->disconnectFromForm( 
         SIGNAL(itemShown(const QModelIndex)),
         this, 
         SLOT(updateIap(const QModelIndex)));
+    delete itemDataHelper;
     OstTrace0( TRACE_FLOW, DUP1_CPIAPITEM_UPDATEIAP_EXIT, "CpIapItem::updateIap exit" );
 }
 
@@ -294,16 +277,16 @@ CpBaseSettingView *CpIapItem::createSettingView() const
 {
     OstTraceFunctionEntry0(CPIAPITEM_CREATESETTINGVIEW_ENTRY);
     CpBaseSettingView *view = NULL;
+    CpItemDataHelper *itemDataHelper = new CpItemDataHelper();
     if (mBearerPlugin != NULL) {
-        HbDataForm *form = static_cast<HbDataForm*>(model()->parent()); 
-        bool connected = connect(
-            form, 
+        CpIapItem *iap = const_cast<CpIapItem*>(this);
+        itemDataHelper->connectToForm( 
             SIGNAL(itemShown(const QModelIndex)),
-            this, 
+            iap, 
             SLOT(updateIap(const QModelIndex)));
-        Q_ASSERT(connected);
         view = mBearerPlugin->createSettingView(mIapId);
     }
+    delete itemDataHelper;
     OstTraceFunctionExit0(CPIAPITEM_CREATESETTINGVIEW_EXIT);
     return view;
 }
@@ -374,13 +357,9 @@ void CpIapItem::saveShare(int id)
     OstTraceFunctionEntry0(CPIAPITEM_SAVESHARE_ENTRY);
     try {
         CmConnectionMethodShim *cm;
-        if (mDestId != 0) {
-            CmDestinationShim *source = mCmm->destination(mDestId);
-            cm = source->connectionMethodByID(mIapId);
-            delete source;
-        } else {
-            cm = mCmm->connectionMethod(mIapId);
-        }
+        CmDestinationShim *source = mCmm->destination(mDestId);
+        cm = source->connectionMethodByID(mIapId);
+        delete source;
         CmDestinationShim *target = mCmm->destination(id);
         target->addConnectionMethod(cm);
         target->update();
@@ -461,7 +440,7 @@ bool CpIapItem::isCmManagerAvailable()
                        access point.
  */
 HbMenu *CpIapItem::createItemMenu(
-    CMManagerShim::CmmProtectionLevel protLvl,
+    bool cmConnected,
     const QPointF &position)
 {
     OstTraceFunctionEntry0(CPIAPITEM_CREATEITEMMENU_ENTRY);
@@ -484,16 +463,11 @@ HbMenu *CpIapItem::createItemMenu(
     connected = connect(shareIapAction, SIGNAL(triggered()), this, SLOT(shareIap()));
     Q_ASSERT(connected);
        
-    if (protLvl == CMManagerShim::ProtLevel1) {
-        // Disable operations for protected destinations
+    if (cmConnected) {
+        // Disable operations for connected APs
         moveIapAction->setDisabled(true);
         deleteIapAction->setDisabled(true);
         shareIapAction->setDisabled(true);
-    } else if (protLvl == CMManagerShim::ProtLevel3) {
-        // Disable operations for protected access points.
-        moveIapAction->setDisabled(mProtected);
-        deleteIapAction->setDisabled(mProtected);
-        shareIapAction->setDisabled(mProtected);
     }
     
     // Can't share uncategorised APs

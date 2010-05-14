@@ -207,7 +207,7 @@ enum TCmmRecordStatus
     {
     ECmmRecordStatusBlank = 0x0001,
     ECmmRecordStatusLoaded = 0x0002, // Loaded and up-to-date.
-    ECmmRecordStatusExpired = 0x0004, // Loaded but out-of-date. //TODO, should this be cache side only?
+    ECmmRecordStatusExpired = 0x0004, // Loaded but out-of-date (Cache side only).
     ECmmRecordStatusModified = 0x0008, // Loaded and modified (Session side only).
     ECmmRecordStatusUnsaved = 0x0010 // Doesn't yet exist in database (Cache side only).
     };

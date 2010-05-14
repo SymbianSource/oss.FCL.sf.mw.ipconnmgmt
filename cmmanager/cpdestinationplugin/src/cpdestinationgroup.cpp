@@ -23,6 +23,7 @@
 #include <HbDataform>
 #include <HbDataFormModel>
 #include <HbDataFormViewItem>
+#include <HbParameterLengthLimiter>
 #include <cpbasesettingview.h>
 #include <cpitemdatahelper.h>
 #include <cpsettingformentryitemdataimpl.h>
@@ -134,10 +135,6 @@ void CpDestinationGroup::addDestination(const QString &dest, int destId)
     destDataItem->setDestinationName(dest);
     connect(destDataItem, SIGNAL(destChanged()), this, SLOT(updateDestinationInformation()));
     
-    // Use ItemDataHelper to make connections
-    QObject* form = this->model()->parent();
-    mItemDataHelper->bindToForm(static_cast<HbDataForm*>(form));
-    
     // Insert Child to correct position
     QList<QSharedPointer<CmDestinationShim> > destinationList;
     fetchDestinations(destinationList);
@@ -236,13 +233,6 @@ void CpDestinationGroup::updateDestinationInformation()
         destDataItem->setContentWidgetData(QString("additionalText"), iapCount);
         destDataItem->setContentWidgetData(QString("text"), destDataItem->destinationName());
     }
-    // Update UI
-    HbDataForm *form = static_cast<HbDataForm*>(this->model()->parent());
-    HbDataFormModel* model = static_cast<HbDataFormModel*>(this->model());
-    QModelIndex index = model->indexFromItem(this);
-    HbDataFormViewItem *viewItem = form->dataFormViewItem(index);
-    viewItem->setExpanded(false);
-    viewItem->setExpanded(true);
     OstTraceFunctionExit0(CPDESTINATIONGROUP_UPDATEDESTINATIONINFORMATION_EXIT);
 }
 
@@ -336,7 +326,8 @@ QString CpDestinationGroup::getDestinationAdditionalText(int iapCount)
     OstTraceFunctionEntry0(CPDESTINATIONGROUP_GETDESTINATIONADDITIONALTEXT_ENTRY);
     QString result = "";
     if (iapCount > 0) {
-        result = hbTrId("txt_occ_dblist_internet_val_ln_access_points", iapCount);
+        //result = hbTrId("txt_occ_dblist_internet_val_ln_access_points", iapCount);
+        result = HbParameterLengthLimiter("txt_occ_dblist_internet_val_ln_access_points").arg(iapCount);
     } else {
         result = hbTrId("txt_occ_dblist_internet_val_no_access_points");
     }

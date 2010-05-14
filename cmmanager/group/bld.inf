@@ -27,4 +27,3 @@ PRJ_MMPFILES
 // None
 
 #include "../cmmgr/group/bld.inf"
-#include "../gsconnsettingsplugin/group/bld.inf"

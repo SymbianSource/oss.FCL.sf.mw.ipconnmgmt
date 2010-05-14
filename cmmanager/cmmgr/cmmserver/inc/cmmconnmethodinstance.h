@@ -33,7 +33,8 @@ class TCmmIdStruct;
 
 
 /**
- * TODO, see DestInstance
+ * Session side object representing a connection method. Keeps track of any
+ * changes the client makes before they are updated to database.
  */
 NONSHARABLE_CLASS( CCmmConnMethodInstance ) : public CObject
     {
