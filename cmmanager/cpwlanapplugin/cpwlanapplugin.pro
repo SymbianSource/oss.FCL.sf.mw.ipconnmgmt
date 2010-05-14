@@ -20,6 +20,12 @@ TARGET = cpwlanapplugin
 DEPENDPATH += .
 INCLUDEPATH += .
 
+# Temporary solution to fix tracecompiler
+# When tracecompiler is fixed, this can be removed
+symbian: {
+    MMP_RULES += "USERINCLUDE traces"
+}
+
 CONFIG += hb plugin
 
 MOC_DIR = moc
@@ -36,6 +42,9 @@ HEADERS += inc/cpwlanapplugin.h \
 SOURCES += src/cpwlanapplugin.cpp \
            src/cpwlanapview.cpp \
            src/cpwlanapadvancedview.cpp
+
+# Include plugin utilities
+include(../cppluginutils/cppluginutils.pri)
 
 symbian:
 {

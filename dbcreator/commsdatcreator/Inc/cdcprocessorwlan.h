@@ -264,25 +264,6 @@ class CProcessorWlan : public CProcessorBase
          */
         void SetExpandedEapListL( CMDBGenericRecord* aGeneric );
         
-        /*
-         * Creates expanded Eap list from the common Eap list
-         * @param aEapList the common Eap list from which the expanded list
-         *              will be created 
-         * @param aEnabledNeed indicates the type of the result expanded  
-         *           Eap list. If it is ETrue then the enabled expanded
-         *           Eap list will be created. Else the disbled one.
-         * @return The created expanded Eap list. It can be empty. 
-         */
-        HBufC8* ExpandedEapListLC( HBufC16* aEapList, TBool aEnabledNeed );
-  
-        /*
-         * Adds one item to the expanded Eap list
-         * @param aExpandedEapList to which the new item will be added.
-         * @param aSlice the common Eap list slice containing one 
-         *              3 digit long number with sign.
-         */
-        void AddToList( HBufC8* aExpandedEapList, TPtrC16 aSlice );
-
     private:
     
         void AddSecurityDataL( TInt aField, HBufC* aPtrTag, TBool aIsWep );
@@ -298,13 +279,6 @@ class CProcessorWlan : public CProcessorBase
 		TUint FindCertificateEntryL( const CertificateEntry::TCertType aCertType, const TInt aEapIndex );
 		
 		void ConvertSubjectKeyIdToBinaryL( const HBufC16* const aSubjectKeyIdString, TDes& aBinaryKey);
-        /*
-        // @var Stores indexes of WEP fields
-        TInt iWEPIndex[KWEPKeyNumOfFields];
-        
-        // @var Stores indexes of WPA fields
-        TInt iWPAIndex[KWPAKeyNumOfFields];
-        */
         
         // @var Indicates the WLAN security mode
         TDbCreatorSecurityMode iSecurityMode;
@@ -322,14 +296,8 @@ class CProcessorWlan : public CProcessorBase
        
         // @var HBufC for empty WEP and WPA tags
         HBufC* iEmptyTag;
-
-        // @var Stores indexes of WEP fields
-        ////RPointerArray< HBufC > iWepData;
         
         HBufC* iWepData[KWEPKeyNumOfFields];
-        
-        // @var Stores indexes of WPA fields
-        ////RPointerArray< HBufC > iWpaData;
         
         HBufC* iWpaData[KWPAKeyNumOfFields];
 

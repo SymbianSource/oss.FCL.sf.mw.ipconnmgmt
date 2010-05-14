@@ -49,7 +49,8 @@ SYSTEMINCLUDE		../../../../../inc
 MW_LAYER_SYSTEMINCLUDE
 
 LIBRARY euser.lib
-LIBRARY	ECOM.LIB
-LIBRARY	cmmpluginbase.lib
-LIBRARY COMMSDAT.lib
+LIBRARY	ecom.lib
+LIBRARY commsdat.lib
 LIBRARY featmgr.lib
+LIBRARY cmmanagerdatabase.lib
+LIBRARY	cmmpluginbase.lib

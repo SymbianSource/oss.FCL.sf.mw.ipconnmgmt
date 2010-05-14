@@ -175,6 +175,7 @@ bool CpAddDestinationEntryItemData::isDestinationNameValid(const QString dest, C
             CmDestinationShim *destination = cmm->destination(destinationList[i]);
             if (0 == dest.compare(destination->name())) {
                 retVal = false;
+                delete destination;
                 break;
             }
             delete destination;

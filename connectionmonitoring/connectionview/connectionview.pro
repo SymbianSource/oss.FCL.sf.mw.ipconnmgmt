@@ -16,7 +16,10 @@
 #
 TEMPLATE = app
 TARGET = connview
-CONFIG += hb no_icon
+
+CONFIG += hb no_icon mobility
+MOBILITY+=bearer
+
 DEPENDPATH += . inc src
 INCLUDEPATH += .
 
@@ -33,8 +36,6 @@ TRANSLATIONS = connectionview.ts
 RESOURCES = res/connectionview.qrc
 
 SYMBIAN_PLATFORMS = WINSCW ARMV5
-
-LIBS += -lqtbearer
 
 symbian {
     TARGET.CAPABILITY = NetworkServices NetworkControl

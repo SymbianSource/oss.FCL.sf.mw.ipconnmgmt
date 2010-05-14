@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<content xmlns="http://www.s60.com/xml/content/2">
+  <desc>Copy commsdat content</desc>
+    <output dir="content/private/10202be9" file="cccccc00.cre">
+    	<externalinput dir="${CIA_KCRUidCommsDatCreator.CommsdatInputPath}">
+    		<include files="cccccc00_empty.cre"/>
+    	</externalinput>
+    </output>
+</content>

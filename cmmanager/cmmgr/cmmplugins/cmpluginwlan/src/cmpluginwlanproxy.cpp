@@ -18,7 +18,7 @@
 
 #include "cmpluginwlan.h"
 #include <e32std.h>
-#include <ecom/ImplementationProxy.h>
+#include <ecom/implementationproxy.h>
 
 // Exported proxy for instantiation method resolution
 // Define the interface UIDs

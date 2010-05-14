@@ -80,8 +80,9 @@ public:
     void SetStatus( const TCmmConnMethodStatus& aStatus );
 
     /**
-     * TODO
-     * 
+     * Refresh the connection method data in this cache side object to be in
+     * synch with the database and copy that data back to the session side
+     * connection method instance given as parameter.
      */
     void RefreshConnMethodInstanceL(
             CCmmConnMethodInstance& aConnMethodInstance );
@@ -93,8 +94,7 @@ public:
     TInt SessionInstanceClosed(); //TODO, rename to ConnMethodInstanceClosed ?
 
     /**
-     * Set the connection method plugin. Updates status and sets reference
-     * counter to 1.
+     * Set the connection method plugin pointer, bearer type and status.
      */
     void SetPlugin(
             CCmPluginBaseEng* aPlugin,

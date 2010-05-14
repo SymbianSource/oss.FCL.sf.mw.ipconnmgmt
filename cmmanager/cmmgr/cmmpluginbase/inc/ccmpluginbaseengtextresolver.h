@@ -22,7 +22,7 @@
 /**
  *  Utility class for resolving localised text.
  */
-class CCmPluginBaseEngTextResolver
+NONSHARABLE_CLASS( CCmPluginBaseEngTextResolver ) : public CBase
     {
 public:    
     /**

@@ -16,7 +16,6 @@
 *
 */
 
-#include <data_caging_paths.hrh>
 #include <platform_paths.hrh>
 
 TARGET      cmpluginpacketdata.dll
@@ -32,13 +31,12 @@ SOURCEPATH  ../src
 SOURCE      cmpluginpacketdataproxy.cpp
 SOURCE      cmpluginpacketdata.cpp
 
-SOURCEPATH  ../Data
+SOURCEPATH  ../data
 
 START RESOURCE 1020737C.rss
 TARGET cmpluginpacketdata.rsc
 END
 
-//USERINCLUDE     ../../../Framework/SrcData
 USERINCLUDE     ../data
 
 // Component specific internal headers 
@@ -54,8 +52,9 @@ MW_LAYER_SYSTEMINCLUDE
 LIBRARY euser.lib
 LIBRARY	ecom.lib
 LIBRARY cmmpluginbase.lib
-LIBRARY commsdat.lib
 LIBRARY etel.lib
 LIBRARY etelpckt.lib
 LIBRARY featmgr.lib
 LIBRARY centralrepository.lib 
+LIBRARY cmmanagerdatabase.lib
+LIBRARY commsdat.lib

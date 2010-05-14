@@ -104,6 +104,15 @@ public:
             TInt& aAction,
             TSecurityInfo& aMissing );
 
+    /**
+     * Checks the client's capabilities in the middle of request handling. Some
+     * checks cannot be done with CustomSecurityCheckL() at the start phase of
+     * the operation.
+     * @param aMsg The IPC message from the client.
+     * @return Returns ETrue if client has the needed capabilities. Otherwise
+     * returns EFalse.
+     */
+    CPolicyServer::TCustomResult CapabilityCheckWithProtection( const RMessage2& aMessage );
 
 protected: // From CActive
     /**

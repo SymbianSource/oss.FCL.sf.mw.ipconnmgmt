@@ -17,11 +17,12 @@
 */
 
 
-#include <stringloader.h>
-#include <FeatMgr.h>
+#include <StringLoader.h>
+#include <featmgr.h>
 #include <centralrepository.h>
 #include <CoreApplicationUIsSDKCRKeys.h>
 
+#include "datamobilitycommsdattypes.h"
 #include "cmpluginpacketdata.h"
 
 #include "OstTraceDefinitions.h"
@@ -34,9 +35,7 @@ using namespace CommsDat;
 
 // ================= CONSTANTS =======================
 
-const TUint32 KDefaultPriorityPacketData = 1;
-
-/// Modem bearer names for GPRS/WCDMA Access Points
+/// Modem bearer names for GPRS/WCDMA access points.
 _LIT( KModemBearerPacketData, "GPRS Modem" );
 _LIT( KDefaultQosDataRecordName, "PRIMARY1" );
 _LIT( KDefaultQosDataRecordNamewithSpace, "PRIMARY1 " );
@@ -313,6 +312,16 @@ void CCmPluginPacketData::ConstructL()
     FeatureManager::InitializeLibL();
     CCmPluginBaseEng::ConstructL();
 
+    // Get bearer priority table ID.
+    TRAP_IGNORE( iBearerPriorityTableId =
+            CCDGlobalBearerTypePriorizationRecord::TableIdL( iSession ) );
+
+    if ( !iBearerPriorityTableId )
+        {
+        iBearerPriorityTableId =
+                CCDGlobalBearerTypePriorizationRecord::CreateTableL( iSession );
+        }
+
     OstTraceFunctionExit0( CCMPLUGINPACKETDATA_CONSTRUCTL_EXIT );
     }
 
@@ -385,11 +394,13 @@ void CCmPluginPacketData::PreparePluginToUpdateRecordsL(
     {
     OstTraceFunctionEntry0( CCMPLUGINPACKETDATA_PREPAREPLUGINTOUPDATERECORDSL_ENTRY );
 
-    CCDIAPRecord* iapRecord =
-                static_cast<CCDIAPRecord*>( aGenRecordArray[KIapRecordIndex] );
+    //TODO, Add null checks for mandatory specific record pointers.
 
-    CCDWCDMAPacketServiceRecord* serviceRecord =
-            static_cast<CCDWCDMAPacketServiceRecord*>( aGenRecordArray[KServiceRecordIndex] );
+    CCDIAPRecord* iapRecord = static_cast<CCDIAPRecord*>(
+            aGenRecordArray[KIapRecordIndex] );
+
+    CCDWCDMAPacketServiceRecord* serviceRecord = static_cast<CCDWCDMAPacketServiceRecord*>(
+            aGenRecordArray[KServiceRecordIndex] );
 
     CheckIfNameModifiedL( iapRecord, serviceRecord );
 
@@ -418,7 +429,7 @@ void CCmPluginPacketData::SetDaemonNameL(
     {
     OstTraceFunctionEntry0( CCMPLUGINPACKETDATA_SETDAEMONNAMEL_ENTRY );
 
-    // use DHCP if we can
+    // Use DHCP if we can.
     TBool ipfromSrv = GetBearerBoolAttributeL( EPacketDataIPAddrFromServer,
                                                aGenRecordArray,
                                                aBearerSpecRecordArray );
@@ -1231,9 +1242,13 @@ TUint32 CCmPluginPacketData::GetBearerIntAttributeL(
                 }
                 break;
             case ECmDefaultUiPriority:
+                {
+                retVal = GetDefPriorityL( aAttribute );
+                }
+                break;
             case ECmDefaultPriority:
                 {
-                retVal = KDefaultPriorityPacketData;
+                retVal = GetDefPriorityL( aAttribute );
                 }
                 break;
             case ECmExtensionLevel:
@@ -2492,11 +2507,14 @@ TUint32 CCmPluginPacketData::GetBearerInfoIntL( TUint32 aAttribute ) const
             retVal = KCommDbBearerWcdma;
             }
             break;
-
         case ECmDefaultUiPriority:
+            {
+            retVal = GetDefPriorityL( aAttribute );
+            }
+            break;
         case ECmDefaultPriority:
             {
-            retVal = KDefaultPriorityPacketData;
+            retVal = GetDefPriorityL( aAttribute );
             }
             break;
         case ECmExtensionLevel:
@@ -2982,6 +3000,48 @@ void CCmPluginPacketData::GetBearerTableIdsToBeObservedL(
     aTableIdArray.AppendL( KCDTIdUmtsR99QoSAndOnTableRecord );
 
     OstTraceFunctionExit0( CCMPLUGINPACKETDATA_GETBEARERTABLEIDSTOBEOBSERVEDL_EXIT );
+    }
+
+// ---------------------------------------------------------------------------
+// CCmPluginPacketData::GetDefPriorityL
+// ---------------------------------------------------------------------------
+//
+TUint32 CCmPluginPacketData::GetDefPriorityL( const TUint32 aAttribute ) const
+    {
+    OstTraceFunctionEntry0( CCMPLUGINPACKETDATA_GETDEFPRIORITYL_ENTRY );
+
+    TUint32 retVal( KDataMobilitySelectionPolicyPriorityWildCard );
+
+    CCDGlobalBearerTypePriorizationRecord* priorityRecord =
+            new( ELeave ) CCDGlobalBearerTypePriorizationRecord( iBearerPriorityTableId );
+    CleanupStack::PushL( priorityRecord );
+
+    priorityRecord->iServiceType.SetL( TPtrC( KCDTypeNameOutgoingWCDMA ) );
+
+    if ( priorityRecord->FindL( iSession ) )
+        {
+        priorityRecord->LoadL( iSession );
+
+        switch ( aAttribute )
+            {
+            case ECmDefaultPriority:
+                {
+                retVal = priorityRecord->iPriority;
+                }
+                break;
+            case ECmDefaultUiPriority:
+                {
+                retVal = priorityRecord->iUIPriority;
+                }
+                break;
+            default:
+                break;
+            }
+        }
+    CleanupStack::PopAndDestroy( priorityRecord );
+
+    OstTraceFunctionExit0( CCMPLUGINPACKETDATA_GETDEFPRIORITYL_EXIT );
+    return retVal;
     }
 
 // End of file

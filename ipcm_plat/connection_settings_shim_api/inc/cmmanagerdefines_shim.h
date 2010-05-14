@@ -1,19 +1,19 @@
 /*
- * Copyright (c) 2010 Nokia Corporation and/or its subsidiary(-ies).
- * All rights reserved.
- * This component and the accompanying materials are made available
- * under the terms of "Eclipse Public License v1.0""
- * which accompanies this distribution, and is available
- * at the URL "http://www.eclipse.org/legal/epl-v10.html".
- *
- * Initial Contributors:
- * Nokia Corporation - initial contribution.
- *
- * Contributors:
- *
- * Description:  
- * Defines for data types and attributes used in CmManagerShim interface.
- */
+* Copyright (c) 2010 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:  
+* Defines for data types and attributes used in CmManagerShim interface.
+*/
 
 #ifndef CMMANAGERDEFINES_SHIM_H
 #define CMMANAGERDEFINES_SHIM_H
@@ -219,6 +219,8 @@ namespace CMManagerShim
         WlanSecurityMode                = CMManager::EWlanSecurityMode,
         //!  From TConnectionMethodWlanSpecificAttributes in cmpluginwlandef.h
         WlanScanSSID                    = CMManager::EWlanScanSSID,
+        //!  From TConnectionMethodWlanSpecificAttributes in cmpluginwlandef.h
+        WlanChannelID                   = CMManager::EWlanChannelID,
         //!  From TConnectionMethodWlanSpecificAttributes in cmpluginwlandef.h
         WlanWepKey1InHex                = CMManager::EWlanWepKey1InHex,
         //!  From TConnectionMethodWlanSpecificAttributes in cmpluginwlandef.h

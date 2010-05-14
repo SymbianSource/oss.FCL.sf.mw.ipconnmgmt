@@ -143,10 +143,12 @@ void ConnectionView::createView()
     // Create the toolbar and the disconnection action
     mToolBar = new HbToolBar();    
     HbIcon icon("qtg_mono_disconnect");
-    mDisconnectAction = mToolBar->addAction(icon, hbTrId("txt_occ_button_disconnect_all"));
+    HbAction *disconnectAction = new HbAction(mToolBar);
+    disconnectAction->setIcon(icon);
+    mToolBar->addAction(disconnectAction);
     mMainView->setToolBar(mToolBar);
     bool connectStatus = connect(
-            mDisconnectAction,
+            disconnectAction,
             SIGNAL(triggered(bool)),
             this,
             SLOT(disconnectAll()));

@@ -80,11 +80,8 @@ IndicatorObserver::IndicatorObserver(int argc, char* argv[]) :
         KWlanOnOff);
     
     //Read current status of WLAN radio
-    //mWlanEnabled = mSettingsManager->readItemValue(wlanKey).toInt() ? true : false;
-    mWlanEnabled = true; 
-    //TODO: Replace above code with commented code when WlanOnOff implementation is in release.
-    //TODO: Remeber to add check for read failure(call error() method from settings manager).
-    
+    mWlanEnabled = mSettingsManager->readItemValue(wlanKey).toInt() ? true : false;
+
     mSettingsManager->startMonitoring(wlanKey);
 
     initializeIndicators();
@@ -147,10 +144,7 @@ void IndicatorObserver::updateWlanRadioStatus(const XQSettingsKey &key, const QV
     Q_UNUSED(key);
     
     // Inform about WLAN ON/OFF status change
-    Q_UNUSED(value); //TODO: to be removed with final implementation. To keep compiler satisfied.
-    //    mWlanEnabled = value.toInt() ? true : false;
-    
-    mWlanEnabled = true; //TODO: Replace with above code when WlanOnOff implementation is in release
+    mWlanEnabled = value.toInt() ? true : false;
     
     if (mWlanEnabled == false) {    
         deactivateWlanIndicatorPlugin();

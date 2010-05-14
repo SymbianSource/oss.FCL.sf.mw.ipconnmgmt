@@ -48,8 +48,7 @@ void HbAutoTest::mouseMove (HbAutoTestMainWindow *window, HbWidget *widget, QPoi
             Qt::NoButton, 
             Qt::NoModifier);
             QSpontaneKeyEvent::setSpontaneous(&me);
-            qApp->notify((window->viewport()), &me);
-            QCoreApplication::sendPostedEvents();
+            QCoreApplication::sendEvent(window->viewport(), &me);
             QTest::qWait(1);
     } else {
             HbAutoTestMouseEvent me (
@@ -60,8 +59,7 @@ void HbAutoTest::mouseMove (HbAutoTestMainWindow *window, HbWidget *widget, QPoi
             Qt::NoButton, 
             Qt::NoModifier);
             QSpontaneKeyEvent::setSpontaneous(&me);
-            qApp->notify((window->viewport()), &me);
-            QCoreApplication::sendPostedEvents();
+            QCoreApplication::sendEvent(window->viewport(), &me);
             QTest::qWait(1);
 
     }
@@ -94,9 +92,7 @@ void HbAutoTest::mousePress (HbAutoTestMainWindow *window, HbWidget *widget, QPo
     Qt::NoModifier);
 
     QSpontaneKeyEvent::setSpontaneous(&me);
-    qApp->notify((window->viewport()), &me);
-    QCoreApplication::sendPostedEvents();
-    QCoreApplication::sendPostedEvents();
+    QCoreApplication::sendEvent(window->viewport(), &me);
     QTest::qWait(1);
 }
 
@@ -123,8 +119,7 @@ void HbAutoTest::mouseRelease (HbAutoTestMainWindow *window, HbWidget *widget, Q
     Qt::NoModifier);
 
     QSpontaneKeyEvent::setSpontaneous(&me);
-    qApp->notify((window->viewport()), &me);
-    QCoreApplication::sendPostedEvents();
+    QCoreApplication::sendEvent(window->viewport(), &me);
 
     QTest::qWait(1);
     QTest::qWait(1);
@@ -152,15 +147,12 @@ void HbAutoTest::mouseClick (HbAutoTestMainWindow *window, const HbWidget *widge
     Qt::LeftButton, 
     Qt::NoModifier);
     QSpontaneKeyEvent::setSpontaneous(&me);
-    qApp->notify((window->viewport()), &me);
-    QCoreApplication::sendPostedEvents();
-    //QTime currentTime = QTime::currentTime();
-    //qDebug() << currentTime.toString("hh:mm:ss.zzz") << ": Left button down";
-    QTest::qWait(1);
+    QCoreApplication::sendEvent(window->viewport(), &me);
 
     if (delay!=-1) {
         QTest::qWait(delay);
     }
+
     HbAutoTestMouseEvent me2 (
     QEvent::MouseButtonRelease, 
     targetPoint.toPoint(), 
@@ -170,10 +162,7 @@ void HbAutoTest::mouseClick (HbAutoTestMainWindow *window, const HbWidget *widge
     Qt::NoModifier);
 
     QSpontaneKeyEvent::setSpontaneous(&me2);
-    qApp->notify((window->viewport()), &me2);
-    QCoreApplication::sendPostedEvents();
-    //currentTime = QTime::currentTime();
-    //qDebug() << currentTime.toString("hh:mm:ss.zzz") << ": Left button up";
+    QCoreApplication::sendEvent(window->viewport(), &me2);
 
     QTest::qWait(1);
     QTest::qWait(1);
@@ -221,8 +210,8 @@ void HbAutoTest::drag(HbAutoTestMainWindow *window, QPointF targetPoint)
                             Qt::NoModifier);   
 
         QSpontaneKeyEvent::setSpontaneous(&me);
-        qApp->notify((window->viewport()), &me);
-        QCoreApplication::sendPostedEvents();
+        QCoreApplication::sendEvent(window->viewport(), &me);
+        QTest::qWait(1);
     }
 
     QCursor::setPos(window->mapToGlobal(targetPoint.toPoint()));
@@ -235,8 +224,7 @@ void HbAutoTest::drag(HbAutoTestMainWindow *window, QPointF targetPoint)
                             Qt::LeftButton, 
                             Qt::NoModifier);   
     QSpontaneKeyEvent::setSpontaneous(&me);
-    qApp->notify((window->viewport()), &me);
-    QCoreApplication::sendPostedEvents();
+    QCoreApplication::sendEvent(window->viewport(), &me);
 }
 
 
@@ -255,7 +243,7 @@ void HbAutoTest::simulateEvent(QWidget *widget, bool press, int code,
 
         HbAutoTestKeyEvent a(press ? QEvent::KeyPress : QEvent::KeyRelease, code, modifier, text, repeat);
         QSpontaneKeyEvent::setSpontaneous(&a);
-        if (!qApp->notify(widget, &a))
+        if (!QCoreApplication::sendEvent(widget, &a))
             QTest::qWarn("Keyboard event not accepted by receiving widget");
     }
 

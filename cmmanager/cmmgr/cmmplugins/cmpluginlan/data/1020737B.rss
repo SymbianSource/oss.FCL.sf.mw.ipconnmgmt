@@ -17,7 +17,7 @@
 *
 */
 
-#include "ecom/RegistryInfo.rh"
+#include "ecom/registryinfo.rh"
 
 // Because attribute enums had to be added to namespace CMManager
 // it's not possible to included cmpluginlanbasedef.h

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ruleml xmlns="http://www.s60.com/xml/ruleml/2">
+
+<!-- correct cccccc00.cre to image --> 
+ <rule>
+  APs.AP or
+  VPN_APs.VPN_AP or
+  LAN_APs.LAN_AP or
+  WLAN_APs.WLAN_AP or 
+  configures 
+  CIA_KCRUidCommsDatCreator.CommsdatInputPath ='/epoc32/data/Z/private/10202be9'
+ </rule>
+ 
+</ruleml>

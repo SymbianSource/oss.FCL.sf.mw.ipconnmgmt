@@ -25,7 +25,7 @@ DEFAULT
 
 PRJ_EXPORTS
 // export iby files
-../Rom/cmmpluginwlan.iby   CORE_MW_LAYER_IBY_EXPORT_PATH(cmmpluginwlan.iby)
+../rom/cmmpluginwlan.iby   CORE_MW_LAYER_IBY_EXPORT_PATH(cmmpluginwlan.iby)
 
 
 PRJ_MMPFILES

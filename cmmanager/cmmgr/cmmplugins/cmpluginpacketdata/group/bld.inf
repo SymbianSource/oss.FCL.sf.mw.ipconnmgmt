@@ -24,7 +24,7 @@ DEFAULT
 
 PRJ_EXPORTS
 // export iby files
-../Rom/cmmpluginpacketdata.iby   CORE_MW_LAYER_IBY_EXPORT_PATH(cmmpluginpacketdata.iby)
+../rom/cmmpluginpacketdata.iby   CORE_MW_LAYER_IBY_EXPORT_PATH(cmmpluginpacketdata.iby)
 
 PRJ_MMPFILES
 cmpluginpacketdata.mmp

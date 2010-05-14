@@ -413,4 +413,27 @@ TInt RCmDestinationApi::IsEqual( const TInt aHandle, TBool& aResult )
     return err;
     }
 
+TInt RCmDestinationApi::GetIcon( HBufC* aBuffer )
+    {
+    OstTraceFunctionEntry0( RCMDESTINATIONAPI_GETICON_ENTRY );
+
+    TPtr descriptor( aBuffer->Des() );
+    TIpcArgs args( &descriptor );
+    TInt err = SendReceive( EDestGetIcon, args );
+
+    OstTraceFunctionExit0( RCMDESTINATIONAPI_GETICON_EXIT );
+    return err;
+    }
+
+TInt RCmDestinationApi::SetIcon( const TDesC& aValue )
+    {
+    OstTraceFunctionEntry0( RCMDESTINATIONAPI_SETICON_ENTRY );
+
+    TIpcArgs args( &aValue );
+    TInt err = SendReceive( EDestSetIcon, args );
+
+    OstTraceFunctionExit0( RCMDESTINATIONAPI_SETICON_EXIT );
+    return err;
+    }
+
 // End of file

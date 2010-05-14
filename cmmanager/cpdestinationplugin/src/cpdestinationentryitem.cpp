@@ -571,6 +571,7 @@ bool CpDestinationEntryItemData::isDestinationNameValid(
             if (0 == destination.compare(dest->name())) {
                 destination = hbTrId("txt_occ_info_name_already_in_use");
                 retVal = false;
+                delete dest;
                 break;
             }
             delete dest;
@@ -692,7 +693,6 @@ void CpDestinationEntryItemData::saveNewDestinationName()
     try {
         cmm = new CmManagerShim();
         if (isDestinationNameValid(destinationName, cmm)) {
-            cmm = new CmManagerShim();
             destination = cmm->destination(mDestinationId);
             destination->setName(destinationName);
             destination->update();

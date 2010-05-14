@@ -69,16 +69,6 @@ private:
 
 public:
     /**
-     * Set the plugin base pointer.
-     */
-    void SetPlugin( CCmPluginBaseEng* aPlugin );
-
-    /**
-     * Get the plugin base pointer.
-     */
-    CCmPluginBaseEng* GetPlugin() const;
-
-    /**
      * Get connection method ID.
      */
     TUint32 GetId() const;
@@ -92,11 +82,6 @@ public:
      * Return bearer type.
      */
     TUint32 GetBearerType() const;
-
-    /**
-     * Set bearer type.
-     */
-    void SetBearerType( const TUint32& aBearerType );
 
     /**
      * Get handle ID.
@@ -171,8 +156,8 @@ public:
      * @return None
      */
     void SetIntAttributeL(
-        const TUint32& aAttribute,
-        const TUint32& aValue );
+            const TUint32& aAttribute,
+            const TUint32& aValue );
 
     /**
      * Sets the integer value identified by aAttribute.
@@ -181,8 +166,8 @@ public:
      * @return None
      */
     void SetBoolAttributeL(
-        const TUint32& aAttribute,
-        const TBool& aValue );
+            const TUint32& aAttribute,
+            const TBool& aValue );
 
     /**
      * Sets the 16 bit string value identified by aAttribute.
@@ -191,8 +176,8 @@ public:
      * @return None
      */
     void SetStringAttributeL(
-        const TUint32& aAttribute,
-        const TDesC16& aValue );
+            const TUint32& aAttribute,
+            const TDesC16& aValue );
 
     /**
      * Sets the 8 bit string value identified by aAttribute.
@@ -201,13 +186,8 @@ public:
      * @return None
      */
     void SetString8AttributeL(
-        const TUint32& aAttribute,
-        const TDesC8& aValue );
-
-    /**
-     * Gets the current status of this connection method instance.
-     */
-    TCmmConnMethodStatus GetStatus() const;
+            const TUint32& aAttribute,
+            const TDesC8& aValue );
 
     /**
      * Sets a new status value.

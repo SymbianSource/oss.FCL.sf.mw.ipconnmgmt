@@ -17,9 +17,7 @@
 */
 
 // System includes
-#include <QString>
-#include <QTranslator>
-#include <QCoreApplication>
+#include <HbTranslator>
 #include <cmmanager_shim.h>
 #include <cmconnectionmethod_shim.h>
 
@@ -49,19 +47,12 @@
     Constructor.
 */
 CpPacketDataApPlugin::CpPacketDataApPlugin() :
-    mTranslator(0),
+    mTranslator(new HbTranslator("cpapplugin")),
     mCmManager(0),
     mCmConnectionMethod(0)
 {
     OstTraceFunctionEntry0(CPPACKETDATAAPPLUGIN_CPPACKETDATAAPPLUGIN_ENTRY);
  
-    // Install localization
-    QString lang = QLocale::system().name();
-    QString path = "z:/resource/qt/translations/";
-    mTranslator = new QTranslator(this);
-    mTranslator->load(path + "cpapplugin_" + lang);
-    qApp->installTranslator(mTranslator);
-    
     OstTraceFunctionExit0(CPPACKETDATAAPPLUGIN_CPPACKETDATAAPPLUGIN_EXIT);
 }
 

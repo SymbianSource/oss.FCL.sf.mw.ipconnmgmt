@@ -48,9 +48,9 @@ const TInt KErrGeneralConnection        = -50000;
 const TInt KErrGenConnNoGPRSNetwork     = -3609;
 
 // Icons representing bearer
-_LIT( KIconCellular, "pri_small_wlan.svg" );
-_LIT( KIconWlan,     "pri_small_gprs.svg" );
-_LIT( KIconVpn,      "pri_small_vpn.svg" ); 
+_LIT( KIconCellular, "qtg_small_wlan.svg" );
+_LIT( KIconWlan,     "qtg_small_gprs.svg" );
+_LIT( KIconVpn,      "qtg_small_vpn.svg" ); 
 _LIT( KIconNone,     "" );
 
 // Empty text

@@ -16,14 +16,14 @@
 
 TEMPLATE = app
 TARGET = indicatorobserver
-CONFIG += hb \
-          no_icon
+CONFIG += hb no_icon mobility
+MOBILITY += bearer
 
 INCLUDEPATH += $$MW_LAYER_SYSTEMINCLUDE \
                ./inc \
                ./traces
                
-LIBS += -lqtbearer -lxqsettingsmanager
+LIBS += -lxqsettingsmanager
 
 QT += core \
       network 

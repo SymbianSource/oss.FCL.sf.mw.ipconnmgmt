@@ -119,6 +119,12 @@ public:
     HBufC* GetLocalisedDestinationNameL();
     void SetDestinationNameL( const TDesC& aDestinationName );
 
+    /**
+     * Get the destination icon.
+     */
+    HBufC* GetDestinationIconL();
+    void SetDestinationIconL( const TDesC& aDestinationIcon );
+
     void GetMetadataL(
             const CMManager::TSnapMetadataField& aMetadataField,
             TUint32& aMetadata );

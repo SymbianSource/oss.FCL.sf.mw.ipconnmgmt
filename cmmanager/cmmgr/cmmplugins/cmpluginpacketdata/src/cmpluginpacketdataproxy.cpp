@@ -18,7 +18,7 @@
 
 
 #include <e32std.h>
-#include <ecom/ImplementationProxy.h>
+#include <ecom/implementationproxy.h>
 
 #include "cmpluginpacketdata.h"
 
@@ -29,9 +29,9 @@ const TImplementationProxy ImplementationTable[] =
     IMPLEMENTATION_PROXY_ENTRY( KUidPacketDataBearerType, CCmPluginPacketData::NewL)
     };
 
-EXPORT_C const TImplementationProxy* ImplementationGroupProxy(TInt& aTableCount)
+EXPORT_C const TImplementationProxy* ImplementationGroupProxy( TInt& aTableCount )
     {
-    aTableCount = sizeof(ImplementationTable) / sizeof(TImplementationProxy);
+    aTableCount = sizeof( ImplementationTable ) / sizeof( TImplementationProxy );
 
     return ImplementationTable;
     }

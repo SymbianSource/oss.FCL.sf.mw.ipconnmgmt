@@ -67,17 +67,6 @@ class CCdcCommsDatStartup : public CBase
     */
     void CheckCreatorUIdL();
 
-    /*
-    * Reads the database descriptor input file name
-    * @param out: Name of the database descriptor file 
-    */
-    void GetInputFileNameL( TFileName &aFileName );
-
-    /*
-    * Creates repository
-    */
-    void CreateRepositoryL();
-
    	/**
     * Resets the commsdat repository. This causes the default Commsdat
     * from z to be copied to c
@@ -89,15 +78,6 @@ class CCdcCommsDatStartup : public CBase
     */
     void ResetEAPSettingsL();
     
-    /*
-    * Sets the startup status
-    * @param startup status to be set.
-    */
-    void SetStartupStatusL( TInt aStatus );
-    
-    // Repository
-    CRepository *iRepository;
-
     };
 
 

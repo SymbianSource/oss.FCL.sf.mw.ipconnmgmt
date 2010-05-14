@@ -58,6 +58,10 @@ const TInt    KGranularity       = 2;
 
 //Total number of ranges
 const TUint KMPMPolicyRangeCount = 2;
+
+// roaming to connected wlan wait interval
+// in micro seconds (10 sec)
+const TInt KRoamingToWlanUpdateInterval = 10000000; 
  
 //Definition of the ranges of IPC numbers
 const TInt KMPMPolicyRanges[KMPMPolicyRangeCount] = 
@@ -699,6 +703,14 @@ class CMPMServer : public CPolicyServer
         void StartForcedRoamingToWlanL( const TConnMonIapInfo& aIapInfo );
         
         /**
+        * Starts forced roaming sequence to connected wlan
+        *
+        * @param aIapInfo Info about available IAPs
+        * @since 5.2
+        */
+        static TInt StartForcedRoamingToConnectedWlanL( TAny* aUpdater );
+        
+        /**
         * Starts forced roaming sequence from WLAN if necessary
         *
         * @param aIapInfo Info about available IAPs
@@ -961,6 +973,12 @@ class CMPMServer : public CPolicyServer
         
         // Is WLAN usage already accepted in this offline session.
         TOfflineWlanQueryResponse iOfflineWlanQueryResponse;
+        
+        // Timer to start roaming to connected WLAN network 
+        CPeriodic* iRoamingToWlanPeriodic;
+
+        // TConnMonIapInfo Info about available IAPs
+        TConnMonIapInfo iConnMonIapInfo;
     };
 
 #include "mpmserver.inl"

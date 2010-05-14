@@ -57,8 +57,6 @@ const TInt KLanLastSocketActivityTimeout = -1;
 const TInt KLanLastSocketClosedTimeout = -1;
 const TInt KLanLastSessionClosedTimeout = -1;
 
-const TUint32 KDefaultPriorityLAN = 0;
-
 
 // ---------------------------------------------------------
 // CCmPluginLan::NewOutgoingL()
@@ -135,6 +133,16 @@ void CCmPluginLan::ConstructL()
     FeatureManager::InitializeLibL();
 
     CCmPluginBaseEng::ConstructL();
+    
+    // Get bearer priority table ID.
+    TRAP_IGNORE( iBearerPriorityTableId = 
+            CCDGlobalBearerTypePriorizationRecord::TableIdL( iSession ) );
+
+    if ( !iBearerPriorityTableId )
+        {
+        iBearerPriorityTableId = 
+                CCDGlobalBearerTypePriorizationRecord::CreateTableL( iSession );
+        }
 
     OstTraceFunctionExit0( CCMPLUGINLAN_CONSTRUCTL_EXIT );
     }
@@ -197,7 +205,6 @@ TBool CCmPluginLan::CanHandleIapIdL( CCDIAPRecord *aIapRecord ) const
 void CCmPluginLan::PreparePluginToLoadRecordsL()
     {
     OstTraceFunctionEntry0( CCMPLUGINLAN_PREPAREPLUGINTOLOADRECORDSL_ENTRY );
-
     OstTraceFunctionExit0( CCMPLUGINLAN_PREPAREPLUGINTOLOADRECORDSL_EXIT );
     }
 
@@ -206,8 +213,8 @@ void CCmPluginLan::PreparePluginToLoadRecordsL()
 // ----------------------------------------------------------------------------
 //
 void CCmPluginLan::PreparePluginToUpdateRecordsL(
-    RPointerArray<CommsDat::CCDRecordBase>& aGenRecordArray,
-    RPointerArray<CommsDat::CCDRecordBase>& aBearerSpecRecordArray )
+        RPointerArray<CommsDat::CCDRecordBase>& aGenRecordArray,
+        RPointerArray<CommsDat::CCDRecordBase>& aBearerSpecRecordArray )
     {
     OstTraceFunctionEntry0( CCMPLUGINLAN_PREPAREPLUGINTOUPDATERECORDSL_ENTRY );
 
@@ -245,11 +252,10 @@ void CCmPluginLan::CreateServiceRecordL()
     delete iServiceRecord;
     iServiceRecord = NULL;
 
-    iServiceRecord = static_cast<CCDLANServiceRecord*>
-                (CCDRecordBase::RecordFactoryL( KCDTIdLANServiceRecord ) );
+    iServiceRecord = static_cast<CCDLANServiceRecord*>(
+            CCDRecordBase::RecordFactoryL( KCDTIdLANServiceRecord ) );
 
-    CCDLANServiceRecord* lanServiceRecord = static_cast<CCDLANServiceRecord *>( iServiceRecord );
-
+    CCDLANServiceRecord* lanServiceRecord = static_cast<CCDLANServiceRecord*>( iServiceRecord );
 
     if ( FeatureManager::FeatureSupported( KFeatureIdIPv6 ) )
         {
@@ -283,6 +289,7 @@ void CCmPluginLan::CreateServiceRecordL()
         lanServiceRecord->iConfigDaemonManagerName.SetL( KEmpty );
         lanServiceRecord->iConfigDaemonName.SetL( KEmpty );
         }
+
     OstTraceFunctionExit0( CCMPLUGINLAN_CREATESERVICERECORDL_EXIT );
     }
 
@@ -831,9 +838,14 @@ TUint32 CCmPluginLan::GetBearerIntAttributeL(
             retVal = KCommDbBearerLAN;
             }
             break;
+        case ECmDefaultUiPriority:
+            {
+            retVal = GetDefPriorityL( aAttribute );
+            }
+            break;
         case ECmDefaultPriority:
             {
-            retVal = KDefaultPriorityLAN;
+            retVal = GetDefPriorityL( aAttribute );
             }
             break;
         case ELanServiceExtensionTableRecordId:
@@ -1311,9 +1323,13 @@ TUint32 CCmPluginLan::GetBearerInfoIntL( TUint32 aAttribute ) const
             }
             break;
         case ECmDefaultUiPriority:
+            {
+            retVal = GetDefPriorityL( aAttribute );
+            }
+            break;
         case ECmDefaultPriority:
             {
-            retVal = KDefaultPriorityLAN;
+            retVal = GetDefPriorityL( aAttribute );
             }
             break;
         case ECmExtensionLevel:
@@ -1457,6 +1473,46 @@ void CCmPluginLan::GetBearerTableIdsToBeObservedL(
     aTableIdArray.AppendL( KCDTIdLANServiceRecord );
 
     OstTraceFunctionExit0( CCMPLUGINLAN_GETBEARERTABLEIDSTOBEOBSERVED_EXIT );
+    }
+
+// ---------------------------------------------------------------------------
+// CCmPluginLan::GetDefPriorityL
+// ---------------------------------------------------------------------------
+//
+TUint32 CCmPluginLan::GetDefPriorityL( const TUint32 aAttribute ) const//TODO, OST
+    {
+
+    TUint32 retVal( KDataMobilitySelectionPolicyPriorityWildCard );
+
+    CCDGlobalBearerTypePriorizationRecord* priorityRecord =
+            new( ELeave ) CCDGlobalBearerTypePriorizationRecord( iBearerPriorityTableId );
+    CleanupStack::PushL( priorityRecord );
+
+    priorityRecord->iServiceType.SetL( TPtrC( KCDTypeNameLANService ) );
+
+    if ( priorityRecord->FindL( iSession ) )
+        {
+        priorityRecord->LoadL( iSession );
+
+        switch ( aAttribute )
+            {
+            case ECmDefaultPriority:
+                {
+                retVal = priorityRecord->iPriority;
+                }
+                break;
+            case ECmDefaultUiPriority:
+                {
+                retVal = priorityRecord->iUIPriority;
+                }
+                break;
+            default:
+                break;
+            }
+        }
+    CleanupStack::PopAndDestroy( priorityRecord );
+
+    return retVal;
     }
 
 //  End of File

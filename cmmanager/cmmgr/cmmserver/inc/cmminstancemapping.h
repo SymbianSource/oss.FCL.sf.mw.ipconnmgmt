@@ -48,6 +48,9 @@ public:
 
     // IDs for unsupported connection methods inside this destination.
     RArray<TUint32> iUnsupportedConnMethods;
+    
+    // The destination metadata.
+    TUint32 iMetadata;
     };
 
 
@@ -140,6 +143,14 @@ public: //TODO, sort methods, they are currently in mixed order in .cpp file.
      * belongs to.
      */
     TInt DestinationsContainingConnMethod( const TUint32& aConnMethodId ) const;
+
+    /**
+     * Returns the destination ids containing the connection method given as
+     * parameter.
+     */
+    void DestinationsContainingConnMethodL(
+            const TUint32 aConnMethodId,
+            RArray<TUint32>& aDestinationIds ) const;
 
     /**
      * Returns all conenction method IDs. Unsupported connection methods are
@@ -241,6 +252,11 @@ public: //TODO, sort methods, they are currently in mixed order in .cpp file.
     void RemoveConnMethodFromDestinations(
             const TUint32& aConnMethodId,
             RArray<TUint32>& aChangedDestinations );
+    
+    /**
+     * Get the metadata of the destination identified with given id.
+     */
+    TUint32 DestinationMetadata( const TUint32 aDestinationId ) const;
 
 private:
     /**

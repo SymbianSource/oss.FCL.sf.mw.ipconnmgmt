@@ -12,6 +12,7 @@
 * Contributors:
 *
 * Description:  
+* Control Panel "Network Settings" plugin header file.
 *   
 */
 
@@ -20,12 +21,13 @@
 
 // System includes
 #include <QObject>
+#include <QSharedPointer>
 #include <cpplugininterface.h>
 
 // User includes
 
 // Forward declarations
-class QTranslator;
+class HbTranslator;
 
 // External data types
 
@@ -51,11 +53,13 @@ protected:
 protected slots:
 
 private:
+    Q_DISABLE_COPY(CpIpSettingsPlugin)
 
 private slots:
     
 private: // data
-    QTranslator *mTranslator;
+    //! Translator instance
+    QSharedPointer<HbTranslator> mTranslator;
 };
 
 #endif // CPIPSETTINGSPLUGIN_H

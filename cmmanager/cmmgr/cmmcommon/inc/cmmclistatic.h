@@ -22,9 +22,6 @@
 
 #include <e32std.h>
 
-const TUint KCmmDefaultMinHeapSize =  0x1000;  //  4K
-const TUint KCmmDefaultMaxHeapSize = 0x10000;  // 64K
-
 const TInt KCmmDefaultMessageSlots = 2;
 
 _LIT( KCmManagerStartupMutex, "CmManagerStartupMutex" );
@@ -37,12 +34,8 @@ class TCmManagerLauncher
     {
 public:
     static TInt LaunchServer(
-            const TDesC& aServerName,
             const TDesC& aServerFileName,
-            const TUid& aServerUid3,
-            const TUint aWinsMinHeapSize = KCmmDefaultMinHeapSize,
-            const TUint aWinsMaxHeapSize = KCmmDefaultMaxHeapSize,
-            const TUint aWinsStackSize = KDefaultStackSize );
+            const TUid& aServerUid3 );
 
 private:
     static TBool ServerStartupLock( RMutex& mutex, TInt& err );
