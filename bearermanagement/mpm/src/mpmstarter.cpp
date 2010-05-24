@@ -26,7 +26,6 @@ Mobility Policy Manager server entry point.
 #include "mpmstarter.h"
 #include "mpmserver.h"
 #include "mpmlogger.h"
-#include "mpmdefaultconnserver.h"
 
 // ============================= LOCAL FUNCTIONS ===============================
 
@@ -46,11 +45,6 @@ static void RunServerL()
     // create the server
     CServer2* server = MPMStarter::CreateAndStartServerL();
     CleanupStack::PushL( server );
-       
-    // create default connection server
-    CServer2* server2 = MPMStarter::CreateDefaultConnServerL( 
-    static_cast<CMPMServer*> ( server ) );
-    CleanupStack::PushL( server2 );
 
     User::LeaveIfError( RThread::RenameMe( MPMStarter::ServerName() ) );
 
@@ -61,7 +55,6 @@ static void RunServerL()
     CActiveScheduler::Start();
     //
     // Cleanup the server and scheduler
-    CleanupStack::PopAndDestroy( server2 );
     CleanupStack::PopAndDestroy( server );
     CleanupStack::PopAndDestroy( s );
     }
@@ -110,17 +103,6 @@ CServer2* MPMStarter::CreateAndStartServerL()
     {
     MPMLOGSTRING( "MPMStarter::CreateAndStartServerL" )
     return CMPMServer::NewL();
-    }
-
-// -----------------------------------------------------------------------------
-// MPMStarter::CreateDefaultConnServerL
-// create default connection server object
-// -----------------------------------------------------------------------------
-//
-CServer2* MPMStarter::CreateDefaultConnServerL( CMPMServer* aMPMServer )
-    {
-    MPMLOGSTRING( "MPMStarter::CreateDefaultConnServerL" )
-    return CMPMDefaultConnServer::NewL( aMPMServer );
     }
 
 // -----------------------------------------------------------------------------

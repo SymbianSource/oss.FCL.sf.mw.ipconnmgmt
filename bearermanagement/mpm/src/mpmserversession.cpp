@@ -43,7 +43,6 @@ Mobility Policy Manager server session implementation.
 #include "mpmconfirmdlgroaming.h"
 #include "mpmlogger.h"
 #include "mpmpropertydef.h"
-#include "mpmdefaultconnection.h"
 #include "mpmiapselection.h"
 #include "mpmcsidwatcher.h"
 
@@ -435,7 +434,7 @@ while extracting TCommDbConnPref from TConnPref" )
     
     MPMLOGSTRING3( "CMPMServerSession::HandleServerChooseIapL - iap %d \
 connType %d", mpmConnPref.IapId(), mpmConnPref.ConnType() )
-
+    
     iIapSelection->ChooseIapL( mpmConnPref );
 
     if ( iAppUid == iMyServer.CsIdWatcher()->ConnectScreenId() )
@@ -963,10 +962,6 @@ void CMPMServerSession::MigrateCallbackL( TInt aError )
 	    if( aError == KErrNone )
 	        {
 	        iMigrateState = EMigrateOfflineConfirmation;
-    	    if( IapSelectionL()->StartWlanQueryIfNeededL( iMigrateIap, ETrue ) )
-	            {
-	            return;
-                }
 	        }
 	    }
 	else if( iMigrateState == EMigrateOfflineConfirmation )
@@ -3314,7 +3309,8 @@ Inconsistent state %d", KErrGeneral )
     // Show error popup if it's allowed per client request
     if ( ChooseBestIapCalled() && (!( iIapSelection->MpmConnPref().NoteBehaviour() &
             TExtendedConnPref::ENoteBehaviourConnDisableNotes ))
-            && ( aError != KErrNone ) )
+            && ( aError != KErrNone ) 
+			&& ( iIapSelection->MpmConnPref().SnapId() == 0 ) )
         {
         // Note: Below function shows the discreet popup only if the error code
         // belongs to the set of errors that are shown to the user.

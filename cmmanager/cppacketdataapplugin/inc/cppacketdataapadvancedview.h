@@ -150,6 +150,9 @@ private: // data
     bool mIpv6Supported;
     //! Current network type (IPv4/IPv6)
     NetworkType mCurrentNetworkType;
+    
+    // Friend classes
+    friend class TestCpPacketDataApPlugin;
 };
 
 #endif // CPPACKETDATAAPADVANCEDVIEW_H

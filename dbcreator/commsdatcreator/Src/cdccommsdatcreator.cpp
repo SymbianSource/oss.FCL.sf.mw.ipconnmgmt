@@ -301,8 +301,7 @@ EXPORT_C void CCdcCommsDatCreator::CreateCommsDatL( const TFileName& aInFileName
                                                           iPluginArray,
                                                           iPluginNames,
                                                           iDestArray,
-                                                          iDestNames,
-                                                          iDefCon ); 
+                                                          iDestNames ); 
                 iFileProcessor->ParseFileL();
 
                 delete iFileProcessor;
@@ -411,8 +410,6 @@ CCdcCommsDatCreator::~CCdcCommsDatCreator()
     
     iLingerSettings.ResetAndDestroy();
 
-    iDefCon.ResetAndDestroy();
-    
     iCmInDest.Close(); 
     
     iCmManager.Close();

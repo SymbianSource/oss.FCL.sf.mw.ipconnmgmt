@@ -60,13 +60,15 @@ static const int waitTime = 10;
 
 // UI coordinates
 static const QPoint scrollMiddle(350, 280);
-static const QPoint scrollTop(350, 50);
-static const QPoint scrollBottom(350, 520);
+static const QPoint scrollTop(350, 30);
+static const QPoint scrollBottom(350, 540);
 
 // Use positive offset if dropdown opens under the combobox
-static const QPoint comboBoxItemOffset(0, 55);
+static const QPoint comboBoxFirstItemOffset(80, 75);
+static const QPoint comboBoxItemOffset(0, 51);
 // Use negative offset if dropdown opens above the combobox
-static const QPoint comboBoxItemNegativeOffset(0, -50);
+static const QPoint comboBoxFirstItemNegativeOffset(80, -29);
+static const QPoint comboBoxItemNegativeOffset(0, -51);
 
 static const QPoint exitEditorOffset(-10, -20);
 
@@ -196,11 +198,11 @@ void TestCpWlanApPlugin::tcChangeConnectionName_data()
     QTest::addColumn<QString>("result");
     
     QTest::newRow("maximum length")
-        << "really long name 1234567890123"
-        << "really long name 1234567890123";
+        << "really long name 123456789012345678901234567890123"
+        << "really long name 123456789012345678901234567890123";
     QTest::newRow("too long")
-        << "too long name 123456789012345678901234567890"
-        << "too long name 1234567890123456";
+        << "too long name 12345678901234567890123456789012345678901234"
+        << "too long name 123456789012345678901234567890123456";
     QTest::newRow("basic") // last one must always fit on one line in UI
         << "test WLAN AP"
         << "test WLAN AP";
@@ -316,8 +318,8 @@ void TestCpWlanApPlugin::tcWlanNetworkNameEmpty()
  */
 void TestCpWlanApPlugin::tcChangeNetworkStatus()
 {
-    QPointF publicPointOffset = comboBoxItemOffset;
-    QPointF hiddenPointOffset = comboBoxItemOffset * 2;
+    QPointF publicPointOffset = comboBoxFirstItemOffset;
+    QPointF hiddenPointOffset = comboBoxFirstItemOffset + comboBoxItemOffset;
     
     // Set network status to hidden
     HbAutoTest::mouseClick(mMainWindow, mNetworkStatusWidget);
@@ -335,8 +337,8 @@ void TestCpWlanApPlugin::tcChangeNetworkStatus()
  */
 void TestCpWlanApPlugin::tcChangeNetworkMode()
 {
-    QPointF infraPointOffset = comboBoxItemOffset;
-    QPointF adHocPointOffset = comboBoxItemOffset * 2;
+    QPointF infraPointOffset = comboBoxFirstItemOffset;
+    QPointF adHocPointOffset = comboBoxFirstItemOffset + comboBoxItemOffset;
     
     // Set network mode to ad-hoc
     HbAutoTest::mouseClick(mMainWindow, mNetworkModeWidget);
@@ -355,12 +357,12 @@ void TestCpWlanApPlugin::tcChangeNetworkMode()
 void TestCpWlanApPlugin::tcChangeSecurityMode()
 {
 #ifdef WLAN_SECURITY_PLUGINS_AVAILABLE
-    QPointF openPointOffset = comboBoxItemNegativeOffset * 4;
-    QPointF wepPointOffset = comboBoxItemNegativeOffset * 3;
-    QPointF wpaPointOffset = comboBoxItemNegativeOffset * 2;
-    QPointF wpa2PointOffset = comboBoxItemNegativeOffset;
+    QPointF openPointOffset = comboBoxFirstItemNegativeOffset + comboBoxItemNegativeOffset * 3;
+    QPointF wepPointOffset = comboBoxFirstItemNegativeOffset + comboBoxItemNegativeOffset * 2;
+    QPointF wpaPointOffset = comboBoxFirstItemNegativeOffset + comboBoxItemNegativeOffset;
+    QPointF wpa2PointOffset = comboBoxFirstItemNegativeOffset;
 #else
-    QPointF openPointOffset = comboBoxItemNegativeOffset;
+    QPointF openPointOffset = comboBoxFirstItemNegativeOffset;
 #endif
     
 #ifdef WLAN_SECURITY_PLUGINS_AVAILABLE
@@ -901,7 +903,7 @@ void TestCpWlanApPlugin::tcExpandIpv6SettingsAndGetUiWidgets()
 void TestCpWlanApPlugin::tcEnableAutomaticIpv6DnsAddress()
 {
     // Enable automatic IPv6 DNS address
-    QPointF automaticPointOffset = comboBoxItemOffset;
+    QPointF automaticPointOffset = comboBoxFirstItemOffset;
     HbAutoTest::mouseClick(mMainWindow, mIpv6DnsAddressAutomaticWidget);
     QTest::qWait(100);
     HbAutoTest::mouseClick(mMainWindow, mIpv6DnsAddressAutomaticWidget, automaticPointOffset, 100);
@@ -921,7 +923,7 @@ void TestCpWlanApPlugin::tcEnableAutomaticIpv6DnsAddress()
 void TestCpWlanApPlugin::tcEnableWellKnownIpv6DnsAddress()
 {
     // Enable well-known IPv6 DNS address
-    QPointF wellKnownPointOffset = comboBoxItemOffset * 2;
+    QPointF wellKnownPointOffset = comboBoxFirstItemOffset + comboBoxItemOffset;
     HbAutoTest::mouseClick(mMainWindow, mIpv6DnsAddressAutomaticWidget);
     QTest::qWait(100);
     HbAutoTest::mouseClick(mMainWindow, mIpv6DnsAddressAutomaticWidget, wellKnownPointOffset, 100);
@@ -949,7 +951,7 @@ void TestCpWlanApPlugin::tcEnableWellKnownIpv6DnsAddress()
 void TestCpWlanApPlugin::tcEnableUserDefinedIpv6DnsAddress()
 {
     // Select user defined IPv6 DNS address
-    QPointF userDefinedPointOffset = comboBoxItemOffset * 3;
+    QPointF userDefinedPointOffset = comboBoxFirstItemOffset + comboBoxItemOffset * 2;
     //QPointF userDefinedPointOffset(0, 160);
     HbAutoTest::mouseClick(mMainWindow, mIpv6DnsAddressAutomaticWidget);
     QTest::qWait(100);

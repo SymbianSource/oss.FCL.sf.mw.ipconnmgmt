@@ -24,7 +24,6 @@ PRJ_EXPORTS
 ../inc/rmpm.h                   |../../../inc/rmpm.h
 ../inc/rmpm.inl                 |../../../inc/rmpm.inl
 ../rom/mpm.iby                  CORE_MW_LAYER_IBY_EXPORT_PATH(mpm.iby)
-../rom/mpmdefaultconnection.iby CORE_MW_LAYER_IBY_EXPORT_PATH(mpmdefaultconnection.iby)
 ../rom/mpmserver.iby            CORE_MW_LAYER_IBY_EXPORT_PATH(mpmserver.iby)
 ../conf/mpm.confml              MW_LAYER_CONFML(mpm.confml)
 ../conf/mpm_101f6d12.crml       MW_LAYER_CRML(mpm_101f6d12.crml)
@@ -33,7 +32,6 @@ PRJ_EXPORTS
 PRJ_MMPFILES
 mpmclient.mmp
 mpmserver.mmp
-mpmdefaultconnectionclient.mmp
 mpmserver_platsim.mmp // mpmserver-variant for Platsim
 
 PRJ_TESTMMPFILES

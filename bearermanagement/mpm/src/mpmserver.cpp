@@ -37,9 +37,7 @@ Mobility Policy Manager server implementation.
 #include "mpmdisconnectdlg.h"
 #include "mpmconfirmdlgroaming.h"
 #include "mpmconfirmdlgstarting.h"
-#include "mpmdefaultconnection.h"
 #include "mpmcommsdataccess.h"
-#include "mpmwlanquerydialog.h"
 #include "mpmprivatecrkeys.h"
 #include "mpmcsidwatcher.h"
 #include "mpmdatausagewatcher.h"
@@ -89,8 +87,6 @@ CMPMServer::CMPMServer()
       iDisconnectQueue( NULL ), 
       iRoamingQueue( NULL ), 
       iStartingQueue( NULL ),
-      iWlanQueryQueue( NULL ),
-      iDefaultConnection( NULL ), 
       iConnectionCounter( 0 ),
       iOfflineMode( ECoreAppUIsNetworkConnectionAllowed )
     {
@@ -162,11 +158,6 @@ void CMPMServer::ConstructL()
 
     iStartingQueue = new ( ELeave ) CArrayPtrFlat<CMPMConfirmDlgStarting>( KGranularity ); 
     iStartingQueue->Reset();
-
-    iWlanQueryQueue = new ( ELeave ) CArrayPtrFlat<CMPMWlanQueryDialog>( KGranularity );
-    iWlanQueryQueue->Reset();
-    
-    iDefaultConnection = CMPMDefaultConnection::NewL( this );    
 
     // Create central repository watcher and start it
     iMpmCsIdWatcher = CMpmCsIdWatcher::NewL();
@@ -253,12 +244,6 @@ CMPMServer::~CMPMServer()
         }
     delete iStartingQueue;
 
-    while ( iWlanQueryQueue && iWlanQueryQueue->Count() > 0 )
-        {
-        iWlanQueryQueue->Delete( 0 );
-        }
-    delete iWlanQueryQueue;
-
     delete iEvents;
 
     for ( TInt i = 0; i < iBlackListIdList.Count(); i++ )
@@ -280,8 +265,6 @@ CMPMServer::~CMPMServer()
 
     iMobilePhone.Close();
     iTelServer.Close();
-    
-    delete iDefaultConnection;
     
     delete iMpmCsIdWatcher;    
     
@@ -1366,18 +1349,6 @@ void CMPMServer::DumpActiveBMConns()
 #endif // _DEBUG
     }
 
-
-// -----------------------------------------------------------------------------
-// CMPMServer::DefaultConnection
-// -----------------------------------------------------------------------------
-//
-CMPMDefaultConnection* CMPMServer::DefaultConnection()
-    {
-    MPMLOGSTRING( "CMPMServer::DefaultConnection:\
- Default Connection" )
-    return iDefaultConnection;
-    }
-
 // -----------------------------------------------------------------------------
 // CMPMServer::StartedConnectionExists
 // -----------------------------------------------------------------------------
@@ -1408,22 +1379,6 @@ TInt CMPMServer::StartedConnectionExists( TInt aIapId )
         {
         MPMLOGSTRING( "CMPMServer::StartedConnectionExists: False" )
         return KErrNotFound;
-        }
-    }
-
-// -----------------------------------------------------------------------------
-// CMPMServer::AppendWlanQueryQueueL
-// -----------------------------------------------------------------------------
-//
-void CMPMServer::AppendWlanQueryQueueL( CMPMWlanQueryDialog* aDlg )
-    {
-    if( aDlg )
-        {
-        iWlanQueryQueue->AppendL( aDlg );
-        }
-    else
-        {
-        MPMLOGSTRING( "CMPMServer::AppendWlanQueryQueueL argument NULL, Error" )
         }
     }
 

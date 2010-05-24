@@ -28,7 +28,8 @@
 #include <cmmanagerext.h>
 #include <cmconnectionmethodext.h>
 #include <metadatabase.h>
-#include <EapSettings.h>
+#include <EapGeneralSettings.h>
+#include <EapExpandedType.h>
 
 #include "cdcprocessorbase.h"
 
@@ -49,7 +50,7 @@ class CEapTypeElement: public CBase
         ~CEapTypeElement();
 		HBufC* iName;
         EAPSettings* iEapSettings; 
-        EAPSettings::TEapType iEncapsulatingEapId;
+        TEapExpandedType iEncapsulatingEapId; 
         };
 
 
@@ -220,6 +221,13 @@ class CProcessorWlan : public CProcessorBase
         void SaveWPAL( TUint32 aIapId );
         
         /**
+        * Gets the expanded EAP type
+        * @param aFieldId is the id of the field 
+        * @return expanded EAP type
+        */
+        TEapExpandedType GetExpandedEapTypeIdL( TDesC& aField );
+        
+        /**
         * Gets the TagContainer index that belongst to the given WPA field
         * @param aFieldId is the id of the field 
         * @return index in TagContainer
@@ -260,25 +268,25 @@ class CProcessorWlan : public CProcessorBase
         
         /*
          * Sets the values of the expanded Eap lists to the database 
-         * @param aGeneric for accessing the database records 
+         * @param aServiceId for accessing the EAP data 
          */
-        void SetExpandedEapListL( CMDBGenericRecord* aGeneric );
+        void SetExpandedEapListL( const TUint aServiceId );
         
     private:
     
         void AddSecurityDataL( TInt aField, HBufC* aPtrTag, TBool aIsWep );
 
-		void AddEAPSettingL( const TInt aField, const HBufC16* const aValue );
+		void AddEAPSettingL( const TInt aField, HBufC16* aValue );
 		
 		TBool EAPSetting( const TInt aField );
 	
 		void FillCipherSuitesL( const HBufC16* const aPtrTag, const TInt aEapIndex );
 		
-		EAPSettings::TEapType GetEapTypeIdFromSettingId( const TInt aField );
+		TEapExpandedType GetEapTypeIdFromSettingId( const TInt aField ); 
 		
-		TUint FindCertificateEntryL( const CertificateEntry::TCertType aCertType, const TInt aEapIndex );
+		TUint FindCertificateEntryL( const EapCertificateEntry::TCertType aCertType, const TInt aEapIndex );
 		
-		void ConvertSubjectKeyIdToBinaryL( const HBufC16* const aSubjectKeyIdString, TDes& aBinaryKey);
+		void ConvertSubjectKeyIdToBinaryL( const HBufC16* const aSubjectKeyIdString, TKeyIdentifier& aBinaryKey);
         
         // @var Indicates the WLAN security mode
         TDbCreatorSecurityMode iSecurityMode;

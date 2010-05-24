@@ -94,6 +94,11 @@ private:
     bool mWlanEnabled;
     
     /*!
+        Indicates whether WLAN radio is forced off
+    */
+    bool mWlanForceDisabled;
+    
+    /*!
         Indicates whether WLAN indicator plugin is activated
     */
     bool mWlanIndicatorIsActivated;

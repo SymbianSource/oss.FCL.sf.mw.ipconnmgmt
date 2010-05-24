@@ -32,6 +32,7 @@ PRJ_MMPFILES
 #include "../cmmanager/group/bld.inf"
 #include "../connectionmonitoring/group/bld.inf"
 #include "../connectionutilities/ConnectionDialogs/group/bld.inf"
+#include "../keepalive/group/bld.inf"
 #include "../dbcreator/group/bld.inf"
 #include "../ipcm_plat/group/bld.inf"
 #include "../ipcm_pub/group/bld.inf"

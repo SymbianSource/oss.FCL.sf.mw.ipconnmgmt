@@ -2500,4 +2500,26 @@ TUint32 CMPMCommsDatAccess::DestinationIdL( CMManager::TSnapPurpose aSnapPurpose
     return destinationId;
     }
 
+// -----------------------------------------------------------------------------
+// CMPMCommsDatAccess::GetDefaultConnectionL
+// -----------------------------------------------------------------------------
+//
+void CMPMCommsDatAccess::GetDefaultConnectionL( TCmDefConnType& aType, TUint32& aId )
+    {
+    MPMLOGSTRING( "CMPMCommsDatAccess::GetDefaultConnectionL" )
+
+    RCmManager rCmManager;
+    CleanupClosePushL( rCmManager ); 
+    rCmManager.CreateTablesAndOpenL();
+    
+    TCmDefConnValue defConnValue;
+    rCmManager.ReadDefConnL( defConnValue );
+    
+    aType = defConnValue.iType;
+    aId = defConnValue.iId;
+    
+    CleanupStack::PopAndDestroy( &rCmManager );
+    
+    }
+
 //  End of File

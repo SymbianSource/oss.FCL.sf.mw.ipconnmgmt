@@ -48,8 +48,8 @@ const TInt KErrGeneralConnection        = -50000;
 const TInt KErrGenConnNoGPRSNetwork     = -3609;
 
 // Icons representing bearer
-_LIT( KIconCellular, "qtg_small_wlan.svg" );
-_LIT( KIconWlan,     "qtg_small_gprs.svg" );
+_LIT( KIconCellular, "qtg_small_gprs.svg" );
+_LIT( KIconWlan,     "qtg_small_wlan.svg" );
 _LIT( KIconVpn,      "qtg_small_vpn.svg" ); 
 _LIT( KIconNone,     "" );
 
@@ -526,7 +526,10 @@ TBool CConnectionStatusPopup::ResolveErrorCodeL( TInt aErrorCode )
         case KErrGprsNSAPIAlreadyUsed:
         case KErrGprsQoSNotAccepted:
         case KErrGprsReactivationRequested:
-            icon = EIconCellular;
+        case KErrGprsOfflineMode:
+            icon = EIconCellular;           
+        case KErrWlanOff:
+        case KErrWlanForceOff:
             textPtr.Set( Ktxt_occ_dpopinfo_connection_unavailable );
             break;
 

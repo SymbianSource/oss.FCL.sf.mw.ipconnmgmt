@@ -1,0 +1,10 @@
+EXPORTS
+	_Z9LibEntryLv @ 1 NONAME
+	_Z15SetRequirementsRP16CTestModuleParamRm @ 2 NONAME
+	_ZTI15CTestRFlexTimer @ 3 NONAME
+	_ZTI20CInheritedCFlexTimer @ 4 NONAME
+	_ZTI21CInheritedCFlexTimer2 @ 5 NONAME
+	_ZTV15CTestRFlexTimer @ 6 NONAME
+	_ZTV20CInheritedCFlexTimer @ 7 NONAME
+	_ZTV21CInheritedCFlexTimer2 @ 8 NONAME
+

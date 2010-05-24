@@ -26,6 +26,7 @@ PRJ_EXPORTS
 ../rom/pdpcontextmanager2.iby CORE_MW_LAYER_IBY_EXPORT_PATH(pdpcontextmanager2.iby)
 
 
+../conf/CI_pdpcontextmanager2.confml		APP_LAYER_CONFML(CI_pdpcontextmanager2.confml)
 ../conf/pdpcontextmanager2.confml		APP_LAYER_CONFML(pdpcontextmanager2.confml)
 ../conf/pdpcontextmanager2_102071F5.crml	APP_LAYER_CRML(pdpcontextmanager2_102071F5.crml)
 

@@ -191,7 +191,6 @@ class CMPMDisconnectDlg;
 class CMPMConfirmDlgRoaming;
 class CMPMConfirmDlgStarting;
 class CMPMDefaultConnection;
-class CMPMWlanQueryDialog;
 
 // CLASS DECLARATION
 /**
@@ -610,40 +609,6 @@ class CMPMServer : public CPolicyServer
         inline CArrayPtrFlat<CMPMConfirmDlgStarting>* StartingQueue();
 
         /**
-        * Appends aDlg to the iWlanQueryQueue.
-        * @since 3.2
-        * @param aDlg Pointer to the CMPMConfirmDlgWlanQuery object.
-        */
-        void AppendWlanQueryQueueL( CMPMWlanQueryDialog* aDlg );
-
-        /**
-        * Removes the first item from the iWlanQueryQueue.
-        * @since 3.2
-        */
-        inline void RemoveFromWlanQueryQueue( CMPMWlanQueryDialog* aDlg );
-
-        /**
-        * Get the WlanQueryQueue.
-        * @since 3.2
-        * @return Pointer to the WlanQueryQueue.
-        */
-        inline CArrayPtrFlat<CMPMWlanQueryDialog>* WlanQueryQueue();
-
-        /**
-        * Get the first item in iWlanQueryQueue.
-        * @since 3.2
-        * @return Pointer to the first item in iWlanQueryQueue.
-        */
-        inline CMPMWlanQueryDialog* FirstInWlanQueryQueue();
-
-        /**
-        * Get the Default Connection object.
-        * @since 3.2
-        * @return Pointer to the Default Connection object.
-        */
-        CMPMDefaultConnection* DefaultConnection(); 
-
-        /**
         * Returns true if there is a started connection
         * 
         * @since 3.2
@@ -923,12 +888,6 @@ class CMPMServer : public CPolicyServer
 
         // Solves problem with overlapping Starting Dialogs
         CArrayPtrFlat<CMPMConfirmDlgStarting>* iStartingQueue;
-
-        // Solves problem with overlapping Wlan Queries
-        CArrayPtrFlat<CMPMWlanQueryDialog>* iWlanQueryQueue;
-        
-        // Handles Default Connection selection
-        CMPMDefaultConnection* iDefaultConnection;
 
         // Keeps track of the number of connections
         TUint iConnectionCounter;

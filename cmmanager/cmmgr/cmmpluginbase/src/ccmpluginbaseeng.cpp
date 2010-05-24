@@ -33,7 +33,7 @@
 using namespace CMManager;
 using namespace CommsDat;
 
-const TInt KApMaxConnNameLength = 30;
+const TInt KApMaxConnNameLength = 50;
 _LIT( KFormatPostfix, "%02d" );
 _LIT( KFormatLargePostfix, "%d" );
 _LIT( KFormatNameWithPostfix, "%S(%S)" );
@@ -930,45 +930,34 @@ void CCmPluginBaseEng::UpdateProxyRecordL(
     CopyAttributes( iapRecord, proxyRecord );
     CheckIfNameModifiedL( iapRecord, proxyRecord );
 
-    if ( proxyRecord->iUseProxyServer )
+    delete iProxyRecord;
+    iProxyRecord = NULL;
+
+    iProxyRecord = static_cast<CCDProxiesRecord*>(
+            CCDRecordBase::CreateCopyRecordL( *proxyRecord ) );
+    iProxyRecord->SetElementId( proxyRecord->ElementId() );
+
+    if ( !iProxyRecord->RecordId() )
         {
-        delete iProxyRecord;
-        iProxyRecord = NULL;
+        // New proxy setting -> create new record.
+        iProxyRecord->iService = iServiceRecord->RecordId();
+        iProxyRecord->iServiceType.SetL( iIapRecord->iServiceType );
 
-        iProxyRecord = static_cast<CCDProxiesRecord*>(
-                CCDRecordBase::CreateCopyRecordL( *proxyRecord ) );
-        iProxyRecord->SetElementId( proxyRecord->ElementId() );
-
-        if ( !iProxyRecord->RecordId() )
+        // By default protocol is set to "http".
+        if ( TPtrC( proxyRecord->iProtocolName ).Length() == 0 )
             {
-            // New proxy setting -> create new record.
-            iProxyRecord->iService = iServiceRecord->RecordId();
-            iProxyRecord->iServiceType.SetL( iIapRecord->iServiceType );
-
-            // By default protocol is set to "http".
-            if ( TPtrC( proxyRecord->iProtocolName ).Length() == 0 )
-                {
-                iProxyRecord->iProtocolName.SetL( KDefProxyProtocolName );
-                }
-
-            iProxyRecord->SetRecordId( KCDNewRecordRequest );
-            iProxyRecord->StoreL( iSession );
-            proxyRecord->SetElementId( iProxyRecord->ElementId() );
-            proxyRecord->iService = iServiceRecord->RecordId();
-            proxyRecord->iServiceType.SetL( iIapRecord->iServiceType );
+            iProxyRecord->iProtocolName.SetL( KDefProxyProtocolName );
             }
-        else
-            // Already existing record -> update only.
-            {
-            iProxyRecord->ModifyL( iSession );
-            }
+
+        iProxyRecord->SetRecordId( KCDNewRecordRequest );
+        iProxyRecord->StoreL( iSession );
+        CopyRecordFieldsL( *iProxyRecord, *proxyRecord );
+        proxyRecord->SetElementId( iProxyRecord->ElementId() );
         }
     else
+        // Already existing record -> update only.
         {
-        if ( iProxyRecord->RecordId() )
-            {
-            iProxyRecord->DeleteL( iSession );
-            }
+        iProxyRecord->ModifyL( iSession );
         }
 
     OstTraceFunctionExit0( CCMPLUGINBASEENG_UPDATEPROXYRECORDL_EXIT );
@@ -1965,7 +1954,6 @@ TUint32 CCmPluginBaseEng::GetLocationIdL() const
     proxyRecord->iServerName.SetL( aProxyServer );
     if ( !aProxyServer.Length() )
         {
-        proxyRecord->iPortNumber = 0;
         proxyRecord->iUseProxyServer = EFalse;
         }
     else
@@ -2330,14 +2318,7 @@ EXPORT_C TBool CCmPluginBaseEng::GetBoolAttributeL(
                     aClientPluginInstance->iBearerSpecRecordArray ) );
             if ( err )
                 {
-                if ( err == KErrNotFound )
-                    {
-                    retVal = EFalse;
-                    }
-                else
-                    {
-                    User::Leave( err );
-                    }
+                retVal = EFalse;
                 }
             }
             break;
@@ -2387,7 +2368,12 @@ EXPORT_C TBool CCmPluginBaseEng::GetBoolAttributeL(
             break;
         case ECmVirtual:
             {
-            retVal = EFalse;
+            // This is bearer specific attribute  
+            TRAPD( err, retVal = GetBearerInfoBoolL( aAttribute ) );
+            if ( err )
+                {
+                retVal = EFalse;
+                }
             }
             break;
         case ECmWapIPSecurity:

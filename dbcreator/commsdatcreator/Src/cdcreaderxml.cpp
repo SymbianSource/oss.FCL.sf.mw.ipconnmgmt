@@ -473,8 +473,6 @@ _LIT16( KUIPriorityDialOut,         "UIPriorityDialOut" );
 _LIT16( KUIPriorityDialIn,          "UIPriorityDialIn" );
 _LIT16( KUIPriorityVpn,             "UIPriorityVpn" );
 _LIT16( KUIPriorityMip,             "UIPriorityMip" );
-_LIT16( KDefaultConnectionType,     "DefaultConnectionType" );
-_LIT16( KDefaultConnectionName,     "DefaultConnectionName" );
 _LIT16( KUsageOfWlan,               "UsageOfWlan" );
 _LIT16( KCellularDataUsageHome,     "CellularDataUsageHome" );
 _LIT16( KCellularDataUsageVisitor,  "CellularDataUsageVisitor" );
@@ -1778,8 +1776,6 @@ void CReaderXML::FillGlobalParams()
     iGlobalParams.Append( EInputParams( EUIPriorityDialIn,      KUIPriorityDialIn ) );
     iGlobalParams.Append( EInputParams( EUIPriorityVpn,         KUIPriorityVpn ) );
     iGlobalParams.Append( EInputParams( EUIPriorityMip,         KUIPriorityMip ) );
-    iGlobalParams.Append( EInputParams( EDefaultConnectionType, KDefaultConnectionType ) );
-    iGlobalParams.Append( EInputParams( EDefaultConnectionName, KDefaultConnectionName ) );
     iGlobalParams.Append( EInputParams( EUsageOfWlan,           KUsageOfWlan ) );
     iGlobalParams.Append( EInputParams( ECellularDataUsageHome,         KCellularDataUsageHome ) );
     iGlobalParams.Append( EInputParams( ECellularDataUsageVisitor,      KCellularDataUsageVisitor ) );

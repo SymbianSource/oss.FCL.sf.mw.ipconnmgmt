@@ -63,6 +63,7 @@ signals:
 public slots:
     void updateDestinationView();
     void showItemMenu(QPointF position);
+    void openDestination();
     void renameDestination();
     void confirmDestinationDelete();
     void deleteDestination();
@@ -112,9 +113,6 @@ private: // data
     HbInputDialog      *mDialog;
     //! New Destination name query's OK action
     HbAction           *mOkAction;
-    
-    //! Maximun length for destination name
-    static const int DestinationNameMaxLength = 30;
 };
 
 #endif /* CPDESTINATIONENTRYITEM_H */

@@ -28,7 +28,6 @@
 
 #include <data_caging_path_literals.hrh>
 #include <ConnectionUiUtilities.rsg>
-#include <apsettings.mbg>
 
 #include "ChangeConnectionDlg.h"
 #include "ActiveCChangeConnectionDlg.h"
@@ -37,17 +36,9 @@
 
 // CONSTANTS
 
-// ROM folder
-_LIT( KDriveZ, "z:" );
-
-// Name of the MBM file containing icons
-_LIT( KFileIcons, "ApSettings.mbm" );
-
 #if defined(_DEBUG)
 _LIT( KErrNullPointer, "NULL pointer" );
 #endif
-
-LOCAL_D const TInt KIconsGranularity = 4;
 
 
 // ================= MEMBER FUNCTIONS =======================
@@ -166,8 +157,6 @@ void CChangeConnectionDlg::PreLayoutDynInitL()
     SetItemTextArray( iActiveDlg->ActIAPs() );       
     SetOwnershipType( ELbmDoesNotOwnItemArray );
 
-    SetIconsL();
-    
     // Timer not in use due the unresolved crash
     //iExpiryTimer = CExpiryTimer::NewL( *this );
     //iExpiryTimer->Start();
@@ -196,67 +185,6 @@ void CChangeConnectionDlg::RefreshDialogL()
     }
 
 
-// ---------------------------------------------------------
-// CChangeConnectionDlg::SetIconsL()
-// ---------------------------------------------------------
-//
-void CChangeConnectionDlg::SetIconsL()
-    {
-    CArrayPtr< CGulIcon >* icons = new( ELeave ) CAknIconArray( 
-                                                        KIconsGranularity );
-    CleanupStack::PushL( icons );
-
-    MAknsSkinInstance* skinInstance = AknsUtils::SkinInstance();
-
-    TFileName iconsFileName;
-
-    iconsFileName.Append( KDriveZ );
-
-    iconsFileName.Append( KDC_APP_BITMAP_DIR );
-
-    iconsFileName.Append( KFileIcons );
-
-    icons->AppendL( AknsUtils::CreateGulIconL( skinInstance, 
-                            KAknsIIDQgnPropWmlGprs,
-                            iconsFileName, 
-                            EMbmApsettingsQgn_prop_wml_gprs, 
-                            EMbmApsettingsQgn_prop_wml_gprs_mask ) );
-
-    icons->AppendL( AknsUtils::CreateGulIconL( skinInstance, 
-                            KAknsIIDQgnPropWmlCsd,
-                            iconsFileName, 
-                            EMbmApsettingsQgn_prop_wml_csd, 
-                            EMbmApsettingsQgn_prop_wml_csd_mask ) );
-
-    icons->AppendL( AknsUtils::CreateGulIconL( skinInstance, 
-                            KAknsIIDQgnPropWmlHscsd,
-                            iconsFileName, 
-                            EMbmApsettingsQgn_prop_wml_hscsd, 
-                            EMbmApsettingsQgn_prop_wml_hscsd_mask ) );
-
-    if ( iIsWLANFeatureSupported )
-        {
-        icons->AppendL( AknsUtils::CreateGulIconL( skinInstance, 
-                            KAknsIIDQgnPropWlanEasy,
-                            iconsFileName, 
-                            EMbmApsettingsQgn_prop_wlan_easy, 
-                            EMbmApsettingsQgn_prop_wlan_easy_mask ) );
-    
-        icons->AppendL( AknsUtils::CreateGulIconL( skinInstance, 
-                            KAknsIIDQgnPropWlanBearer,
-                            iconsFileName, 
-                            EMbmApsettingsQgn_prop_wlan_bearer, 
-                            EMbmApsettingsQgn_prop_wlan_bearer_mask ) );
-        }
-    
-    SetIconArrayL( icons );
-
-    CleanupStack::Pop( icons );
-    }
-
-
-
-
 // ----------------------------------------------------------------------------
 // void CChangeConnectionDlg::HandleResourceChange( TInt aType )
 // Handle resource change events. 
@@ -268,7 +196,6 @@ void CChangeConnectionDlg::HandleResourceChange( TInt aType )
         {
         CAknListQueryDialog::HandleResourceChange( aType );
 
-        TRAP_IGNORE( SetIconsL() );
         SizeChanged();
         }
     else

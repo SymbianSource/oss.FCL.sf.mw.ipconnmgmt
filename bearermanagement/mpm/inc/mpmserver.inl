@@ -99,43 +99,6 @@ inline CArrayPtrFlat<CMPMConfirmDlgStarting>* CMPMServer::StartingQueue()
     }
 
 // -----------------------------------------------------------------------------
-// CMPMServer::RemoveFromWlanQueryQueue
-// -----------------------------------------------------------------------------
-//
-inline void CMPMServer::RemoveFromWlanQueryQueue( CMPMWlanQueryDialog* aDlg )
-    {
-    for ( TInt i = 0; i < iWlanQueryQueue->Count(); i++ )
-        {
-        if ( iWlanQueryQueue->At( i ) == aDlg )
-            {
-            iWlanQueryQueue->Delete( i );
-            break;
-            }
-        }
-    }
-
-// -----------------------------------------------------------------------------
-// CMPMServer::WlanQueryQueue
-// -----------------------------------------------------------------------------
-//
-inline CArrayPtrFlat<CMPMWlanQueryDialog>* CMPMServer::WlanQueryQueue()
-    {
-    return iWlanQueryQueue;
-    }
-
-// -----------------------------------------------------------------------------
-// CMPMServer::FirstInWlanQueryQueue
-// -----------------------------------------------------------------------------
-//
-inline CMPMWlanQueryDialog* CMPMServer::FirstInWlanQueryQueue()
-    {
-    if ( iWlanQueryQueue->Count() == 0 )
-        return NULL;
-    else
-        return iWlanQueryQueue->At( 0 );
-    }
-
-// -----------------------------------------------------------------------------
 // CMPMServer::IncrementConnections
 // -----------------------------------------------------------------------------
 //

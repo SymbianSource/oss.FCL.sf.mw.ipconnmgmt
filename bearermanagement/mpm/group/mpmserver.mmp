@@ -45,11 +45,7 @@ SOURCE            mpmroamingwatcher.cpp
 SOURCE            mpmconfirmdlg.cpp
 SOURCE            mpmconfirmdlgstarting.cpp
 SOURCE            mpmconfirmdlgroaming.cpp
-SOURCE            mpmdefaultconnection.cpp
-SOURCE            mpmdefaultconnserver.cpp
-SOURCE            mpmdefaultconnserversession.cpp
 SOURCE            mpmcommsdataccess.cpp
-SOURCE            mpmwlanquerydialog.cpp
 SOURCE            mpmiapselection.cpp
 SOURCE            mpmcsidwatcher.cpp
 SOURCE            mpmdialogbase.cpp

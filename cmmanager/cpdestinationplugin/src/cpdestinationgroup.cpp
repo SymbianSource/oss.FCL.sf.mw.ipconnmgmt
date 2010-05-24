@@ -20,7 +20,7 @@
 #include <QDir>
 #include <QPluginLoader>
 #include <QStringList>
-#include <HbDataform>
+#include <HbDataForm>
 #include <HbDataFormModel>
 #include <HbDataFormViewItem>
 #include <HbParameterLengthLimiter>
@@ -326,8 +326,7 @@ QString CpDestinationGroup::getDestinationAdditionalText(int iapCount)
     OstTraceFunctionEntry0(CPDESTINATIONGROUP_GETDESTINATIONADDITIONALTEXT_ENTRY);
     QString result = "";
     if (iapCount > 0) {
-        //result = hbTrId("txt_occ_dblist_internet_val_ln_access_points", iapCount);
-        result = HbParameterLengthLimiter("txt_occ_dblist_internet_val_ln_access_points").arg(iapCount);
+        result = hbTrId("txt_occ_dblist_internet_val_ln_access_points", iapCount);
     } else {
         result = hbTrId("txt_occ_dblist_internet_val_no_access_points");
     }

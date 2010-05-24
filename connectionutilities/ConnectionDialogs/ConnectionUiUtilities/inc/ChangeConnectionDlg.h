@@ -102,15 +102,6 @@ NONSHARABLE_CLASS( CChangeConnectionDlg ) : public CAknListQueryDialog, public M
         */
         void HandleTimedOut();
 
-    private:  // New functions
-
-        /**
-        * Sets graphic icons
-        * @param    -
-        */
-        void SetIconsL();
-
-
     private: //data
         TUint32*            iIAPId;
         TBuf<CommsDat::KMaxTextLength> iConnectionName;

@@ -93,7 +93,6 @@ CpDestinationEntryItemData::~CpDestinationEntryItemData()
     OstTraceFunctionEntry0(DUP1_CPDESTINATIONENTRYITEMDATA_CPDESTINATIONENTRYITEMDATA_ENTRY);
     delete mCmm;
     delete mAps;
-    delete mOkAction;
     OstTraceFunctionExit0(DUP1_CPDESTINATIONENTRYITEMDATA_CPDESTINATIONENTRYITEMDATA_EXIT);
 }
 
@@ -216,7 +215,7 @@ void CpDestinationEntryItemData::constructSettingView(CpBaseSettingView *view) c
         // Add priority to item if not Uncategorised "Destination"
         if (mDestinationId  != 0) {
             // Access Points are listed in priority order.
-            QString priority = hbTrId("txt_occ_dblist_val_priority_l1", i);
+            QString priority = hbTrId("txt_occ_dblist_val_priority_l1").arg(i + 1);
             iapDataItem->setContentWidgetData(QString("additionalText"), priority);
         }
         
@@ -294,6 +293,14 @@ void CpDestinationEntryItemData::showItemMenu(QPointF position)
 }
 
 /*!
+   Opens selected destination.
+ */
+void CpDestinationEntryItemData::openDestination()
+{    
+    onLaunchView();
+}
+
+/*!
     Prompts user for new destination name and makes 
     the change in commsdat if new name is valid.
     
@@ -304,17 +311,22 @@ void CpDestinationEntryItemData::renameDestination()
     OstTraceFunctionEntry0(CPDESTINATIONENTRYITEMDATA_RENAMEDESTINATION_ENTRY);
     mDialog = new HbInputDialog();
     mDialog->setAttribute(Qt::WA_DeleteOnClose);
-    mDialog->lineEdit()->setMaxLength(DestinationNameMaxLength);
+    mDialog->lineEdit()->setMaxLength(CMManagerShim::CmNameLength);
     mDialog->clearActions();
     mDialog->setPromptText(hbTrId("txt_occ_dialog_destination_name"));
     mDialog->setInputMode(HbInputDialog::TextInput);
-    mOkAction = new HbAction(hbTrId("txt_common_button_ok"));
+    mDialog->setValue(mDestinationName);
+    mOkAction = new HbAction(
+        hbTrId("txt_common_button_ok"),
+        mDialog);
     bool connected = connect(mOkAction, 
                              SIGNAL(triggered()), 
                              this, 
                              SLOT(saveNewDestinationName()));
     Q_ASSERT(connected);
-    HbAction *cancelAction = new HbAction(hbTrId("txt_common_button_cancel"));
+    HbAction *cancelAction = new HbAction(
+        hbTrId("txt_common_button_cancel"),
+        mDialog);
     mDialog->addAction(mOkAction);
     mDialog->addAction(cancelAction);
     mDialog->show();
@@ -332,7 +344,9 @@ void CpDestinationEntryItemData::confirmDestinationDelete()
     note->setAttribute(Qt::WA_DeleteOnClose);
     note->setText(hbTrId("txt_occ_info_delete_snap").arg(mDestinationName));
     note->clearActions();
-    HbAction *okAction = new HbAction(hbTrId("txt_common_button_yes"));
+    HbAction *okAction = new HbAction(
+        hbTrId("txt_common_button_yes"),
+        note);
     note->addAction(okAction);
     bool connected = connect(
         okAction, 
@@ -340,7 +354,9 @@ void CpDestinationEntryItemData::confirmDestinationDelete()
         this, 
         SLOT(deleteDestination()));
     Q_ASSERT(connected);
-    HbAction *cancelAction = new HbAction(hbTrId("txt_common_button_no"));
+    HbAction *cancelAction = new HbAction(
+        hbTrId("txt_common_button_no"),
+        note);
     note->addAction(cancelAction);
     note->setTimeout(HbPopup::NoTimeout);
     note->show();
@@ -496,7 +512,7 @@ void CpDestinationEntryItemData::updateIndex(HbListWidgetItem *widgetItem)
     Q_UNUSED(widgetItem);
     for (int i = 0; i < mList->count(); i++) {
         HbListWidgetItem *item = mList->item(i);
-        QString priority = hbTrId("txt_occ_dblist_val_priority_l1", i);
+        QString priority = hbTrId("txt_occ_dblist_val_priority_l1").arg(i + 1);
         item->setSecondaryText(priority);
     }
     OstTraceFunctionExit0(CPDESTINATIONENTRYITEMDATA_UPDATEINDEX_EXIT);
@@ -609,7 +625,7 @@ void CpDestinationEntryItemData::createArrangeModeView(HbView *view)
             item->setData(apList[i]->getIntAttribute(CMManagerShim::CmId), Hb::IndexFeedbackRole);
 
             uint pri = destination->priority(apList[i].data());
-            QString priority = hbTrId("txt_occ_dblist_val_priority_l1", pri);
+            QString priority = hbTrId("txt_occ_dblist_val_priority_l1").arg(pri);
             item->setSecondaryText(priority);
         
             mList->addItem(item);
@@ -653,8 +669,12 @@ HbMenu *CpDestinationEntryItemData::createItemMenu(
     OstTraceFunctionEntry0(CPDESTINATIONENTRYITEMDATA_CREATEITEMMENU_ENTRY);
     HbMenu *menu = new HbMenu();
     menu->setAttribute(Qt::WA_DeleteOnClose);
-    HbAction *renameDestAction = menu->addAction(hbTrId("txt_common_menu_rename_item"));
+    HbAction *openDestAction = menu->addAction(hbTrId("txt_common_menu_open"));
     bool connected = 
+        connect(openDestAction, SIGNAL(triggered()), this, SLOT(openDestination()));
+    Q_ASSERT(connected);
+    HbAction *renameDestAction = menu->addAction(hbTrId("txt_common_menu_rename_item"));
+    connected = 
         connect(renameDestAction, SIGNAL(triggered()), this, SLOT(renameDestination()));
     Q_ASSERT(connected);
     HbAction *deleteDestAction = menu->addAction(hbTrId("txt_common_menu_delete"));
@@ -678,41 +698,44 @@ HbMenu *CpDestinationEntryItemData::createItemMenu(
 
 /*!
     This function is called when user selects OK from destination
-    name query popup. The given name is valited and if the name is
-    valid, new destination is created in commsdat with given name.
-    If validation fails user is promted again for destination name.
+    name query popup. The given name is validated and if the name is
+    valid, new destination name is saved to commsdat. If validation fails
+    user is prompted again for destination name.
  */
 void CpDestinationEntryItemData::saveNewDestinationName()
 {
     OstTraceFunctionEntry0(CPDESTINATIONENTRYITEMDATA_SAVENEWDESTINATIONNAME_ENTRY);
     QString destinationName = mDialog->value().toString();
-    bool destinationNameInvalid = true;
-    CmManagerShim *cmm = NULL;
-    CmDestinationShim *destination = NULL;
-    
-    try {
-        cmm = new CmManagerShim();
-        if (isDestinationNameValid(destinationName, cmm)) {
-            destination = cmm->destination(mDestinationId);
-            destination->setName(destinationName);
-            destination->update();
-            mDestinationName = destinationName;
-            destinationNameInvalid = false;
+    if (destinationName != mDestinationName) {
+        // Destination name was changed
+        bool destinationNameInvalid = true;
+        CmManagerShim *cmm = NULL;
+        CmDestinationShim *destination = NULL;
+        
+        try {
+            cmm = new CmManagerShim();
+            if (isDestinationNameValid(destinationName, cmm)) {
+                destination = cmm->destination(mDestinationId);
+                destination->setName(destinationName);
+                destination->update();
+                mDestinationName = destinationName;
+                destinationNameInvalid = false;
+            }
+        } catch (const std::exception&) {
+            OstTraceFunctionExit0(CPDESTINATIONENTRYITEMDATA_SAVENEWDESTINATIONNAME_EXIT);
+            return;
         }
-    } catch (const std::exception&) {
-        OstTraceFunctionExit0(CPDESTINATIONENTRYITEMDATA_SAVENEWDESTINATIONNAME_EXIT);
-        return;
-    }
-    delete destination;
-    delete cmm;
-    
-    if (destinationNameInvalid) {   
-        // Validation function has modified destination name 
-        // to be error string
-        showRenameError(destinationName);
-    } else {
-        OstTrace0(TRACE_NORMAL, CPDESTINATIONENTRYITEMDATA_SAVENEWDESTINATIONNAME, "CpDestinationEntryItemData::saveNewDestinationName: emit destination changed");
-        emit destChanged();
+        delete destination;
+        delete cmm;
+        
+        if (destinationNameInvalid) {   
+            // Validation function has modified destination name 
+            // to be error string
+            showRenameError(destinationName);
+        } else {
+            OstTrace0(TRACE_NORMAL, CPDESTINATIONENTRYITEMDATA_SAVENEWDESTINATIONNAME, "CpDestinationEntryItemData::saveNewDestinationName: emit destination changed");
+            emit destChanged();
+        }
     }
     OstTraceFunctionExit0(DUP1_CPDESTINATIONENTRYITEMDATA_SAVENEWDESTINATIONNAME_EXIT);
 }
@@ -730,7 +753,9 @@ void CpDestinationEntryItemData::showRenameError(const QString &info)
     note->setAttribute(Qt::WA_DeleteOnClose);
     note->setText(info);
     note->setTimeout(HbPopup::NoTimeout);
-    HbAction *errorOk = new HbAction(hbTrId("txt_common_button_ok"));
+    HbAction *errorOk = new HbAction(
+        hbTrId("txt_common_button_ok"),
+        note);
     bool connected = connect(
         errorOk,
         SIGNAL(triggered()),
@@ -755,7 +780,9 @@ void CpDestinationEntryItemData::showErrorNote(const QString &info)
     note->setAttribute(Qt::WA_DeleteOnClose);
     note->setText(info);
     note->setTimeout(HbPopup::NoTimeout);
-    HbAction *errorOk = new HbAction(hbTrId("txt_common_button_ok"));                       
+    HbAction *errorOk = new HbAction(
+        hbTrId("txt_common_button_ok"),
+        note);
     note->addAction(errorOk);
     note->show();    
     OstTraceFunctionExit0(CPDESTINATIONENTRYITEMDATA_SHOWERRORNOTE_EXIT);

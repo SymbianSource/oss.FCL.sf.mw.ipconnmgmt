@@ -1,0 +1,8 @@
+EXPORTS
+	?StartMonitoring@RFlexTimerServerMonitor@@QAEHXZ @ 1 NONAME ; int RFlexTimerServerMonitor::StartMonitoring(void)
+	?GetStatus@RFlexTimerServerMonitor@@QAEHAAH@Z @ 2 NONAME ; int RFlexTimerServerMonitor::GetStatus(int &)
+	?StopMonitoring@RFlexTimerServerMonitor@@QAEHXZ @ 3 NONAME ; int RFlexTimerServerMonitor::StopMonitoring(void)
+	?Connect@RFlexTimerServerMonitor@@QAEHXZ @ 4 NONAME ; int RFlexTimerServerMonitor::Connect(void)
+	??1RFlexTimerServerMonitor@@QAE@XZ @ 5 NONAME ; RFlexTimerServerMonitor::~RFlexTimerServerMonitor(void)
+	??0RFlexTimerServerMonitor@@QAE@XZ @ 6 NONAME ; RFlexTimerServerMonitor::RFlexTimerServerMonitor(void)
+

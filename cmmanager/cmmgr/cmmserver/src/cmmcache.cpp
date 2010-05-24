@@ -2421,21 +2421,11 @@ void CCmmCache::ReadGenConnSettingsL( TCmGenConnSettings& aGenConnSettings ) con
         {
         iTrans->OpenTransactionLC();
 
-        TUint defConnType( 0 );
-        TUint internetSnapId( 0 );
-        iInstanceMapping->InternetDestinationIdL( internetSnapId );
-        if ( internetSnapId )
-            {
-            defConnType = ECmDefConnDestination;
-            }
-
         aGenConnSettings.iUsageOfWlan = ECmUsageOfWlanKnown;
         aGenConnSettings.iCellularDataUsageHome = ECmCellularDataUsageAutomatic;
         aGenConnSettings.iCellularDataUsageVisitor = ECmCellularDataUsageConfirm;
 
         defConnRecord->SetRecordId( KCDNewRecordRequest );
-        defConnRecord->iDefConnType = defConnType;
-        defConnRecord->iDefConnUid = internetSnapId;
         defConnRecord->iUsageOfWlan = ( TUint )aGenConnSettings.iUsageOfWlan;
         defConnRecord->iCellularDataUsageHome = ( TUint )aGenConnSettings.iCellularDataUsageHome;
         defConnRecord->iCellularDataUsageVisitor = ( TUint )aGenConnSettings.iCellularDataUsageVisitor;
