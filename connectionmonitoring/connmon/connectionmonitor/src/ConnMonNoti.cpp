@@ -21,6 +21,8 @@
 #include <e32base.h>
 #include <rmmcustomapi.h>
 #include <featmgr.h>
+#include <gsmerror.h>     // KErrPacketDataTsyMaxPdpContextsReached 
+#include <etelpckt.h>     // KErrUmtsMaxNumOfContextExceededByNetwork
 
 #include "ConnMonServ.h"
 #include "ConnMonSess.h"
@@ -562,10 +564,10 @@ void CProgressNotifier::RunL()
         }
     else
         {
-        iEventInfo.Reset();
-
         if ( iInfoBuf().iStage != static_cast< TInt >( iEventInfo.iData ) )
             {
+            iEventInfo.Reset();
+            
             // Send only new stage info to clients
             iEventInfo.iEventType       = EConnMonConnectionStatusChange;
             iEventInfo.iConnectionId    = iConnectionId;
@@ -640,13 +642,18 @@ void CProgressNotifier::RunL()
                 }
             }
 
-        if ( iInfoBuf().iError == KErrNone )
-            {
-            // New request
+        if ( iInfoBuf().iError == KErrNone ||
+             iInfoBuf().iError == KErrGprsInsufficientResources            || // -4154
+             iInfoBuf().iError == KErrPacketDataTsyMaxPdpContextsReached   || // -6000
+             iInfoBuf().iError == KErrUmtsMaxNumOfContextExceededByNetwork || // -4179
+             iInfoBuf().iError == KErrUmtsMaxNumOfContextExceededByPhone )    // -4178
+            {            	
+            // New request, DisconnectDlg might be shown for the error codes above.
             Receive();
             }
         else
             {
+            LOGIT1("CProgressNotifier::RunL() - connection closing - iInfoBuf().iError: %d", iInfoBuf().iError)
             // Connection is closing.
             CSubConnUpDownNotifier* subConnUpDownNotifier = 0;
             TInt err = iServer->Iap()->GetSubConnUpDownNotifier(

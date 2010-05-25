@@ -34,6 +34,7 @@
 #include <bautils.h>
 #include <e32property.h> 
 #include <rmpm.h>
+#include <startupdomainpskeys.h>
 
 #include <CConnDlgPlugin.rsg>
 #include <data_caging_path_literals.hrh>
@@ -159,7 +160,15 @@ CConnDlgIapPlugin::TNotifierInfo CConnDlgIapPlugin::RegisterL()
 
 void CConnDlgIapPlugin::StartL( const TDesC8& aBuffer, TInt aReplySlot,
                                 const RMessagePtr2& aMessage )
-    {
+    {    
+    if ( ScreenSaverOn() || AutolockOn() )
+        {
+        // Screen saver or Autolock is active. Cancel the dialog. 
+        CLOG_WRITE( "CConnDlgAuthenticationPlugin::StartL: Screen saver or Autolock is active." );
+        aMessage.Complete( KErrCancel );
+        return;
+        }
+
     iPrefs.Copy( (TPtrC8) aBuffer );
 
     iCancelled = EFalse;
@@ -352,6 +361,14 @@ void CConnDlgAuthenticationPlugin::StartL( const TDesC8& aBuffer,
                                            const RMessagePtr2& aMessage )
     {
     CLOG_ENTERFN( "CConnDlgAuthenticationPlugin::StartL" );
+
+    if ( ScreenSaverOn() || AutolockOn() )
+        {
+        // Screen saver or Autolock is active. Cancel the dialog. 
+        CLOG_WRITE( "CConnDlgAuthenticationPlugin::StartL: Screen saver or Autolock is active." );
+        aMessage.Complete( KErrCancel );
+        return;
+        }
 
     if ( aBuffer.Length() > iAuthPairBuff.Length() )
         {
@@ -783,12 +800,26 @@ void CConnDlgSelectConnectionPlugin::StartL( const TDesC8& aBuffer,
                                              TInt aReplySlot,
                                              const RMessagePtr2& aMessage )
     {
+     CLOG_ENTERFN( "CConnDlgSelectConnectionPlugin::StartL" );      	
+    	
     if ( iActivePlugin )
         {
         aMessage.Complete( KErrServerBusy );
         return;
         }
-        
+     
+    TInt iStartUpPhaseValue( EStartupUiPhaseUninitialized );
+    RProperty::Get( KPSUidStartup, KPSStartupUiPhase, iStartUpPhaseValue );
+    CLOG_WRITEF( _L( "CConnDlgSelectConnectionPlugin::Phone start up phase: %d" ), 
+    									iStartUpPhaseValue );           
+    // Don't show the dialog if phone boot up isn't complete or screen saver or Autolock is on.
+    if ( iStartUpPhaseValue != EStartupUiPhaseAllDone || ScreenSaverOn() || AutolockOn() )
+        { 
+        CLOG_WRITE( "CConnDlgSelectConnectionPlugin::StartL: Screen saver or Autolock is active or start up phase not completed yet." );
+        aMessage.Complete( KErrCancel );
+        return;
+        }
+
     iPrefs.Copy( ( TPtrC8 ) aBuffer );
 
     iCancelled = ETrue; // This method could leave before displaying the dialog.

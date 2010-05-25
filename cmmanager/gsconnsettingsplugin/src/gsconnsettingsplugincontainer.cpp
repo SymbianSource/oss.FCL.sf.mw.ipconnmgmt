@@ -386,14 +386,26 @@ CGSPluginInterface* CGSConnSettingsPluginContainer::SelectedPluginL()
     {
     CGSPluginInterface* plugin = NULL;
 
-    // 1) Decrease index with the count
-    TInt index = iListBox->CurrentItemIndex() - iGeneralItemCount;
+    // Plugins are in list box after general menu items.
+    TInt listBoxIndex = iListBox->CurrentItemIndex() - iGeneralItemCount;
     
-    // 2) Check that new index is in range of plugins
-    if ( index >= 0 && index < iPluginArray->Count() )
+    // Pick the correct plugin: Skip the invisible plugin array items.
+    TInt i = 0;
+    TInt invisibleItems = 0;
+    CGSPluginInterface* tmpPlugin;
+    while ( i <= listBoxIndex + invisibleItems )
         {
-        // 3) Get correct plugin
-        plugin = iPluginArray->operator[]( index );
+        tmpPlugin = iPluginArray->operator[]( i );
+        if ( tmpPlugin->Visible() == EFalse )
+            {
+            invisibleItems++;
+            }
+        else if ( i == listBoxIndex + invisibleItems )
+            {
+            plugin = tmpPlugin;
+            break; // Correct plugin found.
+            }
+        i++;
         }
 
     // Leave if not found

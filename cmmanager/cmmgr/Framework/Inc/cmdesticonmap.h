@@ -137,7 +137,7 @@ NONSHARABLE_CLASS(CCmDestinationIconMap) : public CCoeControl
         * @Description:
         */
         void DrawItem( CWindowGc& aGc,
-                       const TRect& aSctPosition,
+                       TInt index,
                        TInt aIconIndex,
                        TBool aHighlighted,
                        TBool aDrawBackground ) const;
@@ -241,8 +241,6 @@ NONSHARABLE_CLASS(CCmDestinationIconMap) : public CCoeControl
         mutable TBool       iOffscreenBgDrawn;
 
         TInt                iMaxColumns;
-        TInt                iCurrentPage;
-        TInt                iNumPages;
         CCmDestinationIconMapExtension*   iExtension;
         CArrayPtr<CGulIcon>*  iConsArray;
         TBool               iDragAlreadyActive;

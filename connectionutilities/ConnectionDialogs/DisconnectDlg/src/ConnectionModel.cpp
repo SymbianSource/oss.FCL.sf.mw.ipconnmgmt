@@ -165,12 +165,12 @@ void CConnectionModel::InitConnectionArrayL()
             User::WaitForRequest( status );
             CLOG_WRITEF(_L( "KClientInfo status: %d" ), status.Int() );  
             
-    
+            bearer = EBearerUnknown;
             iMonitor.GetIntAttribute( connId, 0, KBearer, bearer, status );
             User::WaitForRequest( status );
             CLOG_WRITEF(_L( "KBearer status: %d" ), status.Int() ); 
             
-    
+            connStatus = KConnectionUninitialised;
             iMonitor.GetIntAttribute( connId, 0, KConnectionStatus, connStatus,
                                       status );
             User::WaitForRequest( status );

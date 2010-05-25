@@ -301,6 +301,11 @@ void CMPMServer::ConstructL()
 //
 CMPMServer::~CMPMServer()
     {
+	if ( iRoamingToWlanPeriodic )
+        {
+        iRoamingToWlanPeriodic->Cancel();
+		delete iRoamingToWlanPeriodic;
+        }
     if ( iDisconnectQueue )
         {
         iDisconnectQueue->ResetAndDestroy();
@@ -984,7 +989,32 @@ void CMPMServer::NotifyBMPrefIapL( const TConnMonIapInfo& aIapInfo,
     TCmUsageOfWlan usageOfWlan = CommsDatAccess()->ForcedRoamingL();
     if ( usageOfWlan == ECmUsageOfWlanKnown || usageOfWlan == ECmUsageOfWlanKnownAndNew )
         {
-        StartForcedRoamingToWlanL( iapInfo );
+        if ( IsWlanConnectionStartedL( CommsDatAccess() ) )
+            {
+            iConnMonIapInfo = aIapInfo;
+                
+            if ( iRoamingToWlanPeriodic )
+                {
+                iRoamingToWlanPeriodic->Cancel();
+                }
+            else
+                {
+                iRoamingToWlanPeriodic = CPeriodic::NewL( 
+                                                   CActive::EPriorityStandard );
+                }
+            // start periodic object that calls StartForcedRoamingToWlanL after 10s. 
+            // this handles the case when new wlan connection is 
+            // started from e.g. wlan sniffer but IAP is not yet in Internet SNAP 
+            iRoamingToWlanPeriodic->Start( 
+                   TTimeIntervalMicroSeconds32( KRoamingToWlanUpdateInterval ), 
+                   TTimeIntervalMicroSeconds32( KRoamingToWlanUpdateInterval ), 
+                   TCallBack( StartForcedRoamingToConnectedWlanL, this ) );
+            }
+        else
+            {
+            StartForcedRoamingToWlanL( iapInfo );
+            }
+
         StartForcedRoamingFromWlanL( iapInfo );
         }
     
@@ -1804,12 +1834,11 @@ TBool CMPMServer::UserConnectionInInternet() const
 void CMPMServer::StartForcedRoamingToWlanL( const TConnMonIapInfo& aIapInfo )
     {
     MPMLOGSTRING( "CMPMServer::StartForcedRoamingToWlan" )
-
-    // First check that there is no active wlan connection
-    if ( IsWlanConnectionStartedL( CommsDatAccess() ) )
+    
+    // cancel the periodic object
+    if ( iRoamingToWlanPeriodic != NULL )
         {
-        // Wlan already active can't roam to it
-        return;
+        iRoamingToWlanPeriodic->Cancel();
         }
 
     // Copy all available wlan iap ids to own array
@@ -1868,6 +1897,20 @@ void CMPMServer::StartForcedRoamingToWlanL( const TConnMonIapInfo& aIapInfo )
     CleanupStack::PopAndDestroy( &iapList );
     CleanupStack::PopAndDestroy( &wlanIapIds );
     }
+
+
+// ---------------------------------------------------------------------------
+// CMPMServer::StartForcedRoamingToConnectedWlanL
+// ---------------------------------------------------------------------------
+//    
+TInt CMPMServer::StartForcedRoamingToConnectedWlanL( TAny* aUpdater )
+    {
+    MPMLOGSTRING( "CMPMServer::StartForcedRoamingToConnectedWlanL" );
+    static_cast<CMPMServer*>( aUpdater )->StartForcedRoamingToWlanL( 
+            static_cast<CMPMServer*>( aUpdater )->iConnMonIapInfo );
+    return 0;
+    }
+
 
 // -----------------------------------------------------------------------------
 // CMPMServer::StartForcedRoamingFromWlanL

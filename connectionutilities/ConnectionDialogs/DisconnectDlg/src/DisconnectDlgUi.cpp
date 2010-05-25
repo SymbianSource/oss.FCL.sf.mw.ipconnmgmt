@@ -19,6 +19,9 @@
 
 
 // INCLUDE FILES
+#include <e32property.h>
+#include <ScreensaverInternalPSKeys.h>
+#include <coreapplicationuisdomainpskeys.h>
 #include "DisconnectDlgUi.h"
 #include "ActiveDisconnectDlgPlugin.h"
 #include "ConnectionModel.h"
@@ -251,6 +254,31 @@ void CDisconnectDialogUi::StartL( const TDesC8& aBuffer,
     { 
     CLOG_ENTERFN("CDisconnectDialogUi::StartL");        
       
+    TInt err( KErrNone );
+    TInt screenSaverOn( 0 );
+    
+    // Cancel the dialog if screensaver is on.
+    err = RProperty::Get( KPSUidScreenSaver, 
+            KScreenSaverOn, 
+            screenSaverOn );
+
+    TBool autolockOn( EFalse );
+#ifdef RD_STARTUP_CHANGE
+    TInt autolockStatus( 0 );
+    // Cancel the dialog if Autolock is on.
+    err |= RProperty::Get( KPSUidCoreApplicationUIs, 
+            KCoreAppUIsAutolockStatus, 
+            autolockStatus );
+    autolockOn = autolockStatus > EAutolockOff;
+#endif
+
+    if ( err == KErrNone && ( screenSaverOn > 0 || autolockOn ) )
+        {
+        // Screen saver or Autolock is active. Cancel the dialog. 
+        aMessage.Complete( KErrCancel );
+        return;
+        }
+    
     iStarted = ETrue;
 
     TPckgBuf<TDisconnectConnectionPrefs> passedInfo;
@@ -262,7 +290,7 @@ void CDisconnectDialogUi::StartL( const TDesC8& aBuffer,
     
     CLOG_WRITEF(_L( "iCntPrefs.iPrompt: %d" ), iConnectionPrefs.iPrompt );
     
-    TInt err( KErrNone );    
+    err = KErrNone;    
     TRAP( err, iActivePlugin = CActiveDisconnectDlgPlugin::NewL( this ) ); 
     
     if ( err )

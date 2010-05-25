@@ -56,8 +56,6 @@ void COfflineWlanNoteNotif::StartL( const TDesC8& aBuffer,
     TPckgBuf<TBool> asyncVersion;
     asyncVersion.Copy( aBuffer );
 
-    iCancelled = EFalse;
-
     // We are about to display the Offline note.
     // Since this part of the code can be executed during the bootup, check if
     // the UI has really started up to display notes/dialogs.
@@ -65,8 +63,17 @@ void COfflineWlanNoteNotif::StartL( const TDesC8& aBuffer,
     User::LeaveIfError ( RProperty::Get( KPSUidUikon, KUikGlobalNotesAllowed,
                                         notesAllowed ) );
 
+    if ( ScreenSaverOn() || AutolockOn() )
+        {
+        // Screen saver or Autolock is active. Cancel the dialog. 
+        CLOG_WRITE( "COfflineWlanNoteNotif::StartL: Screen saver or Autolock is active." );
+        aMessage.Complete( KErrCancel );
+        return;
+        }
+
     iReplySlot = aReplySlot;
     iMessage = aMessage;
+    iCancelled = EFalse;
 
     CLOG_WRITEF( _L( "notesAllowed : %d" ), notesAllowed );
 

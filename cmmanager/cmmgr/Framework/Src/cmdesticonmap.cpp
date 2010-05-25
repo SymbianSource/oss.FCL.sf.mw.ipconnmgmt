@@ -285,9 +285,6 @@ void CCmDestinationIconMap::CreateScrollBarAndIconRowL()
     iFirstVisibleRow = 0;
     iAnimated = EFalse;
     iCursorPos = TPoint( 0, 0 );
-    iNumPages = ( iRows / iExtension->iMaxVisibleRows ) + 
-                ( iRows % iExtension->iMaxVisibleRows ? 1 : 0 );
-    iCurrentPage = 1;
     
     // Create and set the scb visible even though there is nothing to scroll   
     delete iSBFrame; iSBFrame=NULL;
@@ -364,9 +361,9 @@ TSize CCmDestinationIconMap::MinimumSize()
     // Main pane without softkeys
     TRect mainPaneRect;
     if ( !AknLayoutUtils::LayoutMetricsRect( AknLayoutUtils::EMainPane, mainPaneRect ) )
-    {
-    mainPaneRect = iAvkonAppUi->ClientRect();
-    }
+        {
+        mainPaneRect = iAvkonAppUi->ClientRect();
+        }
     
     // Dialog layout, check variety first
     TAknLayoutScalableParameterLimits iconMapDialogVariety = 
@@ -409,10 +406,14 @@ TSize CCmDestinationIconMap::MinimumSize()
     // if more lines than possible to show, use the default 
     // ( the biggest grid ) variety
     if ( varietyNumber < 0 )
-       varietyNumber = 0;
+        {
+        varietyNumber = 0;
+        }
     // if zero rows, use the minimum
     else if ( iRows<=0 )
-       varietyNumber -= 1;
+        {
+        varietyNumber -= 1;
+        }
     
     //add the varietyoffset
     varietyNumber += maxVarietyOffset;
@@ -528,32 +529,20 @@ void CCmDestinationIconMap::HandlePointerEventL(
     {
     if ( AknLayoutUtils::PenEnabled() )
         {
-        TInt newGridX; // For the whole
-        TInt newGridY; // For the whole grid.
+        TInt xInPixels = aPointerEvent.iPosition.iX - iGridTopLeft.iX;
         TInt yInPixels = aPointerEvent.iPosition.iY - iGridTopLeft.iY;
-        newGridY = yInPixels / iGridItemHeight;
-        if ( ( aPointerEvent.iPosition.iX - iGridTopLeft.iX ) < 0 )
-            {
-            newGridX = -1;
-            }
-        else
-            {
-            newGridX = ( aPointerEvent.iPosition.iX - iGridTopLeft.iX )
-                                                        / iGridItemWidth;
-            }
+        TInt newGridX = xInPixels / iGridItemWidth;
+        TInt newGridY = yInPixels / iGridItemHeight;
+        TInt globalY = newGridY + iFirstVisibleRow;
 
         // The pointer has been set down or dragged into the area of the grid. 
-        // (it might be in the "white space" at the end of the grid)
-        if ( ( yInPixels >= 0 && yInPixels < iGridItemHeight 
-                * iExtension->iMaxVisibleRows) &&
-            // When the pointer is in rows except the recent icon row
-                ( ( ( ( newGridY + iFirstVisibleRow ) != 0 ) && 
-                newGridX < iMaxColumns && newGridX >= 0 ) ||
-            // When the pointer is in the recent icon row
-                ( ( newGridY + iFirstVisibleRow == 0 ) && 
-                ( newGridX < iMaxColumns ) ) ) )
+        // Also, it may NOT be in the "empty slots" at the end of the grid.
+        if ( xInPixels >= 0 &&
+                yInPixels >= 0 && 
+                newGridX < iMaxColumns &&
+                yInPixels < iGridItemHeight * iExtension->iMaxVisibleRows &&
+                globalY * iMaxColumns + newGridX + 1 <= iConsArray->Count() )
             {
-            TUint globalY = newGridY + iFirstVisibleRow;
             // For any action to be taken, the pointer event must either be a
             // Button1Down or a drag event which has originated from a
             // Button1Down in to the grid.
@@ -727,11 +716,15 @@ void CCmDestinationIconMap::SizeChanged()
     // if more lines than possible to show, use the default 
     // ( the biggest grid ) variety
     if ( varietyNumber < 0 )
-       varietyNumber = 0;
+        {
+        varietyNumber = 0;
+        }
     // if zero rows, use the minimum
     else if ( iRows<=0 )
-       varietyNumber -= 1;
-    
+        {
+        varietyNumber -= 1;
+        }
+
     //add the varietyoffset
     varietyNumber += maxVarietyOffset;
     
@@ -749,10 +742,9 @@ void CCmDestinationIconMap::SizeChanged()
         else
             {
             varietyNumber = 3;
-            }            
-        
-        }       
-    
+            }
+        }
+
     TAknLayoutRect popupGridLayRect;
     popupGridLayRect.LayoutRect( mainPaneRect, 
           AknLayoutScalable_Avkon::popup_grid_graphic_window( varietyNumber ) );
@@ -832,8 +824,7 @@ void CCmDestinationIconMap::HandleResourceChange( TInt aType )
         {
         // save the old info for the magnitudes of the SCT grid
         TInt oldMaxColumns = iMaxColumns;
-        //TInt oldMaxRows = 0;
-        //oldMaxRows = iRows;
+
         // calculate the new magnitudes
         DoLayout();
         
@@ -1023,7 +1014,7 @@ void CCmDestinationIconMap::Draw( const TRect& /*aRect*/ ) const
 
         TPoint pos = iGridTopLeft;
 
-        TInt endX = pos.iX + iGridItemWidth * iMaxColumns + 1;
+        TInt endX = pos.iX + iGridItemWidth * iMaxColumns;
         TInt endY = pos.iY + iGridItemHeight * fullRows;
 
         TInt ii = 0;
@@ -1039,7 +1030,7 @@ void CCmDestinationIconMap::Draw( const TRect& /*aRect*/ ) const
                 pos.iX += iGridItemWidth;
                 }
 
-                pos = iGridTopLeft;
+            pos = iGridTopLeft;
 
             // Draw full horizontal lines
             for ( ii = 0 ; ii <= fullRows ; ii++ )
@@ -1074,9 +1065,8 @@ void CCmDestinationIconMap::Draw( const TRect& /*aRect*/ ) const
                 }
             }
         
-        TInt iconIndex = ( iCurrentPage - 1 ) * 
-                         ( iMaxColumns * iExtension->iMaxVisibleRows );
-        TInt lCnt =  iConsArray->Count(); 
+        TInt iconIndex = iFirstVisibleRow * iMaxColumns;
+        TInt lCnt = iConsArray->Count(); 
         cursorPos = iCursorPos.iX + iCursorPos.iY * iMaxColumns;
         if ( lCnt > 0 )
             {
@@ -1086,7 +1076,7 @@ void CCmDestinationIconMap::Draw( const TRect& /*aRect*/ ) const
                   j < lCnt && i < numberOfIconsToBeDrawn;
                   j++, i++ )
                 {
-                DrawItem( gc, CursorRect( i ), j, cursorPos == i, EFalse );        
+                DrawItem( gc, i, j, cursorPos == i, EFalse );        
                 }     
             }
             
@@ -1101,18 +1091,22 @@ void CCmDestinationIconMap::Draw( const TRect& /*aRect*/ ) const
 //
 void CCmDestinationIconMap::DrawItem( 
     CWindowGc& aGc,
-    const TRect& aSctPosition,
+    TInt index,
     TInt aIconIndex,
     TBool aHighlighted,
     TBool aDrawBackground ) const
     {
+    TRect sctPosition = CursorRect( index );
     MAknsSkinInstance* skin = AknsUtils::SkinInstance();
     MAknsControlContext* cc = AknsDrawUtils::ControlContext( this );
     
-    TBool skins = AknsDrawUtils::Background( skin,cc,aGc, aSctPosition );    
+    TBool skins = AknsDrawUtils::Background( skin,cc,aGc, sctPosition );    
     TRgb color;
     if ( !skins )
+        {
         aGc.SetBrushStyle( CGraphicsContext::ESolidBrush );
+        }
+    
     if ( aHighlighted )
         {
         TRgb colorHightLightRect = AKN_LAF_COLOR( 215 );
@@ -1121,10 +1115,10 @@ void CCmDestinationIconMap::DrawItem(
                                    KAknsIIDQsnLineColors, 
                                    EAknsCIQsnLineColorsCG7 );
         aGc.SetPenColor( colorHightLightRect );
-        aGc.DrawRect( aSctPosition );
+        aGc.DrawRect( sctPosition );
 
         // Shrink by one pixel in all directions.
-        TRect innerRect = aSctPosition;
+        TRect innerRect = sctPosition;
         innerRect.Shrink( 1,1 );
 
         color = AKN_LAF_COLOR( 210 );
@@ -1137,7 +1131,7 @@ void CCmDestinationIconMap::DrawItem(
         }
     else if ( aDrawBackground )
         {
-        TRect innerRect = aSctPosition;
+        TRect innerRect = sctPosition;
         aGc.SetBrushColor( AKN_LAF_COLOR( 0 ) );
         if ( !skins )
             {
@@ -1159,13 +1153,8 @@ void CCmDestinationIconMap::DrawItem(
 
             CGulIcon* bitmap = NULL;
             bitmap = iConsArray->At( aIconIndex );
-            TInt numIconsInaPage = iExtension->iMaxVisibleRows * iMaxColumns;
-            TInt cellIndex = aIconIndex;
-            if ( aIconIndex >= numIconsInaPage )
-                {
-                cellIndex = aIconIndex % numIconsInaPage;
-                }
-            aGc.BitBltMasked( CursorPoint( cellIndex ),
+
+            aGc.BitBltMasked( CursorPoint( index ),
                             bitmap->Bitmap(),
                             cellRect,
                             bitmap->Mask(),
@@ -1218,7 +1207,7 @@ void CCmDestinationIconMap::DrawCell(
 
     Window().Invalidate( rect );
     Window().BeginRedraw( rect );
-    DrawItem( SystemGc(), rect, iconIndex, aHighlighted, ETrue );
+    DrawItem( SystemGc(), aCursorPos, iconIndex, aHighlighted, ETrue );
     Window().EndRedraw();
     SystemGc().DiscardFont();
     }
@@ -1272,10 +1261,14 @@ TPoint CCmDestinationIconMap::CursorPoint( TInt aCursorPos ) const
 void CCmDestinationIconMap::MoveCursorL( TInt aDeltaX, TInt aDeltaY )
     {           
     if ( iIsMirrored )
+        {
         aDeltaX = -aDeltaX;
+        }
     
     if ( ( iConsArray->Count() < 8 ) )
-       return;
+        {
+        return;
+        }
 
     iOldCursorPos = iCursorPos;
     TInt oldFirstVisibleRow = iFirstVisibleRow;
@@ -1443,11 +1436,6 @@ void CCmDestinationIconMap::MoveCursorL( TInt aDeltaX, TInt aDeltaY )
             }
         }
        
-    //TInt increment( 1 );
-    //if ( aDeltaY < 0 || aDeltaX < 0 )
-    //    {
-    ////    increment = -1;
-    //    }
     if ( iRows > iExtension->iMaxVisibleRows && 
         ( iOldCursorPos.iY + oldFirstVisibleRow != 
           iCursorPos.iY + iFirstVisibleRow ) )
@@ -1571,17 +1559,13 @@ void CCmDestinationIconMap::UpdateScrollIndicatorL()
     TAknWindowComponentLayout scrollbarLayout = 
                                     AknLayoutScalable_Avkon::scroll_pane_cp5();
     
-    iCurrentPage = ( iFirstVisibleRow / iExtension->iMaxVisibleRows ) + 1;
-
-    vSbarModel.iScrollSpan = iNumPages * iExtension->iMaxVisibleRows;
+    vSbarModel.iScrollSpan = iRows;
     vSbarModel.iThumbSpan = iExtension->iMaxVisibleRows;
     
-    if ( iSBFrame && iSBFrame->TypeOfVScrollBar() == 
-         CEikScrollBarFrame::EDoubleSpan )
+    if ( iSBFrame->TypeOfVScrollBar() == CEikScrollBarFrame::EDoubleSpan )
         {    
         // For EDoubleSpan type scrollbar
-        vSbarModel.iThumbPosition = ( iCurrentPage - 1 ) * 
-                                    iExtension->iMaxVisibleRows;
+        vSbarModel.iThumbPosition = iFirstVisibleRow;
         TAknDoubleSpanScrollBarModel hDsSbarModel( hSbarModel );
         TAknDoubleSpanScrollBarModel vDsSbarModel( vSbarModel );
         
@@ -1675,7 +1659,8 @@ void CCmDestinationIconMap::DrawOffscreenBackgroundIfRequired() const
             else if ( location == AknLayoutUtils::EAknCbaLocationLeft )
                {
                maxVarietyOffset = varietyOffset + varietyOffset; // 2*
-               }   
+               }
+
             TInt varietyNumber = varietyOffset - iRows - 1; 
             
             // if more lines than possible to show, use the default 
@@ -1886,7 +1871,7 @@ void CCmDestinationIconMap::CountMaxColumnsAndCellSizes()
     TInt cellHeight = cellRect.Height();
     
     // calculate the number of items fitting to grid
-    iExtension->iMaxVisibleRows = 3;//gridHeight / cellHeight;
+    iExtension->iMaxVisibleRows = 3; //gridHeight / cellHeight;
     
     // Store the item height
     TAknLayoutRect secondRowLayRect;
@@ -1913,9 +1898,13 @@ void CCmDestinationIconMap::HandleScrollEventL( CEikScrollBar* aScrollBar,
         case EEikScrollPageUp:
             {           
             // nothing done if we are already on the first page.
-            if ( iFirstVisibleRow != 0 )
-                {               
-                iFirstVisibleRow -= iExtension->iMaxVisibleRows;             
+            if ( iFirstVisibleRow > 0 )
+                {
+                iFirstVisibleRow -= iExtension->iMaxVisibleRows;
+                if ( iFirstVisibleRow < 0 )
+                    {
+                    iFirstVisibleRow = 0;
+                    }
                 update = ETrue;
                 }
             UpdateScrollIndicatorL();
@@ -1926,10 +1915,13 @@ void CCmDestinationIconMap::HandleScrollEventL( CEikScrollBar* aScrollBar,
         case EEikScrollPageDown:
             {           
             // nothing done if we are already on the last page.
-            if ( iFirstVisibleRow != iRows/iExtension->iMaxVisibleRows * 
-                                     iExtension->iMaxVisibleRows )
+            if ( iFirstVisibleRow < iRows - iExtension->iMaxVisibleRows ) 
                 {
                 iFirstVisibleRow += iExtension->iMaxVisibleRows;
+                if ( iFirstVisibleRow > iRows - iExtension->iMaxVisibleRows )
+                    {   
+                    iFirstVisibleRow = iRows - iExtension->iMaxVisibleRows;
+                    }
                 update = ETrue;
                 }
             UpdateScrollIndicatorL();
@@ -1937,13 +1929,10 @@ void CCmDestinationIconMap::HandleScrollEventL( CEikScrollBar* aScrollBar,
             break;   
                
         case EEikScrollThumbDragVert:
-            {           
-            TInt thumbPosition;         
-            TInt halfPage = iExtension->iMaxVisibleRows/2;
+            {        	
             // Ask which type of scrollbar is shown
-            //CAknAppUi* appUi = iAvkonAppUi;            
-            TBool isDoubleSpan = 
-                CEikScrollBarFrame::EDoubleSpan == iSBFrame->TypeOfVScrollBar();
+            TInt thumbPosition;
+            TBool isDoubleSpan = ( CEikScrollBarFrame::EDoubleSpan == iSBFrame->TypeOfVScrollBar() );
             if ( isDoubleSpan )
                 {
                 thumbPosition = static_cast <const TAknDoubleSpanScrollBarModel*>( 
@@ -1953,24 +1942,10 @@ void CCmDestinationIconMap::HandleScrollEventL( CEikScrollBar* aScrollBar,
                 {
                 thumbPosition = aScrollBar->Model()->iThumbPosition;
                 }
-
-            // If the slider is in the range of less then a half page from a 
-            // possible correct thumb position. thus 0 <= iFirstVisibleRow - 
-            // thumbPosition < halfPage. Or in the other direction:
-            // 0 <= thumbPosition - iFirstVisibleRow < halfPage
-            if ( !( ( 0 <= iFirstVisibleRow - thumbPosition &&
-                        iFirstVisibleRow - thumbPosition < halfPage )||                         
-                  ( 0 <= thumbPosition - iFirstVisibleRow && 
-                        thumbPosition - iFirstVisibleRow < halfPage ) ) )
-                {               
-                TReal toRound = thumbPosition / 
-                                ( TReal )iExtension->iMaxVisibleRows;
-                if ( toRound * 2 > ( TInt )toRound * 2 + 1 )
-                    {
-                    toRound++;
-                    }                  
-                iFirstVisibleRow = ( TInt )toRound * 
-                                   iExtension->iMaxVisibleRows;
+            
+            if ( thumbPosition != iFirstVisibleRow )
+                {
+                iFirstVisibleRow = thumbPosition;
                 update = ETrue;
                 }
             }
@@ -1978,6 +1953,19 @@ void CCmDestinationIconMap::HandleScrollEventL( CEikScrollBar* aScrollBar,
         
         case EEikScrollThumbReleaseVert:
             {
+            // Ask which type of scrollbar is shown
+            TBool isDoubleSpan = 
+                CEikScrollBarFrame::EDoubleSpan == iSBFrame->TypeOfVScrollBar();
+            if ( isDoubleSpan )
+                {
+                iFirstVisibleRow = static_cast <const TAknDoubleSpanScrollBarModel*>( 
+                                            aScrollBar->Model() )->FocusPosition();
+                }
+            else
+                {
+                iFirstVisibleRow = aScrollBar->Model()->iThumbPosition;
+                }
+            update = ETrue;
             UpdateScrollIndicatorL();
             }
             break;
@@ -1988,53 +1976,11 @@ void CCmDestinationIconMap::HandleScrollEventL( CEikScrollBar* aScrollBar,
         case EEikScrollPageRight: // flow through
         case EEikScrollThumbDragHoriz: // flow through
         case EEikScrollThumbReleaseHoriz: // flow through
-            // do nothing
-            break;  
-            
         default: 
             // do nothing
             break; 
         }
-        
-    // If we have moved down to the last page we check that the cursor is in 
-    // a place where it can be drawn.       
-    if ( iFirstVisibleRow == 
-         iRows/iExtension->iMaxVisibleRows * iExtension->iMaxVisibleRows )
-        {
-        // the old cursor is set to a "safe" position where it at least can be.
-        iOldCursorPos.iX = 0;
-        iOldCursorPos.iY = 0;                                                    
-        // if the last page has only one line which isn't filled complitely.
-        if ( ( iConsArray->Count() % iMaxColumns - 1 < iCursorPos.iX ) && 
-             ( iRows % iExtension->iMaxVisibleRows ) == 1 )
-            {
-            iCursorPos.iX = iConsArray->Count()%iMaxColumns - 1;
-            }                        
-        // If the cursor is in a position where it would go unto a spot without 
-        // a icon when scrolled.
-        if ( iCursorPos.iY + iFirstVisibleRow >= iRows )
-            {                        
-            if ( iConsArray->Count() % iMaxColumns > iCursorPos.iX )
-                {                                                      
-                iCursorPos.iY = iRows - 1 - iFirstVisibleRow;                             
-                }
-            else
-                {                            
-                iCursorPos.iY = iRows - 2 - iFirstVisibleRow;
-                } 
-            }
-        // If the cursor is actually on the last row, but is still in the
-        // area where there is now icons. ( the rest of the last row )
-        if ( ( iConsArray->Count() <= ( iFirstVisibleRow + iCursorPos.iY ) 
-                                        * iMaxColumns + iCursorPos.iX ) &&
-             ( iCursorPos.iY + iFirstVisibleRow + 1 == iRows ) )
-            {
-            iCursorPos.iY--;
-            }
-        // if the corrections did not help and the cursor is in the area
-        // where there is a valid row, but no icons anymore
-        }
-        
+                
     // to avoid flicker we draw only if there really was something new to draw.
     if ( update )
         {              

@@ -190,7 +190,7 @@ void CCmDlg::PreLayoutDynInitL()
     if ( iHighlight )
         {
         iListbox->ScrollToMakeItemVisible( iHighlight );
-        iListbox->SetCurrentItemIndexAndDraw( iHighlight );
+        iListbox->SetCurrentItemIndex( iHighlight );
         }    
     }
     
@@ -1042,7 +1042,7 @@ void CCmDlg::AddConnectionMethodL()
             //first item cannot be deleted
             iListbox->ScrollToMakeItemVisible( 
                                     iListbox->Model()->NumberOfItems() -1 );
-            iListbox->SetCurrentItemIndexAndDraw( iHighlight );
+            iListbox->SetCurrentItemIndex( iHighlight );
             }
         }
     }
@@ -1685,6 +1685,7 @@ void CCmDlg::HandleListboxDataChangeL()
         if ( selected >= 0 )
             {
             iListbox->ScrollToMakeItemVisible( selected);
+            iListbox->SetCurrentItemIndex( selected );
             }
         }
     }

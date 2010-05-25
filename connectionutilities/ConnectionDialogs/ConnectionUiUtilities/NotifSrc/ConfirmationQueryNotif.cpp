@@ -109,24 +109,23 @@ void CConfirmationQueryNotif::StartL( const TDesC8& aBuffer,
            }    
         }
     
-    // Check if emergency call is ongoing. If it is then do not display the dialog.    
     TInt err( KErrNone );
-    TInt state( 0 );
-
-    err = RProperty::Get(
-            KPSUidCtsyEmergencyCallInfo,
-            KCTSYEmergencyCallInfo,
-            state );
+    TInt emergencyCallState( 0 );
     
-    if ( err == KErrNone && state )
+    // Check if emergency call is ongoing. If it is then do not display the dialog.    
+    err = RProperty::Get( KPSUidCtsyEmergencyCallInfo,
+            KCTSYEmergencyCallInfo,
+            emergencyCallState );
+
+    if ( (err == KErrNone && emergencyCallState) || ScreenSaverOn() || AutolockOn() )
         {
-        // Emergency call is active. Cancel connection. 
-        CLOG_WRITE( "CConfirmationQueryNotif::StartL: Emergency call is active!" );
+        // Emergency call, screen saver or autolock is active. Cancel the dialog. 
+        CLOG_WRITE( "CConfirmationQueryNotif::StartL: Emergency call, Screen saver or Autolock is active." );
         aMessage.WriteL( aReplySlot, TPckg<TMsgQueryLinkedResults>( EMsgQueryCancelled ) );
         aMessage.Complete( KErrNone );
         return;
         }
-    
+
     iChoice = EMsgQueryCancelled; 
     TPckgBuf<TConnUiUiDestConnMethodNoteId> input;
     input.Copy( aBuffer );

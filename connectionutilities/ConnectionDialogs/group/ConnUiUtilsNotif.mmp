@@ -96,7 +96,6 @@ SYSTEMINCLUDE		../../../inc
 MW_LAYER_SYSTEMINCLUDE
 
 SYSTEMINCLUDE   /epoc32/include/libc 
-SYSTEMINCLUDE   /epoc32/include/uikon
 
 
 LIBRARY     euser.lib eikdlg.lib eiksrv.lib cone.lib eikcore.lib eikcoctl.lib

@@ -18,12 +18,14 @@
 
 // INCLUDE FILES
 
-#include "ConnectionDialogsNotifBase.h"
-
+#include <e32property.h>
+#include <ScreensaverInternalPSKeys.h>
+#include <coreapplicationuisdomainpskeys.h>
 #include <bautils.h>
 #include <eikenv.h>
 #include <data_caging_path_literals.hrh>
 
+#include "ConnectionDialogsNotifBase.h"
 
 // CONSTANTS
 
@@ -130,6 +132,43 @@ CConnectionDialogsNotifBase::~CConnectionDialogsNotifBase()
         }
     }
 
+// ---------------------------------------------------------
+// CConnectionDialogsNotifBase::ScreenSaverOn()
+// ---------------------------------------------------------
+//
+TBool CConnectionDialogsNotifBase::ScreenSaverOn()
+    {
+    TInt err( KErrNone );
+    TInt screenSaverOn( 0 );
+
+    // Cancel the dialog if screen saver is on.
+    err = RProperty::Get( KPSUidScreenSaver, 
+            KScreenSaverOn, 
+            screenSaverOn );
+    
+    return (err == KErrNone && screenSaverOn > 0); 
+    }
+
+// ---------------------------------------------------------
+// CConnectionDialogsNotifBase::AutolockOn()
+// ---------------------------------------------------------
+//
+TBool CConnectionDialogsNotifBase::AutolockOn()
+    {
+    TBool retval( EFalse );
+
+#ifdef RD_STARTUP_CHANGE
+    TInt err( KErrNone );
+    TInt autolockOn( 0 );
+    // Cancel the dialog if screen saver is on.
+    err = RProperty::Get( KPSUidCoreApplicationUIs, 
+            KCoreAppUIsAutolockStatus, 
+            autolockOn );
+    retval = (err == KErrNone && autolockOn > EAutolockOff);
+#endif
+
+    return retval; 
+    }
 
 
 // End of File
