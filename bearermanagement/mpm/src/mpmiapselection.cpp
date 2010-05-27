@@ -350,34 +350,39 @@ void CMPMIapSelection::ExplicitConnectionL()
             if ( iSession->IsConfirmFirstL( validateIapId ) &&
                  !( iSession->MyServer().CommsDatAccess()->IsVirtualIapL( validateIapId ) ))
                 {
-                // Check if we are roaming and cellular data usage query has not yet been presented
-                // to the user in this country
-                if ( iSession->MyServer().RoamingWatcher()->RoamingStatus() == EMPMInternationalRoaming )
+            
+                // Check whether queries are enabled
+                if ( !( iChooseIapPref.NoteBehaviour()
+                        & TExtendedConnPref::ENoteBehaviourConnDisableQueries ) )
                     {
-                    // Check whether queries are enabled
-                    if ( !( iChooseIapPref.NoteBehaviour() & TExtendedConnPref::ENoteBehaviourConnDisableQueries ) )
-                        {
-                        TConnectionId connId = iSession->ConnectionId();
-                                                            
-                        // International roaming
-                        iConfirmDlgStarting = CMPMConfirmDlgStarting::NewL( 
-                            *this, 
-                            connId,
-                            snap, 
-                            validateIapId, 
-                            CMPMConfirmDlg::EConfirmDlgVisitorNetwork,
-                            iChooseIapPref,
-                            iSession->MyServer(),
-                            *iSession,
-                            EExplicitConnection );
-                        return;    
-                        }
-                    else
-                        {
-                        // Queries disabled, connection must fail
-                        ChooseIapComplete( KErrPermissionDenied, &iChooseIapPref );
-                        return;
-                        }
+                
+                    TConnectionId connId = iSession->ConnectionId();
+
+                    // Set confirmation type based on roaming status
+                    CMPMConfirmDlg::TDialogType type = 
+                            CMPMConfirmDlg::EConfirmDlgHomeNetwork;
+                    if ( iSession->MyServer().RoamingWatcher()->RoamingStatus()
+                            == EMPMInternationalRoaming ) {
+                        type = CMPMConfirmDlg::EConfirmDlgVisitorNetwork;
+                    }
+                    
+                    iConfirmDlgStarting = CMPMConfirmDlgStarting::NewL( 
+                        *this, 
+                        connId,
+                        snap, 
+                        validateIapId, 
+                        type,
+                        iChooseIapPref,
+                        iSession->MyServer(),
+                        *iSession,
+                        EExplicitConnection );
+                    return;    
+                    }
+                else
+                    {
+                    // Queries disabled, connection must fail
+                    ChooseIapComplete( KErrPermissionDenied, &iChooseIapPref );
+                    return;
                     }
                 }
                            
@@ -455,10 +460,10 @@ void CMPMIapSelection::CompleteExplicitSnapConnectionL()
     // Check if any suitable IAP's were found, if not then complete selection with error code
     if ( validateIapId == 0 )
         {
-        if ( iChooseIapPref.ConnType() == TMpmConnPref::EConnTypeDefault ||
+        if ( !( iChooseIapPref.NoteBehaviour() & TExtendedConnPref::ENoteBehaviourConnDisableQueries ) &&
+                ( iChooseIapPref.ConnType() == TMpmConnPref::EConnTypeDefault ||
                 ( iChooseIapPref.ConnType() == TMpmConnPref::EConnTypeExplicit &&
-                !( iChooseIapPref.NoteBehaviour() & TExtendedConnPref::ENoteBehaviourConnDisableQueries ) &&
-                iCommsDatAccess->IsInternetSnapL( 0, snap ) ) )
+                  iCommsDatAccess->IsInternetSnapL( 0, snap ) ) ) )
             {
             ImplicitConnectionL();
             }
