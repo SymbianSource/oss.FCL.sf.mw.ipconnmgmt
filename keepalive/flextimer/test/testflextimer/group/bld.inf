@@ -42,7 +42,7 @@ PRJ_EXPORTS
 
 PRJ_TESTMMPFILES
 	
-	TestFlexTimer.mmp
+	testflextimer.mmp
 
 PRJ_MMPFILES
 	
