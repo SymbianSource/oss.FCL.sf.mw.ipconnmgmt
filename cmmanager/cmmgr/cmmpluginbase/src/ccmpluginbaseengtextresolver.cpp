@@ -27,15 +27,16 @@ HBufC* CCmPluginBaseEngTextResolver::ResolveTextL( const TDesC& aTextId )
     {
     _LIT(KCMManagerTranslationFile, "cmmanager_");
     _LIT(KTranslationPath, "\\resource\\qt\\translations");
-    
-    TBool result = HbTextResolverSymbian::Init( KCMManagerTranslationFile,
-                                                KTranslationPath );
+
+    TBool result = HbTextResolverSymbian::Init(
+            KCMManagerTranslationFile,
+            KTranslationPath );
     if ( result )
         {
         OstTrace0( TRACE_ERROR, CCMPLUGINBASEENGTEXTRESOLVER_RESOLVETEXTL, "CCmPluginBaseEngTextResolver::ResolveTextL" );
         }
-    
-    return HbTextResolverSymbian::LoadL( aTextId );        
+
+    return HbTextResolverSymbian::LoadL( aTextId );
     }
 
-    
+// End of file

@@ -132,6 +132,7 @@ public:
             const TInt aConnMethodHandle );
     TInt RemoveAllReferences(
             const TInt aConnMethodHandle );
+    TInt GetUncategorizedIcon( HBufC* aBuffer );
 
 private:
     // Array of destination handles opened through this session.

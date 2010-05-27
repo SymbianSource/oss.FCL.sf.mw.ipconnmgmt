@@ -35,21 +35,9 @@ _LIT( KCmmServer, "!CmmServer" );
  */
 _LIT( KCmmServerFile, "cmmserver" );
 
-const TInt KCmmServerStackSize    = 0x5000; //TODO, check if really used (in common code).
-const TInt KCmmServerInitHeapSize = 0x1000; //TODO, check if really used (in common code).
-const TInt KCmmServerMaxHeapSize  = 0x1000000; //TODO, check if really used (in common code).
-
 const TInt KBitsInOneByte = 8;
 const TInt KBitsInTwoBytes = 16;
 const TInt KBitsInThreeBytes = 24;
-
-/**
- * The server version. A version must be specified when creating a session with
- * the server.
- */
-const TUint KCmmServerMajorVersionNumber = 0; //TODO, check if really used (in common code).
-const TUint KCmmServerMinorVersionNumber = 1; //TODO, check if really used (in common code).
-const TUint KCmmServerBuildVersionNumber = 1; //TODO, check if really used (in common code).
 
 /**
  * Amount of time in microseconds that the server will wait before shutting
@@ -73,7 +61,7 @@ const TUint32 KCmmDestIdIntervalLegacyMax = 0x0100;
 const TUint32 KCmmDestIdIntervalMin = 0x1000;
 const TUint32 KCmmDestIdIntervalMax = 0x1100;
 
-const TInt KCmmStringLengthMax = 1024; //TODO, need to find out correct value here
+const TInt KCmmStringLengthMax = 1024; //TODO, need to find out correct value here. 1024 is correct, but can that be received from commsdat?
 
 const TUint32 KTemporaryIdCounterStart = 32768;
 
@@ -117,19 +105,20 @@ enum TCmmRequests
     ECmmReadDefaultConnection                = 8,
     ECmmReadGeneralConnectionSettings        = 9,
     ECmmGetSupportedBearers                  = 10,
+    ECmmGetUncategorizedIcon                 = 11,
 
-    ECmmGetConnMethodInfoInt                 = 11,
-    ECmmGetConnMethodInfoBool                = 12,
-    ECmmGetConnMethodInfoString              = 13,
-    ECmmGetConnMethodInfoString8             = 14,
+    ECmmGetConnMethodInfoInt                 = 12,
+    ECmmGetConnMethodInfoBool                = 13,
+    ECmmGetConnMethodInfoString              = 14,
+    ECmmGetConnMethodInfoString8             = 15,
 
-    ECmmUpdateBearerPriorityArray            = 15,
-    ECmmWriteDefaultConnection               = 16,
-    ECmmWriteGeneralConnectionSettings       = 17,
-    ECmmCopyConnMethod                       = 18,
-    ECmmMoveConnMethod                       = 19,
-    ECmmRemoveConnMethod                     = 20,
-    ECmmRemoveAllReferences                  = 21, // Connection method becomes uncategorized.
+    ECmmUpdateBearerPriorityArray            = 16,
+    ECmmWriteDefaultConnection               = 17,
+    ECmmWriteGeneralConnectionSettings       = 18,
+    ECmmCopyConnMethod                       = 19,
+    ECmmMoveConnMethod                       = 20,
+    ECmmRemoveConnMethod                     = 21,
+    ECmmRemoveAllReferences                  = 22, // Connection method becomes uncategorized.
 
     // RCmDestination starts from 100
     EDestGetDestination                      = 100,
@@ -145,21 +134,23 @@ enum TCmmRequests
     EDestIsHidden                            = 110,
     EDestIsEqual                             = 111,
     EDestGetEmbeddedDestination              = 112,
+    EDestGetIcon                             = 113,
 
-    EDestCreateDestinationWithName           = 113,
-    EDestCreateDestinationWithNameAndId      = 114,
-    EDestIsConnected                         = 115,
-    EDestAddConnMethod                       = 116,
-    EDestAddEmbeddedDestination              = 117,
-    EDestDeleteConnMethod                    = 118,
-    EDestRemoveConnMethod                    = 119,
-    EDestModifyPriority                      = 120,
-    EDestSetName                             = 121,
-    EDestSetMetadata                         = 122,
-    EDestSetProtection                       = 123,
-    EDestSetHidden                           = 124,
-    EDestUpdate                              = 125,
-    EDestDelete                              = 126,
+    EDestCreateDestinationWithName           = 114,
+    EDestCreateDestinationWithNameAndId      = 115,
+    EDestIsConnected                         = 116,
+    EDestAddConnMethod                       = 117,
+    EDestAddEmbeddedDestination              = 118,
+    EDestDeleteConnMethod                    = 119,
+    EDestRemoveConnMethod                    = 120,
+    EDestModifyPriority                      = 121,
+    EDestSetName                             = 122,
+    EDestSetMetadata                         = 123,
+    EDestSetProtection                       = 124,
+    EDestSetHidden                           = 125,
+    EDestUpdate                              = 126,
+    EDestDelete                              = 127,
+    EDestSetIcon                             = 128,
 
     //RCmConnectionMethod starts from 200
     ECMGetConnMethodWithId                   = 200,

@@ -85,6 +85,8 @@ public:
     TInt IsConnected( TBool& aResult );
     TInt IsHidden( TBool& aResult );
     TInt IsEqual( const TInt aHandle, TBool& aResult );
+    TInt GetIcon( HBufC* aBuffer );
+    TInt SetIcon( const TDesC& aValue );
 
 private:
     // True when a subsession is established to the server.

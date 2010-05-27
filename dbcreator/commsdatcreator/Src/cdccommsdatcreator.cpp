@@ -150,8 +150,6 @@ EXPORT_C void CCdcCommsDatCreator::CreateCommsDatL( const TFileName& aInFileName
     CLOG_WRITE( "Processing started...\n" )
     CLOG_WRITE( "=====================\n" )               
 
-	iCmManager.OpenL();
-
     TDbCreatorInputCharSet charSet( ECharSetUnknown );//input character set
 
     //Creates access points
@@ -325,7 +323,7 @@ EXPORT_C void CCdcCommsDatCreator::CreateCommsDatL( const TFileName& aInFileName
                   
 
     // Updates the IAPs that are not in destinations.
-    UpdateUncatCmsL( iCmInDest /*, iPluginNames, iPluginArray*/ );
+    UpdateUncatCmsL( iCmInDest );
 
     // Sets the underlying IAP/SNAPS for vpn IAPs    
     SetUnderlyingIapL( iUnderLying );
@@ -349,9 +347,6 @@ EXPORT_C void CCdcCommsDatCreator::CreateCommsDatL( const TFileName& aInFileName
     // Sets linger settings
     SetLingerSettingsL( iLingerSettings );
 
-    // Sets the default connection    
-//    SetDefaultConnectionL( iDefCon );
-    
     // Logs IAPs in UDEB mode
     #ifdef _DEBUG
     LogIapIdsL();
@@ -435,7 +430,9 @@ void CCdcCommsDatCreator::ConstructL()
     FeatureManager::InitializeLibL();
     iIsWlanS = FeatureManager::FeatureSupported( KFeatureIdProtocolWlan );
     FeatureManager::UnInitializeLib();
-    CLOG_WRITE( "FeatureManager closed\n" )               
+    CLOG_WRITE( "FeatureManager closed\n" )
+
+    iCmManager.OpenL();
     }
     
 //------------------------------------------------
@@ -583,34 +580,6 @@ void CCdcCommsDatCreator::SetUnderlyingIapL( RPointerArray< HBufC >& aUnderLying
         }
     }
 
-// ---------------------------------------------------------
-// CCdcCommsDatCreator::ProcessDNL
-// ---------------------------------------------------------
-//
-/*void CCdcCommsDatCreator::SetDefaultConnectionL( RPointerArray< HBufC >& aDefCon )
-    {
-    // Sets the default connection    
-    if( aDefCon.Count() > 0 )
-        {
-        CLOG_WRITE_FORMAT( "SetDefaultConnectionL: %d\n", aDefCon.Count() )
-        CLOG_WRITE( "--------------------------------------\n" )
-
-        CProcessorGlobal* glb = CProcessorGlobal::NewL( iReader,
-                                               iCmManager,
-                                               iPluginArray,
-                                               iPluginNames,
-                                               iDestArray,
-                                               iDestNames,
-                                               aDefCon );
-        
-        CleanupStack::PushL( glb );
-        glb->SetDefaultConnectionL();
-        
-        CleanupStack::PopAndDestroy( glb );
-
-        CLOG_WRITE( "--------------------------------------\n" )
-        }
-    }*/
 
 // ---------------------------------------------------------
 // CCdcCommsDatCreator::SetUnderlyingIapL

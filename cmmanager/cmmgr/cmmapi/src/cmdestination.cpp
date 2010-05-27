@@ -796,21 +796,44 @@ EXPORT_C HBufC* RCmDestination::GetIconL() const
     {
     OstTraceFunctionEntry0( RCMDESTINATION_GETICONL_ENTRY );
 
-    User::Leave( KErrNotSupported );
+    if ( !iCmDestinationWrapper || !iCmDestinationWrapper->SessionConnected() )
+        {
+        User::Leave( KErrBadHandle );
+        }
+
+    HBufC* buffer = HBufC::NewLC( KCmmStringLengthMax );
+    TInt err = iCmDestinationWrapper->GetIcon( buffer );
+    User::LeaveIfError( err );
+
+    if ( buffer->Length() > 0 )
+        {
+        CleanupStack::Pop( buffer );
+        }
+    else
+        {
+        CleanupStack::PopAndDestroy( buffer );
+        buffer = KNullDesC().AllocL();
+        }
 
     OstTraceFunctionExit0( RCMDESTINATION_GETICONL_EXIT );
-    return NULL;
+    return buffer;
     }
 
 //-----------------------------------------------------------------------------
 //  RCmDestination::SetIconL()
 //-----------------------------------------------------------------------------
 //
-EXPORT_C void RCmDestination::SetIconL( const TDesC& /*aIcon*/ )
+EXPORT_C void RCmDestination::SetIconL( const TDesC& aIcon )
     {
     OstTraceFunctionEntry0( RCMDESTINATION_SETICONL_ENTRY );
 
-    User::Leave( KErrNotSupported );
+    if ( !iCmDestinationWrapper || !iCmDestinationWrapper->SessionConnected() )
+        {
+        User::Leave( KErrBadHandle );
+        }
+
+    TInt err = iCmDestinationWrapper->SetIcon( aIcon );
+    User::LeaveIfError( err );
 
     OstTraceFunctionExit0( RCMDESTINATION_SETICONL_EXIT );
     }

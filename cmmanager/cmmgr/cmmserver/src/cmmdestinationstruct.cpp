@@ -211,7 +211,7 @@ void CCmmDestinationStruct::ConstructL( const TUint32& aDestinationId )
         // Not found -> fill in with default values.
         iMetadataRecord->iSNAP = iId;
         iMetadataRecord->iMetadata = 0;
-        iMetadataRecord->iIcon = 0;
+        //iMetadataRecord->iIcon = 0;//TODO, set to 0 or not?
         iMetadataRecord->SetRecordId( KCDNewRecordRequest );
         iMetadataRecordStatus = ECmmRecordStatusUnsaved;
         }
@@ -836,7 +836,7 @@ void CCmmDestinationStruct::UpdateL(
                     {
                     // Normal connection method.
                     snapRecord2->iEmbeddedSNAP = 0;
-                    snapRecord2->iIAP = ( KCDMaskShowField & CommsDat::KCDTIdIAPRecord ) | ( connMethodRealId << 8 );
+                    snapRecord2->iIAP = CommsDat::KCDTIdIAPRecord | ( connMethodRealId << 8 );
                     snapRecord2->iPriority = i + 1; // Priority values start from 1.
                     aDestinationInstance.iConnMethodItemArray[i].iPriority = i + 1; // Update this just in case.
                     }
@@ -1333,6 +1333,10 @@ CommsDat::CCDRecordBase* CCmmDestinationStruct::CopyRecordL(
                 {
                 metadataRecord->iIcon.SetL( source->iIcon );
                 }
+            //if ( !source->iIconFileName.IsNull() )//TODO, enable after commsdat icon changes are implemented.
+                //{
+                //metadataRecord->iIconFileName.SetL( source->iIconFileName );
+                //}
             metadataRecord->SetElementId( source->ElementId() );
 
             CleanupStack::Pop( metadataRecord );

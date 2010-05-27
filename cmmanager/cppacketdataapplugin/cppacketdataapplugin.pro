@@ -20,6 +20,12 @@ TARGET = cppacketdataapplugin
 DEPENDPATH += .
 INCLUDEPATH += .
 
+# Temporary solution to fix tracecompiler
+# When tracecompiler is fixed, this can be removed
+symbian: {
+    MMP_RULES += "USERINCLUDE traces"
+}
+
 CONFIG += hb plugin
 
 MOC_DIR = moc
@@ -36,6 +42,9 @@ HEADERS += inc/cppacketdataapplugin.h \
 SOURCES += src/cppacketdataapplugin.cpp \
            src/cppacketdataapview.cpp \
            src/cppacketdataapadvancedview.cpp
+
+# Include plugin utilities
+include(../cppluginutils/cppluginutils.pri)
 
 TRANSLATIONS = cpapplugin.ts
 

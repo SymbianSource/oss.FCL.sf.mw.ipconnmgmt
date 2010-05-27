@@ -533,6 +533,13 @@ public:
     void CheckIfConnMethodReferencesCanBeRemovedL( const CCmmConnMethodInstance& aConnMethodInstance );
 
     /**
+     * Check if given connection method is referenced from any protected destination.
+     */
+    void CheckIfConnMethodBelongsToProtectedDestinationL(
+            const CCmmConnMethodInstance& aConnMethodInstance,
+            TBool& aBelongsToProtectedDestination );
+
+    /**
      * Check if the given connection method can be deleted.
      */
     void CheckIfConnMethodCanBeDeletedL( const CCmmConnMethodInstance& aConnMethodInstance );

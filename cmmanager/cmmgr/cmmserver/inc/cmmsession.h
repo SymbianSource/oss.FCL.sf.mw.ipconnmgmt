@@ -184,6 +184,7 @@ private:
     void GetAllDestinationsL( const RMessage2& aMessage );
     void GetEasyWLANIdL( const RMessage2& aMessage );
     void GetSupportedBearersL( const RMessage2& aMessage );
+    void GetUncategorizedIconL( const RMessage2& aMessage );
     void ReadDefaultConnectionL( const RMessage2& aMessage );
     void ReadGenConnSettingsL( const RMessage2& aMessage );
     void WriteGenConnSettingsL( const RMessage2& aMessage );
@@ -192,7 +193,6 @@ private:
     void CopyConnMethodL( const RMessage2& aMessage );
     void MoveConnMethodL( const RMessage2& aMessage );
     void RemoveConnMethodL( const RMessage2& aMessage );
-
     void RemoveAllReferencesL( const RMessage2& aMessage );
 
     void GetDestinationL( const RMessage2& aMessage );
@@ -210,6 +210,7 @@ private:
     void IsDestinationConnectedL( const RMessage2& aMessage );
     void IsDestinationHiddenL( const RMessage2& aMessage );
     void DestinationIsEqualL( const RMessage2& aMessage );
+    void GetDestinationIconL( const RMessage2& aMessage );
 
     void DestAddConnMethodL( const RMessage2& aMessage );
     void DestAddEmbeddedDestinationL( const RMessage2& aMessage );
@@ -223,6 +224,7 @@ private:
     void SetDestinationHiddenL( const RMessage2& aMessage );
     void UpdateDestinationL( const RMessage2& aMessage );
     void DeleteDestinationL( const RMessage2& aMessage );
+    void SetDestinationIconL( const RMessage2& aMessage );
 
     void CreateConnMethodL( const RMessage2& aMessage );
     void UpdateConnMethodL( const RMessage2& aMessage );
@@ -246,6 +248,13 @@ private:
     void CmIsEqualL( const RMessage2& aMessage );
     void CreateCopyOfExistingL( const RMessage2& aMessage );
     void GetEmbeddedDestinationL( const RMessage2& aMessage );
+
+    /**
+     * Check if CM is protected and if so then check the needed capabilities.
+     */
+    void CheckCapabilitiesForProtectedCML( 
+            const RMessage2& aMessage,
+            CCmmConnMethodInstance* aConnectionMethod );
 
 private:
     RMessage2 iMessage;

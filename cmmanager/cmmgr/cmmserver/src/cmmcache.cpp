@@ -401,11 +401,13 @@ void CCmmCache::CreateConnMethodL(
 
 
     // Store the connection method into cache.
-    CCmmConnMethodStruct* connMethodStruct = CCmmConnMethodStruct::NewLC( connMethodId ); // Use connMethodId here, so ID is either a real ID or a temporary ID.
+    // Use connMethodId here, so ID is either a real ID or a temporary ID.
+    CCmmConnMethodStruct* connMethodStruct = CCmmConnMethodStruct::NewL( connMethodId );
     connMethodStruct->SetPlugin( plugin, aBearerType, ECmmConnMethodStatusNotSaved );
+    CleanupStack::Pop( plugin );
+    CleanupStack::PushL( connMethodStruct );
     iConnMethodArray.AppendL( connMethodStruct );
     CleanupStack::Pop( connMethodStruct );
-    CleanupStack::Pop( plugin ); //TODO, pop after SetPlugin()-call?
 
     // Copy the connection method data to session instance.
     aConnMethodInstance.CopyDataL( connMethodStruct ); // Will increase reference counter.
@@ -416,6 +418,7 @@ void CCmmCache::CreateConnMethodL(
         // Add connection method to destination.
         aDestinationInstance->AddConnMethodL( aConnMethodInstance );
         }
+
     OstTraceFunctionExit0( CCMMCACHE_CREATECONNMETHODL_EXIT );
     }
 
@@ -445,15 +448,21 @@ void CCmmCache::CreateCopyOfConnMethodL(
         User::Leave( KErrNotFound );
         }
 
-    CCmPluginBaseEng* pluginCopy = plugin->CreateCopyL( aConnMethodInstance.GetPluginDataInstance() );
+    CCmPluginBaseEng* pluginCopy =
+            plugin->CreateCopyL( aConnMethodInstance.GetPluginDataInstance() );
     CleanupStack::PushL( pluginCopy );
 
     // Store the connection method into cache.
-    CCmmConnMethodStruct* connMethodStruct = CCmmConnMethodStruct::NewLC( NextFreeTemporaryId() );
-    connMethodStruct->SetPlugin( pluginCopy, aConnMethodInstance.GetBearerType(), ECmmConnMethodStatusNotSaved );
+    CCmmConnMethodStruct* connMethodStruct =
+            CCmmConnMethodStruct::NewL( NextFreeTemporaryId() );
+    connMethodStruct->SetPlugin(
+            pluginCopy,
+            aConnMethodInstance.GetBearerType(),
+            ECmmConnMethodStatusNotSaved );
+    CleanupStack::Pop( pluginCopy );
+    CleanupStack::PushL( connMethodStruct );
     iConnMethodArray.AppendL( connMethodStruct );
     CleanupStack::Pop( connMethodStruct );
-    CleanupStack::Pop( pluginCopy ); //TODO, pop after SetPlugin()-call?
 
     // Copy the connection method data to session instance.
     aNewConnMethodInstance.CopyDataL( connMethodStruct ); // Will increase reference counter.
@@ -2103,11 +2112,12 @@ void CCmmCache::OpenConnectionMethodInstanceL(
         }
 
     // Store the connection method into cache.
-    CCmmConnMethodStruct* connMethodStruct = CCmmConnMethodStruct::NewLC( aConnMethodId );
+    CCmmConnMethodStruct* connMethodStruct = CCmmConnMethodStruct::NewL( aConnMethodId );
     connMethodStruct->SetPlugin( plugin, bearerType, ECmmConnMethodStatusValid );
+    CleanupStack::Pop( plugin );
+    CleanupStack::PushL( connMethodStruct );
     iConnMethodArray.AppendL( connMethodStruct );
     CleanupStack::Pop( connMethodStruct );
-    CleanupStack::Pop( plugin ); //TODO, pop after SetPlugin()-call?
 
     // Copy the connection method data to session instance.
     aConnMethodInstance.CopyDataL( connMethodStruct ); // Will increase reference counter.
@@ -2875,6 +2885,8 @@ void CCmmCache::TranslateTemporaryId( const TUint32& aTemporaryId, TUint32& aRea
 void CCmmCache::CheckIfConnMethodReferencesCanBeRemovedL(
         const CCmmConnMethodInstance& aConnMethodInstance )
     {
+    OstTraceFunctionEntry0( CCMMCACHE_CHECKIFCONNMETHODREFERENCESCANBEREMOVEDL_ENTRY );
+
     TUint32 connMethodId( aConnMethodInstance.GetId() );
 
     // Check that connection method exists in database.
@@ -2888,8 +2900,6 @@ void CCmmCache::CheckIfConnMethodReferencesCanBeRemovedL(
         {
         User::Leave( KErrArgument );
         }
-
-    //TODO, what if protected?
 
     // Iterate all destinations in database and check if possible reference can
     // be removed.
@@ -2910,6 +2920,49 @@ void CCmmCache::CheckIfConnMethodReferencesCanBeRemovedL(
         {
         User::Leave( KErrInUse );
         }
+
+    OstTraceFunctionExit0( CCMMCACHE_CHECKIFCONNMETHODREFERENCESCANBEREMOVEDL_EXIT );
+    }
+
+// ---------------------------------------------------------------------------
+// Check if the given connection method can have all references removed and
+// made into an uncategorized connection method. //TODO, fix comment, this looks like copy&paste from above
+// ---------------------------------------------------------------------------
+//
+void CCmmCache::CheckIfConnMethodBelongsToProtectedDestinationL(
+        const CCmmConnMethodInstance& aConnMethodInstance,
+        TBool& aBelongsToProtectedDestination )
+    {
+    OstTraceFunctionEntry0( CCMMCACHE_CHECKIFCONNMETHODBELONGSTOPROTECTEDDESTINATIONL_ENTRY );
+
+    TUint32 connMethodId( aConnMethodInstance.GetId() );
+
+    // Check that connection method exists in database.
+    if ( !iInstanceMapping->ValidConnMethodId( connMethodId ) )
+        {
+        User::Leave( KErrNotFound );
+        }
+
+    aBelongsToProtectedDestination = EFalse;
+    // Get destinations which have references to connection method passed as parameter.
+    RArray<TUint32> dbDestinations;
+    CleanupClosePushL( dbDestinations );
+    iInstanceMapping->DestinationsContainingConnMethodL( connMethodId, dbDestinations );
+    TUint32 metadata( 0 );
+    for ( TInt i = 0; i < dbDestinations.Count(); i++ )
+        {
+        // Check if any of destinations is protected.
+        metadata = iInstanceMapping->DestinationMetadata( dbDestinations[i] );
+        TUint32 protlevel = ( metadata & KDestProtectionLevelMask ) >> KBitsToShiftDestProtectionLevel;
+        if ( protlevel == CMManager::EProtLevel1 || protlevel == CMManager::EProtLevel3 )
+            {
+            aBelongsToProtectedDestination = ETrue;
+            break;
+            }
+        }
+    CleanupStack::PopAndDestroy( &dbDestinations );
+
+    OstTraceFunctionExit0( CCMMCACHE_CHECKIFCONNMETHODBELONGSTOPROTECTEDDESTINATIONL_EXIT );
     }
 
 // ---------------------------------------------------------------------------
@@ -2919,6 +2972,8 @@ void CCmmCache::CheckIfConnMethodReferencesCanBeRemovedL(
 void CCmmCache::CheckIfConnMethodCanBeDeletedL(
         const CCmmConnMethodInstance& aConnMethodInstance )
     {
+    OstTraceFunctionEntry0( CCMMCACHE_CHECKIFCONNMETHODCANBEDELETEDL_ENTRY );
+
     TUint32 connMethodId( aConnMethodInstance.GetId() );
 
     // Find connection method from cache.
@@ -2961,6 +3016,8 @@ void CCmmCache::CheckIfConnMethodCanBeDeletedL(
         {
         User::Leave( KErrLocked );
         }
+
+    OstTraceFunctionExit0( CCMMCACHE_CHECKIFCONNMETHODCANBEDELETEDL_EXIT );
     }
 
 // ---------------------------------------------------------------------------
@@ -2970,6 +3027,8 @@ void CCmmCache::CheckIfConnMethodCanBeDeletedL(
 void CCmmCache::CheckIfDestinationCanBeDeletedL(
         const CCmmDestinationInstance& aDestinationInstance )
     {
+    OstTraceFunctionEntry0( CCMMCACHE_CHECKIFDESTINATIONCANBEDELETEDL_ENTRY );
+
     TUint32 destinationId( aDestinationInstance.GetId() );
 
     // Find destination from cache.
@@ -3019,6 +3078,8 @@ void CCmmCache::CheckIfDestinationCanBeDeletedL(
         {
         User::Leave( KErrInUse );
         }
+
+    OstTraceFunctionExit0( CCMMCACHE_CHECKIFDESTINATIONCANBEDELETEDL_EXIT );
     }
 
 // ---------------------------------------------------------------------------
@@ -3035,13 +3096,16 @@ CommsDat::TMDBElementId CCmmCache::TableId( TCmmDbRecords aRecord )
 // methods inside it are connected.
 // ---------------------------------------------------------------------------
 //
-void CCmmCache::DeleteDestinationForcedL( CCmmDestinationInstance& aDestinationInstance ) //TODO, OST
+void CCmmCache::DeleteDestinationForcedL( CCmmDestinationInstance& aDestinationInstance )
     {
-    //TODO
+    OstTraceFunctionEntry0( CCMMCACHE_DELETEDESTINATIONFORCEDL_ENTRY );
+
     if ( !DestinationConnectedL( 0, &aDestinationInstance ) )
         {
         DeleteDestinationL( aDestinationInstance, ETrue );
         }
+
+    OstTraceFunctionExit0( CCMMCACHE_DELETEDESTINATIONFORCEDL_EXIT );
     }
 
 // End of file

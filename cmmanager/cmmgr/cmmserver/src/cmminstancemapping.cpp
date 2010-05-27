@@ -445,6 +445,55 @@ TInt CCmmInstanceMapping::DestinationsContainingConnMethod(
     }
 
 // ---------------------------------------------------------------------------
+// Returns the destination IDs containing the connection method given as
+// parameter.
+// ---------------------------------------------------------------------------
+//
+void CCmmInstanceMapping::DestinationsContainingConnMethodL(
+        const TUint32 aConnMethodId,
+        RArray<TUint32>& aDestinationIds ) const
+    {
+    OstTraceFunctionEntry0( CCMMINSTANCEMAPPING_DESTINATIONSCONTAININGCONNMETHODL_ENTRY );
+    
+    aDestinationIds.Reset();
+    TInt count( 0 );
+    
+    // Go through each destination.
+    for ( TInt i = 0; i < iDestinations.Count(); i++ )
+        {
+        TBool foundInThisDestination( EFalse );
+
+        // Loop through all connection methods in this destination.
+        count = iDestinations[i]->iConnMethodItemArray.Count();
+        for ( TInt j = 0; j < count; j++ )
+            {
+            if ( iDestinations[i]->iConnMethodItemArray[j].iId == aConnMethodId )
+                {
+                foundInThisDestination = ETrue;
+                aDestinationIds.AppendL( iDestinations[i]->iId );
+                break;
+                }
+            }
+
+        // Check unsupported connection methods also.
+        if ( !foundInThisDestination )
+            {
+            count = iDestinations[i]->iUnsupportedConnMethods.Count();
+            for ( TInt j = 0; j < count; j++ )
+                {
+                if ( iDestinations[i]->iUnsupportedConnMethods[j] == aConnMethodId )
+                    {
+                    aDestinationIds.AppendL( iDestinations[i]->iId );
+                    break;
+                    }
+                }
+            }
+        }
+    
+    OstTraceFunctionExit0( CCMMINSTANCEMAPPING_DESTINATIONSCONTAININGCONNMETHODL_EXIT );
+    }
+
+// ---------------------------------------------------------------------------
 // Get database session.
 // ---------------------------------------------------------------------------
 //
@@ -575,7 +624,21 @@ void CCmmInstanceMapping::ReadAndValidateDestinationsL()
                     {
                     CDestination* dest = CDestination::NewL();
                     dest->iId = destinationId;
-                    iDestinations.Append( dest );
+
+                    CCDSNAPMetadataRecord* metadataRecord = new( ELeave ) CCDSNAPMetadataRecord( 
+                            iCache.TableId( ECmmDestMetadataRecord ) );
+                    CleanupStack::PushL( metadataRecord );
+
+                    // Add destination metadata.
+                    metadataRecord->iSNAP.SetL( destinationId );
+                    if ( metadataRecord->FindL( Session() ) )
+                        {
+                        metadataRecord->LoadL( Session() );
+                        dest->iMetadata = metadataRecord->iMetadata;
+                        iDestinations.AppendL( dest );
+                        }
+                    CleanupStack::PopAndDestroy( metadataRecord );
+                    metadataRecord = NULL;
                     }
                 }
             }
@@ -1064,6 +1127,7 @@ void CCmmInstanceMapping::RemoveConnMethod(
         const TUint32& aConnMethodId,
         RArray<TUint32>& aChangedDestinations )
     {
+    OstTraceFunctionEntry0( DUP1_CCMMINSTANCEMAPPING_REMOVECONNMETHOD_ENTRY );
 
     // Remove from list of connection methods.
     for ( TInt i = 0; i < iConnMethodItemArray.Count(); i++ )
@@ -1089,7 +1153,8 @@ void CCmmInstanceMapping::RemoveConnMethod(
                 }
             }
         }
-
+    
+    OstTraceFunctionExit0( DUP1_CCMMINSTANCEMAPPING_REMOVECONNMETHOD_EXIT );
     }
 
 // ---------------------------------------------------------------------------
@@ -1157,6 +1222,30 @@ void CCmmInstanceMapping::RemoveConnMethodFromDestinations(
         }
 
     OstTraceFunctionExit0( CCMMINSTANCEMAPPING_REMOVECONNMETHODFROMDESTINATIONS_EXIT );
+    }
+
+// ---------------------------------------------------------------------------
+// Iterate through destinations to find the one identified with parameter
+// and returns its metadata mask.
+// ---------------------------------------------------------------------------
+//
+TUint32 CCmmInstanceMapping::DestinationMetadata( 
+        const TUint32 aDestinationId ) const
+    {
+    OstTraceFunctionEntry0( CCMMINSTANCEMAPPING_DESTINATIONMETADATA_ENTRY );
+
+    TUint32 metadata( 0 );
+    for ( TInt i = 0; i < iDestinations.Count(); i++ )
+        {
+        if ( iDestinations[i]->iId == aDestinationId )
+            {
+            metadata = iDestinations[i]->iMetadata;
+            break;
+            }
+        }
+
+    OstTraceFunctionExit0( CCMMINSTANCEMAPPING_DESTINATIONMETADATA_EXIT );
+    return metadata;
     }
 
 // End of file

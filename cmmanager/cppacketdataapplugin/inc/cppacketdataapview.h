@@ -59,6 +59,8 @@ protected:
 protected slots:
  
 private:
+    Q_DISABLE_COPY(CpPacketDataApView)
+    
     void createAccessPointSettingsGroup();
     void updateAccessPointSettingsGroup();
     void showMessageBox(

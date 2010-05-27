@@ -209,17 +209,14 @@ QVariant CellularIndicatorPlugin::indicatorData(int role) const
             else if ( indicatorInfo[0].toInt() && (indicatorInfo.count() >= 2)) {
                 
                 // Only one connection -> show name of the iap
-                QString iapName;
-                iapName = indicatorInfo[1].toString();
-                QString str = QString(hbTrId("txt_occ_dblist_cellular_data_val_1_connected"));
-                ret = str.arg(iapName);
+                ret = indicatorInfo[1].toString();
             }
         }
         break;
 
     case DecorationNameRole:
         // Return the icon
-        ret = HbIcon("qtg_small_gprs");
+        ret = QString("qtg_small_gprs");
         break;
     
     default:

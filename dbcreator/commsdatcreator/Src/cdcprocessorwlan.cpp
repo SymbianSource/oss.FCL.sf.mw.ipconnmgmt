@@ -379,7 +379,7 @@ void CProcessorWlan::ProcessSpecialFieldsL( TInt aField, HBufC* aPtrTag, TInt /*
             //WPA
             case EWPAPresharedKey:
             case EWPAKeyLength:
-            case EWPAListOfEAPs:
+            case EWPAEapMethod:
             case EWPAUseOfPresharedKey:
                 {
                 if( iSecurityMode != ESecurityModeWEP && iSecurityMode != ESecurityModeOpen )
@@ -638,6 +638,7 @@ void CProcessorWlan::SaveSecurityInfoL()
 		    eapType->SetConfigurationL( *eap->iEapSettings );
 		    CLOG_WRITE( "eapType->SetConfiguration success!" );
 		    CleanupStack::PopAndDestroy( eapType );
+		    REComSession::FinalClose();
 			}
         }
         
@@ -1248,15 +1249,9 @@ void CProcessorWlan::SaveWPAL( TUint32 aIapId )
     secModeField->SetL( iSecurityMode );
     
     CLOG_WRITE( "Wrote securityMode" );
+
     // Save EAP list
-    CMDBField<TDesC>* wlanEapsField = static_cast<CMDBField<TDesC>*>
-                                ( generic->GetFieldByIdL( KCDTIdWlanEaps ) );
-    wlanEapsField->SetL( WPAFieldData( EWPAListOfEAPs )->Des() );
-
-	CLOG_WRITE( "Wrote EAPList" );
-	
     SetExpandedEapListL( generic );
-
 	CLOG_WRITE( "Wrote expandedEapList" );	
 	
     // Save PreShared Key
@@ -1298,116 +1293,38 @@ void CProcessorWlan::SaveWPAL( TUint32 aIapId )
 //
 void CProcessorWlan::SetExpandedEapListL( CMDBGenericRecord* generic )
     {
+    CLOG_WRITE( "CProcessorWlan::SetExpandedEapListL" )
     // Gets the text format eap list
-    HBufC16* eapList = WPAFieldData( EWPAListOfEAPs );
+    HBufC16* eapList = WPAFieldData( EWPAEapMethod );
     
     if ( eapList != NULL && 0 < eapList->Length() )
         {
-        
-        // Creates the expanded eap lists    
-        HBufC8* enabledEapList = ExpandedEapListLC( eapList, ETrue );
-        HBufC8* disabledEapList = ExpandedEapListLC( eapList, EFalse );
-        
-        // Save enabled EAP list
+
+        // Read EAP method and save it as enabled eap list.
+        // Fills expandedForm with 8 bytes: 0xFE, 6 zeros and EAP ID.
+        // That's the format expected by EAPOL.
+        TBuf8<8> expandedForm;
+        expandedForm.AppendFill( 0xFE, 1 );
+        expandedForm.AppendFill( 0x00, 6 );
+            
+        TUint8 resultByte;
+        TLex16 lex( eapList->Ptr() );
+        User::LeaveIfError( lex.Val( resultByte, EDecimal ) );
+        expandedForm.AppendFill( resultByte, 1 );
+        CLOG_WRITE_FORMAT( "CProcessorWlan::SetExpandedEapListL: EAP %d",
+                (int)resultByte)
+
         CMDBField<TDesC8>* wlanEnabledEapsField = static_cast<CMDBField<TDesC8>*>
                                 ( generic->GetFieldByIdL( KCDTIdWlanEnabledEaps ) );
-        wlanEnabledEapsField->SetL( enabledEapList->Des() );
+        wlanEnabledEapsField->SetL( expandedForm );
 
-        // Save disabled EAP list
+        // Save empty disabled EAP list
+        HBufC8* disabledEapList = HBufC8::NewLC(0);
         CMDBField<TDesC8>* wlanDisabledEapsField = static_cast<CMDBField<TDesC8>*>
                                 ( generic->GetFieldByIdL( KCDTIdWlanDisabledEaps ) );
         wlanDisabledEapsField->SetL( disabledEapList->Des() );
-        
         CleanupStack::PopAndDestroy( disabledEapList );
-        CleanupStack::PopAndDestroy( enabledEapList );
-        
         }
-    }
-
-// ---------------------------------------------------------
-// CProcessorWlan::ExpandedEapListLC
-// ---------------------------------------------------------
-//
-HBufC8* CProcessorWlan::ExpandedEapListLC( HBufC16* aEapList, TBool aEnabledNeed )
-    {
-    // The eap list has a well defined form 
-    // so this parser supposes this concrete form like this:
-    // "+018,-023,+026,-021,-006"
-    
-    // Lenght of a 3 digit long signed number 
-     const TInt sliceLength = 4;
-     
-   // Max lenght of the resulted list.
-    // Adding one "," then divide the lenght of a slice+1   
-    TInt maxLenght = ( ( aEapList->Length()+1 ) / 5 ) * 8;
-    
-    HBufC8* expandedEapList = HBufC8::NewLC( maxLenght );
-    
-    TInt pos = 0;
-    while ( pos + sliceLength <= aEapList->Length() )
-        {
-        // Getting a slice
-        TPtrC16 slice = aEapList->Mid( pos, sliceLength );
-        
-        // Checks the sign
-        if( slice[0] == '+' )
-            {
-            if( aEnabledNeed )
-                {
-                AddToList( expandedEapList, slice );
-                }
-            }
-        else if( slice[0] == '-' )
-            {
-            if( !aEnabledNeed )
-                {
-                AddToList( expandedEapList, slice );
-                }
-            }
-        else
-            {
-            CLOG_WRITE_FORMAT( "! Error : Wrong Eap list format %S", aEapList );
-            }
-        
-        // Step over one slice and "," e.g. "+023,"
-        pos+=5;    
-        
-        }
-    if( pos != aEapList->Length() + 1)    
-        {
-        CLOG_WRITE_FORMAT( "! Warning : possible wrong Eap list format %S", aEapList );
-        }
-        
-    return expandedEapList;    
-    }
-
-// ---------------------------------------------------------
-// CProcessorWlan::AddToList
-// ---------------------------------------------------------
-//
-void CProcessorWlan::AddToList( HBufC8* aExpandedEapList, TPtrC16 aSlice )
-    {
-    // Fills the 8 byte form with "0xFE000000000000"        
-    TBuf8<8> expandedForm;
-    expandedForm.AppendFill( 0xFE, 1 );
-    expandedForm.AppendFill( 0x00, 6 );
-        
-    // Leave the "sign"     
-    TPtrC16 number = aSlice.Mid( 1 );    
-    TUint8 resultByte;
-    TLex16 lex( number );
-        
-    if( KErrNone == lex.Val( resultByte, EDecimal ) )
-        {
-        expandedForm.AppendFill( resultByte, 1 );
-        }
-    else
-        {
-        expandedForm.AppendFill( 0x00, 1 );
-        CLOG_WRITE( "! Error : Unlexed Eap number. 0 is addded" );
-        }
-
-    aExpandedEapList->Des().Append( expandedForm ); 
     }
 
 

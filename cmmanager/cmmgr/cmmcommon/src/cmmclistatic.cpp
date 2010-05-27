@@ -28,12 +28,8 @@
  * otherwise one of the system wide error codes.
  */
 TInt TCmManagerLauncher::LaunchServer(
-        const TDesC& aServerName,
         const TDesC& aServerFileName,
-        const TUid& aServerUid3,
-        const TUint aWinsMinHeapSize,
-        const TUint aWinsMaxHeapSize,
-        const TUint aWinsStackSize )
+        const TUid& aServerUid3 )
     {
     RMutex mutex;
     TInt err( KErrNone );
@@ -55,10 +51,6 @@ TInt TCmManagerLauncher::LaunchServer(
 
     RProcess server;
     err = server.Create( aServerFileName, KNullDesC, serverUid );
-    (void)aServerName;
-    (void)aWinsMinHeapSize;
-    (void)aWinsMaxHeapSize;
-    (void)aWinsStackSize;
 
     if ( err != KErrNone )
         {

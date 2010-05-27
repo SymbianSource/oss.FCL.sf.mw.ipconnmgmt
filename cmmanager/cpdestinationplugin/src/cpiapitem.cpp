@@ -223,6 +223,7 @@ void CpIapItem::deleteConfirmed()
             CmConnectionMethodShim *cm = destination->connectionMethodByID(mIapId);
             destination->deleteConnectionMethod(cm);
             destination->update();
+            delete cm;
             delete destination;
         } else {
             CmConnectionMethodShim *cm = mCmm->connectionMethod(mIapId);

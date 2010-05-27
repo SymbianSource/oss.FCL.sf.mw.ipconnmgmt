@@ -304,23 +304,25 @@ void CCmManagerImpl::BuildPluginArrayL()
             CleanupStack::PushL( plugin );
 
             TBool inserted( EFalse );
-            //TODO, Implement plugin sorting by priority later.
-            /*
-            TInt defaultPriority( KDataMobilitySelectionPolicyPriorityWildCard );
 
-            // No UI priority -> wildcard
-            TRAP_IGNORE( defaultPriority = plugin->GetIntAttributeL( ECmDefaultUiPriority ) );
+            TInt defaultPriority( CMManager::KDataMobilitySelectionPolicyPriorityWildCard );
 
-            for ( TInt j( 0 ); j < iPlugins->Count(); ++j )
+            // No priority -> wildcard
+            TRAP_IGNORE( defaultPriority = plugin->GetBearerInfoIntL(
+                    CMManager::ECmDefaultPriority ) );
+
+            for ( TInt j = 0; j < iPlugins->Count(); j++ )
                 {
-                if ( defaultPriority > (*iPlugins)[j]->GetIntAttributeL( ECmDefaultUiPriority ) )
+                TUint32 bearerToCompare = (*iPlugins)[j]->GetBearerInfoIntL(
+                        CMManager::ECmDefaultPriority );
+                if ( defaultPriority > bearerToCompare )
                     {
                     continue;
                     }
-                else if ( defaultPriority == (*iPlugins)[j]->GetIntAttributeL( ECmDefaultUiPriority ) )
+                else if ( defaultPriority == bearerToCompare )
                     {
-                    if ( plugin->GetIntAttributeL( ECmExtensionLevel ) >
-                        (*iPlugins)[j]->GetIntAttributeL( ECmExtensionLevel ) )
+                    if ( plugin->GetBearerInfoIntL( ECmExtensionLevel ) >
+                            (*iPlugins)[j]->GetBearerInfoIntL( ECmExtensionLevel ) )
                         {
                         iPlugins->InsertL( j, plugin );
                         inserted = ETrue;
@@ -333,7 +335,7 @@ void CCmManagerImpl::BuildPluginArrayL()
                     inserted = ETrue;
                     break;
                     }
-                }*/
+                }
 
             if ( !inserted )
                 {

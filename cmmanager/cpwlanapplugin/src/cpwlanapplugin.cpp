@@ -17,7 +17,7 @@
 */
 
 // System includes
-#include <QtCore>
+#include <HbTranslator>
 #include <cmmanager_shim.h>
 #include <cmconnectionmethod_shim.h>
 
@@ -46,19 +46,12 @@
     Constructor.
 */
 CpWlanApPlugin::CpWlanApPlugin() :
-    mTranslator(0),
+    mTranslator(new HbTranslator("cpapplugin")),
     mCmManager(0),
     mCmConnectionMethod(0)
 {
     OstTraceFunctionEntry0(CPWLANAPPLUGIN_CPWLANAPPLUGIN_ENTRY);
 
-    // Install localization
-    QString lang = QLocale::system().name();
-    QString path = "z:/resource/qt/translations/";
-    mTranslator = new QTranslator(this);
-    mTranslator->load(path + "cpapplugin_" + lang);
-    qApp->installTranslator(mTranslator);
-    
     OstTraceFunctionExit0(CPWLANAPPLUGIN_CPWLANAPPLUGIN_EXIT);
 }
 

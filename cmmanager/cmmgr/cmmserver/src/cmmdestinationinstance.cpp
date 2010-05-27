@@ -425,6 +425,8 @@ TDesC& CCmmDestinationInstance::GetDestinationNameL()
 //
 HBufC* CCmmDestinationInstance::GetLocalisedDestinationNameL()
     {
+    OstTraceFunctionEntry0( CCMMDESTINATIONINSTANCE_GETLOCALISEDDESTINATIONNAMEL_ENTRY );
+
     RefreshRecordL( ECmmDestNetworkRecord );
 
     if ( !iNetworkRecord )
@@ -463,12 +465,13 @@ HBufC* CCmmDestinationInstance::GetLocalisedDestinationNameL()
             break;
         }
 
-    // Not Internet, operator or intranet...or something went wrong 
+    // Not Internet, operator or intranet, or something went wrong. 
     if ( !isLocalised || ( isLocalised && !resolvedText ) )
         {
-        resolvedText = ( iNetworkRecord->iRecordName.GetL() ).AllocL();
+        resolvedText = TPtrC( iNetworkRecord->iRecordName ).AllocL();
         }
-    
+
+    OstTraceFunctionExit0( CCMMDESTINATIONINSTANCE_GETLOCALISEDDESTINATIONNAMEL_EXIT );
     return resolvedText;
     }
 
@@ -479,8 +482,6 @@ HBufC* CCmmDestinationInstance::GetLocalisedDestinationNameL()
 void CCmmDestinationInstance::SetDestinationNameL( const TDesC& aDestinationName )
     {
     OstTraceFunctionEntry0( CCMMDESTINATIONINSTANCE_SETDESTINATIONNAMEL_ENTRY );
-
-    //TODO, capability check depending on destination protection level, or if it is internet destination. Internet destination should be protected always?
 
     // Write action, load all records.
     LoadAllRecordsL();
@@ -493,6 +494,48 @@ void CCmmDestinationInstance::SetDestinationNameL( const TDesC& aDestinationName
     iStatus = ECmmDestinationStatusChanged;
 
     OstTraceFunctionExit0( CCMMDESTINATIONINSTANCE_SETDESTINATIONNAMEL_EXIT );
+    }
+
+// ---------------------------------------------------------------------------
+// Get the destination icon.
+// ---------------------------------------------------------------------------
+//
+HBufC* CCmmDestinationInstance::GetDestinationIconL()
+    {
+    OstTraceFunctionEntry0( CCMMDESTINATIONINSTANCE_GETDESTINATIONICONL_ENTRY );
+
+    RefreshRecordL( ECmmDestMetadataRecord );
+
+    if ( !iMetadataRecord )
+        {
+        User::Leave( KErrCorrupt );
+        }
+
+    HBufC* icon( NULL );
+    //icon = TPtrC( iMetadataRecord->iIconFileName ).AllocL();//TODO, enable after commsdat icon changes are implemented.
+	icon = KNullDesC().AllocL();//TODO
+
+    OstTraceFunctionExit0( CCMMDESTINATIONINSTANCE_GETDESTINATIONICONL_EXIT );
+    return icon;
+    }
+
+// ---------------------------------------------------------------------------
+// Set the destination icon.
+// ---------------------------------------------------------------------------
+//
+void CCmmDestinationInstance::SetDestinationIconL( const TDesC& /*aDestinationIcon*/ )
+    {
+    OstTraceFunctionEntry0( CCMMDESTINATIONINSTANCE_SETDESTINATIONICONL_ENTRY );
+
+    // Write action, load all records.
+    LoadAllRecordsL();
+
+    //iMetadataRecord->iIconFileName.SetL( aDestinationIcon );//TODO, enable after commsdat icon changes are implemented.
+
+    iMetadataRecordStatus = ECmmRecordStatusModified;
+    iStatus = ECmmDestinationStatusChanged;
+
+    OstTraceFunctionExit0( CCMMDESTINATIONINSTANCE_SETDESTINATIONICONL_EXIT );
     }
 
 // ---------------------------------------------------------------------------
@@ -630,8 +673,7 @@ void CCmmDestinationInstance::SetProtectionL(
     // Write action, load all records.
     LoadAllRecordsL();
 
-    //TODO, verify capability check is done (NetworkControl).
-
+    //TODO, comment this:
     iCurrentProtectionLevel = aProtectionLevel;
     if ( !iProtectionChanged )
         {
@@ -1289,19 +1331,16 @@ TBool CCmmDestinationInstance::AllMandatoryRecordsContainData() const
     TBool result( ETrue );
 
     if ( iNetworkRecordStatus != ECmmRecordStatusLoaded &&
-            iNetworkRecordStatus != ECmmRecordStatusExpired &&
             iNetworkRecordStatus != ECmmRecordStatusModified )
         {
         result = EFalse;
         }
     if ( iDestApRecordStatus != ECmmRecordStatusLoaded &&
-            iDestApRecordStatus != ECmmRecordStatusExpired &&
             iDestApRecordStatus != ECmmRecordStatusModified )
         {
         result = EFalse;
         }
     if ( iMetadataRecordStatus != ECmmRecordStatusLoaded &&
-            iMetadataRecordStatus != ECmmRecordStatusExpired &&
             iMetadataRecordStatus != ECmmRecordStatusModified )
         {
         result = EFalse;
@@ -1316,7 +1355,11 @@ TBool CCmmDestinationInstance::AllMandatoryRecordsContainData() const
     }
 
 // ---------------------------------------------------------------------------
-// Loads a certain type of record from database if it is not up-to-date.
+// Loads a requested type of record from database if it is not yet loaded.
+//
+// Currently all records are loaded when client opens a handle to a
+// destination, but if future optimizations are added and records are only
+// loaded when needed, the functionality of this method becomes essential.
 // ---------------------------------------------------------------------------
 //
 void CCmmDestinationInstance::RefreshRecordL( TCmmDbRecords aRecordType )
@@ -1344,16 +1387,16 @@ void CCmmDestinationInstance::RefreshRecordL( TCmmDbRecords aRecordType )
         {
         // Fallthrough intended
         case ECmmRecordStatusBlank:
-        case ECmmRecordStatusExpired:
             iCache->LoadDestinationRecordL( *this, aRecordType );
             break;
         case ECmmRecordStatusLoaded:
         case ECmmRecordStatusModified:
             // Record is up-to-date.
             break;
+        case ECmmRecordStatusExpired:
         case ECmmRecordStatusUnsaved:
         default:
-            User::Leave( KErrCorrupt ); // Error, unknown status.
+            User::Leave( KErrCorrupt ); // Error, invalid or unknown status.
             break;
         }
 
@@ -1362,6 +1405,7 @@ void CCmmDestinationInstance::RefreshRecordL( TCmmDbRecords aRecordType )
 
 // ---------------------------------------------------------------------------
 // Loads all records from database that are not up-to-date.
+// Guarantees the record pointers are valid or leaves.
 // ---------------------------------------------------------------------------
 //
 void CCmmDestinationInstance::LoadAllRecordsL()

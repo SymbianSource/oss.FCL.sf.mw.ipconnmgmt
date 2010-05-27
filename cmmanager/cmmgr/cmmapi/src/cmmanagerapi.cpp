@@ -73,12 +73,8 @@ TInt RCmManagerApi::Connect()
                 return err;
                 }
             err = TCmManagerLauncher::LaunchServer(
-                    KCmmServer,
                     KCmmServerFile,
-                    KCmmUid3,
-                    KCmmServerInitHeapSize,
-                    KCmmServerMaxHeapSize,
-                    KCmmServerStackSize );
+                    KCmmUid3 );
 
             if ( err != KErrNone && err != KErrAlreadyExists )
                 {
@@ -951,6 +947,22 @@ TInt RCmManagerApi::RemoveAllReferences(
     TInt err = SendReceive( ECmmRemoveAllReferences, args );
 
     OstTraceFunctionExit0( RCMMANAGERAPI_REMOVEALLREFERENCES_EXIT );
+    return err;
+    }
+
+//-----------------------------------------------------------------------------
+// RCmManagerApi::GetUncategorizedIcon()
+//-----------------------------------------------------------------------------
+//
+TInt RCmManagerApi::GetUncategorizedIcon( HBufC* aBuffer )
+    {
+    OstTraceFunctionEntry0( RCMMANAGERAPI_GETUNCATEGORIZEDICON_ENTRY );
+
+    TPtr descriptor( aBuffer->Des() );
+    TIpcArgs args( &descriptor );
+    TInt err = SendReceive( ECmmGetUncategorizedIcon, args );
+
+    OstTraceFunctionExit0( RCMMANAGERAPI_GETUNCATEGORIZEDICON_EXIT );
     return err;
     }
 

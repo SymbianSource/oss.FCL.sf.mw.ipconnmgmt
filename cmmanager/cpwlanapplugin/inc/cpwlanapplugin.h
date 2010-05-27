@@ -21,12 +21,13 @@
 
 // System includes
 #include <QObject>
+#include <QSharedPointer>
 #include <cpbearerapplugininterface.h>
 
 // User includes
 
 // Forward declarations
-class QTranslator;
+class HbTranslator;
 class CmManagerShim;
 class CmConnectionMethodShim;
 
@@ -56,12 +57,13 @@ protected:
 protected slots:
 
 private:
+    Q_DISABLE_COPY(CpWlanApPlugin)
 
 private slots:
     
 private: // data
     //! Translator instance
-    QTranslator *mTranslator;
+    QSharedPointer<HbTranslator> mTranslator;
     //! CM Manager Shim instance
     CmManagerShim *mCmManager;
     //! CM Connection Method Shim instance

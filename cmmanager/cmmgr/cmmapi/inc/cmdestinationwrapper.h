@@ -90,6 +90,8 @@ public:
     TInt IsConnected( TBool& aResult );
     TInt IsHidden( TBool& aResult );
     TInt IsEqual( const TInt aHandle, TBool& aResult );
+    TInt GetIcon( HBufC* aBuffer );
+    TInt SetIcon( const TDesC& aValue);
 
     TBool SessionConnected();
     void CloseSession();
