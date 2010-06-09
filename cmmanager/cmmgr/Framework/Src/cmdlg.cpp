@@ -1060,7 +1060,7 @@ void CCmDlg::CopyConnectionMethodL()
         {
         return;
         }
-
+    
     if ( cm->GetBoolAttributeL( ECmProtected ) ||
         ( iCmDestinationImpl && 
          iCmDestinationImpl->ProtectionLevel() == CMManager::EProtLevel1 ) )
@@ -1111,7 +1111,11 @@ void CCmDlg::CopyConnectionMethodL()
         CleanupStack::PopAndDestroy( &destArray );
         return;
         }
-    
+
+    // create a copy of the current connection method
+    CCmPluginBase* cmCopy = cm->CreateCopyL();
+    CleanupStack::PushL( cmCopy );
+
     // ok, there is at least 1, pop up the dialog
     CSelectDestinationDlg* dlg = CSelectDestinationDlg::NewL( destId, 
                                                               *iCmManager, 
@@ -1123,14 +1127,9 @@ void CCmDlg::CopyConnectionMethodL()
         CleanupStack::PushL( dest ); 
         if ( iCmDestinationImpl )
             {
-            // create a copy of the current connection method
-            CCmPluginBase* cmCopy = cm->CreateCopyL();
-            CleanupStack::PushL( cmCopy );
             // store it in commsdat
             cmCopy->UpdateL();
             dest->AddConnectionMethodL( *cmCopy );
-            
-            CleanupStack::PopAndDestroy( cmCopy );
             }
         else
             {
@@ -1147,7 +1146,7 @@ void CCmDlg::CopyConnectionMethodL()
         CleanupStack::PopAndDestroy( dest );
         HandleListboxDataChangeL();                             
         }
-
+    CleanupStack::PopAndDestroy( cmCopy );
     CleanupStack::PopAndDestroy( &destArray );
     }
 

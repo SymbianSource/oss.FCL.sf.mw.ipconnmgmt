@@ -488,16 +488,14 @@ void CApSelPopupList::FillListBoxWithDataL()
 
     iList->HandleItemAdditionL();
 
-    iList->View()->SetDisableRedraw( EFalse );
-    iList->HandleItemAdditionL();
-
     SetSelectedL();
     iPreferredUid = *iSelected;
     
     SetHighlighted();
 
+    iList->View()->SetDisableRedraw( EFalse );
+    
     SizeChanged();
-    DrawNow();
     
     CheckAndSetDataValidity();
     UpdateCbaL();
@@ -525,7 +523,8 @@ void CApSelPopupList::SetSelectedL()
             i = count;
             }
         }
-    iList->SetCurrentItemIndexAndDraw( idx );
+    
+    iList->SetCurrentItemIndex( idx );
     SelectCurrentItemL();
     
     APSETUILOGGER_LEAVEFN( EListbox,"SelPopupList::SetSelectedL")

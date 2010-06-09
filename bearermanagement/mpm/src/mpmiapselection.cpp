@@ -493,10 +493,10 @@ void CMPMIapSelection::CompleteExplicitSnapConnectionL()
     // Check if any suitable IAP's were found, if not then complete selection with error code
     if ( validateIapId == 0 )
         {
-        if ( iChooseIapPref.ConnType() == TMpmConnPref::EConnTypeDefault ||
+        if ( !( iChooseIapPref.NoteBehaviour() & TExtendedConnPref::ENoteBehaviourConnDisableQueries ) &&
+                ( iChooseIapPref.ConnType() == TMpmConnPref::EConnTypeDefault ||
                 ( iChooseIapPref.ConnType() == TMpmConnPref::EConnTypeExplicit &&
-                !( iChooseIapPref.NoteBehaviour() & TExtendedConnPref::ENoteBehaviourConnDisableQueries ) &&
-                iCommsDatAccess->IsInternetSnapL( 0, snap ) ) )
+                  iCommsDatAccess->IsInternetSnapL( 0, snap ) ) ) )
             {
             ImplicitConnectionL();
             }
@@ -740,21 +740,18 @@ void CMPMIapSelection::ChooseIapComplete(
         TBool connectionAlreadyActive =
             iSession->MyServer().CheckIfStarted( aPolicyPref->IapId(), 
                                                  iSession->ConnectionId() );
-        CConnectionUiUtilities* connUiUtils = NULL;
         if ( !connectionAlreadyActive &&
-        	   ( iSession->IsMMSIap( aPolicyPref->IapId() ) == EFalse ) )
-        	{
-        	TRAPD( popupError,
-          	     connUiUtils = CConnectionUiUtilities::NewL();
-            	   connUiUtils->ConnectingViaDiscreetPopup(
-              	     aPolicyPref->IapId());
-               	delete connUiUtils; );
-        	if ( popupError && connUiUtils )
-          	  {
-            	delete connUiUtils;
-            	}
-        	}
-       }
+                ( iSession->IsMMSIap( aPolicyPref->IapId() ) == EFalse ) )
+            {
+            CConnectionUiUtilities* connUiUtils;
+            TRAPD( popupError, connUiUtils = CConnectionUiUtilities::NewL() );
+            if ( popupError == KErrNone )
+        	    {
+            	connUiUtils->ConnectingViaDiscreetPopup( aPolicyPref->IapId() );
+               	delete connUiUtils;
+        	    }
+            }
+        }
     
     if( iWlanDialog )
         {

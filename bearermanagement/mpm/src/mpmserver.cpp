@@ -962,6 +962,11 @@ void CMPMServer::RemoveSession( const CMPMServerSession* aSession )
     TInt index = iSessions.Find( aSession );
     if ( index != KErrNotFound )
         {
+        if ( Events() )
+            {
+            // Cancel WLAN scan request if one exists
+            TRAP_IGNORE( Events()->CancelScanL( iSessions[index] ) )
+            }
         iSessions.Remove( index );
         }
     }

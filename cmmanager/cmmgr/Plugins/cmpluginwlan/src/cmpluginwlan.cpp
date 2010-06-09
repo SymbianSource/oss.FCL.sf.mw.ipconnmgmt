@@ -1811,7 +1811,6 @@ TBool CCmPluginWlan::ManuallyConfigureL()
     LOGGER_ENTERFN( "CCmPluginWlan::ManuallyConfigureL" );
     
     TBool proceed ( EFalse );
-    TBool askNWModeAndSec ( EFalse );
     
     // Step 1 - WLAN Network Name query (SSID)
     // sets: ECmName, EWlanSSID
@@ -1820,74 +1819,17 @@ TBool CCmPluginWlan::ManuallyConfigureL()
     CleanupClosePushL( nwName );
 
     proceed = ShowNWNameQueryL( nwName );
-    
-    TWlanConnectionExtentedSecurityMode securityMode =
-                                        EWlanConnectionExtentedSecurityModeOpen;
-            
-    TWpaMode wpaMode = EWpaModeUndefined;
 
     if ( proceed )
         {
         TWlanNetMode nwMode( EInfra );
 
-        // Step 2 - SSID scan ( first broadcast, then direct )
-        // sets: EWlanConnectionMode
-        //       EWlanScanSSID
-        //       EWlanSecurityMode
-
-        TWlanSsid ssid;
-        ssid.Copy( nwName );       
+        TWlanConnectionExtentedSecurityMode securityMode =
+                                        EWlanConnectionExtentedSecurityModeOpen;
         
-        TBool protectedSetupSupported = EFalse;
-        if ( ScanForWlanNwL( ssid, nwMode, securityMode, protectedSetupSupported ) )
-            {
-            if ( protectedSetupSupported )
-                {
-                TBool wifiret = ProtectedSetupL( ssid );
-                switch ( wifiret )
-                    {
-                    case WiFiProt::EWiFiCancel: //cancel pressed, cancel process
-                        {
-                        CleanupStack::PopAndDestroy( &nwName ); //cleanup and return 
-                        return EFalse;
-                        //break;
-                        }
-                    case WiFiProt::EWiFiOK:
-                        {
-                        CleanupStack::PopAndDestroy( &nwName );//cleanup and return 
-                        //UpdateSecuritySettingsL();
-                        return ETrue;
-                        //break;
-                        }
-                    case WiFiProt::EWifiNoAuto://proceed with normal setup
-                        {
-                        break;
-                        }  
-                    default:
-                        {
-                        User::Leave( KErrNotSupported );
-                        break;
-                        }                                              
-                    }    
-                }
-
-            if ( securityMode == EWlanConnectionExtentedSecurityModeWpaPsk
-                 || securityMode == EWlanConnectionExtentedSecurityModeWpa2Psk )
-                {
-                wpaMode = EWpaModePreSharedKey;
-                }
-            else if ( securityMode == EWlanConnectionExtentedSecurityModeWpa
-                      || securityMode == EWlanConnectionExtentedSecurityMode802d1x
-                      || securityMode == EWlanConnectionExtentedSecurityModeWpa2 )
-                {
-                wpaMode = EWpaModeEap;
-                }
-            }
-        else
-            {
-            askNWModeAndSec = ETrue;
-            }
-        proceed = ProceedWithManualL ( askNWModeAndSec, nwMode, securityMode, wpaMode  );
+        TWpaMode wpaMode = EWpaModeUndefined;
+        
+        proceed = ProceedWithManualL ( ETrue, nwMode, securityMode, wpaMode  );
         }
     CleanupStack::PopAndDestroy( &nwName );
 

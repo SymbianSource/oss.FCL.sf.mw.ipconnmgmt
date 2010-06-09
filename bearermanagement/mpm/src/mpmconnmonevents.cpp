@@ -35,12 +35,11 @@ Get events from Connection Monitor.
 // CMPMConnMonEvents::NewL
 // -----------------------------------------------------------------------------
 //             
-CMPMConnMonEvents* CMPMConnMonEvents::NewL( CMPMServer& aServer, 
-                                            CMPMServerSession& aSession )
+CMPMConnMonEvents* CMPMConnMonEvents::NewL( CMPMServer& aServer )
     {
     CMPMConnMonEvents* self = new ( ELeave ) CMPMConnMonEvents( aServer );
     CleanupStack::PushL( self );
-    self->ConstructL( aSession );
+    self->ConstructL();
     CleanupStack::Pop( self );
     return self;
     }
@@ -74,7 +73,7 @@ CMPMConnMonEvents::~CMPMConnMonEvents()
 // CMPMConnMonEvents::ConstructL
 // -----------------------------------------------------------------------------
 // 
-void CMPMConnMonEvents::ConstructL( CMPMServerSession& aSession )
+void CMPMConnMonEvents::ConstructL()
     {
     MPMLOGSTRING( "CMPMConnMonEvents::ConstructL" )
     // Connect to Connection Monitor
@@ -93,7 +92,8 @@ void CMPMConnMonEvents::ConstructL( CMPMServerSession& aSession )
     CMPMConnMonReqs* req = CMPMConnMonReqs::NewL( 
                                 *const_cast<CMPMConnMonEvents*>( this ),
                                 iConnMon,
-                                aSession.ConnectionId(), aSession );
+                                0,
+                                NULL );
     CleanupStack::PushL( req );
     iReqPtrs.AppendL( req ); 
     req->AvailableIapsSync();
@@ -573,7 +573,7 @@ void CMPMConnMonEvents::ScanWLANNetworksL( CMPMServerSession* aSession,
                                 *const_cast<CMPMConnMonEvents*>( this ),
                                 iConnMon,
                                 aId, 
-                                *aSession );
+                                aSession );
     CleanupStack::PushL( req );
     iReqPtrs.AppendL( req ); 
     req->RefreshAvailableIAPs( aCallback, aForceRefreshIntervalSeconds );
@@ -585,7 +585,7 @@ void CMPMConnMonEvents::ScanWLANNetworksL( CMPMServerSession* aSession,
 // CMPMConnMonEvents::CancelScanL
 // -----------------------------------------------------------------------------
 // 
-void CMPMConnMonEvents::CancelScanL( CMPMServerSession& aSession )
+void CMPMConnMonEvents::CancelScanL( CMPMServerSession* aSession )
     {
     MPMLOGSTRING( "CMPMConnMonEvents::CancelScanL" )
 
@@ -596,7 +596,7 @@ void CMPMConnMonEvents::CancelScanL( CMPMServerSession& aSession )
     CMPMConnMonReqs* req = CMPMConnMonReqs::NewL( 
                                 *const_cast<CMPMConnMonEvents*>( this ),
                                 iConnMon,
-                                aSession.ConnectionId(), 
+                                aSession->ConnectionId(), 
                                 aSession );
     // Delete ongoing req, if found
     TInt index = iReqPtrs.Find(req, CMPMConnMonReqs::CompareConnIds);

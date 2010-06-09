@@ -16,6 +16,8 @@
 */
 
 // INCLUDE FILES
+#include <e32property.h>
+#include <ScreensaverInternalPSKeys.h>
 #include "ConnectionDialogsUidDefs.h"
 #include "nowlannetworksavailablenotif.h"
 #include "nowlansdiscreetpopup.h"
@@ -48,9 +50,14 @@ void CNoWLANNetworksAvailableNotif::StartL( const TDesC8& /*aBuffer*/,
                                             TInt aReplySlot,
                                             const RMessagePtr2& aMessage )
     {
-    if ( iActiveNote )
+    TInt screenSaverOn( 0 );
+    RProperty::Get( KPSUidScreenSaver, 
+                    KScreenSaverOn, 
+                    screenSaverOn );
+
+    if ( iActiveNote || screenSaverOn > 0 )
         {
-        // Note is already active
+        // Note is already active or Screensaver is on.
         aMessage.Complete( KErrNone );
         return;
         }

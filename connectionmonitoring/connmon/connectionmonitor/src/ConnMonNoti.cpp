@@ -642,40 +642,15 @@ void CProgressNotifier::RunL()
                 }
             }
 
-        if ( iInfoBuf().iError == KErrNone ||
-             iInfoBuf().iError == KErrGprsInsufficientResources            || // -4154
-             iInfoBuf().iError == KErrPacketDataTsyMaxPdpContextsReached   || // -6000
-             iInfoBuf().iError == KErrUmtsMaxNumOfContextExceededByNetwork || // -4179
-             iInfoBuf().iError == KErrUmtsMaxNumOfContextExceededByPhone )    // -4178
-            {            	
-            // New request, DisconnectDlg might be shown for the error codes above.
-            Receive();
-            }
-        else
+        // New request
+        Receive();
+            
+        if ( iInfoBuf().iError == KErrDisconnected )
             {
-            LOGIT1("CProgressNotifier::RunL() - connection closing - iInfoBuf().iError: %d", iInfoBuf().iError)
-            // Connection is closing.
-            CSubConnUpDownNotifier* subConnUpDownNotifier = 0;
-            TInt err = iServer->Iap()->GetSubConnUpDownNotifier(
-                    iConnectionId,
-                    &subConnUpDownNotifier );
-
-            if ( KErrNone == err )
-                {
-                // Subconn down notifier has stopped and allinterface closed event has arrived
-                if ( !subConnUpDownNotifier->IsActive() )
-                    {
-                    subConnUpDownNotifier->SendDeletedEvent();
-                    }
-                }
-
-            if ( iInfoBuf().iError == KErrDisconnected )
-                {
-                // Enable WLAN scan when IAP availability is check for the
-                // next time because current bearer has been lost (-36).
-                // MPM needs a fresh list of available iaps.
-                iServer->Iap()->EnableWlanScan();
-                }
+            // Enable WLAN scan when IAP availability is check for the
+            // next time because current bearer has been lost (-36).
+            // MPM needs a fresh list of available iaps.
+            iServer->Iap()->EnableWlanScan();
             }
         }
     //LOGEXITFN("CProgressNotifier::RunL()")

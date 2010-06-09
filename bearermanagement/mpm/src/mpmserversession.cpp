@@ -90,8 +90,8 @@ void CMPMServerSession::ConstructL()
     MPMLOGSTRING( "CMPMServerSession::ConstructL" )
     if ( !iMyServer.Events() )
         {
-        iMyServer.SetEvents(CMPMConnMonEvents::NewL(
-            *const_cast<CMPMServer*>( &iMyServer ), *this ));
+        iMyServer.SetEvents( CMPMConnMonEvents::NewL(
+            *const_cast<CMPMServer*>( &iMyServer ) ) );
         }
 
     // Append session pointer to server
@@ -507,7 +507,7 @@ void CMPMServerSession::HandleServerCancelRequest( const RMessage2& aMessage )
             
             // Cancel WLAN scan request if one exists
             //
-            TRAP_IGNORE( iMyServer.Events()->CancelScanL( *this ) )
+            TRAP_IGNORE( iMyServer.Events()->CancelScanL( this ) )
             
             if ( iIapSelection )
                 {
@@ -529,7 +529,7 @@ void CMPMServerSession::HandleServerCancelRequest( const RMessage2& aMessage )
 
             // Cancel WLAN scan request if one exists
             //
-            TRAP_IGNORE( iMyServer.Events()->CancelScanL( *this ) )
+            TRAP_IGNORE( iMyServer.Events()->CancelScanL( this ) )
 
             if ( iDisconnectDlg )
                 {
@@ -556,7 +556,7 @@ removing dconn dlg" )
                 // TODO Change CancelScanL to non-leaving.
                 // Otherwise, nothing clever can be done here.
                 // And OOM may risk MPM stability.
-                TRAP_IGNORE( iMyServer.Events()->CancelScanL( *this ))
+                TRAP_IGNORE( iMyServer.Events()->CancelScanL( this ) )
                 iServerSortSNAPMessage.Complete( KErrCancel );
                 }
             break;
@@ -3321,10 +3321,12 @@ void CMPMServerSession::ChooseIapComplete(
     {
     MPMLOGSTRING2( "CMPMServerSession::ChooseIapComplete aError = %d", aError )
 
-    // Show error popup if it's allowed per client request
+    // Show error popup if it's allowed per client request.
+	// No error popup shown to SNAP.
     if ( ChooseBestIapCalled() && (!( iIapSelection->MpmConnPref().NoteBehaviour() &
             TExtendedConnPref::ENoteBehaviourConnDisableNotes ))
-            && ( aError != KErrNone ) )
+            && ( aError != KErrNone ) 
+            && ( iIapSelection->MpmConnPref().SnapId() == 0 ) )
         {
         CConnectionUiUtilities* connUiUtils = NULL;
         TRAPD( error, connUiUtils = CConnectionUiUtilities::NewL() );
