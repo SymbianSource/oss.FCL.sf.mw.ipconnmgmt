@@ -20,6 +20,7 @@
 
 // System includes
 
+#include <QString>
 #include <cmmanagerdef.h>
 #include <cmconnectionmethoddef.h>
 #include <cmpluginwlandef.h>

@@ -45,4 +45,9 @@ EXPORTS
 	_ZNK22CmConnectionMethodShim19getString8AttributeEN13CMManagerShim25ConnectionMethodAttributeE @ 44 NONAME
 	_ZN17CmDestinationShim7refreshEv @ 45 NONAME
 	_ZN22CmConnectionMethodShim7refreshEv @ 46 NONAME
+	_ZNK22CmConnectionMethodShim7getIconEv @ 47 NONAME
+	_ZNK17CmDestinationShim7getIconEv @ 48 NONAME
+	_ZN17CmDestinationShim7setIconE7QString @ 49 NONAME
+	_ZN22CmConnectionMethodShim7setIconE7QString @ 50 NONAME
+	_ZNK13CmManagerShim20getUncategorizedIconEv @ 51 NONAME
 

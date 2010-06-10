@@ -69,20 +69,20 @@ const TUint32 KDestProtectionLevelMask = 0xF0000000;
 const TInt KBitsToShiftDestProtectionLevel = 28;
 
 
-// Buffer size for initial connection method query
+// Buffer size for initial connection method query.
 const TInt KCmmConnMethodAmountNormal = 64; //TODO, Check value
-// Maximum theoretical amount of connection methods
+// Maximum theoretical amount of connection methods.
 const TInt KCmmConnMethodAmountMax = 256;
 
-// Buffer size for initial destination query
+// Buffer size for initial destination query.
 const TInt KCmmDestAmountNormal = 32;
-// Maximum theoretical amount of connection methods
+// Maximum theoretical amount of connection methods.
 const TInt KCmmDestAmountMax = 256;
 
-// Buffer size for supported bearers query
+// Buffer size for supported bearers query.
 const TInt KCmmBearerAmountNormal = 10;
 
-// Buffer size for bearer priority array query, first attempt
+// Buffer size for bearer priority array query, first attempt.
 const TInt KCmmDefaultBearerPriorityArraySize = 256;
 
 // iPriority:           2 16-bit values,
@@ -90,8 +90,14 @@ const TInt KCmmDefaultBearerPriorityArraySize = 256;
 // iServiceType length: 1 16-bit value.
 const TInt KCmmBearerPriorityHeaderLength = 5;
 
+// Name of the icon for the 'uncategorized' group. This group is a UI-construct
+// that is used to group all uncategorized IAPs together.
+_LIT( KCmmUncategorizedIconName, "qtg_small_favorite" );
 
-// Opcodes used in message passing between client and server
+// Minimum disk space required for writing operations.
+const TInt KMinimumDiskSpace = 8192;
+
+// Opcodes used in message passing between client and server.
 enum TCmmRequests
     {
     ECmmGetBearerInfoInt                     = 0,

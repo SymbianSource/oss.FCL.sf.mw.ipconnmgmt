@@ -70,10 +70,11 @@ public slots:
     void activateArrangeMode();
     void viewDone();
     void viewCancel();
-    void updateIndex(HbListWidgetItem *widgetItem);
+    void updateIndex();
     void saveNewDestinationName();
     
 protected:
+    bool eventFilter(QObject *obj, QEvent *event);
     
 protected slots:
     
@@ -90,6 +91,7 @@ private:
     void lauchNewDestinationNameQuery();
     void showRenameError(const QString &info);
     void showErrorNote(const QString &info);
+    QString resolveApIcon(QSharedPointer<CmConnectionMethodShim> cm) const; 
             
 private slots:
     

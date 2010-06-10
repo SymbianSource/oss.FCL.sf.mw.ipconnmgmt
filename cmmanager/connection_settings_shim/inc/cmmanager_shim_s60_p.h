@@ -61,6 +61,8 @@ public:
             
     void AllDestinations(QList<uint> &destArray) const;
     
+    QString GetUncategorizedIcon() const;
+    
 protected:
 
 private:
@@ -72,6 +74,8 @@ private:
         bool legacyOnly) const;
     
     void AllDestinationsL(QList<uint> &destArray) const;
+    
+    void GetUncategorizedIconL(QString &icon) const;
 
     void TraceIfError(TInt error) const;
 

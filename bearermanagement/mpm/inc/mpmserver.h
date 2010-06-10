@@ -49,9 +49,8 @@ const TInt    KPhoneRetryCount   = 7;
 //
 const TInt    KPhoneRetryTimeout = 100000;
 
-// The granularity with which iDisconnectQueue will allocate memory chunks. 
-// If set to two there will be space for two instances of CMPMDisconnectDlg
-// before new memory will be allocated.
+// The granularity with which roaming and starting dialogs will allocate memory chunks. 
+// If set to two there will be space for two instances before new memory will be allocated.
 const TInt    KGranularity       = 2;
 
 // Security policy definitions
@@ -187,7 +186,6 @@ void PanicServer( TInt aPanic );
 class CMPMConnMonEvents;
 class CMPMServerSession;
 class CMPMDtmWatcher;
-class CMPMDisconnectDlg;
 class CMPMConfirmDlgRoaming;
 class CMPMConfirmDlgStarting;
 class CMPMDefaultConnection;
@@ -588,13 +586,6 @@ class CMPMServer : public CPolicyServer
         inline TBool IsWLANScanRequired() const;
 
         /**
-        * Get the DisconnectQueue.
-        * @since 3.2
-        * @return Pointer to the DisconnectQueue.
-        */
-        inline CArrayPtrFlat<CMPMDisconnectDlg>* DisconnectQueue();
-
-        /**
         * Get the RoamingQueue.
         * @since 3.2
         * @return Pointer to the RoamingQueue.
@@ -879,9 +870,6 @@ class CMPMServer : public CPolicyServer
 
         // Is WLAN scan required or not before displaying Connection Dialog
         TBool iWLANScanRequired;
-
-        // Solves problem with overlapping Disconnect Dialogs
-        CArrayPtrFlat<CMPMDisconnectDlg>* iDisconnectQueue;
 
         // Solves problem with overlapping Roaming Dialogs
         CArrayPtrFlat<CMPMConfirmDlgRoaming>* iRoamingQueue;

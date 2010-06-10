@@ -38,7 +38,9 @@
 // Two phased construction.
 // ---------------------------------------------------------------------------
 //
-CCmmDestinationInstance* CCmmDestinationInstance::NewL( CCmmSession* aCmmSession, CCmmCache* aCache )
+CCmmDestinationInstance* CCmmDestinationInstance::NewL(
+        CCmmSession* aCmmSession,
+        CCmmCache* aCache )
     {
     OstTraceFunctionEntry0( CCMMDESTINATIONINSTANCE_NEWL_ENTRY );
 
@@ -53,7 +55,9 @@ CCmmDestinationInstance* CCmmDestinationInstance::NewL( CCmmSession* aCmmSession
 // Two phased construction.
 // ---------------------------------------------------------------------------
 //
-CCmmDestinationInstance* CCmmDestinationInstance::NewLC( CCmmSession* aCmmSession, CCmmCache* aCache )
+CCmmDestinationInstance* CCmmDestinationInstance::NewLC(
+        CCmmSession* aCmmSession,
+        CCmmCache* aCache )
     {
     OstTraceFunctionEntry0( CCMMDESTINATIONINSTANCE_NEWLC_ENTRY );
 
@@ -135,7 +139,7 @@ void CCmmDestinationInstance::ConstructL()
 // Set the destination ID.
 // ---------------------------------------------------------------------------
 //
-void CCmmDestinationInstance::SetId( const TUint32& aId )
+void CCmmDestinationInstance::SetId( const TUint32 aId )
     {
     OstTraceFunctionEntry0( CCMMDESTINATIONINSTANCE_SETID_ENTRY );
 
@@ -214,7 +218,7 @@ TInt CCmmDestinationInstance::GetHandle() const
 // Set handle ID.
 // ---------------------------------------------------------------------------
 //
-void CCmmDestinationInstance::SetHandle( const TInt& aHandle )
+void CCmmDestinationInstance::SetHandle( const TInt aHandle )
     {
     iHandle = aHandle;
     }
@@ -242,7 +246,7 @@ TUint32 CCmmDestinationInstance::GetElementIdL()
     {
     OstTraceFunctionEntry0( CCMMDESTINATIONINSTANCE_GETELEMENTIDL_ENTRY );
 
-    RefreshRecordL( ECmmDestNetworkRecord );
+    LoadRecordIfMissingL( ECmmDestNetworkRecord );
 
     if ( !iNetworkRecord )
         {
@@ -261,7 +265,7 @@ TUint32 CCmmDestinationInstance::GetRecordTagFromApRecordL()
     {
     OstTraceFunctionEntry0( CCMMDESTINATIONINSTANCE_GETRECORDTAGFROMAPRECORDL_ENTRY );
 
-    RefreshRecordL( ECmmDestApRecord );
+    LoadRecordIfMissingL( ECmmDestApRecord );
 
     if ( !iDestApRecord )
         {
@@ -406,7 +410,7 @@ TDesC& CCmmDestinationInstance::GetDestinationNameL()
     {
     OstTraceFunctionEntry0( CCMMDESTINATIONINSTANCE_GETDESTINATIONNAMEL_ENTRY );
 
-    RefreshRecordL( ECmmDestNetworkRecord );
+    LoadRecordIfMissingL( ECmmDestNetworkRecord );
 
     if ( !iNetworkRecord )
         {
@@ -427,7 +431,7 @@ HBufC* CCmmDestinationInstance::GetLocalisedDestinationNameL()
     {
     OstTraceFunctionEntry0( CCMMDESTINATIONINSTANCE_GETLOCALISEDDESTINATIONNAMEL_ENTRY );
 
-    RefreshRecordL( ECmmDestNetworkRecord );
+    LoadRecordIfMissingL( ECmmDestNetworkRecord );
 
     if ( !iNetworkRecord )
         {
@@ -504,7 +508,7 @@ HBufC* CCmmDestinationInstance::GetDestinationIconL()
     {
     OstTraceFunctionEntry0( CCMMDESTINATIONINSTANCE_GETDESTINATIONICONL_ENTRY );
 
-    RefreshRecordL( ECmmDestMetadataRecord );
+    LoadRecordIfMissingL( ECmmDestMetadataRecord );
 
     if ( !iMetadataRecord )
         {
@@ -512,8 +516,7 @@ HBufC* CCmmDestinationInstance::GetDestinationIconL()
         }
 
     HBufC* icon( NULL );
-    //icon = TPtrC( iMetadataRecord->iIconFileName ).AllocL();//TODO, enable after commsdat icon changes are implemented.
-	icon = KNullDesC().AllocL();//TODO
+    icon = TPtrC( iMetadataRecord->iIconFileName ).AllocL();
 
     OstTraceFunctionExit0( CCMMDESTINATIONINSTANCE_GETDESTINATIONICONL_EXIT );
     return icon;
@@ -523,14 +526,14 @@ HBufC* CCmmDestinationInstance::GetDestinationIconL()
 // Set the destination icon.
 // ---------------------------------------------------------------------------
 //
-void CCmmDestinationInstance::SetDestinationIconL( const TDesC& /*aDestinationIcon*/ )
+void CCmmDestinationInstance::SetDestinationIconL( const TDesC& aDestinationIcon )
     {
     OstTraceFunctionEntry0( CCMMDESTINATIONINSTANCE_SETDESTINATIONICONL_ENTRY );
 
     // Write action, load all records.
     LoadAllRecordsL();
 
-    //iMetadataRecord->iIconFileName.SetL( aDestinationIcon );//TODO, enable after commsdat icon changes are implemented.
+    iMetadataRecord->iIconFileName.SetL( aDestinationIcon );
 
     iMetadataRecordStatus = ECmmRecordStatusModified;
     iStatus = ECmmDestinationStatusChanged;
@@ -548,38 +551,41 @@ void CCmmDestinationInstance::GetMetadataL(
     {
     OstTraceFunctionEntry0( CCMMDESTINATIONINSTANCE_GETMETADATAL_ENTRY );
 
-    RefreshRecordL( ECmmDestMetadataRecord );
+    LoadRecordIfMissingL( ECmmDestMetadataRecord );
 
     if ( !iMetadataRecord )
         {
-        OstTraceFunctionExit0( CCMMDESTINATIONINSTANCE_GETMETADATAL_EXIT );
-
         User::Leave( KErrCorrupt );
         }
 
     switch ( aMetadataField )
         {
         case CMManager::ESnapMetadataInternet:
-            aMetadata = ( TUint32 )( iMetadataRecord->iMetadata ) & CMManager::ESnapMetadataInternet;
+            aMetadata = ( TUint32 )( iMetadataRecord->iMetadata ) &
+                    CMManager::ESnapMetadataInternet;
             break;
         case CMManager::ESnapMetadataHighlight:
-            aMetadata = ( TUint32 )( iMetadataRecord->iMetadata ) & CMManager::ESnapMetadataHighlight;
+            aMetadata = ( TUint32 )( iMetadataRecord->iMetadata ) &
+                    CMManager::ESnapMetadataHighlight;
             break;
         case CMManager::ESnapMetadataHiddenAgent:
-            aMetadata = ( TUint32 )( iMetadataRecord->iMetadata ) & CMManager::ESnapMetadataHiddenAgent;
+            aMetadata = ( TUint32 )( iMetadataRecord->iMetadata ) &
+                    CMManager::ESnapMetadataHiddenAgent;
             break;
         case CMManager::ESnapMetadataDestinationIsLocalised:
-            aMetadata = ( ( TUint32 )( iMetadataRecord->iMetadata ) & CMManager::ESnapMetadataDestinationIsLocalised ) >> 4;
+            aMetadata = ( ( TUint32 )( iMetadataRecord->iMetadata ) &
+                    CMManager::ESnapMetadataDestinationIsLocalised ) >> 4;
             break;
         case CMManager::ESnapMetadataPurpose:
-            aMetadata = ( ( TUint32 )( iMetadataRecord->iMetadata ) & CMManager::ESnapMetadataPurpose ) >> 8;
+            aMetadata = ( ( TUint32 )( iMetadataRecord->iMetadata ) &
+                    CMManager::ESnapMetadataPurpose ) >> 8;
             break;
         default:
             User::Leave( KErrArgument );
             break;
         }
 
-    OstTraceFunctionExit0( DUP1_CCMMDESTINATIONINSTANCE_GETMETADATAL_EXIT );
+    OstTraceFunctionExit0( CCMMDESTINATIONINSTANCE_GETMETADATAL_EXIT );
     }
 
 // ---------------------------------------------------------------------------
@@ -588,7 +594,7 @@ void CCmmDestinationInstance::GetMetadataL(
 //
 void CCmmDestinationInstance::SetMetadataL(
         const CMManager::TSnapMetadataField& aMetadataField,
-        const TUint32& aMetadata )
+        const TUint32 aMetadata )
     {
     OstTraceFunctionEntry0( CCMMDESTINATIONINSTANCE_SETMETADATAL_ENTRY );
 
@@ -631,14 +637,15 @@ void CCmmDestinationInstance::GetProtectionL( CMManager::TProtectionLevel& aProt
     {
     OstTraceFunctionEntry0( CCMMDESTINATIONINSTANCE_GETPROTECTIONL_ENTRY );
 
-    RefreshRecordL( ECmmDestMetadataRecord );
+    LoadRecordIfMissingL( ECmmDestMetadataRecord );
 
     if ( !iMetadataRecord )
         {
         User::Leave( KErrCorrupt );
         }
 
-    TUint32 value = ( ( TUint32 )( iMetadataRecord->iMetadata ) & KDestProtectionLevelMask ) >> KBitsToShiftDestProtectionLevel;
+    TUint32 value = ( ( TUint32 )( iMetadataRecord->iMetadata ) &
+            KDestProtectionLevelMask ) >> KBitsToShiftDestProtectionLevel;
     switch ( value )
         {
         case CMManager::EProtLevel0:
@@ -673,7 +680,8 @@ void CCmmDestinationInstance::SetProtectionL(
     // Write action, load all records.
     LoadAllRecordsL();
 
-    //TODO, comment this:
+    // Protection level is saved to CommsDat during update-call, so we need to
+    // keep track of both the original value and the currently set new value.
     iCurrentProtectionLevel = aProtectionLevel;
     if ( !iProtectionChanged )
         {
@@ -724,9 +732,18 @@ CMManager::TProtectionLevel CCmmDestinationInstance::LastProtectionLevel()
 // Return the protection level currently set into this destination instance.
 // ---------------------------------------------------------------------------
 //
-CMManager::TProtectionLevel CCmmDestinationInstance::CurrentProtectionLevel()
+CMManager::TProtectionLevel CCmmDestinationInstance::CurrentProtectionLevelL()
     {
-    return iCurrentProtectionLevel;
+    OstTraceFunctionEntry0( CCMMDESTINATIONINSTANCE_CURRENTPROTECTIONLEVELL_ENTRY );
+
+    CMManager::TProtectionLevel protLevel( iCurrentProtectionLevel );
+    if ( !iProtectionChanged )
+        {
+        GetProtectionL( protLevel );
+        }
+
+    OstTraceFunctionExit0( CCMMDESTINATIONINSTANCE_CURRENTPROTECTIONLEVELL_EXIT );
+    return protLevel;
     }
 
 // ---------------------------------------------------------------------------
@@ -737,15 +754,14 @@ CMManager::TProtectionLevel CCmmDestinationInstance::CurrentProtectionLevel()
 // ---------------------------------------------------------------------------
 //
 TInt CCmmDestinationInstance::AddConnMethodL(
-        const CCmmConnMethodInstance& aConnMethodInstance )
+        CCmmConnMethodInstance& aConnMethodInstance )
     {
     OstTraceFunctionEntry0( CCMMDESTINATIONINSTANCE_ADDCONNMETHODL_ENTRY );
 
     TUint32 connMethodId( aConnMethodInstance.GetId() );
-    TUint32 bearerType( aConnMethodInstance.GetBearerType() );
 
     // Check that the connection method is not an embedded destination.
-    if ( bearerType == KUidEmbeddedDestination )
+    if ( aConnMethodInstance.IsEmbeddedDestination() )
         {
         User::Leave( KErrArgument );
         }
@@ -770,32 +786,98 @@ TInt CCmmDestinationInstance::AddConnMethodL(
         }
 
     // Get the priority value of this connection method according to bearer.
+    TUint32 bearerType( aConnMethodInstance.GetBearerType() );
     TUint bearerPriority( 0 );
     iCache->BearerPriorityFromIapRecordL(
-            ( CommsDat::CCDIAPRecord* )aConnMethodInstance.GetPluginDataInstance()->iGenRecordArray[KIapRecordIndex],
+            ( CommsDat::CCDIAPRecord* )aConnMethodInstance.GetPluginDataInstance()
+                    ->iGenRecordArray[KIapRecordIndex],
             bearerPriority );
     TCmmConnMethodItem item( connMethodId, bearerType, bearerPriority, 0 );
 
     // Find out the correct position for the connection method inside this
     // destination.
-    TInt index = iConnMethodItemArray.Count();
-    for ( TInt i = index - 1; i >= 0; i-- )
+
+    // If the destination contains 1 or more connection methods of the same
+    // bearer type, position the new connection method after the last of these
+    // connection methods.
+    // If not, position the connection method before the first connection
+    // method found that has an equal or greater bearer based priority.
+
+    // The relevant connection method item count is the number of connection
+    // methods excluding a possible embedded destination.
+    TInt relevantCount = iConnMethodItemArray.Count();
+    if ( relevantCount > 0 && iConnMethodItemArray[ relevantCount - 1 ].IsEmbedded() )
         {
-        if ( iConnMethodItemArray[i].iBearerPriority ==
-                CMManager::KDataMobilitySelectionPolicyPriorityWildCard )
+        relevantCount--;
+        }
+    // The final position will be between 0 and relevantCount.
+    TInt index( relevantCount );
+
+    // If this is a virtual IAP that doesn't point to an IAP, position it at
+    // the end of the list.
+    TBool connMethodIsVirtual = aConnMethodInstance.GetBoolAttributeL( CMManager::ECmVirtual );
+    TUint32 linkedIapId( 0 );
+    if ( connMethodIsVirtual )
+        {
+        // Ask link information only if this is a virtual IAP.
+        linkedIapId = aConnMethodInstance.GetIntAttributeL( CMManager::ECmNextLayerIapId );
+        if ( linkedIapId == 0 )
             {
-            index = i;
-            continue;
-            }
-        if ( iConnMethodItemArray[i].iBearerPriority == bearerPriority )
-            {
-            break;
-            }
-        if ( iConnMethodItemArray[i].iBearerPriority > bearerPriority )
-            {
-            index = i;
+            item.iPriority = CMManager::KDataMobilitySelectionPolicyPriorityWildCard;
+            index = relevantCount;
             }
         }
+    else
+        {
+        TBool positionFound( EFalse );
+        if ( connMethodIsVirtual )
+            {
+            // If this is a virtual IAP that links to another IAP, position it
+            // as if it was that IAP.
+            TCmmConnMethodItem linkedItem;
+            TInt err = iCache->GetConnMethodItem( linkedIapId, linkedItem );
+            if ( err )
+                {
+                User::Leave( KErrArgument );
+                }
+            if ( linkedItem.IsVirtual() )
+                {
+                // This is a virtual IAP linking to another virtual IAP.
+                index = relevantCount;
+                positionFound = ETrue;
+                }
+            bearerType = linkedItem.iBearerType;
+            bearerPriority = linkedItem.iBearerPriority;
+            }
+
+        if ( !positionFound )
+            {
+            // Search for any connection methods with the same bearer type.
+            for ( TInt i = 0; i < relevantCount; i++ )
+                {
+                if ( iConnMethodItemArray[i].iBearerType == bearerType )
+                    {
+                    index = i + 1;
+                    positionFound = ETrue;
+                    // Don't break, need find last item.
+                    }
+                }
+            }
+        if ( !positionFound )
+            {
+            // No connection method found with the same bearer type. Position
+            // the connection method according to bearer priority.
+            for ( TInt i = 0; i < relevantCount; i++ )
+                {
+                if ( iConnMethodItemArray[i].iBearerPriority >= bearerPriority )
+                    {
+                    index = i;
+                    break;
+                    }
+                }
+            }
+        }
+
     // Add the connection method item into this destination at the correct
     // position (priority).
     iConnMethodItemArray.InsertL( item, index );
@@ -869,7 +951,7 @@ TInt CCmmDestinationInstance::AddEmbeddedDestinationL(
             embeddedDestinationId,
             KUidEmbeddedDestination,
             CMManager::KDataMobilitySelectionPolicyPriorityWildCard,
-            0 );
+            CMManager::KDataMobilitySelectionPolicyPriorityWildCard );
     iConnMethodItemArray.AppendL( item );
 
     SetStatus( ECmmDestinationStatusChanged );
@@ -930,7 +1012,7 @@ void CCmmDestinationInstance::DeleteConnMethodFromDestinationL(
 
     // If this connection method is an embedded destination, then removing it
     // from this destination is enough. The destination is not deleted.
-    if ( aConnMethodInstance.GetBearerType() != KUidEmbeddedDestination )
+    if ( !aConnMethodInstance.IsEmbeddedDestination() )
         {
         // Add connection method to delete list only if not referenced from any
         // other destination (in database or in any destination handles for the
@@ -956,7 +1038,7 @@ void CCmmDestinationInstance::DeleteConnMethodFromDestinationL(
 //
 void CCmmDestinationInstance::RemoveConnMethodFromDestinationL(
         const CCmmConnMethodInstance& aConnMethodInstance,
-        const TBool& aTestIfConnected )
+        const TBool aTestIfConnected )
     {
     OstTraceFunctionEntry0( CCMMDESTINATIONINSTANCE_REMOVECONNMETHODFROMDESTINATIONL_ENTRY );
 
@@ -1003,10 +1085,16 @@ void CCmmDestinationInstance::RemoveConnMethodFromDestinationL(
 // ---------------------------------------------------------------------------
 //
 void CCmmDestinationInstance::ModifyConnMethodPriorityL(
-        const CCmmConnMethodInstance& aConnMethodInstance,
+        CCmmConnMethodInstance& aConnMethodInstance,
         TUint aIndex )
     {
     OstTraceFunctionEntry0( CCMMDESTINATIONINSTANCE_MODIFYCONNMETHODPRIORITYL_ENTRY );
+
+    // Check index range.
+    if ( aIndex >= iConnMethodItemArray.Count() )
+        {
+        User::Leave( KErrArgument );
+        }
 
     // Check if the connection method is in this destination. Also store the
     // current index of the connection method.
@@ -1019,26 +1107,24 @@ void CCmmDestinationInstance::ModifyConnMethodPriorityL(
             break;
             }
         }
-    if ( oldIndex < 0 )
+    if ( oldIndex == KErrNotFound )
         {
         User::Leave( KErrArgument );
         }
 
     // If connection method is an embedded destination, just return silently.
-    if ( aConnMethodInstance.GetBearerType() == KUidEmbeddedDestination )
+    if ( aConnMethodInstance.IsEmbeddedDestination() )
         {
         OstTraceFunctionExit0( CCMMDESTINATIONINSTANCE_MODIFYCONNMETHODPRIORITYL_EXIT );
         return;
         }
 
-    //TODO, if CM is virtual IAP that points into DESTINATION, just return silently.
-    //
-    //
-
-    // Check index range.
-    if ( aIndex >= iConnMethodItemArray.Count() )
+    // If connection method is a virtual IAP linking to a destination, just return silently.
+    if ( aConnMethodInstance.GetBoolAttributeL( CMManager::ECmVirtual ) &&
+            aConnMethodInstance.GetIntAttributeL( CMManager::ECmNextLayerIapId ) == 0 )
         {
-        User::Leave( KErrArgument );
+        OstTraceFunctionExit0( DUP1_CCMMDESTINATIONINSTANCE_MODIFYCONNMETHODPRIORITYL_EXIT );
+        return;
         }
 
     // If the given index points to any wildcard priority connection method,
@@ -1053,13 +1139,13 @@ void CCmmDestinationInstance::ModifyConnMethodPriorityL(
             ASSERT( 0 );
             User::Leave( KErrCorrupt );
             }
-        aIndex = numberOfConnMethodsWithPriority--;
+        aIndex = numberOfConnMethodsWithPriority - 1;
         }
 
     // Check if the priority is changing from current.
     if ( oldIndex == aIndex )
         {
-        OstTraceFunctionExit0( DUP1_CCMMDESTINATIONINSTANCE_MODIFYCONNMETHODPRIORITYL_EXIT );
+        OstTraceFunctionExit0( DUP2_CCMMDESTINATIONINSTANCE_MODIFYCONNMETHODPRIORITYL_EXIT );
         return;
         }
 
@@ -1070,7 +1156,7 @@ void CCmmDestinationInstance::ModifyConnMethodPriorityL(
 
     SetStatus( ECmmDestinationStatusChanged );
 
-    OstTraceFunctionExit0( DUP2_CCMMDESTINATIONINSTANCE_MODIFYCONNMETHODPRIORITYL_EXIT );
+    OstTraceFunctionExit0( DUP3_CCMMDESTINATIONINSTANCE_MODIFYCONNMETHODPRIORITYL_EXIT );
     }
 
 // ---------------------------------------------------------------------------
@@ -1079,7 +1165,7 @@ void CCmmDestinationInstance::ModifyConnMethodPriorityL(
 // ---------------------------------------------------------------------------
 //
 CCmmConnMethodInstance* CCmmDestinationInstance::FindConnMethodInstanceFromSessionById(
-        const TUint32& aConnMethodId ) const
+        const TUint32 aConnMethodId ) const
     {
     OstTraceFunctionEntry0( CCMMDESTINATIONINSTANCE_FINDCONNMETHODINSTANCEFROMSESSIONBYID_ENTRY );
 
@@ -1096,7 +1182,7 @@ CCmmConnMethodInstance* CCmmDestinationInstance::FindConnMethodInstanceFromSessi
 // ---------------------------------------------------------------------------
 //
 CCmmDestinationInstance* CCmmDestinationInstance::FindDestinationInstanceFromSessionById(
-        const TUint32& aDestinationId ) const
+        const TUint32 aDestinationId ) const
     {
     OstTraceFunctionEntry0( CCMMDESTINATIONINSTANCE_FINDDESTINATIONINSTANCEFROMSESSIONBYID_ENTRY );
 
@@ -1113,8 +1199,8 @@ CCmmDestinationInstance* CCmmDestinationInstance::FindDestinationInstanceFromSes
 // ---------------------------------------------------------------------------
 //
 TBool CCmmDestinationInstance::ConnMethodInOtherDestinationInSession(
-        const TUint32& aConnMethodId,
-        const TUint32& aDestinationId ) const
+        const TUint32 aConnMethodId,
+        const TUint32 aDestinationId ) const
     {
     OstTraceFunctionEntry0( CCMMDESTINATIONINSTANCE_CONNMETHODINOTHERDESTINATIONINSESSION_ENTRY );
 
@@ -1130,7 +1216,8 @@ TBool CCmmDestinationInstance::ConnMethodInOtherDestinationInSession(
 // embedded destinations.
 // ---------------------------------------------------------------------------
 //
-TBool CCmmDestinationInstance::ValidConnMethodIdInDestinationIncludeEmbedded( const TUint32& aConnMethodId ) const
+TBool CCmmDestinationInstance::ValidConnMethodIdInDestinationIncludeEmbedded(
+        const TUint32 aConnMethodId ) const
     {
     OstTraceFunctionEntry0( CCMMDESTINATIONINSTANCE_VALIDCONNMETHODIDINDESTINATIONINCLUDEEMBEDDED_ENTRY );
 
@@ -1160,7 +1247,7 @@ TBool CCmmDestinationInstance::ValidConnMethodIdInDestinationIncludeEmbedded( co
 // ---------------------------------------------------------------------------
 //
 TBool CCmmDestinationInstance::ConnMethodInDestinationButLocked(
-        const TUint32& aConnMethodId ) const
+        const TUint32 aConnMethodId ) const
     {
     OstTraceFunctionEntry0( CCMMDESTINATIONINSTANCE_CONNMETHODINDESTINATIONBUTLOCKED_ENTRY );
 
@@ -1196,11 +1283,10 @@ TUint CCmmDestinationInstance::NumberOfConnMethodsWithPriority() const
 
     for ( TUint i = 0; i < iConnMethodItemArray.Count(); i++ )
         {
-        //TODO, add virtual IAP pointing to SNAP check.
-        if ( iConnMethodItemArray[i].iBearerType == KUidEmbeddedDestination )
+        if ( iConnMethodItemArray[i].IsEmbedded() || iConnMethodItemArray[i].iPriority ==
+                CMManager::KDataMobilitySelectionPolicyPriorityWildCard )
             {
-            count = i;
-            break;
+            count--;
             }
         }
 
@@ -1225,7 +1311,7 @@ TBool CCmmDestinationInstance::HasEmbedded() const
     TInt index = iConnMethodItemArray.Count() - 1;
     if ( index >= 0 )
         {
-        if ( iConnMethodItemArray[index].iBearerType == KUidEmbeddedDestination )
+        if ( iConnMethodItemArray[index].IsEmbedded() )
             {
             result = ETrue;
             }
@@ -1241,7 +1327,7 @@ TBool CCmmDestinationInstance::HasEmbedded() const
 // the current status in database.
 // ---------------------------------------------------------------------------
 //
-TBool CCmmDestinationInstance::HasEmbeddedWithId( const TUint32& aDestinationId ) const
+TBool CCmmDestinationInstance::HasEmbeddedWithId( const TUint32 aDestinationId ) const
     {
     OstTraceFunctionEntry0( CCMMDESTINATIONINSTANCE_HASEMBEDDEDWITHID_ENTRY );
 
@@ -1362,7 +1448,7 @@ TBool CCmmDestinationInstance::AllMandatoryRecordsContainData() const
 // loaded when needed, the functionality of this method becomes essential.
 // ---------------------------------------------------------------------------
 //
-void CCmmDestinationInstance::RefreshRecordL( TCmmDbRecords aRecordType )
+void CCmmDestinationInstance::LoadRecordIfMissingL( TCmmDbRecords aRecordType )
     {
     OstTraceFunctionEntry0( CCMMDESTINATIONINSTANCE_REFRESHRECORDL_ENTRY );
 
@@ -1412,9 +1498,9 @@ void CCmmDestinationInstance::LoadAllRecordsL()
     {
     OstTraceFunctionEntry0( CCMMDESTINATIONINSTANCE_LOADALLRECORDSL_ENTRY );
 
-    RefreshRecordL( ECmmDestNetworkRecord );
-    RefreshRecordL( ECmmDestApRecord );
-    RefreshRecordL( ECmmDestMetadataRecord );
+    LoadRecordIfMissingL( ECmmDestNetworkRecord );
+    LoadRecordIfMissingL( ECmmDestApRecord );
+    LoadRecordIfMissingL( ECmmDestMetadataRecord );
 
     if ( !iNetworkRecord || !iDestApRecord || !iMetadataRecord )
         {
@@ -1428,13 +1514,15 @@ void CCmmDestinationInstance::LoadAllRecordsL()
 // Set metadata of type ESnapMetadataInternet.
 // ---------------------------------------------------------------------------
 //
-void CCmmDestinationInstance::SetMetadataInternetL( const TUint32& aMetadata )
+void CCmmDestinationInstance::SetMetadataInternetL( const TUint32 aMetadata )
     {
     OstTraceFunctionEntry0( CCMMDESTINATIONINSTANCE_SETMETADATAINTERNETL_ENTRY );
 
     if ( aMetadata )
         {
-        if ( iCache->DestinationExistsWithMetadataLocalizedL( *this, CMManager::ELocalisedDestInternet ) )
+        if ( iCache->DestinationExistsWithMetadataLocalizedL(
+                *this,
+                CMManager::ELocalisedDestInternet ) )
             {
             User::Leave( KErrAlreadyExists );
             }
@@ -1457,8 +1545,11 @@ void CCmmDestinationInstance::SetMetadataInternetL( const TUint32& aMetadata )
         }
     else
         {
-        // Clear old ESnapMetadataInternet-bit, ESnapMetadataDestinationIsLocalised-bits and CMManager::ESnapMetadataPurpose-bits.
-        TUint32 temp = ~( CMManager::ESnapMetadataInternet | CMManager::ESnapMetadataDestinationIsLocalised | CMManager::ESnapMetadataPurpose );
+        // Clear old ESnapMetadataInternet-bit,
+        // ESnapMetadataDestinationIsLocalised-bits and CMManager::ESnapMetadataPurpose-bits.
+        TUint32 temp = ~( CMManager::ESnapMetadataInternet |
+                CMManager::ESnapMetadataDestinationIsLocalised |
+                CMManager::ESnapMetadataPurpose );
         iMetadataRecord->iMetadata = iMetadataRecord->iMetadata & temp;
         }
 
@@ -1469,7 +1560,7 @@ void CCmmDestinationInstance::SetMetadataInternetL( const TUint32& aMetadata )
 // Set metadata of type ESnapMetadataHighlight.
 // ---------------------------------------------------------------------------
 //
-void CCmmDestinationInstance::SetMetadataHighlight( const TUint32& aMetadata )
+void CCmmDestinationInstance::SetMetadataHighlight( const TUint32 aMetadata )
     {
     OstTraceFunctionEntry0( CCMMDESTINATIONINSTANCE_SETMETADATAHIGHLIGHTL_ENTRY );
 
@@ -1478,12 +1569,14 @@ void CCmmDestinationInstance::SetMetadataHighlight( const TUint32& aMetadata )
     if ( aMetadata )
         {
         // Set ESnapMetadataHighlight-bit.
-        iMetadataRecord->iMetadata = iMetadataRecord->iMetadata | CMManager::ESnapMetadataHighlight;
+        iMetadataRecord->iMetadata =
+                iMetadataRecord->iMetadata | CMManager::ESnapMetadataHighlight;
         }
     else
         {
         // Clear ESnapMetadataHighlight-bit.
-        iMetadataRecord->iMetadata = iMetadataRecord->iMetadata & ( ~CMManager::ESnapMetadataHighlight );
+        iMetadataRecord->iMetadata =
+                iMetadataRecord->iMetadata & ( ~CMManager::ESnapMetadataHighlight );
         }
 
     OstTraceFunctionExit0( CCMMDESTINATIONINSTANCE_SETMETADATAHIGHLIGHTL_EXIT );
@@ -1493,29 +1586,35 @@ void CCmmDestinationInstance::SetMetadataHighlight( const TUint32& aMetadata )
 // Set metadata of type ESnapMetadataHiddenAgent.
 // ---------------------------------------------------------------------------
 //
-void CCmmDestinationInstance::SetMetadataHiddenAgentL( const TUint32& aMetadata )
+void CCmmDestinationInstance::SetMetadataHiddenAgentL( const TUint32 aMetadata )
     {
     OstTraceFunctionEntry0( CCMMDESTINATIONINSTANCE_SETMETADATAHIDDENAGENTL_ENTRY );
 
     if ( aMetadata )
         {
-        TUint32 metadataInternet(    iMetadataRecord->iMetadata & CMManager::ESnapMetadataInternet                      );
-        TUint32 metadataLocalized( ( iMetadataRecord->iMetadata & CMManager::ESnapMetadataDestinationIsLocalised ) >> 4 );
-        TUint32 metadataPurpose(   ( iMetadataRecord->iMetadata & CMManager::ESnapMetadataPurpose                ) >> 8 );
+        TUint32 metadataInternet( iMetadataRecord->iMetadata &
+                CMManager::ESnapMetadataInternet );
+        TUint32 metadataLocalized( ( iMetadataRecord->iMetadata &
+                CMManager::ESnapMetadataDestinationIsLocalised ) >> 4 );
+        TUint32 metadataPurpose( ( iMetadataRecord->iMetadata &
+                CMManager::ESnapMetadataPurpose ) >> 8 );
         if ( metadataInternet ||
                 ( metadataLocalized == CMManager::ELocalisedDestInternet ) ||
                 ( metadataPurpose == CMManager::ESnapPurposeInternet ) )
             {
-            // Not allowed to set ESnapMetadataHiddenAgent if destination is localized or has purpose set.
+            // Not allowed to set ESnapMetadataHiddenAgent if destination is
+            // localized or has purpose set.
             User::Leave( KErrArgument );
             }
         // Set ESnapMetadataHiddenAgent-bit.
-        iMetadataRecord->iMetadata = iMetadataRecord->iMetadata | CMManager::ESnapMetadataHiddenAgent;
+        iMetadataRecord->iMetadata =
+                iMetadataRecord->iMetadata | CMManager::ESnapMetadataHiddenAgent;
         }
     else
         {
         // Clear ESnapMetadataHiddenAgent-bit.
-        iMetadataRecord->iMetadata = iMetadataRecord->iMetadata & ( ~CMManager::ESnapMetadataHiddenAgent );
+        iMetadataRecord->iMetadata =
+                iMetadataRecord->iMetadata & ( ~CMManager::ESnapMetadataHiddenAgent );
         }
 
     OstTraceFunctionExit0( CCMMDESTINATIONINSTANCE_SETMETADATAHIDDENAGENTL_EXIT );
@@ -1525,7 +1624,7 @@ void CCmmDestinationInstance::SetMetadataHiddenAgentL( const TUint32& aMetadata 
 // Set metadata of type ESnapMetadataDestinationIsLocalised.
 // ---------------------------------------------------------------------------
 //
-void CCmmDestinationInstance::SetMetadataLocalizationL( const TUint32& aMetadata )
+void CCmmDestinationInstance::SetMetadataLocalizationL( const TUint32 aMetadata )
     {
     OstTraceFunctionEntry0( CCMMDESTINATIONINSTANCE_SETMETADATALOCALIZATIONL_ENTRY );
 
@@ -1535,10 +1634,14 @@ void CCmmDestinationInstance::SetMetadataLocalizationL( const TUint32& aMetadata
         User::Leave( KErrArgument );
         }
 
-    TUint32 temp = ~( CMManager::ESnapMetadataInternet | CMManager::ESnapMetadataDestinationIsLocalised | CMManager::ESnapMetadataPurpose );
+    TUint32 temp = ~(
+            CMManager::ESnapMetadataInternet |
+            CMManager::ESnapMetadataDestinationIsLocalised |
+            CMManager::ESnapMetadataPurpose );
     if ( aMetadata == CMManager::ENotLocalisedDest )
         {
-        // Clear old ESnapMetadataInternet-bit, ESnapMetadataDestinationIsLocalised-bits and ESnapMetadataPurpose-bits.
+        // Clear old ESnapMetadataInternet-bit,
+        // ESnapMetadataDestinationIsLocalised-bits and ESnapMetadataPurpose-bits.
         iMetadataRecord->iMetadata = iMetadataRecord->iMetadata & temp;
         }
     else
@@ -1548,7 +1651,8 @@ void CCmmDestinationInstance::SetMetadataLocalizationL( const TUint32& aMetadata
             User::Leave( KErrAlreadyExists );
             }
 
-        // Clear old ESnapMetadataInternet-bit, ESnapMetadataDestinationIsLocalised-bits and ESnapMetadataPurpose-bits.
+        // Clear old ESnapMetadataInternet-bit,
+        // ESnapMetadataDestinationIsLocalised-bits and ESnapMetadataPurpose-bits.
         TUint32 value = iMetadataRecord->iMetadata & temp;
         switch ( aMetadata )
             {
@@ -1597,7 +1701,7 @@ void CCmmDestinationInstance::SetMetadataLocalizationL( const TUint32& aMetadata
 // Set metadata of type ESnapMetadataPurpose.
 // ---------------------------------------------------------------------------
 //
-void CCmmDestinationInstance::SetMetadataPurposeL( const TUint32& aMetadata )
+void CCmmDestinationInstance::SetMetadataPurposeL( const TUint32 aMetadata )
     {
     OstTraceFunctionEntry0( CCMMDESTINATIONINSTANCE_SETMETADATAPURPOSEL_ENTRY );
 
@@ -1607,10 +1711,14 @@ void CCmmDestinationInstance::SetMetadataPurposeL( const TUint32& aMetadata )
         User::Leave( KErrArgument );
         }
 
-    TUint32 temp = ~( CMManager::ESnapMetadataInternet | CMManager::ESnapMetadataDestinationIsLocalised | CMManager::ESnapMetadataPurpose );
+    TUint32 temp = ~(
+            CMManager::ESnapMetadataInternet |
+            CMManager::ESnapMetadataDestinationIsLocalised |
+            CMManager::ESnapMetadataPurpose );
     if ( aMetadata == CMManager::ESnapPurposeUnknown )
         {
-        // Clear old ESnapMetadataInternet-bit, ESnapMetadataDestinationIsLocalised-bits and ESnapMetadataPurpose-bits.
+        // Clear old ESnapMetadataInternet-bit,
+        // ESnapMetadataDestinationIsLocalised-bits and ESnapMetadataPurpose-bits.
         iMetadataRecord->iMetadata = iMetadataRecord->iMetadata & temp;
         }
     else
@@ -1620,7 +1728,8 @@ void CCmmDestinationInstance::SetMetadataPurposeL( const TUint32& aMetadata )
             User::Leave( KErrAlreadyExists );
             }
 
-        // Clear old ESnapMetadataInternet-bit, ESnapMetadataDestinationIsLocalised-bits and ESnapMetadataPurpose-bits.
+        // Clear old ESnapMetadataInternet-bit,
+        // ESnapMetadataDestinationIsLocalised-bits and ESnapMetadataPurpose-bits.
         TUint32 value = iMetadataRecord->iMetadata & temp;
 
         switch ( aMetadata )
@@ -1676,9 +1785,12 @@ TBool CCmmDestinationInstance::ConflictingMetadataFoundL()
     OstTraceFunctionEntry0( CCMMDESTINATIONINSTANCE_CONFLICTINGMETADATAFOUNDL_ENTRY );
 
     TBool result( EFalse );
-    TUint32 metadataInternet(    iMetadataRecord->iMetadata & CMManager::ESnapMetadataInternet                      );
-    TUint32 metadataLocalized( ( iMetadataRecord->iMetadata & CMManager::ESnapMetadataDestinationIsLocalised ) >> 4 );
-    TUint32 metadataPurpose(   ( iMetadataRecord->iMetadata & CMManager::ESnapMetadataPurpose                ) >> 8 );
+    TUint32 metadataInternet( iMetadataRecord->iMetadata &
+            CMManager::ESnapMetadataInternet );
+    TUint32 metadataLocalized( ( iMetadataRecord->iMetadata &
+            CMManager::ESnapMetadataDestinationIsLocalised ) >> 4 );
+    TUint32 metadataPurpose( ( iMetadataRecord->iMetadata &
+            CMManager::ESnapMetadataPurpose ) >> 8 );
 
     if ( metadataPurpose )
         {
@@ -1690,7 +1802,9 @@ TBool CCmmDestinationInstance::ConflictingMetadataFoundL()
             case CMManager::ESnapPurposeOperator:
             case CMManager::ESnapPurposeMMS:
             case CMManager::ESnapPurposeIntranet:
-                result = iCache->DestinationExistsWithMetadataPurposeL( *this, metadataPurpose );
+                result = iCache->DestinationExistsWithMetadataPurposeL(
+                        *this,
+                        metadataPurpose );
                 break;
             default:
                 User::Leave( KErrCorrupt ); // Invalid metadata.
@@ -1707,7 +1821,9 @@ TBool CCmmDestinationInstance::ConflictingMetadataFoundL()
             case CMManager::ELocalisedDestWap:
             case CMManager::ELocalisedDestMMS:
             case CMManager::ELocalisedDestIntranet:
-                result = iCache->DestinationExistsWithMetadataLocalizedL( *this, metadataLocalized );
+                result = iCache->DestinationExistsWithMetadataLocalizedL(
+                        *this,
+                        metadataLocalized );
                 break;
             default:
                 User::Leave( KErrCorrupt ); // Invalid metadata.
@@ -1717,7 +1833,9 @@ TBool CCmmDestinationInstance::ConflictingMetadataFoundL()
     else if ( metadataInternet )
         {
         // Error, metadataPurpose and metadataLocalized was not set. Continue anyway.
-        result = iCache->DestinationExistsWithMetadataLocalizedL( *this, CMManager::ELocalisedDestInternet );
+        result = iCache->DestinationExistsWithMetadataLocalizedL(
+                *this,
+                CMManager::ELocalisedDestInternet );
         }
 
     OstTraceFunctionExit0( CCMMDESTINATIONINSTANCE_CONFLICTINGMETADATAFOUNDL_EXIT );

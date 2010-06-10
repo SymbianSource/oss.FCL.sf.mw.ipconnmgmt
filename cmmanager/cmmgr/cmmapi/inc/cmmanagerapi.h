@@ -56,13 +56,13 @@ public:
             CCmDestinationWrapper* aDestinationWrapper );
     TInt RemoveDestinationWrapper(
             CCmDestinationWrapper* aDestinationWrapper );
-    CCmDestinationWrapper* GetDestinationWrapperL( const TInt& aHandle );
+    CCmDestinationWrapper* GetDestinationWrapperL( const TInt aHandle );
 
     TInt StoreConnMethodWrapper(
             CCmConnectionMethodWrapper* aConnMethodWrapper );
     TInt RemoveConnMethodWrapper(
             CCmConnectionMethodWrapper* aConnMethodWrapper );
-    CCmConnectionMethodWrapper* GetConnMethodWrapperL( const TInt& aHandle );
+    CCmConnectionMethodWrapper* GetConnMethodWrapperL( const TInt aHandle );
 
     TInt GetBearerInfoInt(
             const TUint32 aBearerType,

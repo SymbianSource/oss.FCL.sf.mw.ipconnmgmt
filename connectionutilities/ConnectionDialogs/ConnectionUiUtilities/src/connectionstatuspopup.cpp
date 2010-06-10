@@ -35,22 +35,22 @@
 
 // Error code definitions are from these headers
 #include <wlanerrorcodes.h> // WLAN-specific error code definitions
+#include <gsmerror.h>       // KErrPacketDataTsyMaxPdpContextsReached 
 #include <in_iface.h>
-#include <etelpckt.h>       // GPRS-specific causes for Session Managemeei saant
+#include <etelpckt.h>       // GPRS-specific causes for Session Management
 #include <nd_err.h>         // NetDial errors
 #include <inet6err.h>       // IPv6 error constants
 #include <rmmcustomapi.h>
 
 // Errors in UI spec not found elsewhere
-const TInt KErrPDPMaxContextsReached    = -6000;
 const TInt KErrDndNameNotFound          = -5120;
 const TInt KErrGeneralConnection        = -50000;
 const TInt KErrGenConnNoGPRSNetwork     = -3609;
 
 // Icons representing bearer
-_LIT( KIconCellular, "qtg_small_gprs.svg" );
-_LIT( KIconWlan,     "qtg_small_wlan.svg" );
-_LIT( KIconVpn,      "qtg_small_vpn.svg" ); 
+_LIT( KIconCellular, "qtg_small_gprs" );
+_LIT( KIconWlan,     "qtg_small_wlan" );
+_LIT( KIconVpn,      "qtg_small_vpn" ); 
 _LIT( KIconNone,     "" );
 
 // Empty text
@@ -96,6 +96,10 @@ _LIT(Ktxt_occ_dpopinfo_connection_unavailable,
         "txt_occ_dpopinfo_connection_unavailable");
 _LIT(Ktxt_occ_dpophead_configuration_failed,
         "txt_occ_dpophead_configuration_failed");
+_LIT(Ktxt_occ_dpophead_maximum_connections_in_use,
+        "txt_occ_dpophead_maximum_connections_in_use");
+_LIT(Ktxt_occ_dpopinfo_select_to_manage,
+        "txt_occ_dpopinfo_select_to_manage");
 
 
 //-----------------------------------------------------------------------------
@@ -103,7 +107,7 @@ _LIT(Ktxt_occ_dpophead_configuration_failed,
 //-----------------------------------------------------------------------------
 //
 CConnectionStatusPopup::CConnectionStatusPopup()
-:iPopup( NULL ), iPopupState( EPopupClosed )
+:iPopup( NULL ), iPopupState( EPopupClosed ), iTouchAction( EDoNothing )
     {
     }
 
@@ -176,6 +180,8 @@ void CConnectionStatusPopup::ConnectingViaDiscreetPopup( )
         iPopup->SetTextL( KTextNone );
         iPopup->SetIconNameL( KIconNone );
         );
+    iTouchAction = EDoNothing;
+    iPopup->SetTimeout( KForeverTimeout );
 
     SetState( EPopupConnecting );
  
@@ -205,6 +211,7 @@ void CConnectionStatusPopup::ConnectingViaDiscreetPopup(
         }
     else
         {
+        iPopup->SetTimeout( KForeverTimeout );
         SetState( EPopupConnectingIap );
         }
     
@@ -239,6 +246,7 @@ void CConnectionStatusPopup::ConnectionErrorDiscreetPopup( TInt aErrorCode )
     
     if (showPopup)
         {
+        iPopup->SetTimeout( KHbLongNotificationDialogTimeout ); 
         SetState( EPopupError );
         }
 
@@ -252,37 +260,12 @@ void CConnectionStatusPopup::ConnectionErrorDiscreetPopup( TInt aErrorCode )
 void CConnectionStatusPopup::SetState( TPopupState aNewState )
     {
     OstTraceExt2( TRACE_FLOW, CCONNECTIONSTATUSPOPUP_SETSTATE, "CConnectionStatusPopup::SetState;iPopupState=%u;aNewState=%u", iPopupState, aNewState );
-    
-    switch (aNewState)
-        {
-        
-        case EPopupClosed:
-            // Close popup if it's not already closing or closed
-            if (iPopupState != EPopupClosed && iPopupState != EPopupError)
-                {
-                iPopup->Close();
-                }
-            break;
-            
-        case EPopupConnecting:
-            iPopup->EnableTouchActivation( EFalse );
-            iPopup->SetTimeout( KForeverTimeout );
-            break;
-            
-        case EPopupConnectingIap:
-            iPopup->EnableTouchActivation( ETrue );
-            iPopup->SetTimeout( KForeverTimeout );
-            break;
-            
-        default: // EPopupError
-            __ASSERT_DEBUG( aNewState == EPopupError, User::Invariant() );
-            iPopup->EnableTouchActivation( EFalse );
-            iPopup->SetTimeout( KHbLongNotificationDialogTimeout ); 
-            break;
-        }
-    
+
     if (aNewState != EPopupClosed)
         {
+        // Enable touch activation based on defined action
+        iPopup->EnableTouchActivation( iTouchAction != EDoNothing );
+
         // Show or update popup
         if (iPopupState == EPopupClosed)
             {
@@ -291,6 +274,14 @@ void CConnectionStatusPopup::SetState( TPopupState aNewState )
         else
             {
             TRAP_IGNORE( iPopup->UpdateL() );
+            }
+        }
+    else
+        {
+        // Close popup if it's not already closed or closing 
+        if (iPopupState != EPopupClosed && iPopupState != EPopupError)
+            {
+            iPopup->Close();
             }
         }
     
@@ -338,16 +329,19 @@ void CConnectionStatusPopup::FormatIapInfoL( TUint32 aIapId )
         }
     CleanupStack::PopAndDestroy( connectionName ); 
 
-    // Icon
+    // Icon and action
     switch (bearerType)
         {
         case KUidWlanBearerType:
+            iTouchAction = EOpenWlanView;
             iPopup->SetIconNameL( KIconWlan );
             break;
         case KPluginVPNBearerTypeUid:
+            iTouchAction = EDoNothing;
             iPopup->SetIconNameL( KIconVpn );
             break;
         default:
+            iTouchAction = EOpenCellularView;
             iPopup->SetIconNameL( KIconCellular );
         }
     
@@ -365,12 +359,22 @@ TBool CConnectionStatusPopup::ResolveErrorCodeL( TInt aErrorCode )
     // Icons, which are resolved at the end
     enum TIconType
         {
-        EIconWlan, EIconCellular, EIconNone
+        // WLAN icon
+        EIconWlan, 
+        // Cellular icon
+        EIconCellular, 
+        // No icon to be used
+        EIconNoneSet, 
+        // Icon from connecting popup to be used
+        EIconUsePreviouslyDefined
         };
-    TIconType icon = EIconWlan;
 
+    // Most errors have following values
+    TIconType icon = EIconWlan;
+    iTouchAction = EDoNothing;
     TPtrC titlePtr;
     titlePtr.Set( Ktxt_occ_dpophead_connection_failed );
+    
     TPtrC textPtr;
 
     // Resolve title, text and icon of error code.
@@ -478,9 +482,6 @@ TBool CConnectionStatusPopup::ResolveErrorCodeL( TInt aErrorCode )
             break;
 
         // Group 9
-        case KErrPDPMaxContextsReached:
-            icon = EIconCellular;
-            // These were GPRS; fall through
         case KErrWlanConnAlreadyActive:
             textPtr.Set( Ktxt_occ_dpopinfo_connection_already_active );
             break;
@@ -503,7 +504,6 @@ TBool CConnectionStatusPopup::ResolveErrorCodeL( TInt aErrorCode )
         case KErrGeneralConnection:
         case KErrGprsMSCTemporarilyNotReachable:
         case KErrGprsLlcOrSndcpFailure:
-        case KErrGprsInsufficientResources:
         case KErrGprsActivationRejectedByGGSN:
         case KErrPacketDataTsyInvalidAPN:
             icon = EIconCellular;
@@ -527,7 +527,7 @@ TBool CConnectionStatusPopup::ResolveErrorCodeL( TInt aErrorCode )
         case KErrGprsQoSNotAccepted:
         case KErrGprsReactivationRequested:
         case KErrGprsOfflineMode:
-            icon = EIconCellular;           
+            icon = EIconCellular;
         case KErrWlanOff:
         case KErrWlanForceOff:
             textPtr.Set( Ktxt_occ_dpopinfo_connection_unavailable );
@@ -560,11 +560,25 @@ TBool CConnectionStatusPopup::ResolveErrorCodeL( TInt aErrorCode )
             titlePtr.Set( Ktxt_occ_dpophead_configuration_failed );
             textPtr.Set( Ktxt_occ_dpopinfo_please_try_again );
             break;
-
+            
+        // Group 15, errors related to maximum number of PDP contexts
+        case KErrGprsInsufficientResources:
+        case KErrUmtsMaxNumOfContextExceededByNetwork: 
+        case KErrUmtsMaxNumOfContextExceededByPhone:
+        case KErrPacketDataTsyMaxPdpContextsReached:
+            // Open cellular view for these errors
+            iTouchAction = EOpenCellularView;
+            // The icon is left out from these popups in order to make room 
+            // for the text which needs to be as descriptive as possible
+            icon = EIconNoneSet;
+            titlePtr.Set( Ktxt_occ_dpophead_maximum_connections_in_use );
+            textPtr.Set( Ktxt_occ_dpopinfo_select_to_manage );
+            break;
+            
         // For error values not specifically mapped to any error message
         // the discreet pop-up #12 is used.
         default:
-            icon = EIconNone;
+            icon = EIconUsePreviouslyDefined;
             textPtr.Set( Ktxt_occ_dpopinfo_connection_unavailable );
             break;
         }
@@ -584,8 +598,11 @@ TBool CConnectionStatusPopup::ResolveErrorCodeL( TInt aErrorCode )
         case EIconCellular:
             iPopup->SetIconNameL( KIconCellular );
             break;
+        case EIconNoneSet:
+            iPopup->SetIconNameL( KIconNone );
+            break;
         default:
-            __ASSERT_DEBUG( icon == EIconNone, User::Invariant());
+            __ASSERT_DEBUG( icon == EIconUsePreviouslyDefined, User::Invariant());
             // Leave icon as-is, either set by ConnectingViaDiscreetPopup
             // or undefined.
             break;
@@ -605,13 +622,13 @@ void CConnectionStatusPopup::NotificationDialogActivated(
     {
     OstTraceFunctionEntry0( CCONNECTIONSTATUSPOPUP_NOTIFICATIONDIALOGACTIVATED_ENTRY );
     
-    // Launch wlan view or connection view depending of bearer
+    // Launch wlan view or connection view depending on bearer
     TPtrC procName; 
-    if (iPopup->IconName().Compare( KIconWlan ) == 0)
+    if ( iTouchAction == EOpenWlanView )
         {
         procName.Set( KWlanViewExeFile );
         }
-    else if (iPopup->IconName().Compare( KIconCellular ) == 0)
+    else if ( iTouchAction == EOpenCellularView )
         {
         procName.Set( KConnViewExeFile );
         }

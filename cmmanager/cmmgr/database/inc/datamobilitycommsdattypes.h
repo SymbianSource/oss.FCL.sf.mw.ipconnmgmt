@@ -43,6 +43,7 @@
 #define KCDTypeNameSNAPMetadataSNAP _S( "SNAP" )
 #define KCDTypeNameSNAPMetadataMetadata _S( "Metadata" )
 #define KCDTypeNameSNAPMetadataIcon _S( "Icon" )
+#define KCDTypeNameSNAPMetadataIconFileName _S( "IconFileName" )
 
 //Global bearer priorization table and fields
 #define KCDTypeNameGlobalService _S( "GlobalBearerTypePriorization" )
@@ -60,6 +61,7 @@
 #define KCDTypeNameIAPMetadataIAP _S( "IAP" )
 #define KCDTypeNameIAPMetadataMetadata _S( "Metadata" )
 #define KCDTypeNameIAPMetadataSeamlessness _S( "Seamlessness" )
+#define KCDTypeNameIAPMetadataIconFileName _S( "IconFileName" )
 
 //MIP4 table and fields
 #define KCDTypeNameMIP4 _S( "MIP4" )
@@ -124,6 +126,7 @@ const CommsDat::TMDBElementId KCDTIdDataMobilitySelectionPolicyPriority  = 0x001
 const CommsDat::TMDBElementId KCDTIdSNAPMetadataSNAP  = 0x00120000;
 const CommsDat::TMDBElementId KCDTIdSNAPMetadataMetadata  = 0x00130000;
 const CommsDat::TMDBElementId KCDTIdSNAPMetadataIcon  = 0x00140000;
+const CommsDat::TMDBElementId KCDTIdSNAPMetadataIconFileName  = 0x00150000;
 
     //mip service extension table
 const CommsDat::TMDBElementId KCDTIdMIPMIP4  = 0x00120000;
@@ -138,6 +141,7 @@ const CommsDat::TMDBElementId KCDTIdGlobalServiceUIPriority  = 0x00140000;
 const CommsDat::TMDBElementId KCDTIdIAPMetadataIAP  = 0x00120000;
 const CommsDat::TMDBElementId KCDTIdIAPMetadataMetadata  = 0x00130000;
 const CommsDat::TMDBElementId KCDTIdIAPMetadataSeamlessness  = 0x00140000;
+const CommsDat::TMDBElementId KCDTIdIAPMetadataIconFileName  = 0x00150000;
 
 //MIP4 Metadata
 const CommsDat::TMDBElementId KCDTIdMIP4HomeAddress = 0x00120000;
@@ -259,7 +263,8 @@ NONSHARABLE_CLASS( CCDSNAPMetadataRecord ): public CommsDat::CCDRecordBase
     public:
     CommsDat::CMDBField<TInt> iSNAP;
     CommsDat::CMDBField<TUint32> iMetadata;
-    CommsDat::CMDBField<TUint32> iIcon;       
+    CommsDat::CMDBField<TUint32> iIcon;         //< Not used.
+    CommsDat::CMDBField<TDesC> iIconFileName;   //< May contain path information also.
     
      private:
     
@@ -355,6 +360,7 @@ NONSHARABLE_CLASS( CCDIAPMetadataRecord ): public CommsDat::CCDRecordBase
     CommsDat::CMDBRecordLink<CommsDat::CCDIAPRecord> iIAP;
     CommsDat::CMDBField<TUint32> iMetadata;
     CommsDat::CMDBField<TInt> iSeamlessness;
+    CommsDat::CMDBField<TDesC> iIconFileName;   //< May contain path information also.
 
      private:
     
@@ -473,8 +479,8 @@ NONSHARABLE_CLASS( CCDDefConnRecord ) : public CommsDat::CCDRecordBase
     DATA_VTABLE
         
     public:
-    CommsDat::CMDBField<TUint> iDefConnType;
-    CommsDat::CMDBField<TUint> iDefConnUid;    
+    CommsDat::CMDBField<TUint> iDefConnType;    //< Not used.
+    CommsDat::CMDBField<TUint> iDefConnUid;     //< Not used.
     CommsDat::CMDBField<TUint> iUsageOfWlan;
     CommsDat::CMDBField<TUint> iCellularDataUsageHome;
     CommsDat::CMDBField<TUint> iCellularDataUsageVisitor;

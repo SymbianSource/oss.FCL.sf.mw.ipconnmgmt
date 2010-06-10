@@ -23,7 +23,7 @@ TARGET          cmmserver.exe
 TARGETTYPE      exe
 UID             0x1000008d 0x20016A7A
 
-CAPABILITY      NetworkControl NetworkServices ProtServ WriteDeviceData
+CAPABILITY      NetworkControl NetworkServices ProtServ ReadDeviceData WriteDeviceData
 VENDORID        VID_DEFAULT
 
 SOURCEPATH      ../src
@@ -66,5 +66,6 @@ LIBRARY         featmgr.lib
 LIBRARY         centralrepository.lib
 LIBRARY         esock.lib
 LIBRARY	        hbcore.lib
+LIBRARY         sysutil.lib
 
 EPOCSTACKSIZE   0x4000

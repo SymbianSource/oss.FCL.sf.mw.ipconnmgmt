@@ -258,8 +258,6 @@ CCmPluginPacketData::~CCmPluginPacketData()
 
     ResetBearerRecords();
 
-    FeatureManager::UnInitializeLib();
-
     OstTraceFunctionExit1( CCMPLUGINPACKETDATA_CCMPLUGINPACKETDATA_EXIT, this );
     }
 
@@ -309,7 +307,8 @@ void CCmPluginPacketData::ConstructL()
     {
     OstTraceFunctionEntry0( CCMPLUGINPACKETDATA_CONSTRUCTL_ENTRY );
 
-    FeatureManager::InitializeLibL();
+    // Feature Manager is initialized by the CmmServer, so no need to do it here.
+
     CCmPluginBaseEng::ConstructL();
 
     // Get bearer priority table ID.
@@ -335,7 +334,7 @@ TBool CCmPluginPacketData::CanHandleIapIdL( TUint32 aIapId ) const
 
     TBool retVal( EFalse );
 
-    CCDIAPRecord *iapRecord = static_cast<CCDIAPRecord *>(
+    CCDIAPRecord *iapRecord = static_cast<CCDIAPRecord*>(
             CCDRecordBase::RecordFactoryL( KCDTIdIAPRecord ) );
 
     CleanupStack::PushL( iapRecord );
@@ -364,9 +363,9 @@ TBool CCmPluginPacketData::CanHandleIapIdL( CCDIAPRecord *aIapRecord ) const
 
     TBool retVal( EFalse );
 
-    if ( (TPtrC(aIapRecord->iServiceType) == TPtrC(KCDTypeNameOutgoingWCDMA) ||
-            TPtrC(aIapRecord->iServiceType) == TPtrC(KCDTypeNameIncomingWCDMA)) &&
-            TPtrC(aIapRecord->iBearerType) == TPtrC(KCDTypeNameModemBearer) )
+    if ( ( TPtrC( aIapRecord->iServiceType ) == TPtrC( KCDTypeNameOutgoingWCDMA ) ||
+            TPtrC( aIapRecord->iServiceType ) == TPtrC( KCDTypeNameIncomingWCDMA )) &&
+            TPtrC( aIapRecord->iBearerType ) == TPtrC( KCDTypeNameModemBearer ) )
         {
         retVal = ETrue;
         }
@@ -483,7 +482,7 @@ void CCmPluginPacketData::LoadBearerRecordsL()
 
     if ( ServiceRecord().iUmtsR99QoSAndOnTable )
         {
-        iPacketDataQoSRecord = static_cast<CCDUmtsR99QoSAndOnTableRecord *>(
+        iPacketDataQoSRecord = static_cast<CCDUmtsR99QoSAndOnTableRecord*>(
                 CCDRecordBase::RecordFactoryL( KCDTIdUmtsR99QoSAndOnTableRecord ) );
 
         iPacketDataQoSRecord->SetRecordId( ServiceRecord().iUmtsR99QoSAndOnTable );
@@ -503,13 +502,13 @@ void CCmPluginPacketData::LoadServiceRecordL()
 
     if ( TPtrC( KCDTypeNameOutgoingWCDMA ) == iIapRecord->iServiceType )
         {
-        iServiceRecord = static_cast<CCDWCDMAPacketServiceRecord *>(
+        iServiceRecord = static_cast<CCDWCDMAPacketServiceRecord*>(
                 CCDRecordBase::RecordFactoryL( KCDTIdOutgoingGprsRecord ) );
         iOutgoing = ETrue;
         }
     else if ( TPtrC( KCDTypeNameIncomingWCDMA ) == iIapRecord->iServiceType )
         {
-        iServiceRecord = static_cast<CCDWCDMAPacketServiceRecord *>(
+        iServiceRecord = static_cast<CCDWCDMAPacketServiceRecord*>(
                 CCDRecordBase::RecordFactoryL( KCDTIdIncomingGprsRecord ) );
         iOutgoing = EFalse;
         }
@@ -552,12 +551,12 @@ void CCmPluginPacketData::CreateServiceRecordL()
 
     if ( iOutgoing )
         {
-        iServiceRecord = static_cast<CCDWCDMAPacketServiceRecord *>(
+        iServiceRecord = static_cast<CCDWCDMAPacketServiceRecord*>(
                 CCDRecordBase::RecordFactoryL( KCDTIdOutgoingGprsRecord ) );
         }
     else
         {
-        iServiceRecord = static_cast<CCDWCDMAPacketServiceRecord *>(
+        iServiceRecord = static_cast<CCDWCDMAPacketServiceRecord*>(
                 CCDRecordBase::RecordFactoryL( KCDTIdIncomingGprsRecord ) );
         }
 
@@ -639,7 +638,7 @@ void CCmPluginPacketData::BearerRecordIdL( TUint32& aRecordId )
             new( ELeave ) CMDBRecordSet<CCDModemBearerRecord>( KCDTIdModemBearerRecord );
     CleanupStack::PushL( bearerRS );
 
-    CCDModemBearerRecord* bearerRecord = static_cast<CCDModemBearerRecord *>(
+    CCDModemBearerRecord* bearerRecord = static_cast<CCDModemBearerRecord*>(
             CCDRecordBase::RecordFactoryL( KCDTIdModemBearerRecord ) );
 
     CleanupStack::PushL( bearerRecord );
@@ -745,15 +744,17 @@ void CCmPluginPacketData::CreateBearerRecordsL()
     delete iPacketDataQoSRecord;
     iPacketDataQoSRecord = NULL;
 
-    iPacketDataQoSRecord = static_cast<CCDUmtsR99QoSAndOnTableRecord *>(
+    iPacketDataQoSRecord = static_cast<CCDUmtsR99QoSAndOnTableRecord*>(
             CCDRecordBase::RecordFactoryL( KCDTIdUmtsR99QoSAndOnTableRecord ) );
 
     iPacketDataQoSRecord->iGPRSReqTrafficClass = RPacketQoS::ETrafficClassUnspecified;
     iPacketDataQoSRecord->iGPRSMinTrafficClass = RPacketQoS::ETrafficClassUnspecified;
     iPacketDataQoSRecord->iGPRSReqDeliveryOrder = RPacketQoS::EDeliveryOrderUnspecified;
     iPacketDataQoSRecord->iGPRSMinDeliveryOrder = RPacketQoS::EDeliveryOrderUnspecified;
-    iPacketDataQoSRecord->iGPRSReqDeliverErroneousSDU = RPacketQoS::EErroneousSDUDeliveryUnspecified;
-    iPacketDataQoSRecord->iGPRSMinDeliverErroneousSDU = RPacketQoS::EErroneousSDUDeliveryUnspecified;
+    iPacketDataQoSRecord->iGPRSReqDeliverErroneousSDU =
+            RPacketQoS::EErroneousSDUDeliveryUnspecified;
+    iPacketDataQoSRecord->iGPRSMinDeliverErroneousSDU =
+            RPacketQoS::EErroneousSDUDeliveryUnspecified;
     iPacketDataQoSRecord->iGPRSReqMaxSDUSize = 0;
     iPacketDataQoSRecord->iGPRSMinAcceptableMaxSDUSize = 0;
     iPacketDataQoSRecord->iGPRSReqMaxUplinkRate = 0;
@@ -764,8 +765,10 @@ void CCmPluginPacketData::CreateBearerRecordsL()
     iPacketDataQoSRecord->iGPRSMaxBER = RPacketQoS::EBERUnspecified;
     iPacketDataQoSRecord->iGPRSReqSDUErrorRatio = RPacketQoS::ESDUErrorRatioUnspecified;
     iPacketDataQoSRecord->iGPRSMaxSDUErrorRatio = RPacketQoS::ESDUErrorRatioUnspecified;
-    iPacketDataQoSRecord->iGPRSReqTrafficHandlingPriority = RPacketQoS::ETrafficPriorityUnspecified;
-    iPacketDataQoSRecord->iGPRSMinTrafficHandlingPriority = RPacketQoS::ETrafficPriorityUnspecified;
+    iPacketDataQoSRecord->iGPRSReqTrafficHandlingPriority =
+            RPacketQoS::ETrafficPriorityUnspecified;
+    iPacketDataQoSRecord->iGPRSMinTrafficHandlingPriority =
+            RPacketQoS::ETrafficPriorityUnspecified;
     iPacketDataQoSRecord->iGPRSReqTransferDelay = 0;
     iPacketDataQoSRecord->iGPRSMaxTransferDelay = 0;
     iPacketDataQoSRecord->iGPRSReqGuaranteedUplinkRate = 0;
@@ -774,7 +777,8 @@ void CCmPluginPacketData::CreateBearerRecordsL()
     iPacketDataQoSRecord->iGPRSMinGuaranteedDownlinkRate = 0;
     iPacketDataQoSRecord->iGPRSSignallingIndication = EFalse;
     iPacketDataQoSRecord->iGPRS_ImCnSignallingIndication = EFalse;
-    iPacketDataQoSRecord->iGPRSSourceStatisticsDescriptor = RPacketQoS::ESourceStatisticsDescriptorUnknown;
+    iPacketDataQoSRecord->iGPRSSourceStatisticsDescriptor =
+            RPacketQoS::ESourceStatisticsDescriptorUnknown;
 
     OstTraceFunctionExit0( CCMPLUGINPACKETDATA_CREATEBEARERRECORDSL_EXIT );
     }
@@ -813,197 +817,245 @@ void CCmPluginPacketData::UpdateServiceRecordL(
 
     if ( !clientServiceRecordCopy->iRecordTag.IsNull() )
         {
-        origServiceRecord->iRecordTag.SetL( clientServiceRecordCopy->iRecordTag );
+        origServiceRecord->iRecordTag.SetL(
+                clientServiceRecordCopy->iRecordTag );
         }
     if ( !clientServiceRecordCopy->iRecordName.IsNull() )
         {
-        origServiceRecord->iRecordName.SetL( clientServiceRecordCopy->iRecordName );
+        origServiceRecord->iRecordName.SetL(
+                clientServiceRecordCopy->iRecordName );
         }
 
     if ( !clientServiceRecordCopy->iServiceEnableLlmnr.IsNull() )
         {
-        origServiceRecord->iServiceEnableLlmnr.SetL( clientServiceRecordCopy->iServiceEnableLlmnr );
+        origServiceRecord->iServiceEnableLlmnr.SetL(
+                clientServiceRecordCopy->iServiceEnableLlmnr );
         }
 
     if ( !clientServiceRecordCopy->iGPRSAPN.IsNull() )
         {
-        origServiceRecord->iGPRSAPN.SetL( clientServiceRecordCopy->iGPRSAPN );
+        origServiceRecord->iGPRSAPN.SetL(
+                clientServiceRecordCopy->iGPRSAPN );
         }
     if ( !clientServiceRecordCopy->iGPRSPDPType.IsNull() )
         {
-        origServiceRecord->iGPRSPDPType.SetL( clientServiceRecordCopy->iGPRSPDPType );
+        origServiceRecord->iGPRSPDPType.SetL(
+                clientServiceRecordCopy->iGPRSPDPType );
         }
     if ( !clientServiceRecordCopy->iGPRSPDPAddress.IsNull() )
         {
-        origServiceRecord->iGPRSPDPAddress.SetL( clientServiceRecordCopy->iGPRSPDPAddress );
+        origServiceRecord->iGPRSPDPAddress.SetL(
+                clientServiceRecordCopy->iGPRSPDPAddress );
         }
     if ( !clientServiceRecordCopy->iGPRSReqPrecedence.IsNull() )
         {
-        origServiceRecord->iGPRSReqPrecedence.SetL( clientServiceRecordCopy->iGPRSReqPrecedence );
+        origServiceRecord->iGPRSReqPrecedence.SetL(
+                clientServiceRecordCopy->iGPRSReqPrecedence );
         }
     if ( !clientServiceRecordCopy->iGPRSReqDelay.IsNull() )
         {
-        origServiceRecord->iGPRSReqDelay.SetL( clientServiceRecordCopy->iGPRSReqDelay );
+        origServiceRecord->iGPRSReqDelay.SetL(
+                clientServiceRecordCopy->iGPRSReqDelay );
         }
     if ( !clientServiceRecordCopy->iGPRSReqReliability.IsNull() )
         {
-        origServiceRecord->iGPRSReqReliability.SetL( clientServiceRecordCopy->iGPRSReqReliability );
+        origServiceRecord->iGPRSReqReliability.SetL(
+                clientServiceRecordCopy->iGPRSReqReliability );
         }
     if ( !clientServiceRecordCopy->iGPRSReqPeakThroughput.IsNull() )
         {
-        origServiceRecord->iGPRSReqPeakThroughput.SetL( clientServiceRecordCopy->iGPRSReqPeakThroughput );
+        origServiceRecord->iGPRSReqPeakThroughput.SetL(
+                clientServiceRecordCopy->iGPRSReqPeakThroughput );
         }
     if ( !clientServiceRecordCopy->iGPRSReqMeanThroughput.IsNull() )
         {
-        origServiceRecord->iGPRSReqMeanThroughput.SetL( clientServiceRecordCopy->iGPRSReqMeanThroughput );
+        origServiceRecord->iGPRSReqMeanThroughput.SetL(
+                clientServiceRecordCopy->iGPRSReqMeanThroughput );
         }
     if ( !clientServiceRecordCopy->iGPRSMinPrecedence.IsNull() )
         {
-        origServiceRecord->iGPRSMinPrecedence.SetL( clientServiceRecordCopy->iGPRSMinPrecedence );
+        origServiceRecord->iGPRSMinPrecedence.SetL(
+                clientServiceRecordCopy->iGPRSMinPrecedence );
         }
     if ( !clientServiceRecordCopy->iGPRSMinDelay.IsNull() )
         {
-        origServiceRecord->iGPRSMinDelay.SetL( clientServiceRecordCopy->iGPRSMinDelay );
+        origServiceRecord->iGPRSMinDelay.SetL(
+                clientServiceRecordCopy->iGPRSMinDelay );
         }
     if ( !clientServiceRecordCopy->iGPRSMinReliability.IsNull() )
         {
-        origServiceRecord->iGPRSMinReliability.SetL( clientServiceRecordCopy->iGPRSMinReliability );
+        origServiceRecord->iGPRSMinReliability.SetL(
+                clientServiceRecordCopy->iGPRSMinReliability );
         }
     if ( !clientServiceRecordCopy->iGPRSMinPeakThroughput.IsNull() )
         {
-        origServiceRecord->iGPRSMinPeakThroughput.SetL( clientServiceRecordCopy->iGPRSMinPeakThroughput );
+        origServiceRecord->iGPRSMinPeakThroughput.SetL(
+                clientServiceRecordCopy->iGPRSMinPeakThroughput );
         }
     if ( !clientServiceRecordCopy->iGPRSMinMeanThroughput.IsNull() )
         {
-        origServiceRecord->iGPRSMinMeanThroughput.SetL( clientServiceRecordCopy->iGPRSMinMeanThroughput );
+        origServiceRecord->iGPRSMinMeanThroughput.SetL(
+                clientServiceRecordCopy->iGPRSMinMeanThroughput );
         }
     if ( !clientServiceRecordCopy->iGPRSDataCompression.IsNull() )
         {
-        origServiceRecord->iGPRSDataCompression.SetL( clientServiceRecordCopy->iGPRSDataCompression );
+        origServiceRecord->iGPRSDataCompression.SetL(
+                clientServiceRecordCopy->iGPRSDataCompression );
         }
     if ( !clientServiceRecordCopy->iGPRSHeaderCompression.IsNull() )
         {
-        origServiceRecord->iGPRSHeaderCompression.SetL( clientServiceRecordCopy->iGPRSHeaderCompression );
+        origServiceRecord->iGPRSHeaderCompression.SetL(
+                clientServiceRecordCopy->iGPRSHeaderCompression );
         }
     if ( !clientServiceRecordCopy->iGPRSUseEdge.IsNull() )
         {
-        origServiceRecord->iGPRSUseEdge.SetL( clientServiceRecordCopy->iGPRSUseEdge );
+        origServiceRecord->iGPRSUseEdge.SetL(
+                clientServiceRecordCopy->iGPRSUseEdge );
         }
     if ( !clientServiceRecordCopy->iGPRSAnonymousAccess.IsNull() )
         {
-        origServiceRecord->iGPRSAnonymousAccess.SetL( clientServiceRecordCopy->iGPRSAnonymousAccess );
+        origServiceRecord->iGPRSAnonymousAccess.SetL(
+                clientServiceRecordCopy->iGPRSAnonymousAccess );
         }
     if ( !clientServiceRecordCopy->iGPRSIfParams.IsNull() )
         {
-        origServiceRecord->iGPRSIfParams.SetL( clientServiceRecordCopy->iGPRSIfParams );
+        origServiceRecord->iGPRSIfParams.SetL(
+                clientServiceRecordCopy->iGPRSIfParams );
         }
     if ( !clientServiceRecordCopy->iGPRSIfNetworks.IsNull() )
         {
-        origServiceRecord->iGPRSIfNetworks.SetL( clientServiceRecordCopy->iGPRSIfNetworks );
+        origServiceRecord->iGPRSIfNetworks.SetL(
+                clientServiceRecordCopy->iGPRSIfNetworks );
         }
     if ( !clientServiceRecordCopy->iGPRSIfPromptForAuth.IsNull() )
         {
-        origServiceRecord->iGPRSIfPromptForAuth.SetL( clientServiceRecordCopy->iGPRSIfPromptForAuth );
+        origServiceRecord->iGPRSIfPromptForAuth.SetL(
+                clientServiceRecordCopy->iGPRSIfPromptForAuth );
         }
     if ( !clientServiceRecordCopy->iGPRSIfAuthName.IsNull() )
         {
-        origServiceRecord->iGPRSIfAuthName.SetL( clientServiceRecordCopy->iGPRSIfAuthName );
+        origServiceRecord->iGPRSIfAuthName.SetL(
+                clientServiceRecordCopy->iGPRSIfAuthName );
         }
     if ( !clientServiceRecordCopy->iGPRSIfAuthPass.IsNull() )
         {
-        origServiceRecord->iGPRSIfAuthPass.SetL( clientServiceRecordCopy->iGPRSIfAuthPass );
+        origServiceRecord->iGPRSIfAuthPass.SetL(
+                clientServiceRecordCopy->iGPRSIfAuthPass );
         }
     if ( !clientServiceRecordCopy->iGPRSIfAuthRetries.IsNull() )
         {
-        origServiceRecord->iGPRSIfAuthRetries.SetL( clientServiceRecordCopy->iGPRSIfAuthRetries );
+        origServiceRecord->iGPRSIfAuthRetries.SetL(
+                clientServiceRecordCopy->iGPRSIfAuthRetries );
         }
     if ( !clientServiceRecordCopy->iGPRSIPNetMask.IsNull() )
         {
-        origServiceRecord->iGPRSIPNetMask.SetL( clientServiceRecordCopy->iGPRSIPNetMask );
+        origServiceRecord->iGPRSIPNetMask.SetL(
+                clientServiceRecordCopy->iGPRSIPNetMask );
         }
     if ( !clientServiceRecordCopy->iGPRSIPGateway.IsNull() )
         {
-        origServiceRecord->iGPRSIPGateway.SetL( clientServiceRecordCopy->iGPRSIPGateway );
+        origServiceRecord->iGPRSIPGateway.SetL(
+                clientServiceRecordCopy->iGPRSIPGateway );
         }
     if ( !clientServiceRecordCopy->iGPRSIPAddrFromServer.IsNull() )
         {
-        origServiceRecord->iGPRSIPAddrFromServer.SetL( clientServiceRecordCopy->iGPRSIPAddrFromServer );
+        origServiceRecord->iGPRSIPAddrFromServer.SetL(
+                clientServiceRecordCopy->iGPRSIPAddrFromServer );
         }
     if ( !clientServiceRecordCopy->iGPRSIPAddr.IsNull() )
         {
-        origServiceRecord->iGPRSIPAddr.SetL( clientServiceRecordCopy->iGPRSIPAddr );
+        origServiceRecord->iGPRSIPAddr.SetL(
+                clientServiceRecordCopy->iGPRSIPAddr );
         }
     if ( !clientServiceRecordCopy->iGPRSIPDNSAddrFromServer.IsNull() )
         {
-        origServiceRecord->iGPRSIPDNSAddrFromServer.SetL( clientServiceRecordCopy->iGPRSIPDNSAddrFromServer );
+        origServiceRecord->iGPRSIPDNSAddrFromServer.SetL(
+                clientServiceRecordCopy->iGPRSIPDNSAddrFromServer );
         }
     if ( !clientServiceRecordCopy->iGPRSIPNameServer1.IsNull() )
         {
-        origServiceRecord->iGPRSIPNameServer1.SetL( clientServiceRecordCopy->iGPRSIPNameServer1 );
+        origServiceRecord->iGPRSIPNameServer1.SetL(
+                clientServiceRecordCopy->iGPRSIPNameServer1 );
         }
     if ( !clientServiceRecordCopy->iGPRSIPNameServer2.IsNull() )
         {
-        origServiceRecord->iGPRSIPNameServer2.SetL( clientServiceRecordCopy->iGPRSIPNameServer2 );
+        origServiceRecord->iGPRSIPNameServer2.SetL(
+                clientServiceRecordCopy->iGPRSIPNameServer2 );
         }
     if ( !clientServiceRecordCopy->iGPRSIP6DNSAddrFromServer.IsNull() )
         {
-        origServiceRecord->iGPRSIP6DNSAddrFromServer.SetL( clientServiceRecordCopy->iGPRSIP6DNSAddrFromServer );
+        origServiceRecord->iGPRSIP6DNSAddrFromServer.SetL(
+                clientServiceRecordCopy->iGPRSIP6DNSAddrFromServer );
         }
     if ( !clientServiceRecordCopy->iGPRSIP6NameServer1.IsNull() )
         {
-        origServiceRecord->iGPRSIP6NameServer1.SetL( clientServiceRecordCopy->iGPRSIP6NameServer1 );
+        origServiceRecord->iGPRSIP6NameServer1.SetL(
+                clientServiceRecordCopy->iGPRSIP6NameServer1 );
         }
     if ( !clientServiceRecordCopy->iGPRSIP6NameServer2.IsNull() )
         {
-        origServiceRecord->iGPRSIP6NameServer2.SetL( clientServiceRecordCopy->iGPRSIP6NameServer2 );
+        origServiceRecord->iGPRSIP6NameServer2.SetL(
+                clientServiceRecordCopy->iGPRSIP6NameServer2 );
         }
     if ( !clientServiceRecordCopy->iGPRSIPAddrLeaseValidFrom.IsNull() )
         {
-        origServiceRecord->iGPRSIPAddrLeaseValidFrom.SetL( clientServiceRecordCopy->iGPRSIPAddrLeaseValidFrom );
+        origServiceRecord->iGPRSIPAddrLeaseValidFrom.SetL(
+                clientServiceRecordCopy->iGPRSIPAddrLeaseValidFrom );
         }
     if ( !clientServiceRecordCopy->iGPRSIPAddrLeaseValidTo.IsNull() )
         {
-        origServiceRecord->iGPRSIPAddrLeaseValidTo.SetL( clientServiceRecordCopy->iGPRSIPAddrLeaseValidTo );
+        origServiceRecord->iGPRSIPAddrLeaseValidTo.SetL(
+                clientServiceRecordCopy->iGPRSIPAddrLeaseValidTo );
         }
     if ( !clientServiceRecordCopy->iGPRSConfigDaemonManagerName.IsNull() )
         {
-        origServiceRecord->iGPRSConfigDaemonManagerName.SetL( clientServiceRecordCopy->iGPRSConfigDaemonManagerName );
+        origServiceRecord->iGPRSConfigDaemonManagerName.SetL(
+                clientServiceRecordCopy->iGPRSConfigDaemonManagerName );
         }
     if ( !clientServiceRecordCopy->iGPRSConfigDaemonName.IsNull() )
         {
-        origServiceRecord->iGPRSConfigDaemonName.SetL( clientServiceRecordCopy->iGPRSConfigDaemonName );
+        origServiceRecord->iGPRSConfigDaemonName.SetL(
+                clientServiceRecordCopy->iGPRSConfigDaemonName );
         }
     if ( !clientServiceRecordCopy->iGPRSEnableLCPExtension.IsNull() )
         {
-        origServiceRecord->iGPRSEnableLCPExtension.SetL( clientServiceRecordCopy->iGPRSEnableLCPExtension );
+        origServiceRecord->iGPRSEnableLCPExtension.SetL(
+                clientServiceRecordCopy->iGPRSEnableLCPExtension );
         }
     if ( !clientServiceRecordCopy->iGPRSDisablePlainTextAuth.IsNull() )
         {
-        origServiceRecord->iGPRSDisablePlainTextAuth.SetL( clientServiceRecordCopy->iGPRSDisablePlainTextAuth );
+        origServiceRecord->iGPRSDisablePlainTextAuth.SetL(
+                clientServiceRecordCopy->iGPRSDisablePlainTextAuth );
         }
     if ( !clientServiceRecordCopy->iGPRSAPType.IsNull() )
         {
-        origServiceRecord->iGPRSAPType.SetL( clientServiceRecordCopy->iGPRSAPType );
+        origServiceRecord->iGPRSAPType.SetL(
+                clientServiceRecordCopy->iGPRSAPType );
         }
     if ( !clientServiceRecordCopy->iGPRSQOSWarningTimeOut.IsNull() )
         {
-        origServiceRecord->iGPRSQOSWarningTimeOut.SetL( clientServiceRecordCopy->iGPRSQOSWarningTimeOut );
+        origServiceRecord->iGPRSQOSWarningTimeOut.SetL(
+                clientServiceRecordCopy->iGPRSQOSWarningTimeOut );
         }
     if ( !clientServiceRecordCopy->iGPRSR5DataCompression.IsNull() )
         {
-        origServiceRecord->iGPRSR5DataCompression.SetL( clientServiceRecordCopy->iGPRSR5DataCompression );
+        origServiceRecord->iGPRSR5DataCompression.SetL(
+                clientServiceRecordCopy->iGPRSR5DataCompression );
         }
     if ( !clientServiceRecordCopy->iGPRSR5HeaderCompression.IsNull() )
         {
-        origServiceRecord->iGPRSR5HeaderCompression.SetL( clientServiceRecordCopy->iGPRSR5HeaderCompression );
+        origServiceRecord->iGPRSR5HeaderCompression.SetL(
+                clientServiceRecordCopy->iGPRSR5HeaderCompression );
         }
     if ( !clientServiceRecordCopy->iGPRSPacketFlowIdentifier.IsNull() )
         {
-        origServiceRecord->iGPRSPacketFlowIdentifier.SetL( clientServiceRecordCopy->iGPRSPacketFlowIdentifier );
+        origServiceRecord->iGPRSPacketFlowIdentifier.SetL(
+                clientServiceRecordCopy->iGPRSPacketFlowIdentifier );
         }
     if ( !clientServiceRecordCopy->iGPRSUmtsGprsRelease.IsNull() )
         {
-        origServiceRecord->iGPRSUmtsGprsRelease.SetL( clientServiceRecordCopy->iGPRSUmtsGprsRelease );
+        origServiceRecord->iGPRSUmtsGprsRelease.SetL(
+                clientServiceRecordCopy->iGPRSUmtsGprsRelease );
         }
 
     if ( iPacketDataQoSRecord )
@@ -1039,15 +1091,14 @@ void CCmPluginPacketData::UpdateBearerRecordsL(
     {
     OstTraceFunctionEntry0( CCMPLUGINPACKETDATA_UPDATEBEARERRECORDSL_ENTRY );
 
-    delete iPacketDataQoSRecord;
-    iPacketDataQoSRecord = NULL;
-
     CCDUmtsR99QoSAndOnTableRecord* packetDataQoSRecord =
             static_cast<CCDUmtsR99QoSAndOnTableRecord*>( aBearerSpecRecordArray[KQosRecordIndex] );
 
+    delete iPacketDataQoSRecord;
+    iPacketDataQoSRecord = NULL;
     iPacketDataQoSRecord = static_cast<CCDUmtsR99QoSAndOnTableRecord*>(
-            CCDRecordBase::CreateCopyRecordL( *packetDataQoSRecord ) );
-
+            CCDRecordBase::RecordFactoryL( KCDTIdUmtsR99QoSAndOnTableRecord ) );
+    CopyRecordFieldsL( *packetDataQoSRecord, *iPacketDataQoSRecord );
     iPacketDataQoSRecord->SetElementId( aBearerSpecRecordArray[KQosRecordIndex]->ElementId() );
 
     if ( !iPacketDataQoSRecord->RecordId() )
@@ -1083,14 +1134,15 @@ void CCmPluginPacketData::GetBearerSpecificRecordsL(
 
     if ( !iPacketDataQoSRecord )
         {
-        // IAP not yet in CommDat
+        // IAP not yet in CommDat.
         GetDefaultQosRecordL( aRecordArray );
         }
     else
         {
         CCDUmtsR99QoSAndOnTableRecord* qosRecord = static_cast<CCDUmtsR99QoSAndOnTableRecord*>(
-                CCDRecordBase::CreateCopyRecordL( *iPacketDataQoSRecord ) );
+                CCDRecordBase::RecordFactoryL( KCDTIdUmtsR99QoSAndOnTableRecord ) );
         CleanupStack::PushL( qosRecord );
+        CopyRecordFieldsL( *iPacketDataQoSRecord, *qosRecord );
         qosRecord->SetElementId( iPacketDataQoSRecord->ElementId() );
         aRecordArray.AppendL( static_cast<CommsDat::CCDRecordBase*>( qosRecord ) );
         CleanupStack::Pop( qosRecord );
@@ -1171,7 +1223,7 @@ void CCmPluginPacketData::GetDefaultQosRecordL(
     OstTraceFunctionEntry0( CCMPLUGINPACKETDATA_GETDEFAULTQOSRECORDL_ENTRY );
 
     CCDUmtsR99QoSAndOnTableRecord* packetDataQoSRecord =
-            static_cast<CCDUmtsR99QoSAndOnTableRecord *>(
+            static_cast<CCDUmtsR99QoSAndOnTableRecord*>(
                     CCDRecordBase::RecordFactoryL( KCDTIdUmtsR99QoSAndOnTableRecord ) );
     CleanupStack::PushL( packetDataQoSRecord );
 
@@ -1179,8 +1231,10 @@ void CCmPluginPacketData::GetDefaultQosRecordL(
     packetDataQoSRecord->iGPRSMinTrafficClass = RPacketQoS::ETrafficClassUnspecified;
     packetDataQoSRecord->iGPRSReqDeliveryOrder = RPacketQoS::EDeliveryOrderUnspecified;
     packetDataQoSRecord->iGPRSMinDeliveryOrder = RPacketQoS::EDeliveryOrderUnspecified;
-    packetDataQoSRecord->iGPRSReqDeliverErroneousSDU = RPacketQoS::EErroneousSDUDeliveryUnspecified;
-    packetDataQoSRecord->iGPRSMinDeliverErroneousSDU = RPacketQoS::EErroneousSDUDeliveryUnspecified;
+    packetDataQoSRecord->iGPRSReqDeliverErroneousSDU =
+            RPacketQoS::EErroneousSDUDeliveryUnspecified;
+    packetDataQoSRecord->iGPRSMinDeliverErroneousSDU =
+            RPacketQoS::EErroneousSDUDeliveryUnspecified;
     packetDataQoSRecord->iGPRSReqMaxSDUSize = 0;
     packetDataQoSRecord->iGPRSMinAcceptableMaxSDUSize = 0;
     packetDataQoSRecord->iGPRSReqMaxUplinkRate = 0;
@@ -1191,8 +1245,10 @@ void CCmPluginPacketData::GetDefaultQosRecordL(
     packetDataQoSRecord->iGPRSMaxBER = RPacketQoS::EBERUnspecified;
     packetDataQoSRecord->iGPRSReqSDUErrorRatio = RPacketQoS::ESDUErrorRatioUnspecified;
     packetDataQoSRecord->iGPRSMaxSDUErrorRatio = RPacketQoS::ESDUErrorRatioUnspecified;
-    packetDataQoSRecord->iGPRSReqTrafficHandlingPriority = RPacketQoS::ETrafficPriorityUnspecified;
-    packetDataQoSRecord->iGPRSMinTrafficHandlingPriority = RPacketQoS::ETrafficPriorityUnspecified;
+    packetDataQoSRecord->iGPRSReqTrafficHandlingPriority =
+            RPacketQoS::ETrafficPriorityUnspecified;
+    packetDataQoSRecord->iGPRSMinTrafficHandlingPriority =
+            RPacketQoS::ETrafficPriorityUnspecified;
     packetDataQoSRecord->iGPRSReqTransferDelay = 0;
     packetDataQoSRecord->iGPRSMaxTransferDelay = 0;
     packetDataQoSRecord->iGPRSReqGuaranteedUplinkRate = 0;
@@ -1201,7 +1257,8 @@ void CCmPluginPacketData::GetDefaultQosRecordL(
     packetDataQoSRecord->iGPRSMinGuaranteedDownlinkRate = 0;
     packetDataQoSRecord->iGPRSSignallingIndication = EFalse;
     packetDataQoSRecord->iGPRS_ImCnSignallingIndication = EFalse;
-    packetDataQoSRecord->iGPRSSourceStatisticsDescriptor = RPacketQoS::ESourceStatisticsDescriptorUnknown;
+    packetDataQoSRecord->iGPRSSourceStatisticsDescriptor =
+            RPacketQoS::ESourceStatisticsDescriptorUnknown;
 
     aRecordArray.AppendL( static_cast<CommsDat::CCDRecordBase*>( packetDataQoSRecord ) );
     CleanupStack::Pop( packetDataQoSRecord );
@@ -1258,7 +1315,8 @@ TUint32 CCmPluginPacketData::GetBearerIntAttributeL(
                 break;
             case ECmInvalidAttribute:
                 {
-                retVal = 0;
+                // This attribute has been deprecated since Symbian^4.
+                User::Leave( KErrNotSupported );
                 }
                 break;
             case ECmIFAuthRetries:
@@ -1268,7 +1326,7 @@ TUint32 CCmPluginPacketData::GetBearerIntAttributeL(
                 break;
             default:
                 {
-                User::Leave( KErrNotFound );
+                User::Leave( KErrNotFound ); //TODO, check leave code, should it be KErrNotSupported ?
                 }
                 break;
             }
@@ -1300,8 +1358,9 @@ TUint32 CCmPluginPacketData::GetBearerIntAttributeL(
 // CCmPluginPacketData::GetServiceIntAttributeL
 // ---------------------------------------------------------------------------
 //
-TUint32 CCmPluginPacketData::GetServiceIntAttributeL( TUint32 aAttribute,
-                                                      RPointerArray<CommsDat::CCDRecordBase>& aGenRecordArray )
+TUint32 CCmPluginPacketData::GetServiceIntAttributeL(
+        TUint32 aAttribute,
+        RPointerArray<CommsDat::CCDRecordBase>& aGenRecordArray )
     {
     OstTraceFunctionEntry0( CCMPLUGINPACKETDATA_GETSERVICEINTATTRIBUTEL_ENTRY );
 
@@ -1410,15 +1469,16 @@ TUint32 CCmPluginPacketData::GetServiceIntAttributeL( TUint32 aAttribute,
 // CCmPluginPacketData::GetQosIntAttributeL
 // ---------------------------------------------------------------------------
 //
-TUint32 CCmPluginPacketData::GetQosIntAttributeL( TUint32 aAttribute,
-                                                  RPointerArray<CommsDat::CCDRecordBase>& aBearerSpecRecordArray )
+TUint32 CCmPluginPacketData::GetQosIntAttributeL(
+        TUint32 aAttribute,
+        RPointerArray<CommsDat::CCDRecordBase>& aBearerSpecRecordArray )
     {
     OstTraceFunctionEntry0( CCMPLUGINPACKETDATA_GETQOSINTATTRIBUTEL_ENTRY );
 
     TUint32 retVal( 0 );
 
-    CCDUmtsR99QoSAndOnTableRecord* qosRecord =
-            static_cast<CCDUmtsR99QoSAndOnTableRecord*>( aBearerSpecRecordArray[KQosRecordIndex] );
+    CCDUmtsR99QoSAndOnTableRecord* qosRecord = static_cast<CCDUmtsR99QoSAndOnTableRecord*>(
+            aBearerSpecRecordArray[KQosRecordIndex] );
 
     switch ( aAttribute )
         {
@@ -1577,7 +1637,6 @@ TUint32 CCmPluginPacketData::GetQosIntAttributeL( TUint32 aAttribute,
         }
 
     OstTraceFunctionExit0( CCMPLUGINPACKETDATA_GETQOSINTATTRIBUTEL_EXIT );
-
     return retVal;
     }
 
@@ -1933,8 +1992,8 @@ void CCmPluginPacketData::SetServiceIntAttributeL(
     {
     OstTraceFunctionEntry0( CCMPLUGINPACKETDATA_SETSERVICEINTATTRIBUTEL_ENTRY );
 
-    CCDWCDMAPacketServiceRecord* serviceRecord =
-                static_cast<CCDWCDMAPacketServiceRecord*>( aGenRecordArray[KServiceRecordIndex] );
+    CCDWCDMAPacketServiceRecord* serviceRecord = static_cast<CCDWCDMAPacketServiceRecord*>(
+            aGenRecordArray[KServiceRecordIndex] );
 
     switch ( aAttribute )
         {
@@ -2035,48 +2094,54 @@ void CCmPluginPacketData::SetServiceIntAttributeL(
 // ---------------------------------------------------------------------------
 //
 void CCmPluginPacketData::SetQosIntAttributeL(
-    TUint32 aAttribute,
-    TUint32 aValue,
-    RPointerArray<CommsDat::CCDRecordBase>& aBearerSpecRecordArray )
+        TUint32 aAttribute,
+        TUint32 aValue,
+        RPointerArray<CommsDat::CCDRecordBase>& aBearerSpecRecordArray )
     {
     OstTraceFunctionEntry0( CCMPLUGINPACKETDATA_SETQOSINTATTRIBUTEL_ENTRY );
 
-    CCDUmtsR99QoSAndOnTableRecord* qosRecord =
-                static_cast<CCDUmtsR99QoSAndOnTableRecord*>( aBearerSpecRecordArray[KQosRecordIndex] );
+    CCDUmtsR99QoSAndOnTableRecord* qosRecord = static_cast<CCDUmtsR99QoSAndOnTableRecord*>(
+            aBearerSpecRecordArray[KQosRecordIndex] );
 
     switch ( aAttribute )
         {
         case EGPRSReqTrafficClass:
             {
-            qosRecord->iGPRSReqTrafficClass.SetL( static_cast<RPacketQoS::TTrafficClass>( aValue ) );
+            qosRecord->iGPRSReqTrafficClass.SetL(
+                    static_cast<RPacketQoS::TTrafficClass>( aValue ) );
             }
             break;
 
         case EGPRSMinTrafficClass:
             {
-            qosRecord->iGPRSMinTrafficClass.SetL( static_cast<RPacketQoS::TTrafficClass>( aValue ) );
+            qosRecord->iGPRSMinTrafficClass.SetL(
+                    static_cast<RPacketQoS::TTrafficClass>( aValue ) );
             }
             break;
 
         case EGPRSReqDeliveryOrder:
             {
-            qosRecord->iGPRSReqDeliveryOrder.SetL( static_cast<RPacketQoS::TDeliveryOrder>( aValue ) );
+            qosRecord->iGPRSReqDeliveryOrder.SetL(
+                    static_cast<RPacketQoS::TDeliveryOrder>( aValue ) );
             }
             break;
 
         case GPRSMinDeliveryOrder:
             {
-            qosRecord->iGPRSMinDeliveryOrder.SetL( static_cast<RPacketQoS::TDeliveryOrder>( aValue ) );
+            qosRecord->iGPRSMinDeliveryOrder.SetL(
+                    static_cast<RPacketQoS::TDeliveryOrder>( aValue ) );
             }
             break;
         case EGPRSReqDeliverErroneousSDU:
             {
-            qosRecord->iGPRSReqDeliverErroneousSDU.SetL( static_cast<RPacketQoS::TErroneousSDUDelivery>( aValue ) );
+            qosRecord->iGPRSReqDeliverErroneousSDU.SetL(
+                    static_cast<RPacketQoS::TErroneousSDUDelivery>( aValue ) );
             }
             break;
         case EGPRSMinDeliverErroneousSDU:
             {
-            qosRecord->iGPRSMinDeliverErroneousSDU.SetL( static_cast<RPacketQoS::TErroneousSDUDelivery>( aValue ) );
+            qosRecord->iGPRSMinDeliverErroneousSDU.SetL(
+                    static_cast<RPacketQoS::TErroneousSDUDelivery>( aValue ) );
             }
             break;
         case EGPRSReqMaxSDUSize:
@@ -2117,37 +2182,43 @@ void CCmPluginPacketData::SetQosIntAttributeL(
 
         case EGPRSReqBER:
             {
-            qosRecord->iGPRSReqBER.SetL( static_cast<RPacketQoS::TBitErrorRatio>( aValue ) );
+            qosRecord->iGPRSReqBER.SetL(
+                    static_cast<RPacketQoS::TBitErrorRatio>( aValue ) );
             }
             break;
 
         case EGPRSMaxBER:
             {
-            qosRecord->iGPRSMaxBER.SetL( static_cast<RPacketQoS::TBitErrorRatio>( aValue ) );
+            qosRecord->iGPRSMaxBER.SetL(
+                    static_cast<RPacketQoS::TBitErrorRatio>( aValue ) );
             }
             break;
 
         case EGPRSReqSDUErrorRatio:
             {
-            qosRecord->iGPRSReqSDUErrorRatio.SetL( static_cast<RPacketQoS::TSDUErrorRatio>( aValue ) );
+            qosRecord->iGPRSReqSDUErrorRatio.SetL(
+                    static_cast<RPacketQoS::TSDUErrorRatio>( aValue ) );
             }
             break;
 
         case EGPRSMaxSDUErrorRatio:
             {
-            qosRecord->iGPRSMaxSDUErrorRatio.SetL( static_cast<RPacketQoS::TSDUErrorRatio>( aValue ) );
+            qosRecord->iGPRSMaxSDUErrorRatio.SetL(
+                    static_cast<RPacketQoS::TSDUErrorRatio>( aValue ) );
             }
             break;
 
         case EGPRSReqTrafficHandlingPriority:
             {
-            qosRecord->iGPRSReqTrafficHandlingPriority.SetL( static_cast<RPacketQoS::TTrafficHandlingPriority>( aValue ) );
+            qosRecord->iGPRSReqTrafficHandlingPriority.SetL(
+                    static_cast<RPacketQoS::TTrafficHandlingPriority>( aValue ) );
             }
             break;
 
         case EGPRSMinTrafficHandlingPriority:
             {
-            qosRecord->iGPRSMinTrafficHandlingPriority.SetL( static_cast<RPacketQoS::TTrafficHandlingPriority>( aValue ) );
+            qosRecord->iGPRSMinTrafficHandlingPriority.SetL(
+                    static_cast<RPacketQoS::TTrafficHandlingPriority>( aValue ) );
             }
             break;
 
@@ -2189,7 +2260,8 @@ void CCmPluginPacketData::SetQosIntAttributeL(
 
         case EGPRSSourceStatisticsDescriptor:
             {
-            qosRecord->iGPRSSourceStatisticsDescriptor.SetL( static_cast<RPacketQoS::TSourceStatisticsDescriptor>( aValue ) );
+            qosRecord->iGPRSSourceStatisticsDescriptor.SetL(
+                    static_cast<RPacketQoS::TSourceStatisticsDescriptor>( aValue ) );
             }
             break;
 
@@ -2199,6 +2271,7 @@ void CCmPluginPacketData::SetQosIntAttributeL(
             }
             break;
         }
+
     OstTraceFunctionExit0( CCMPLUGINPACKETDATA_SETQOSINTATTRIBUTEL_EXIT );
     }
 
@@ -2206,14 +2279,16 @@ void CCmPluginPacketData::SetQosIntAttributeL(
 // CCmPluginPacketData::SetBearerBoolAttributeL
 // ---------------------------------------------------------------------------
 //
-void CCmPluginPacketData::SetBearerBoolAttributeL( TUint32 aAttribute, TBool aValue,
-                                        RPointerArray<CommsDat::CCDRecordBase>& aGenRecordArray,
-                                        RPointerArray<CommsDat::CCDRecordBase>& aBearerSpecRecordArray )
+void CCmPluginPacketData::SetBearerBoolAttributeL(
+        TUint32 aAttribute,
+        TBool aValue,
+        RPointerArray<CommsDat::CCDRecordBase>& aGenRecordArray,
+        RPointerArray<CommsDat::CCDRecordBase>& aBearerSpecRecordArray )
     {
     OstTraceFunctionEntry0( CCMPLUGINPACKETDATA_SETBEARERBOOLATTRIBUTEL_ENTRY );
 
-    CCDWCDMAPacketServiceRecord* serviceRecord =
-                    static_cast<CCDWCDMAPacketServiceRecord*>( aGenRecordArray[KServiceRecordIndex] );
+    CCDWCDMAPacketServiceRecord* serviceRecord = static_cast<CCDWCDMAPacketServiceRecord*>(
+            aGenRecordArray[KServiceRecordIndex] );
 
     switch ( aAttribute )
         {
@@ -2280,14 +2355,16 @@ void CCmPluginPacketData::SetBearerBoolAttributeL( TUint32 aAttribute, TBool aVa
             break;
         case EGPRSSignallingIndication:
             {
-            static_cast<CCDUmtsR99QoSAndOnTableRecord*>
-                 ( aBearerSpecRecordArray[KQosRecordIndex] )->iGPRSSignallingIndication.SetL( aValue );
+            static_cast<CCDUmtsR99QoSAndOnTableRecord*>(
+                    aBearerSpecRecordArray[KQosRecordIndex] )
+                    ->iGPRSSignallingIndication.SetL( aValue );
             }
             break;
         case EGPRS_ImCnSignallingIndication:
             {
             static_cast<CCDUmtsR99QoSAndOnTableRecord*>
-                 ( aBearerSpecRecordArray[KQosRecordIndex] )->iGPRS_ImCnSignallingIndication.SetL( aValue );
+                 ( aBearerSpecRecordArray[KQosRecordIndex] )
+                 ->iGPRS_ImCnSignallingIndication.SetL( aValue );
             }
             break;
         case EPacketDataServiceEnableLLMNR:
@@ -2301,6 +2378,7 @@ void CCmPluginPacketData::SetBearerBoolAttributeL( TUint32 aAttribute, TBool aVa
             }
             break;
         }
+
     OstTraceFunctionExit0( CCMPLUGINPACKETDATA_SETBEARERBOOLATTRIBUTEL_EXIT );
     }
 
@@ -2472,16 +2550,17 @@ void CCmPluginPacketData::SetBearerStringAttributeL(
 // CCmPluginPacketData::SetBearerString8AttributeL
 // ---------------------------------------------------------------------------
 //
-void CCmPluginPacketData::SetBearerString8AttributeL( TUint32 /*aAttribute*/, const TDesC8& /*aValue*/,
-                                           RPointerArray<CommsDat::CCDRecordBase>& /*aGenRecordArray*/,
-                                           RPointerArray<CommsDat::CCDRecordBase>& /*aBearerSpecRecordArray*/ )
+void CCmPluginPacketData::SetBearerString8AttributeL(
+        TUint32 /*aAttribute*/,
+        const TDesC8& /*aValue*/,
+        RPointerArray<CommsDat::CCDRecordBase>& /*aGenRecordArray*/,
+        RPointerArray<CommsDat::CCDRecordBase>& /*aBearerSpecRecordArray*/ )
     {
     OstTraceFunctionEntry0( CCMPLUGINPACKETDATA_SETBEARERSTRING8ATTRIBUTEL_ENTRY );
 
     User::Leave( KErrNotSupported );
 
     OstTraceFunctionExit0( CCMPLUGINPACKETDATA_SETBEARERSTRING8ATTRIBUTEL_EXIT );
-
     return;
     }
 
@@ -2531,7 +2610,6 @@ TUint32 CCmPluginPacketData::GetBearerInfoIntL( TUint32 aAttribute ) const
         }
 
     OstTraceFunctionExit0( CCMPLUGINPACKETDATA_GETBEARERINFOINTL_EXIT );
-
     return retVal;
     }
 
@@ -2589,7 +2667,6 @@ TBool CCmPluginPacketData::GetBearerInfoBoolL( TUint32 aAttribute ) const
         }
 
     OstTraceFunctionExit0( CCMPLUGINPACKETDATA_GETBEARERINFOBOOLL_EXIT );
-
     return retVal;
     }
 
@@ -2613,7 +2690,6 @@ HBufC* CCmPluginPacketData::GetBearerInfoStringL( TUint32 aAttribute ) const
         }
 
     OstTraceFunctionExit0( CCMPLUGINPACKETDATA_GETBEARERINFOSTRINGL_EXIT );
-
     return retVal;
     }
 
@@ -2980,9 +3056,12 @@ void CCmPluginPacketData::CopyBearerRecordsL( CCmPluginBaseEng* aCopyInstance )
 
     CCmPluginPacketData* plugin = static_cast<CCmPluginPacketData*>( aCopyInstance );
 
-    plugin->iPacketDataQoSRecord =
-        static_cast<CCDUmtsR99QoSAndOnTableRecord*>(
-                CCDRecordBase::CreateCopyRecordL( *iPacketDataQoSRecord ) );
+    CCDUmtsR99QoSAndOnTableRecord* qosRecord = static_cast<CCDUmtsR99QoSAndOnTableRecord*>(
+            CCDRecordBase::RecordFactoryL( KCDTIdUmtsR99QoSAndOnTableRecord ) );
+    CleanupStack::PushL( qosRecord );
+    CopyRecordFieldsL( *iPacketDataQoSRecord, *qosRecord );
+    CleanupStack::Pop( qosRecord );
+    plugin->iPacketDataQoSRecord = qosRecord;
 
     OstTraceFunctionExit0( CCMPLUGINPACKETDATA_COPYBEARERRECORDSL_EXIT );
     }

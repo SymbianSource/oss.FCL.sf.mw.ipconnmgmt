@@ -121,7 +121,7 @@ private:
 public:
     void OpenDestinationL(
             CCmmDestinationInstance& aDestinationInstance,
-            const TUint32& aId );
+            const TUint32 aId );
 
     /**
      * Refresh the data contained in aDestinationInstance. This means reloading
@@ -134,12 +134,12 @@ public:
     void CreateDestinationL(
             CCmmDestinationInstance& aDestinationInstance,
             const TDesC& aName,
-            const TUint32& aId );
+            const TUint32 aId );
 
     void OpenConnMethodL(
             CCmmConnMethodInstance& aConnMethodInstance,
             CCmmDestinationInstance* aDestinationInstance,
-            const TUint32& aId );
+            const TUint32 aId );
 
     /**
      * Refresh the data contained in aConnMethodInstance. This means reloading
@@ -152,8 +152,8 @@ public:
     void CreateConnMethodL(
             CCmmConnMethodInstance& aConnMethodInstance,
             CCmmDestinationInstance* aDestinationInstance,
-            const TUint32& aBearerType,
-            const TUint32& aConnMethodId );
+            const TUint32 aBearerType,
+            const TUint32 aConnMethodId );
 
     /**
      * Creates a copy of the given client instance (copy of the connection
@@ -207,14 +207,14 @@ public:
      * is already checked that the connection method given as parameter can be
      * deleted and a transaction is already open.
      */
-    void DeleteConnMethodAsPartOfDestinationUpdateL( const TUint32& aConnMethodId );
+    void DeleteConnMethodAsPartOfDestinationUpdateL( const TUint32 aConnMethodId );
 
     /**
      * Deletes a connection method as part of destination delete operation. It
      * is already checked that the connection method given as parameter can be
      * deleted and a transaction is already open.
      */
-    void DeleteConnMethodAsPartOfDestinationDeleteL( const TUint32& aConnMethodId );
+    void DeleteConnMethodAsPartOfDestinationDeleteL( const TUint32 aConnMethodId );
 
     /**
      * Basic connection method delete. Removes a connection method from any
@@ -222,23 +222,23 @@ public:
      */
     void DeleteConnMethodL( CCmmConnMethodInstance& aConnMethodInstance );
 
-    TBool DestinationExistsWithId( const TUint32& aId );
-    TBool DestinationExistsWithNameL( const TDesC& aName, const TUint32& aDestinationId );
-    TBool DestinationOpenWithId( const TUint32& aId );
-    TBool NotSavedDestinationOpenWithNameL( const TDesC& aName, const TUint32& aDestinationId );
+    TBool DestinationExistsWithId( const TUint32 aId );
+    TBool DestinationExistsWithNameL( const TDesC& aName, const TUint32 aDestinationId );
+    TBool DestinationOpenWithId( const TUint32 aId );
+    TBool NotSavedDestinationOpenWithNameL( const TDesC& aName, const TUint32 aDestinationId );
 
-    TBool ConnMethodExistsWithId( const TUint32& aConnMethodId );
-    TBool ConnMethodOpenWithId( const TUint32& aConnMethodId );
+    TBool ConnMethodExistsWithId( const TUint32 aConnMethodId );
+    TBool ConnMethodOpenWithId( const TUint32 aConnMethodId );
 
     TBool DestinationExistsWithMetadataLocalizedL(
             CCmmDestinationInstance& aDestinationInstance,
-            const TUint32& aValue );
+            const TUint32 aValue );
     TBool DestinationExistsWithMetadataPurposeL(
             CCmmDestinationInstance& aDestinationInstance,
-            const TUint32& aValue );
+            const TUint32 aValue );
 
-    void DbChangeDetected( const TUint32& aTableId );
-    void DbChangeError( const TUint32& aTableId );
+    void DbChangeDetected( const TUint32 aTableId );
+    void DbChangeError( const TUint32 aTableId );
 
     void CloseDestination( CCmmDestinationInstance& aDestinationInstance );
     void CloseConnMethod( CCmmConnMethodInstance& aConnMethodInstance );
@@ -279,7 +279,7 @@ public:
      */
     void OpenConnectionMethodInstanceL(
             CCmmConnMethodInstance& aConnMethodInstance,
-            const TUint32& aConnMethodId );
+            const TUint32 aConnMethodId );
 
     /**
      * Returns Connection Method specific integer value. CM is loaded(if not loaded already)
@@ -290,8 +290,8 @@ public:
      * KErrNotFound.
      */
     TUint32 GetConnectionMethodInfoIntL(
-            const TUint32& aCmId,
-            const TUint32& aAttribute );
+            const TUint32 aCmId,
+            const TUint32 aAttribute );
 
     /**
      * Returns Connection Method specific boolean value. CM is loaded(if not loaded already)
@@ -302,8 +302,8 @@ public:
      * KErrNotFound.
      */
     TBool GetConnectionMethodInfoBoolL(
-            const TUint32& aCmId,
-            const TUint32& aAttribute );
+            const TUint32 aCmId,
+            const TUint32 aAttribute );
 
     /**
      * Returns Connection Method specific 16 bit string value.
@@ -314,8 +314,8 @@ public:
      * KErrNotFound.
      */
     HBufC* GetConnectionMethodInfoStringL(
-            const TUint32& aCmId,
-            const TUint32& aAttribute );
+            const TUint32 aCmId,
+            const TUint32 aAttribute );
 
     /**
      * Returns Connection Method specific 8 bit string value.
@@ -326,8 +326,8 @@ public:
      * KErrNotFound.
      */
     HBufC8* GetConnectionMethodInfoString8L(
-            const TUint32& aCmId,
-            const TUint32& aAttribute );
+            const TUint32 aCmId,
+            const TUint32 aAttribute );
 
     /**
      * Returns bearer specific integer value. IAP does not need to be loaded for this.
@@ -337,8 +337,8 @@ public:
      * KErrNotFound.
      */
     TUint32 GetBearerInfoIntL(
-            const TUint32& aBearerType,
-            const TUint32& aAttribute );
+            const TUint32 aBearerType,
+            const TUint32 aAttribute );
 
     /**
      * Returns bearer specific boolean value. IAP does not need to be loaded for this.
@@ -348,8 +348,8 @@ public:
      * KErrNotFound.
      */
     TBool GetBearerInfoBoolL(
-            const TUint32& aBearerType,
-            const TUint32& aAttribute );
+            const TUint32 aBearerType,
+            const TUint32 aAttribute );
 
     /**
      * Returns bearer specific 16 bit string value. IAP does not need to be loaded for this.
@@ -359,8 +359,8 @@ public:
      * KErrNotFound.
      */
     HBufC* GetBearerInfoStringL(
-            const TUint32& aBearerType,
-            const TUint32& aAttribute );
+            const TUint32 aBearerType,
+            const TUint32 aAttribute );
 
     /**
      * Returns bearer specific 8 bit string value. IAP does not need to be loaded for this.
@@ -370,8 +370,16 @@ public:
      * KErrNotFound.
      */
     HBufC8* GetBearerInfoString8L(
-            const TUint32& aBearerType,
-            const TUint32& aAttribute );
+            const TUint32 aBearerType,
+            const TUint32 aAttribute );
+
+    /**
+     * Find and return a copy of a connection method item matching the given ID.
+     * Returns KErrNotFound, if the connection method is not found.
+     */
+    TInt GetConnMethodItem(
+            const TUint32 aConnMethodId,
+            TCmmConnMethodItem& aConnMethodItem ) const;
 
     /**
      * Returns all conenction method IDs. Unsupported connection methods are
@@ -385,7 +393,7 @@ public:
      * Returns the number of destinations the provided connection method
      * belongs to.
      */
-    TInt DestinationsContainingConnMethod( const TUint32& aConnMethodId ) const;
+    TInt DestinationsContainingConnMethod( const TUint32 aConnMethodId ) const;
 
     /**
      * Return the EasyWLAN IAP ID, zero if not found or WLAN not supported.
@@ -416,7 +424,7 @@ public:
      * Returns all the valid connection methods under given destination.
      */
     void GetConnMethodsFromDestinationL(
-            const TUint32& aDestinationId,
+            const TUint32 aDestinationId,
             RArray<TCmmConnMethodItem>& aConnMethodArray ) const;
 
     /**
@@ -430,8 +438,8 @@ public:
     void UpdateBearerPriorityArrayL( const RPointerArray<CCmmBearerPriority>& aArray );
 
     TBool ConnMethodInOtherDestination(
-            const TUint32& aConnMethodId,
-            const TUint32& aDestinationId );
+            const TUint32 aConnMethodId,
+            const TUint32 aDestinationId );
     TUint32 NextFreeTemporaryId();
 
     /**
@@ -451,7 +459,7 @@ public:
      * @return Returns ETrue if the CM is connected and EFalse if it's not
      * connected.
      */
-    TBool CheckIfCmConnected( const TUint32& aCmId ) const;
+    TBool CheckIfCmConnected( const TUint32 aCmId ) const;
 
     /**
      * Enumerates connections and checks if any of the connection methods in
@@ -468,32 +476,32 @@ public:
      * Check from database if the given destination is an embedded destination
      * in any other destination.
      */
-    TBool DestinationIsEmbedded( const TUint32& aDestinationId ) const;
+    TBool DestinationIsEmbedded( const TUint32 aDestinationId ) const;
 
     /**
      * Check from database if the given destination has an embedded destination.
      */
-    TBool DestinationHasEmbedded( const TUint32& aDestinationId ) const;
+    TBool DestinationHasEmbedded( const TUint32 aDestinationId ) const;
 
     /**
      * Check from database if the given destination is pointed to by any
      * virtual IAP.
      */
-    TBool DestinationPointedToByVirtualIap( const TUint32& aDestinationId ) const;
+    TBool DestinationPointedToByVirtualIap( const TUint32 aDestinationId ) const;
 
     /**
      * Check from database if the given connection method is pointed to by any
      * virtual IAP.
      */
-    TBool ConnMethodPointedToByVirtualIap( const TUint32& aConnMethodId ) const;
+    TBool ConnMethodPointedToByVirtualIap( const TUint32 aConnMethodId ) const;
 
     /**
      * Check if the given connection method is the only connection method in
      * the given destination and if a virtual IAP points to that destination.
      */
     TBool ConnMethodInDestinationButLocked(
-            const TUint32& aConnMethodId,
-            const TUint32& aDestinationId ) const;
+            const TUint32 aConnMethodId,
+            const TUint32 aDestinationId ) const;
 
     /**
      * Remove all references to the given connection method from the
@@ -524,13 +532,14 @@ public:
      * held in the temporary array iUpdatedConnMethods until successful commit
      * to database. This method is used to find out those real IDs before that.
      */
-    void TranslateTemporaryId( const TUint32& aTemporaryId, TUint32& aRealId ) const;
+    void TranslateTemporaryId( const TUint32 aTemporaryId, TUint32& aRealId ) const;
 
     /**
      * Check if the given connection method can have all references removed and
      * made into an uncategorized connection method.
      */
-    void CheckIfConnMethodReferencesCanBeRemovedL( const CCmmConnMethodInstance& aConnMethodInstance );
+    void CheckIfConnMethodReferencesCanBeRemovedL(
+            const CCmmConnMethodInstance& aConnMethodInstance );
 
     /**
      * Check if given connection method is referenced from any protected destination.
@@ -555,10 +564,10 @@ public:
     CommsDat::TMDBElementId TableId( TCmmDbRecords aRecord );
 
 private:
-    TInt FindDestinationFromCache( const TUint32& aId );
-    TInt FindNotSavedDestinationFromCacheL( const TDesC& aName, const TUint32& aDestinationId );
+    TInt FindDestinationFromCache( const TUint32 aId );
+    TInt FindNotSavedDestinationFromCacheL( const TDesC& aName, const TUint32 aDestinationId );
 
-    TInt FindConnMethodFromCache( const TUint32& aConnMethodId );
+    TInt FindConnMethodFromCache( const TUint32 aConnMethodId );
 
     void ReplaceGenConnSettingsL( const TCmGenConnSettings& aGenConnSettings );
 

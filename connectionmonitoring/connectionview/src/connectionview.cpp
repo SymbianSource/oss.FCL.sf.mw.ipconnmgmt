@@ -45,6 +45,8 @@
 QTM_USE_NAMESPACE
 
 
+const qreal typeLabelWidth = 18.0;
+
 ConnectionView::ConnectionView():
     mNetConfigurationManager(new QNetworkConfigurationManager(this)),
     mSignalMapper(new QSignalMapper(this)),
@@ -180,9 +182,9 @@ void ConnectionView::createGroupBoxesForConnections()
     
     // Toolbar is shown only if there are more than one connections active
     if (mConnectionCount > 1) {
-        mToolBar->show();
+        mMainView->setItemVisible(Hb::ToolBarItem, true);
     } else {
-        mToolBar->hide();
+        mMainView->setItemVisible(Hb::ToolBarItem, false);
     }
     
     // if there are connections, the main view with the connections is shown
@@ -316,8 +318,16 @@ void ConnectionView::addGroupBox(int iapId, QString iapName)
     QGraphicsLinearLayout *labelLayout = new QGraphicsLinearLayout(Qt::Horizontal);
     labelLayout->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     HbLabel *typeLabel = new HbLabel(hbTrId("txt_occ_list_name"));
+
+    // get the pixel size matching the spesified 18 units using the HbDeviceProfile
+    // and set the width of the label
+    HbDeviceProfile profile = HbDeviceProfile::profile(mMainView);
+    typeLabel->setPreferredWidth(typeLabelWidth*profile.unitValue());
+    typeLabel->setObjectName("mConnectionLabel");
+    
     HbLabel *nameLabel = new HbLabel(iapName);
     nameLabel->setAlignment(Qt::AlignRight);
+    nameLabel->setObjectName("mConnectionLabel");
     labelLayout->addItem(typeLabel);
     labelLayout->addItem(nameLabel);
    

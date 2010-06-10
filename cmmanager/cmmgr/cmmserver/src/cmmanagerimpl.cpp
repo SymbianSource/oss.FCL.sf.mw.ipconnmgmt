@@ -70,6 +70,8 @@ CCmManagerImpl::~CCmManagerImpl()
 
     if ( iIsFeatureManagerInitialised )
         {
+        // Feature manager must not be uninitialized earlier. Plugins must be
+        // able to use it.
         FeatureManager::UnInitializeLib();
         }
 
@@ -107,6 +109,8 @@ void CCmManagerImpl::ConstructL()
     {
     OstTraceFunctionEntry0( CCMMANAGERIMPL_CONSTRUCTL_ENTRY );
 
+    // Feature Manager is initialized here, and it can be used by plugins also.
+    // It is uninitialized in destructor.
     FeatureManager::InitializeLibL();
     iIsFeatureManagerInitialised = ETrue;
     iWLanSupport = FeatureManager::FeatureSupported( KFeatureIdProtocolWlan );
@@ -133,22 +137,22 @@ void CCmManagerImpl::CheckTablesL()
 
     TInt err( 0 );
 
-    TRAP( err, iSnapTableId = CCDDataMobilitySelectionPolicyRecord::TableIdL( iTrans->Session() ));
-    if ( err == KErrNotFound )
-        {
-        iSnapTableId = CCDDataMobilitySelectionPolicyRecord::CreateTableL( iTrans->Session() );
-        }
-    else
-        {
-        User::LeaveIfError( err );
-        }
-
     TRAP( err, iBearerPriorityTableId =
             CCDGlobalBearerTypePriorizationRecord::TableIdL( iTrans->Session() ) );
     if ( err == KErrNotFound )
         {
         iBearerPriorityTableId =
                CCDGlobalBearerTypePriorizationRecord::CreateTableL( iTrans->Session() );
+        }
+    else
+        {
+        User::LeaveIfError( err );
+        }
+
+    TRAP( err, iSnapTableId = CCDDataMobilitySelectionPolicyRecord::TableIdL( iTrans->Session() ));
+    if ( err == KErrNotFound )
+        {
+        iSnapTableId = CCDDataMobilitySelectionPolicyRecord::CreateTableL( iTrans->Session() );
         }
     else
         {

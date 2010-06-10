@@ -37,7 +37,7 @@ Mobility Policy Manager ConnMon request handling.
 CMPMConnMonReqs* CMPMConnMonReqs::NewL(CMPMConnMonEvents& aParent,
                                        RConnectionMonitor& aConnMon,
                                        TUint aConnId, 
-                                       CMPMServerSession& aSession )
+                                       CMPMServerSession* aSession )
     {
     CMPMConnMonReqs* self = new (ELeave) CMPMConnMonReqs(
                                 aParent, aConnMon, aConnId, aSession );
@@ -55,7 +55,7 @@ CMPMConnMonReqs* CMPMConnMonReqs::NewL(CMPMConnMonEvents& aParent,
 CMPMConnMonReqs::CMPMConnMonReqs(CMPMConnMonEvents& aParent,
                                  RConnectionMonitor& aConnMon,
                                  TUint aConnId, 
-                                 CMPMServerSession& aSession )
+                                 CMPMServerSession* aSession )
     : CActive(CActive::EPriorityStandard), 
       iParent(aParent), 
       iConnMon(aConnMon), 
@@ -227,6 +227,7 @@ void CMPMConnMonReqs::ErrorCallbackL( TInt aStatus )
         case EScanWLANNetworksStateCached:
             {
             MPMLOGSTRING( "CMPMConnMonReqs::ErrorCallbackL: EScanWLANNetworksState failed" )
+            ASSERT( iSession );
 
             // Disable discarding availability notifications from Connection Monitor.
             // 
@@ -237,23 +238,23 @@ void CMPMConnMonReqs::ErrorCallbackL( TInt aStatus )
             // 
             if( iWlanScanCallback == EWlanScanCallbackChooseIap )
                 {
-                iSession.IapSelectionL()->ChooseIapWLANScanCompletedL( aStatus );
+                iSession->IapSelectionL()->ChooseIapWLANScanCompletedL( aStatus );
                 }
             else if( iWlanScanCallback == EWlanScanCallbackProcessErr )
                 {
-                iSession.ProcessErrorWlanScanCompletedL();
+                iSession->ProcessErrorWlanScanCompletedL();
                 }
             else if( iWlanScanCallback == EWlanScanCallbackCarrierRejected )
                 {
                 // No fresh IAP info available but try to select new IAP
                 // based on whatever existing info there is
                 // 
-                iSession.CompleteCarrierRejected();
+                iSession->CompleteCarrierRejected();
                 }
             else if( iWlanScanCallback == EWlanScanCallbackSortSnap )
                 {
                 // SortSnap was called with old availability information.
-                iSession.CompleteServerSortSNAP();
+                iSession->CompleteServerSortSNAP();
                 }
             else
                 {
@@ -326,6 +327,8 @@ ConnMon request completed with error code = %i", iStatus.Int() )
             case EScanWLANNetworksStateCached:
                 {
                 MPMLOGSTRING( "CMPMConnMonReqs::RunL: EScanWLANNetworksState and EScanWLANNetworksStateCached" )
+                ASSERT( iSession );
+
                 if ( iNextState == EScanWLANNetworksState )
                     {
                     MPMLOGSTRING( "CMPMConnMonReqs::RunL: EScanWLANNetworksState fresh data available from ConnMon" )
@@ -349,19 +352,19 @@ ConnMon request completed with error code = %i", iStatus.Int() )
                 // 
                 if( iWlanScanCallback == EWlanScanCallbackChooseIap )
                     {
-                    iSession.IapSelectionL()->ChooseIapWLANScanCompletedL( iStatus.Int() );
+                    iSession->IapSelectionL()->ChooseIapWLANScanCompletedL( iStatus.Int() );
                     }
                 else if( iWlanScanCallback == EWlanScanCallbackProcessErr )
                     {
-                    iSession.ProcessErrorWlanScanCompletedL();
+                    iSession->ProcessErrorWlanScanCompletedL();
                     }
                 else if( iWlanScanCallback == EWlanScanCallbackCarrierRejected )
                     {
-                    iSession.CompleteCarrierRejected();
+                    iSession->CompleteCarrierRejected();
                     }
                 else if( iWlanScanCallback == EWlanScanCallbackSortSnap )
                     {
-                    iSession.CompleteServerSortSNAP();
+                    iSession->CompleteServerSortSNAP();
                     }
                 else
                     {
@@ -398,9 +401,7 @@ ConnMon request completed with error code = %i", iStatus.Int() )
 
 TInt CMPMConnMonReqs::RunError( TInt aError )
     {
-    MPMLOGSTRING2(
-        "CMPMConnMonReqs::RunError: RunL made a leave with error = %i", 
-        aError )
+    MPMLOGSTRING2( "CMPMConnMonReqs::RunError: RunL made a leave with error = %i", aError )
 
     // Disable discarding availability notifications from Connection Monitor.
     // 
@@ -410,12 +411,14 @@ TInt CMPMConnMonReqs::RunError( TInt aError )
     // 
     if( iWlanScanCallback == EWlanScanCallbackChooseIap )
         {
-        iSession.ChooseIapComplete( aError, NULL );
+        ASSERT( iSession );
+        iSession->ChooseIapComplete( aError, NULL );
         }
     else if( iWlanScanCallback == EWlanScanCallbackProcessErr )
         {
         TBMNeededAction neededAction( EPropagateError );
-        iSession.ProcessErrorComplete( KErrNone, &aError, &neededAction );
+        ASSERT( iSession );
+        iSession->ProcessErrorComplete( KErrNone, &aError, &neededAction );
         }
     else
         {

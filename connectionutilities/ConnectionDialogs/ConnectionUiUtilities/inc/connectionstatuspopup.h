@@ -136,6 +136,32 @@ private:
     
     // The state of the popup
     TPopupState iPopupState;
+    
+    enum TTouchAction
+        {
+        /**
+         * Do nothing
+         */
+        EDoNothing,
+        
+        /**
+         * Open WLAN view
+         */
+        EOpenWlanView,
+        
+        /**
+         *  Open connection view
+         */
+        EOpenCellularView,
+        
+        };
+    
+    /**
+     * Indicates what to do when popup is activated (tapped) and
+     * enables/disables touch activation based on value.
+     */
+    TTouchAction iTouchAction;
+    
     };
 
 #endif /* __CCONNECTIONSTATUSPOPUP_H_ */

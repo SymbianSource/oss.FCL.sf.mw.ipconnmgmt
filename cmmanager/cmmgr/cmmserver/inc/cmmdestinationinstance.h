@@ -70,7 +70,7 @@ private:
     void ConstructL();
 
 public:
-    void SetId( const TUint32& aId );
+    void SetId( const TUint32 aId );
     TUint32 GetId() const;
 
     /**
@@ -91,7 +91,7 @@ public:
     /**
      * Set handle ID.
      */
-    void SetHandle( const TInt& aHandle );
+    void SetHandle( const TInt aHandle );
 
     /**
      * Set the record status for all records.
@@ -130,7 +130,7 @@ public:
             TUint32& aMetadata );
     void SetMetadataL(
             const CMManager::TSnapMetadataField& aMetadataField,
-            const TUint32& aMetadata );
+            const TUint32 aMetadata );
 
     void GetProtectionL( CMManager::TProtectionLevel& aProtectionLevel );
     void SetProtectionL( CMManager::TProtectionLevel aProtectionLevel );
@@ -149,14 +149,14 @@ public:
     /**
      * Return the protection level currently set into this destination instance.
      */
-    CMManager::TProtectionLevel CurrentProtectionLevel();
+    CMManager::TProtectionLevel CurrentProtectionLevelL();
 
     /**
      * Adds a connection method into this destination. Returns the index in
      * the connection method array where the connection method was added.
      */
     TInt AddConnMethodL(
-            const CCmmConnMethodInstance& aConnMethodInstance );
+            CCmmConnMethodInstance& aConnMethodInstance );
 
     /**
      * Adds an embedded destination into this destination. Returns the index in
@@ -181,13 +181,13 @@ public:
      */
     void RemoveConnMethodFromDestinationL(
             const CCmmConnMethodInstance& aConnMethodInstance,
-            const TBool& aTestIfConnected = ETrue );
+            const TBool aTestIfConnected = ETrue );
 
     /**
      * Modifies the priority of a connection method inside this destination.
      */
     void ModifyConnMethodPriorityL(
-            const CCmmConnMethodInstance& aConnMethodInstance,
+            CCmmConnMethodInstance& aConnMethodInstance,
             TUint aIndex );
 
     /**
@@ -195,14 +195,14 @@ public:
      * matches the provided ID. Return NULL if no match is found.
      */
     CCmmConnMethodInstance* FindConnMethodInstanceFromSessionById(
-            const TUint32& aConnMethodId ) const;
+            const TUint32 aConnMethodId ) const;
 
     /**
      * Finds a destination instance that belongs to the same session and matches
      * the provided ID. Return NULL if no match is found.
      */
     CCmmDestinationInstance* FindDestinationInstanceFromSessionById(
-            const TUint32& aDestinationId ) const;
+            const TUint32 aDestinationId ) const;
 
     /**
      * Check from all open destination handles in the same session if the given
@@ -210,15 +210,15 @@ public:
      * skipped.
      */
     TBool ConnMethodInOtherDestinationInSession(
-            const TUint32& aConnMethodId,
-            const TUint32& aDestinationId ) const;
+            const TUint32 aConnMethodId,
+            const TUint32 aDestinationId ) const;
 
     /**
      * Check if the given connection method is in this destination. Include
      * embedded destinations.
      */
     TBool ValidConnMethodIdInDestinationIncludeEmbedded(
-            const TUint32& aConnMethodId ) const;
+            const TUint32 aConnMethodId ) const;
 
     /**
      * Check if the given connection method is inside this destination and if
@@ -227,7 +227,7 @@ public:
      * if it is the only remaining connection method in a destination and a
      * virtual IAP points into that destination.
      */
-    TBool ConnMethodInDestinationButLocked( const TUint32& aConnMethodId ) const;
+    TBool ConnMethodInDestinationButLocked( const TUint32 aConnMethodId ) const;
 
     /**
      * Counts how many connection methods that require priority information are
@@ -250,7 +250,7 @@ public:
      * ID. Checks the current (possibly unsaved) status of this destination
      * handle, not the current status in database.
      */
-    TBool HasEmbeddedWithId( const TUint32& aDestinationId ) const;
+    TBool HasEmbeddedWithId( const TUint32 aDestinationId ) const;
 
     /**
      * After update/delete to database, refresh temporary ID to real ID if
@@ -279,14 +279,14 @@ private:
     /**
      * Loads a requested type of record from database if it is not yet loaded.
      */
-    void RefreshRecordL( TCmmDbRecords aRecordType );
+    void LoadRecordIfMissingL( TCmmDbRecords aRecordType );
 
     void LoadAllRecordsL();
-    void SetMetadataInternetL( const TUint32& aMetadata );
-    void SetMetadataHighlight( const TUint32& aMetadata );
-    void SetMetadataHiddenAgentL( const TUint32& aMetadata );
-    void SetMetadataLocalizationL( const TUint32& aMetadata );
-    void SetMetadataPurposeL( const TUint32& aMetadata );
+    void SetMetadataInternetL( const TUint32 aMetadata );
+    void SetMetadataHighlight( const TUint32 aMetadata );
+    void SetMetadataHiddenAgentL( const TUint32 aMetadata );
+    void SetMetadataLocalizationL( const TUint32 aMetadata );
+    void SetMetadataPurposeL( const TUint32 aMetadata );
 
     /**
      * Checks the current metadata for this destination, and verifies there is

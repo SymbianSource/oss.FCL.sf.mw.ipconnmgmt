@@ -21,6 +21,7 @@
 #define CMMSESSION_H_
 
 #include <e32base.h>
+#include <f32file.h>
 
 #include "cmmcache.h"
 
@@ -77,21 +78,21 @@ public:
      * matches the provided ID. Return NULL if no match is found.
      */
     CCmmConnMethodInstance* FindConnMethodInstanceById(
-            const TUint32& aConnMethodId );
+            const TUint32 aConnMethodId );
 
     /**
      * Finds a destination instance that belongs to this session and matches
      * the provided handle.
      */
     CCmmDestinationInstance* FindDestinationInstanceByHandleL(
-            const TInt& aDestinationHandle );
+            const TInt aDestinationHandle );
 
     /**
      * Finds a destination instance that belongs to this session and matches
      * the provided ID. Return NULL if no match is found.
      */
     CCmmDestinationInstance* FindDestinationInstanceById(
-            const TUint32& aDestinationId );
+            const TUint32 aDestinationId );
 
     /**
      * Check from all open destination handles in this session if the given
@@ -99,8 +100,8 @@ public:
      * skipped.
      */
     TBool ConnMethodInOtherDestination(
-            const TUint32& aConnMethodId,
-            const TUint32& aDestinationId );
+            const TUint32 aConnMethodId,
+            const TUint32 aDestinationId );
 
     /**
      * Check for restrictions for adding an embedded destination from destination
@@ -111,8 +112,8 @@ public:
      * embedded.
      */
     TBool EmbeddedDestinationConflictsFromAllSessions(
-            const TUint32& aDestinationId,
-            const TUint32& aEmbeddedDestinationId );
+            const TUint32 aDestinationId,
+            const TUint32 aEmbeddedDestinationId );
 
     /**
      * Check for restrictions for adding an embedded destination from destination
@@ -123,8 +124,8 @@ public:
      * embedded.
      */
     TBool EmbeddedDestinationConflicts(
-            const TUint32& aDestinationId,
-            const TUint32& aEmbeddedDestinationId );
+            const TUint32 aDestinationId,
+            const TUint32 aEmbeddedDestinationId );
 
     /**
      * After update to database, refresh temporary ID to real ID if necessary
@@ -138,13 +139,13 @@ public:
      * session.
      */
     void RemoveConnMethodFromDestinationHandles(
-            const TUint32& aConnMethodId );
+            const TUint32 aConnMethodId );
 
     /**
      * Notify this sessions destination/connection method handles about an
      * updated/deleted destination/connection method.
      */
-    void RefreshHandles( const TUint32& aId ) const;
+    void RefreshHandles( const TUint32 aId ) const;
 
 private:
     /**
@@ -256,6 +257,11 @@ private:
             const RMessage2& aMessage,
             CCmmConnMethodInstance* aConnectionMethod );
 
+    /**
+     * Checks the disk space.
+     */
+    TBool CheckSpaceBelowCriticalLevelL();
+
 private:
     RMessage2 iMessage;
 
@@ -274,6 +280,12 @@ private:
     CObjectIx* iConnMethodObjects;
 
     CCmmCache& iCache; // Not owned
+
+    // Tells if Fileserver handle is valid.
+    TBool iFsConnected;
+
+    // File server handle.
+    RFs iFs;
     };
 
 #endif // CMMSESSION_H_

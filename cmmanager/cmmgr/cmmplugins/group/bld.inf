@@ -29,6 +29,6 @@ PRJ_MMPFILES
 #include "../cmpluginlan/group/bld.inf"
 #include "../cmpluginwlan/group/bld.inf"
 #include "../cmpluginvpn/group/bld.inf"
-//#include "../cmpluginembdestination/group/bld.inf"
+#include "../cmpluginembdestination/group/bld.inf"
 
 // End of File

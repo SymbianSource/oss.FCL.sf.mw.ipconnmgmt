@@ -161,7 +161,7 @@ TInt RCmManagerApi::RemoveDestinationWrapper(
 // RCmManagerApi::GetDestinationWrapperL()
 //-----------------------------------------------------------------------------
 //
-CCmDestinationWrapper* RCmManagerApi::GetDestinationWrapperL( const TInt& aHandle )
+CCmDestinationWrapper* RCmManagerApi::GetDestinationWrapperL( const TInt aHandle )
     {
     OstTraceFunctionEntry0( RCMMANAGERAPI_GETDESTINATIONWRAPPER_ENTRY );
 
@@ -225,7 +225,7 @@ TInt RCmManagerApi::RemoveConnMethodWrapper(
 // RCmManagerApi::GetConnMethodWrapperL()
 //-----------------------------------------------------------------------------
 //
-CCmConnectionMethodWrapper* RCmManagerApi::GetConnMethodWrapperL( const TInt& aHandle )
+CCmConnectionMethodWrapper* RCmManagerApi::GetConnMethodWrapperL( const TInt aHandle )
     {
     OstTraceFunctionEntry0( RCMMANAGERAPI_GETCONNMETHODWRAPPER_ENTRY );
 

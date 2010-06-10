@@ -149,13 +149,9 @@ CpBaseSettingView *CpDestinationEntryItemData::createSettingView() const
     // Toolbar. Allow arrange if more than one AP is shown
     if (mDestinationId != 0 && mAps->count() > 1) {
         HbToolBar *tb = view->toolBar();
-        HbAction *arrangeAction = tb->addAction(hbTrId("txt_occ_button_arrange"));
-        bool connected = connect(
-            arrangeAction, 
-            SIGNAL(triggered()), 
-            this, 
-            SLOT(activateArrangeMode()));
-        Q_ASSERT(connected);
+        HbIcon arrangeIcon("qtg_mono_sort");
+        HbAction *arrangeAction 
+            = tb->addAction(arrangeIcon, "", this, SLOT(activateArrangeMode()));
     }
     OstTraceFunctionExit0(CPDESTINATIONENTRYITEMDATA_CREATESETTINGVIEW_EXIT);
     return view;        
@@ -211,12 +207,18 @@ void CpDestinationEntryItemData::constructSettingView(CpBaseSettingView *view) c
         iapDataItem->setContentWidgetData(
             QString("text"), 
             apList[i]->getStringAttribute(CMManagerShim::CmName));
+        
+        // Add Icon if found
+        HbIcon iapIcon(resolveApIcon(apList[i]));
+        iapDataItem->setEntryItemIcon(iapIcon);
        
         // Add priority to item if not Uncategorised "Destination"
         if (mDestinationId  != 0) {
             // Access Points are listed in priority order.
             QString priority = hbTrId("txt_occ_dblist_val_priority_l1").arg(i + 1);
             iapDataItem->setContentWidgetData(QString("additionalText"), priority);
+        } else {
+            iapDataItem->setContentWidgetData(QString("stretched"), true);
         }
         
         // Set item disabled if it is protected
@@ -413,13 +415,7 @@ void CpDestinationEntryItemData::activateArrangeMode()
     HbMainWindow *mainWnd = mainWindows.front();
     HbView *view = new HbView();
     createArrangeModeView(view);
-    
-    bool connectionSuccessful = connect(
-            mList,
-            SIGNAL(released(HbListWidgetItem*)),
-            this,
-            SLOT(updateIndex(HbListWidgetItem*)));
-    Q_ASSERT(connectionSuccessful);
+    mList->installEventFilter(this);
     
     if (mainWnd && view) {
         mPreView = mainWnd->currentView();
@@ -470,6 +466,7 @@ void CpDestinationEntryItemData::viewDone()
     
     if (mainWnd && view)  {
         //restore previous status
+        mList->removeEventFilter(this);
         mainWnd->removeView(view);
         mainWnd->setCurrentView(mPreView);
         mPreView = NULL;
@@ -490,6 +487,7 @@ void CpDestinationEntryItemData::viewCancel()
     
     if (mainWnd && view) {
         //restore previous status
+        mList->removeEventFilter(this);
         mainWnd->removeView(view);
         view->deleteLater();
         mainWnd->setCurrentView(mPreView);
@@ -502,14 +500,11 @@ void CpDestinationEntryItemData::viewCancel()
     This function updates access points priorities shown in UI
     when user is in arrange mode.
     
-    @param[in] widgetItem Unused.
-    
     \sa activateArrangeMode()
  */
-void CpDestinationEntryItemData::updateIndex(HbListWidgetItem *widgetItem)
+void CpDestinationEntryItemData::updateIndex()
 {
     OstTraceFunctionEntry0(CPDESTINATIONENTRYITEMDATA_UPDATEINDEX_ENTRY);
-    Q_UNUSED(widgetItem);
     for (int i = 0; i < mList->count(); i++) {
         HbListWidgetItem *item = mList->item(i);
         QString priority = hbTrId("txt_occ_dblist_val_priority_l1").arg(i + 1);
@@ -627,6 +622,9 @@ void CpDestinationEntryItemData::createArrangeModeView(HbView *view)
             uint pri = destination->priority(apList[i].data());
             QString priority = hbTrId("txt_occ_dblist_val_priority_l1").arg(pri);
             item->setSecondaryText(priority);
+            
+            HbIcon iapIcon(resolveApIcon(apList[i]));
+            item->setIcon(iapIcon);
         
             mList->addItem(item);
         }
@@ -646,13 +644,9 @@ void CpDestinationEntryItemData::createArrangeModeView(HbView *view)
     }
     // Toolbar
     HbToolBar *tb = view->toolBar();
-    HbAction *doneAction = tb->addAction(hbTrId("txt_common_button_ok"));
-    bool connected = connect(
-        doneAction, 
-        SIGNAL(triggered()), 
-        this, 
-        SLOT(viewDone()));
-    Q_ASSERT(connected);
+    HbIcon okIcon("qtg_mono_tick");
+    HbAction *doneAction 
+        = tb->addAction(okIcon, "", this, SLOT(viewDone()));
     OstTraceFunctionExit0(CPDESTINATIONENTRYITEMDATA_CREATEARRANGEMODEVIEW_EXIT);
 }
 
@@ -787,3 +781,44 @@ void CpDestinationEntryItemData::showErrorNote(const QString &info)
     note->show();    
     OstTraceFunctionExit0(CPDESTINATIONENTRYITEMDATA_SHOWERRORNOTE_EXIT);
 }
+
+/*!
+    Helper function for showing icons.
+    
+    \return Returns string representing given destination's icon
+ */
+QString CpDestinationEntryItemData::resolveApIcon(QSharedPointer<CmConnectionMethodShim> cm) const
+{
+    QString result(cm->getIcon());
+    
+    if (result.isEmpty()) {
+        uint bearerType = cm->getIntAttribute(CMManagerShim::CmBearerType);
+        switch (bearerType) {
+            case CMManagerShim::BearerTypeWlan:
+                result = "qtg_small_wlan";
+                break;
+            case CMManagerShim::BearerTypePacketData:
+                result = "qtg_small_gprs";
+                break;
+            default:
+                // Unknown bearer type
+                break;
+        }
+    }
+    return result;
+}
+
+/*!
+    Event filter for updating priorities when arrange mode is active.
+    
+    \return Returns false so that event gets forwarded
+ */
+bool CpDestinationEntryItemData::eventFilter(QObject *object, QEvent *event)
+{
+    Q_UNUSED(object);
+    if (event->type() == QEvent::GraphicsSceneMouseRelease) {
+        updateIndex();
+    }
+    return false;
+}
+

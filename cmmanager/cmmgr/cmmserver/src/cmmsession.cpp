@@ -16,7 +16,7 @@
 *
 */
 
-
+#include <sysutil.h>
 #include <cmconnectionmethoddef.h>
 #include <cmpluginembdestinationdef.h>
 #include <cmdefconnvalues.h>
@@ -63,7 +63,8 @@ CCmmSession* CCmmSession::NewLC( CCmmServer& aServer, CCmmCache& aCache )
 CCmmSession::CCmmSession( CCmmServer& aServer, CCmmCache& aCache )
         :
         iServer( aServer ),
-        iCache( aCache )
+        iCache( aCache ),
+        iFsConnected( EFalse )
     {
     OstTraceFunctionEntry0( CCMMSESSION_CCMMSESSION_ENTRY );
 
@@ -128,6 +129,13 @@ CCmmSession::~CCmmSession()
         iServer.RemoveContainer( iConnMethodContainer );
         iConnMethodContainer = NULL;
         }
+
+    if ( iFsConnected )
+        {
+        iFs.Close();
+        iFsConnected = EFalse;
+        }
+
     OstTraceFunctionExit0( DUP1_CCMMSESSION_CCMMSESSION_EXIT );
     }
 
@@ -336,7 +344,7 @@ void CCmmSession::ServiceL( const RMessage2& aMessage )
 // -----------------------------------------------------------------------------
 //
 CCmmConnMethodInstance* CCmmSession::FindConnMethodInstanceById(
-        const TUint32& aConnMethodId )
+        const TUint32 aConnMethodId )
     {
     OstTraceFunctionEntry0( CCMMSESSION_FINDCONNMETHODINSTANCEBYID_ENTRY );
 
@@ -363,7 +371,7 @@ CCmmConnMethodInstance* CCmmSession::FindConnMethodInstanceById(
 // -----------------------------------------------------------------------------
 //
 CCmmDestinationInstance* CCmmSession::FindDestinationInstanceByHandleL(
-        const TInt& aDestinationHandle )
+        const TInt aDestinationHandle )
     {
     OstTraceFunctionEntry0( CCMMSESSION_FINDDESTINATIONINSTANCEBYHANDLEL_ENTRY );
 
@@ -376,7 +384,7 @@ CCmmDestinationInstance* CCmmSession::FindDestinationInstanceByHandleL(
 // -----------------------------------------------------------------------------
 //
 CCmmDestinationInstance* CCmmSession::FindDestinationInstanceById(
-        const TUint32& aDestinationId )
+        const TUint32 aDestinationId )
     {
     OstTraceFunctionEntry0( CCMMSESSION_FINDDESTINATIONINSTANCEBYID_ENTRY );
 
@@ -403,8 +411,8 @@ CCmmDestinationInstance* CCmmSession::FindDestinationInstanceById(
 // -----------------------------------------------------------------------------
 //
 TBool CCmmSession::ConnMethodInOtherDestination(
-        const TUint32& aConnMethodId,
-        const TUint32& aDestinationId )
+        const TUint32 aConnMethodId,
+        const TUint32 aDestinationId )
     {
     OstTraceFunctionEntry0( CCMMSESSION_CONNMETHODINOTHERDESTINATION_ENTRY );
 
@@ -439,12 +447,14 @@ TBool CCmmSession::ConnMethodInOtherDestination(
 // -----------------------------------------------------------------------------
 //
 TBool CCmmSession::EmbeddedDestinationConflictsFromAllSessions(
-        const TUint32& aDestinationId,
-        const TUint32& aEmbeddedDestinationId )
+        const TUint32 aDestinationId,
+        const TUint32 aEmbeddedDestinationId )
     {
     OstTraceFunctionEntry0( CCMMSESSION_EMBEDDEDDESTINATIONCONFLICTSFROMALLSESSIONS_ENTRY );
 
-    return iServer.EmbeddedDestinationConflictsFromAllSessions( aDestinationId, aEmbeddedDestinationId );
+    return iServer.EmbeddedDestinationConflictsFromAllSessions(
+            aDestinationId,
+            aEmbeddedDestinationId );
     }
 
 // -----------------------------------------------------------------------------
@@ -462,8 +472,8 @@ TBool CCmmSession::EmbeddedDestinationConflictsFromAllSessions(
 // -----------------------------------------------------------------------------
 //
 TBool CCmmSession::EmbeddedDestinationConflicts(
-        const TUint32& aDestinationId,
-        const TUint32& aEmbeddedDestinationId )
+        const TUint32 aDestinationId,
+        const TUint32 aEmbeddedDestinationId )
     {
     OstTraceFunctionEntry0( CCMMSESSION_EMBEDDEDDESTINATIONCONFLICTS_ENTRY );
 
@@ -569,7 +579,7 @@ void CCmmSession::RefreshHandlesForAllSessions( const TCmmIdStruct& aIdStruct )
 // ---------------------------------------------------------------------------
 //
 void CCmmSession::RemoveConnMethodFromDestinationHandles(
-        const TUint32& aConnMethodId )
+        const TUint32 aConnMethodId )
     {
     OstTraceFunctionEntry0( CCMMSESSION_REMOVECONNMETHODFROMDESTINATIONHANDLES_ENTRY );
 
@@ -598,7 +608,7 @@ void CCmmSession::RemoveConnMethodFromDestinationHandles(
 // updated/deleted destination/connection method.
 // ---------------------------------------------------------------------------
 //
-void CCmmSession::RefreshHandles( const TUint32& aId ) const
+void CCmmSession::RefreshHandles( const TUint32 aId ) const
     {
     OstTraceFunctionEntry0( CCMMSESSION_REFRESHHANDLES_ENTRY );
 
@@ -1031,7 +1041,7 @@ void CCmmSession::GetUncategorizedIconL( const RMessage2& aMessage )
     {
     OstTraceFunctionEntry0( CCMMSESSION_GETUNCATEGORIZEDICONL_ENTRY );
 
-    HBufC* result = KNullDesC().AllocLC(); //TODO, Is there an uncategorized icon?
+    HBufC* result = KCmmUncategorizedIconName().AllocLC();
 
     TInt bufferLen = aMessage.GetDesMaxLength( 0 );
     if ( result->Length() > bufferLen )
@@ -1133,7 +1143,8 @@ void CCmmSession::GetBearerPriorityArrayL( const RMessage2& aMessage )
     for ( TInt i = 0; i < bearerCountInArray; i++ )
         {
         // Skip if service type is not valid.
-        if ( bearerPriorityArray[i]->ServiceType() && bearerPriorityArray[i]->ServiceType()->Length() > 0 )
+        if ( bearerPriorityArray[i]->ServiceType() &&
+                bearerPriorityArray[i]->ServiceType()->Length() > 0 )
             {
             maxBufLen += KCmmBearerPriorityHeaderLength; // Priorities and servicetype length.
             maxBufLen += bearerPriorityArray[i]->ServiceType()->Length();
@@ -1171,7 +1182,8 @@ void CCmmSession::GetBearerPriorityArrayL( const RMessage2& aMessage )
     for ( TInt i = 0; i < bearerCountInArray; i++ )
         {
         // Skip if service type is not valid.
-        if ( bearerPriorityArray[i]->ServiceType() && bearerPriorityArray[i]->ServiceType()->Length() > 0 )
+        if ( bearerPriorityArray[i]->ServiceType() &&
+                bearerPriorityArray[i]->ServiceType()->Length() > 0 )
             {
             TUint32 priority = bearerPriorityArray[i]->Priority();
             TUint32 uiPriority = bearerPriorityArray[i]->UiPriority();
@@ -1202,6 +1214,12 @@ void CCmmSession::GetBearerPriorityArrayL( const RMessage2& aMessage )
 void CCmmSession::UpdateBearerPriorityArrayL( const RMessage2& aMessage )
     {
     OstTraceFunctionEntry0( CCMMSESSION_UPDATEBEARERPRIORITYARRAYL_ENTRY );
+
+    // Check the disk space.
+    if ( CheckSpaceBelowCriticalLevelL() )
+        {
+        User::Leave( KErrDiskFull );
+        }
 
     HBufC* bearerPriorityBuf = HBufC::NewLC( aMessage.GetDesMaxLengthL( 0 ) );
     TPtr bearerPriorityBufPtr( bearerPriorityBuf->Des() );
@@ -1243,7 +1261,10 @@ void CCmmSession::UpdateBearerPriorityArrayL( const RMessage2& aMessage )
             position += stringLength;
 
             TPtrC tempServiceType( serviceName->Des() );
-            CCmmBearerPriority* item = CCmmBearerPriority::NewLC( tempServiceType, priority, uiPriority );
+            CCmmBearerPriority* item = CCmmBearerPriority::NewLC(
+                    tempServiceType,
+                    priority,
+                    uiPriority );
             bearerPriorityArray.AppendL( item );
             CleanupStack::Pop( item );
 
@@ -1270,8 +1291,16 @@ void CCmmSession::CopyConnMethodL( const RMessage2& aMessage )
     {
     OstTraceFunctionEntry0( CCMMSESSION_COPYCONNMETHODL_ENTRY );
 
-    CCmmDestinationInstance* destination = ( CCmmDestinationInstance* )iDestinationObjects->AtL( aMessage.Int0() );
-    CCmmConnMethodInstance* connMethod = ( CCmmConnMethodInstance* )iConnMethodObjects->AtL( aMessage.Int1() );
+    // Check the disk space.
+    if ( CheckSpaceBelowCriticalLevelL() )
+        {
+        User::Leave( KErrDiskFull );
+        }
+
+    CCmmDestinationInstance* destination =
+            ( CCmmDestinationInstance* )iDestinationObjects->AtL( aMessage.Int0() );
+    CCmmConnMethodInstance* connMethod =
+            ( CCmmConnMethodInstance* )iConnMethodObjects->AtL( aMessage.Int1() );
 
     // Can't add an embedded destination this way.
     if ( connMethod->IsEmbeddedDestination() )
@@ -1316,6 +1345,12 @@ void CCmmSession::CopyConnMethodL( const RMessage2& aMessage )
 void CCmmSession::MoveConnMethodL( const RMessage2& aMessage )
     {
     OstTraceFunctionEntry0( CCMMSESSION_MOVECONNMETHODL_ENTRY );
+
+    // Check the disk space.
+    if ( CheckSpaceBelowCriticalLevelL() )
+        {
+        User::Leave( KErrDiskFull );
+        }
 
     // Read data from client request.
     TPckgBuf<TCmmIpcStructMoveConnMethod> attributesPckg;
@@ -1796,10 +1831,12 @@ void CCmmSession::CreateDestinationWithNameAndIdL( const RMessage2& aMessage )
         }
 
     // Check if a destination with given ID exists (or is already created but not saved).
-    if ( iCache.DestinationExistsWithId( destinationId ) ||
-            iCache.DestinationOpenWithId( destinationId ) )
+    //TODO, Implement one single method for this check in CCmmCache-class, and call that. CCmmCache::DestinationOpenWithId() can be removed after that.
+    if ( iCache.DestinationExistsWithId( destinationId ) || iCache.DestinationOpenWithId( destinationId ) )
         {
         User::Leave( KErrAlreadyExists );
+        //TODO: Destination ID is decided based on network record ID. Connection methods also use network records.
+        //TODO: Add a check here too see that the necessary network record ID is also available.
         }
 
     // Load and check name.
@@ -1915,12 +1952,19 @@ void CCmmSession::GetConnMethodPriorityL( const RMessage2& aMessage )
     User::LeaveIfError( index );
 
     // Check if the connection method is an embedded destination.
-    if ( connMethodInstance->GetBearerType() == KUidEmbeddedDestination )
+    if ( connMethodInstance->IsEmbeddedDestination() )
         {
         index = CMManager::KDataMobilitySelectionPolicyPriorityWildCard;
         }
 
-    //TODO, what if CM is virtual?
+    // If this is a virtual IAP that doesn't link to an IAP, the priority is wildcard.
+    else if ( connMethodInstance->GetBoolAttributeL( CMManager::ECmVirtual ) )
+        {
+        if ( connMethodInstance->GetIntAttributeL( CMManager::ECmNextLayerIapId ) == 0 )
+            {
+            index = CMManager::KDataMobilitySelectionPolicyPriorityWildCard;
+            }
+        }
 
     TUint priority = ( TUint )index;
     TPckg<TUint> priorityPckg( priority );
@@ -2153,7 +2197,7 @@ void CCmmSession::DestAddConnMethodL( const RMessage2& aMessage )
 
     // Check the protection and if protected check the needed capabilities.
     CMManager::TProtectionLevel protLevel =
-            destination->CurrentProtectionLevel();
+            destination->CurrentProtectionLevelL();
     if ( protLevel == CMManager::EProtLevel1 )
         {
         CPolicyServer::TCustomResult capabilities( CPolicyServer::EPass );
@@ -2192,7 +2236,7 @@ void CCmmSession::DestAddEmbeddedDestinationL( const RMessage2& aMessage )
 
     // Check the protection and if protected check the needed capabilities.
     CMManager::TProtectionLevel protLevel = 
-            destinationInstance->CurrentProtectionLevel();
+            destinationInstance->CurrentProtectionLevelL();
     if ( protLevel == CMManager::EProtLevel1 )
         {
         CPolicyServer::TCustomResult capabilities( CPolicyServer::EPass );
@@ -2229,7 +2273,7 @@ void CCmmSession::DestDeleteConnMethodL( const RMessage2& aMessage )
     // Check the protection of destination and if protected check the needed
     // capabilities.
     CMManager::TProtectionLevel protLevel = 
-            destinationInstance->CurrentProtectionLevel();
+            destinationInstance->CurrentProtectionLevelL();
     if ( protLevel == CMManager::EProtLevel1 ||
             protLevel == CMManager::EProtLevel3 )
         {
@@ -2266,7 +2310,7 @@ void CCmmSession::DestRemoveConnMethodL( const RMessage2& aMessage )
     // Check the protection of destination and if protected check the needed
     // capabilities.
     CMManager::TProtectionLevel protLevel = 
-            destinationInstance->CurrentProtectionLevel();
+            destinationInstance->CurrentProtectionLevelL();
     if ( protLevel == CMManager::EProtLevel1 ||
             protLevel == CMManager::EProtLevel3 )
         {
@@ -2297,7 +2341,7 @@ void CCmmSession::ModifyConnMethodPriorityL( const RMessage2& aMessage )
     // Check the protection of destination and if protected check the needed
     // capabilities.
     CMManager::TProtectionLevel protLevel = 
-            destinationInstance->CurrentProtectionLevel();
+            destinationInstance->CurrentProtectionLevelL();
     if ( protLevel == CMManager::EProtLevel1 ||
             protLevel == CMManager::EProtLevel3 )
         {
@@ -2341,7 +2385,7 @@ void CCmmSession::SetDestinationNameL( const RMessage2& aMessage )
 
     // Check the protection and if protected check the needed capabilities.
     CMManager::TProtectionLevel protLevel =
-            destinationInstance->CurrentProtectionLevel();
+            destinationInstance->CurrentProtectionLevelL();
     if ( protLevel == CMManager::EProtLevel1 ||
             protLevel == CMManager::EProtLevel2 )
         {
@@ -2391,7 +2435,7 @@ void CCmmSession::SetDestinationIconL( const RMessage2& aMessage )
 
     // Check the protection and if protected check the needed capabilities.
     CMManager::TProtectionLevel protLevel =
-            destinationInstance->CurrentProtectionLevel(); //TODO, check the current level can't be altered without proper capas.
+            destinationInstance->CurrentProtectionLevelL();
     if ( protLevel == CMManager::EProtLevel1 ||
             protLevel == CMManager::EProtLevel2 )
         {
@@ -2433,7 +2477,7 @@ void CCmmSession::SetDestinationMetadataL( const RMessage2& aMessage )
 
     // Check the protection and if protected check the needed capabilities.
     CMManager::TProtectionLevel protLevel =
-            destinationInstance->CurrentProtectionLevel();
+            destinationInstance->CurrentProtectionLevelL();
     if ( protLevel == CMManager::EProtLevel1 ||
             protLevel == CMManager::EProtLevel2 )
         {
@@ -2492,7 +2536,7 @@ void CCmmSession::SetDestinationHiddenL( const RMessage2& aMessage )
 
     // Check the protection and if protected check the needed capabilities.
     CMManager::TProtectionLevel protLevel =
-            destinationInstance->CurrentProtectionLevel();
+            destinationInstance->CurrentProtectionLevelL();
     if ( protLevel == CMManager::EProtLevel1 ||
             protLevel == CMManager::EProtLevel2 )
         {
@@ -2518,12 +2562,18 @@ void CCmmSession::UpdateDestinationL( const RMessage2& aMessage )
     {
     OstTraceFunctionEntry0( CCMMSESSION_UPDATEDESTINATIONL_ENTRY );
 
+    // Check the disk space.
+    if ( CheckSpaceBelowCriticalLevelL() )
+        {
+        User::Leave( KErrDiskFull );
+        }
+
     CCmmDestinationInstance* destinationInstance =
             ( CCmmDestinationInstance* )iDestinationObjects->AtL( aMessage.Int3() );
 
     // Check the protection and if protected check the needed capabilities
     CMManager::TProtectionLevel protLevel =
-            destinationInstance->CurrentProtectionLevel();
+            destinationInstance->CurrentProtectionLevelL();
     if ( protLevel == CMManager::EProtLevel1 ||
          protLevel == CMManager::EProtLevel2 ||
          protLevel == CMManager::EProtLevel3 )
@@ -2555,7 +2605,7 @@ void CCmmSession::DeleteDestinationL( const RMessage2& aMessage )
     // Check the protection of destination and if protected check the needed
     // capabilities.
     CMManager::TProtectionLevel protLevel =
-            destinationInstance->CurrentProtectionLevel();
+            destinationInstance->CurrentProtectionLevelL();
     if ( protLevel == CMManager::EProtLevel1 ||
          protLevel == CMManager::EProtLevel2 ||
          protLevel == CMManager::EProtLevel3 )
@@ -2747,10 +2797,16 @@ void CCmmSession::UpdateConnMethodL( const RMessage2& aMessage )
     {
     OstTraceFunctionEntry0( CCMMSESSION_UPDATECONNMETHODL_ENTRY );
 
+    // Check the disk space.
+    if ( CheckSpaceBelowCriticalLevelL() )
+        {
+        User::Leave( KErrDiskFull );
+        }
+
     CCmmConnMethodInstance* connMethodInstance =
             ( CCmmConnMethodInstance* )iConnMethodObjects->AtL( aMessage.Int3() );
 
-    // Check if the Client has capabilities to delete this CM.
+    // Check if the Client has capabilities to modify this CM.
     CheckCapabilitiesForProtectedCML( aMessage, connMethodInstance );
 
     connMethodInstance->UpdateL();
@@ -2787,6 +2843,12 @@ void CCmmSession::DeleteConnMethodL( const RMessage2& aMessage )
 
     CCmmConnMethodInstance* connMethodInstance =
             ( CCmmConnMethodInstance* )iConnMethodObjects->AtL( aMessage.Int3() );
+
+    // Embedded destinations cannot be deleted through connection method handle.
+    if ( connMethodInstance->IsEmbeddedDestination() )
+        {
+        User::Leave( KErrNotSupported );
+        }
 
     // Check if the Client has capabilities to delete this CM.
     CheckCapabilitiesForProtectedCML( aMessage, connMethodInstance );
@@ -3245,7 +3307,7 @@ void CCmmSession::CreateConnMethodToDestL( const RMessage2& aMessage )
 
     // Check the protection and if protected check the needed capabilities.
     CMManager::TProtectionLevel protLevel =
-            destination->CurrentProtectionLevel();
+            destination->CurrentProtectionLevelL();
     if ( protLevel == CMManager::EProtLevel1 )
         {
         CPolicyServer::TCustomResult capabilities( CPolicyServer::EPass );
@@ -3294,7 +3356,7 @@ void CCmmSession::CreateConnMethodToDestWithIdL( const RMessage2& aMessage )
 
     // Check the protection and if protected check the needed capabilities.
     CMManager::TProtectionLevel protLevel =
-            destination->CurrentProtectionLevel();
+            destination->CurrentProtectionLevelL();
     if ( protLevel == CMManager::EProtLevel1 )
         {
         CPolicyServer::TCustomResult capabilities( CPolicyServer::EPass );
@@ -3387,7 +3449,8 @@ void CCmmSession::CreateCopyOfExistingL( const RMessage2& aMessage )
     }
 
 // -----------------------------------------------------------------------------
-// Creates a copy of an existing connection method and opens a handle to it.
+// Opens a destination handle to the embedded destination that the provided
+// connection method handle represents.
 // -----------------------------------------------------------------------------
 //
 void CCmmSession::GetEmbeddedDestinationL( const RMessage2& aMessage )
@@ -3397,7 +3460,8 @@ void CCmmSession::GetEmbeddedDestinationL( const RMessage2& aMessage )
     CCmmConnMethodInstance* connMethodInstance =
             ( CCmmConnMethodInstance* )iConnMethodObjects->AtL( aMessage.Int3() );
 
-    if ( connMethodInstance->GetBearerType() != KUidEmbeddedDestination )
+    // Check this connection method realy represents an embedded destination.
+    if ( !connMethodInstance->IsEmbeddedDestination() )
         {
         User::Leave( KErrNotSupported );
         }
@@ -3446,6 +3510,7 @@ void CCmmSession::GetEmbeddedDestinationL( const RMessage2& aMessage )
         iDestinationObjects->Remove( handle );
         User::Leave( error );
         }
+
     OstTraceFunctionExit0( CCMMSESSION_GETEMBEDDEDDESTINATIONL_EXIT );
     }
 
@@ -3471,6 +3536,29 @@ void CCmmSession::CheckCapabilitiesForProtectedCML(
         }
 
     OstTraceFunctionExit0( CCMMSESSION_CHECKCAPABILITIESFORPROTECTEDCML_EXIT );
+    }
+
+// ---------------------------------------------------------------------------
+// Check if there is space enough in the disk.
+// ---------------------------------------------------------------------------
+//
+TBool CCmmSession::CheckSpaceBelowCriticalLevelL()
+    {
+    if ( !iFsConnected )
+        {
+        TInt err = iFs.Connect();
+        if ( err )
+            {
+            // Error happened in connect --> disk space cannot be checked,
+            // --> return information that everything is ok.
+            return EFalse;
+            }
+        iFsConnected = ETrue;
+        }
+
+    TBool belowCL = SysUtil::FFSSpaceBelowCriticalLevelL( &iFs, KMinimumDiskSpace );
+
+    return belowCL;
     }
 
 // End of file

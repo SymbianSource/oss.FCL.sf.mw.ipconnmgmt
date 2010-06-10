@@ -423,10 +423,10 @@ TUint32 CCmPluginVpn::GetBearerIntAttributeL(
             retVal = bearer;
             }
             break;
-        case ECmNextLayerIapId: //falls through
+        case ECmNextLayerIapId:
         case EVpnIapId:
             {            
-            TUint recordId = serviceRecord->iServiceIAP;
+            TUint recordId = serviceRecord->iServiceIAP;//TODO, can't use this straight? link containd the ID.
             if (recordId != 0)
                 {
                 CCDIAPRecord *iapRecord = static_cast<CCDIAPRecord *>
@@ -440,23 +440,23 @@ TUint32 CCmPluginVpn::GetBearerIntAttributeL(
                 }
             }
             break;
-        case EVpnNetworkId: //falls through      
+        case EVpnNetworkId:
         case ECmNextLayerSNAPId:
             {
             TUint recordId = serviceRecord->iServiceSNAP;
-            if (recordId != 0)
+            if ( recordId != 0 )
                 {
-                CCDAccessPointRecord* accessPointRecord = static_cast<CCDAccessPointRecord *>
-                                                        ( CCDRecordBase::RecordFactoryL( KCDTIdAccessPointRecord ) );
+                CCDAccessPointRecord* accessPointRecord = static_cast<CCDAccessPointRecord*>(
+                        CCDRecordBase::RecordFactoryL( KCDTIdAccessPointRecord ) );
                 CleanupStack::PushL( accessPointRecord );
                 accessPointRecord->SetRecordId( recordId );
                 accessPointRecord->LoadL( iSession );
                 retVal = accessPointRecord->iRecordTag;
                 CleanupStack::PopAndDestroy( accessPointRecord );
-                
-                if (aAttribute == EVpnNetworkId)
+
+                if ( aAttribute == EVpnNetworkId )
                     {
-                    __ASSERT_DEBUG( retVal >= KCmmDestIdIntervalMin, User::Invariant() );
+                    __ASSERT_DEBUG( retVal >= KCmmDestIdIntervalMin, User::Invariant() );//TODO, replace with iCustomSelectionPolicy
                     retVal -= KCmmDestIdIntervalMin;
                     }
                 }
@@ -596,22 +596,23 @@ void CCmPluginVpn::SetBearerIntAttributeL(
                 {
                 User::Leave( KErrArgument );
                 }
-            } //falls through
+            }
+            // Fallthrough intended.
         case ECmNextLayerSNAPId:
             {
-            if ( aValue <= (KCmmDestIdIntervalLegacyMax - 2) )
+            if ( aValue <= ( KCmmDestIdIntervalLegacyMax - 2 ) )
                 {
                 aValue += KCmmDestIdIntervalMin;
                 }
-            
+
             if ( aValue <= KCmmDestIdIntervalMin ||
-                 aValue > KCmmDestIdIntervalMax - 2 )
+                    aValue > KCmmDestIdIntervalMax - 2 )
                 {
                 User::Leave( KErrArgument );
                 }
-            
-            CCDAccessPointRecord* accessPointRecord = static_cast<CCDAccessPointRecord *>
-                                                    ( CCDRecordBase::RecordFactoryL( KCDTIdAccessPointRecord ) );
+
+            CCDAccessPointRecord* accessPointRecord = static_cast<CCDAccessPointRecord*>(
+                    CCDRecordBase::RecordFactoryL( KCDTIdAccessPointRecord ) );
             CleanupStack::PushL( accessPointRecord );
             accessPointRecord->iRecordTag = aValue;
             if ( accessPointRecord->FindL( iSession ) )
@@ -625,7 +626,7 @@ void CCmPluginVpn::SetBearerIntAttributeL(
             else
                 {
                 User::Leave( KErrArgument );
-                }            
+                }
             CleanupStack::PopAndDestroy( accessPointRecord );
             }
             break;

@@ -103,6 +103,11 @@ CpIapItem::CpIapItem(
             this,
             SLOT(showItemMenu(QPointF)));
         itemDataHelper.addConnection(this,SIGNAL(clicked()),this,SLOT(onLaunchView()));
+        itemDataHelper.addConnection(
+            this,
+            SIGNAL(visibleChanged()),
+            this, 
+            SLOT(updateIap()));
     }
     OstTraceFunctionExit0(CPIAPITEM_CPIAPITEM_EXIT);
 }
@@ -247,10 +252,9 @@ void CpIapItem::deleteConfirmed()
 /*!
     Updates access point item name when the item becomes visible.
  */
-void CpIapItem::updateIap(const QModelIndex index)
+void CpIapItem::updateIap()
 {
     OstTrace0( TRACE_FLOW, CPIAPITEM_UPDATEIAP_ENTRY, "CpIapItem::updateIap entry" );
-    Q_UNUSED(index);
     try {
         CmConnectionMethodShim *cm = mCmm->connectionMethod(mIapId);
         this->setContentWidgetData("text", cm->getStringAttribute(CMManagerShim::CmName));
@@ -258,14 +262,6 @@ void CpIapItem::updateIap(const QModelIndex index)
     } catch (const std::exception&) {
         OstTrace0( TRACE_NORMAL, CPIAPITEM_UPDATEIAP, "CpIapItem::updateIap: exception caught, CM name reading failed" );
     }
-    // Disconnect because we need to do this only after returning
-    // from accees point settings view
-    CpItemDataHelper *itemDataHelper = new CpItemDataHelper();
-    itemDataHelper->disconnectFromForm( 
-        SIGNAL(itemShown(const QModelIndex)),
-        this, 
-        SLOT(updateIap(const QModelIndex)));
-    delete itemDataHelper;
     OstTrace0( TRACE_FLOW, DUP1_CPIAPITEM_UPDATEIAP_EXIT, "CpIapItem::updateIap exit" );
 }
 
@@ -286,7 +282,6 @@ CpBaseSettingView *CpIapItem::createSettingView() const
 {
     OstTraceFunctionEntry0(CPIAPITEM_CREATESETTINGVIEW_ENTRY);
     CpBaseSettingView *view = NULL;
-    CpItemDataHelper *itemDataHelper = new CpItemDataHelper();
     if (mBearerPlugin != NULL) {
         CmConnectionMethodShim *cm = mCmm->connectionMethod(mIapId);
         bool cmConnected = cm->getBoolAttribute(CMManagerShim::CmConnected);
@@ -294,15 +289,9 @@ CpBaseSettingView *CpIapItem::createSettingView() const
         
         // Do not open connected AP
         if (!cmConnected) {
-            CpIapItem *iap = const_cast<CpIapItem*>(this);
-            itemDataHelper->connectToForm( 
-                SIGNAL(itemShown(const QModelIndex)),
-                iap, 
-                SLOT(updateIap(const QModelIndex)));
             view = mBearerPlugin->createSettingView(mIapId);
         }
     }
-    delete itemDataHelper;
     OstTraceFunctionExit0(CPIAPITEM_CREATESETTINGVIEW_EXIT);
     return view;
 }

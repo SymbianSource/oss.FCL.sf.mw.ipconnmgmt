@@ -34,11 +34,13 @@ PRJ_EXPORTS
 /*
 \agnmodel\inc\AGMCOMON.H
 */
+
+
+PRJ_TESTEXPORTS
 ../rom/testflextimer.iby CORE_MW_LAYER_IBY_EXPORT_PATH(testflextimer.iby)
 ../init/testflextimer.ini /epoc32/data/z/system/data/testframework.ini
 ../init/testflextimer.ini /epoc32/wins/c/TestFramework/testframework.ini
 ../init/testflextimer.ini /epoc32/winscw/c/TestFramework/testframework.ini
-
 
 PRJ_TESTMMPFILES
 	

@@ -1,0 +1,211 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<hbdocument version="1.0">
+    <object name="testAction" type="HbAction">
+        <string name="text" value="Test"/>
+    </object>
+    <widget name="testApplView" type="HbView">
+        <widget name="content" role="HbView:widget" type="HbWidget">
+            <widget name="container_P" type="HbWidget">
+                <widget name="label_1" type="HbLabel">
+                    <string name="plainText" value="Select Dialog Type:"/>
+                </widget>
+                <widget name="checkbox_dest" type="HbCheckBox">
+                    <enums name="checkState" value="Checked"/>
+                    <string name="text" value="Destinations"/>
+                </widget>
+                <widget name="checkbox_cm" type="HbCheckBox">
+                    <enums name="checkState" value="Checked"/>
+                    <string name="text" value="Connection Methods"/>
+                </widget>
+                <widget name="label" type="HbLabel">
+                    <string name="plainText" value="Bearer Filter:"/>
+                </widget>
+                <widget name="checkbox_wlan" type="HbCheckBox">
+                    <string name="text" value="WLAN"/>
+                </widget>
+                <widget name="checkbox_gprs" type="HbCheckBox">
+                    <string name="text" value="GPRS"/>
+                </widget>
+                <widget name="label_2" type="HbLabel">
+                    <string name="plainText" value="Selection:"/>
+                </widget>
+                <widget name="container_mode" type="HbWidget">
+                    <widget name="mode" type="HbComboBox">
+                        <container name="items" type="stringlist">
+                            <string value="Destination"/>
+                            <string value="Connection Method"/>
+                        </container>
+                        <sizepolicy horizontalPolicy="Expanding" horizontalStretch="0" verticalPolicy="Preferred" verticalStretch="0"/>
+                    </widget>
+                    <widget name="label_3" type="HbLabel">
+                        <sizepolicy horizontalPolicy="Preferred" horizontalStretch="0" verticalPolicy="Preferred" verticalStretch="0"/>
+                        <string name="plainText" value="Mode:"/>
+                    </widget>
+                    <real name="z" value="0"/>
+                    <layout orientation="Horizontal" type="linear">
+                        <linearitem itemname="label_3"/>
+                        <linearitem itemname="mode"/>
+                    </layout>
+                </widget>
+                <widget name="container_id" type="HbWidget">
+                    <widget name="label_4" type="HbLabel">
+                        <string name="plainText" value="Id:"/>
+                    </widget>
+                    <widget name="id" type="HbLineEdit">
+                        <enums name="alignment" value="AlignLeft|AlignLeading"/>
+                        <string name="text" value="0"/>
+                    </widget>
+                    <real name="z" value="0"/>
+                    <layout orientation="Horizontal" type="linear">
+                        <linearitem itemname="label_4"/>
+                        <linearitem itemname="id"/>
+                    </layout>
+                </widget>
+                <widget name="label_5" type="HbLabel">
+                    <real name="z" value="1"/>
+                    <string name="plainText" value="Result:"/>
+                </widget>
+                <widget name="result" type="HbLabel">
+                    <enums name="alignment" value="AlignLeft|AlignVCenter|AlignHCenter|AlignLeading"/>
+                    <real name="z" value="3"/>
+                    <string name="plainText" value="-"/>
+                </widget>
+                <widget name="toolBar" type="HbToolBar">
+                    <sizepolicy horizontalPolicy="Minimum" horizontalStretch="0" verticalPolicy="Preferred" verticalStretch="0"/>
+                    <ref object="testAction" role="HbToolBar:addAction"/>
+                </widget>
+                <real name="z" value="1"/>
+                <sizepolicy horizontalPolicy="Ignored" horizontalStretch="0" verticalPolicy="Ignored" verticalStretch="0"/>
+                <layout orientation="Vertical" type="linear">
+                    <linearitem itemname="label_1"/>
+                    <linearitem itemname="checkbox_dest"/>
+                    <linearitem itemname="checkbox_cm"/>
+                    <linearitem itemname="label"/>
+                    <linearitem itemname="checkbox_wlan"/>
+                    <linearitem itemname="checkbox_gprs"/>
+                    <linearitem itemname="label_2"/>
+                    <linearitem itemname="container_mode"/>
+                    <linearitem itemname="container_id"/>
+                    <linearitem itemname="label_5"/>
+                    <linearitem itemname="result"/>
+                    <linearitem itemname="toolBar"/>
+                </layout>
+            </widget>
+            <widget name="container_L1" type="HbWidget">
+                <layout orientation="Horizontal" type="linear"/>
+            </widget>
+            <widget name="container_L2" type="HbWidget">
+                <layout orientation="Vertical" type="linear"/>
+            </widget>
+            <widget name="container_L3" type="HbWidget">
+                <layout orientation="Vertical" type="linear"/>
+            </widget>
+            <layout type="anchor">
+                <anchoritem dst="container_P" dstEdge="LEFT" spacing="0un" src="" srcEdge="LEFT"/>
+                <anchoritem dst="container_P" dstEdge="TOP" spacing="0un" src="" srcEdge="TOP"/>
+                <anchoritem dst="container_P" dstEdge="RIGHT" spacing="0un" src="" srcEdge="RIGHT"/>
+                <anchoritem dst="container_P" dstEdge="BOTTOM" spacing="0un" src="" srcEdge="BOTTOM"/>
+            </layout>
+        </widget>
+        <string name="title" value="cmapplsettingsui"/>
+    </widget>
+    <section name="portrait">
+        <widget name="content" role="HbView:widget" type="HbWidget">
+            <widget name="container_P" type="HbWidget">
+                <widget name="label_1" type="HbLabel"/>
+                <widget name="checkbox_dest" type="HbCheckBox"/>
+                <widget name="checkbox_cm" type="HbCheckBox"/>
+                <widget name="label" type="HbLabel"/>
+                <widget name="checkbox_wlan" type="HbCheckBox"/>
+                <widget name="checkbox_gprs" type="HbCheckBox"/>
+                <widget name="label_2" type="HbLabel"/>
+                <widget name="container_mode" type="HbWidget">
+                    <widget name="mode" type="HbComboBox"/>
+                    <widget name="label_3" type="HbLabel"/>
+                </widget>
+                <widget name="container_id" type="HbWidget">
+                    <widget name="label_4" type="HbLabel"/>
+                    <widget name="id" type="HbLineEdit"/>
+                </widget>
+                <widget name="label_5" type="HbLabel"/>
+                <widget name="result" type="HbLabel"/>
+                <widget name="toolBar" type="HbToolBar"/>
+                <layout orientation="Vertical" type="linear">
+                    <linearitem itemname="label_1"/>
+                    <linearitem itemname="checkbox_dest"/>
+                    <linearitem itemname="checkbox_cm"/>
+                    <linearitem itemname="label"/>
+                    <linearitem itemname="checkbox_wlan"/>
+                    <linearitem itemname="checkbox_gprs"/>
+                    <linearitem itemname="label_2"/>
+                    <linearitem itemname="container_mode"/>
+                    <linearitem itemname="container_id"/>
+                    <linearitem itemname="label_5"/>
+                    <linearitem itemname="result"/>
+                    <linearitem itemname="toolBar"/>
+                </layout>
+            </widget>
+        </widget>
+    </section>
+    <section name="landscape">
+        <widget name="content" role="HbView:widget" type="HbWidget">
+            <widget name="container_L1" type="HbWidget">
+                <widget name="container_L2" type="HbWidget">
+                    <widget name="label_1" type="HbLabel"/>
+                    <widget name="checkbox_dest" type="HbCheckBox"/>
+                    <widget name="checkbox_cm" type="HbCheckBox"/>
+                    <widget name="label" type="HbLabel"/>
+                    <widget name="checkbox_wlan" type="HbCheckBox"/>
+                    <widget name="checkbox_gprs" type="HbCheckBox"/>
+                    <sizepolicy horizontalPolicy="Ignored" horizontalStretch="0" verticalPolicy="Ignored" verticalStretch="0"/>
+                    <layout orientation="Vertical" type="linear">
+                        <linearitem itemname="label_1"/>
+                        <linearitem itemname="checkbox_dest"/>
+                        <linearitem itemname="checkbox_cm"/>
+                        <linearitem itemname="label"/>
+                        <linearitem itemname="checkbox_wlan"/>
+                        <linearitem itemname="checkbox_gprs"/>
+                    </layout>
+                </widget>
+                <widget name="container_L3" type="HbWidget">
+                    <widget name="label_2" type="HbLabel"/>
+                    <widget name="container_mode" type="HbWidget">
+                        <widget name="mode" type="HbComboBox"/>
+                        <widget name="label_3" type="HbLabel"/>
+                    </widget>
+                    <widget name="container_id" type="HbWidget">
+                        <widget name="label_4" type="HbLabel"/>
+                        <widget name="id" type="HbLineEdit"/>
+                    </widget>
+                    <widget name="label_5" type="HbLabel"/>
+                    <widget name="result" type="HbLabel"/>
+                    <widget name="toolBar" type="HbToolBar"/>
+                    <sizepolicy horizontalPolicy="Ignored" horizontalStretch="0" verticalPolicy="Ignored" verticalStretch="0"/>
+                    <layout orientation="Vertical" type="linear">
+                        <linearitem itemname="label_2"/>
+                        <linearitem itemname="container_mode"/>
+                        <linearitem itemname="container_id"/>
+                        <linearitem itemname="label_5"/>
+                        <linearitem itemname="result"/>
+                        <linearitem itemname="toolBar"/>
+                    </layout>
+                </widget>
+                <layout orientation="Horizontal" type="linear">
+                    <linearitem itemname="container_L2"/>
+                    <linearitem itemname="container_L3"/>
+                </layout>
+            </widget>
+            <layout type="anchor">
+                <anchoritem dst="container_L1" dstEdge="LEFT" spacing="0un" src="" srcEdge="LEFT"/>
+                <anchoritem dst="container_L1" dstEdge="TOP" spacing="0un" src="" srcEdge="TOP"/>
+                <anchoritem dst="container_L1" dstEdge="RIGHT" spacing="0un" src="" srcEdge="RIGHT"/>
+                <anchoritem dst="container_L1" dstEdge="BOTTOM" spacing="0un" src="" srcEdge="BOTTOM"/>
+            </layout>
+        </widget>
+    </section>
+    <metadata activeUIState="Common ui state" display="NHD portrait" unit="un">
+        <uistate name="Common ui state" sections="#common"/>
+        <uistate name="landscape" sections="#common landscape"/>
+        <uistate name="portrait" sections="#common portrait"/>
+    </metadata>
+</hbdocument>

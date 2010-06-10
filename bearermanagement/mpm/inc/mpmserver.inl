@@ -72,15 +72,6 @@ inline TBool CMPMServer::IsWLANScanRequired() const
     }
 
 // -----------------------------------------------------------------------------
-// CMPMServer::DisconnectQueue
-// -----------------------------------------------------------------------------
-//
-inline CArrayPtrFlat<CMPMDisconnectDlg>* CMPMServer::DisconnectQueue()
-    {
-    return iDisconnectQueue;
-    }
-
-// -----------------------------------------------------------------------------
 // CMPMServer::RoamingQueue
 // -----------------------------------------------------------------------------
 //

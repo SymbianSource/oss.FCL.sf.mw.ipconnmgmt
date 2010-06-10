@@ -31,16 +31,16 @@ public:
      */
     static CCmmBearerPriority* NewL(
             const TDesC& aServiceType,
-            const TUint& aPriority,
-            const TUint& aUiPriority );
+            const TUint aPriority,
+            const TUint aUiPriority );
 
     /**
      * Two phased constuction.
      */
     static CCmmBearerPriority* NewLC(
             const TDesC& aServiceType,
-            const TUint& aPriority,
-            const TUint& aUiPriority );
+            const TUint aPriority,
+            const TUint aUiPriority );
 
     /**
      * Destructor.
@@ -51,7 +51,7 @@ private:
     /**
      * Constructor.
      */
-    CCmmBearerPriority( const TUint& aPriority, const TUint& aUiPriority );
+    CCmmBearerPriority( const TUint aPriority, const TUint aUiPriority );
 
     /**
      * 2nd phase constructor.
