@@ -36,7 +36,7 @@ LIBRARY         euser.lib
 LIBRARY         connmon.lib
 DEBUGLIBRARY    flogger.lib
 
-#if defined(ARMCC)
+#if defined(EABI)
     DEFFILE ../EABI/ConnMonExt_EKA2.def
 #elif defined( WINSCW )
     DEFFILE ../BWinsCw/CONNMONEXT_EKA2.def

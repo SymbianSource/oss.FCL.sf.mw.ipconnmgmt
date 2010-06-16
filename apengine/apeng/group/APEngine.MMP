@@ -73,7 +73,7 @@ LIBRARY     FeatMgr.lib
 LIBRARY		Vpnapi.lib
 LIBRARY     centralrepository.lib
 
-#if defined(ARMCC)
+#if defined(EABI)
     DEFFILE ../EABI/ApEngine_EKA2.def
 #elif defined( WINSCW )
     DEFFILE ../BWinsCw/ApEngine_EKA2.def

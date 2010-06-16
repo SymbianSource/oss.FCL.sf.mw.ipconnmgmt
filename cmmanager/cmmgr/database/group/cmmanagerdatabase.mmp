@@ -47,7 +47,7 @@ LIBRARY         COMMSDAT.lib
 //LIBRARY         flogger.lib
 
 
-#if defined(ARMCC)
+#if defined(EABI)
     DEFFILE ../eabi/cmmanagerdatabase.def
 #elif defined( WINSCW )
     DEFFILE ../bwinscw/cmmanagerdatabase.def

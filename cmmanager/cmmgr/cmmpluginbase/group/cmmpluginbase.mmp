@@ -53,7 +53,7 @@ LIBRARY     ecom.lib
 LIBRARY     efsrv.lib
 LIBRARY     hbcore.lib
 
-#if defined(ARMCC)
+#if defined(EABI)
     DEFFILE ../EABI/cmmpluginbase.def
 #else
     DEFFILE ../BWinsCw/cmmpluginbase.def

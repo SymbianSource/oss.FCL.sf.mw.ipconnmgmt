@@ -58,7 +58,7 @@ LIBRARY         euser.lib
 
 DEBUGLIBRARY    flogger.lib
 
-#if defined(ARMCC)
+#if defined(EABI)
 DEFFILE ../EABI/CmManager_prot_setup.def
 #elif defined( WINSCW )
 DEFFILE ../BWinsCw/CmManager_prot_setup.def

@@ -87,7 +87,7 @@ DEBUGLIBRARY flogger.lib
 DEBUGLIBRARY efsrv.lib
 
 
-#if defined(ARMCC)
+#if defined(EABI)
     DEFFILE ../DisconnectDlg/EABI/DisconnectDlg.DEF
 #elif defined( WINSCW )
     DEFFILE ../DisconnectDlg/BWinsCw/DISCONNECTDLG.def

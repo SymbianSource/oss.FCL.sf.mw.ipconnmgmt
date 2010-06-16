@@ -78,7 +78,7 @@ LIBRARY         centralrepository.lib
 
 DEBUGLIBRARY    flogger.lib
 
-#if defined(ARMCC)
+#if defined(EABI)
 DEFFILE ../EABI/ConnMon_EKA2.def
 #elif defined( WINSCW )
 DEFFILE ../BWINSCW/CONNMON_EKA2.def

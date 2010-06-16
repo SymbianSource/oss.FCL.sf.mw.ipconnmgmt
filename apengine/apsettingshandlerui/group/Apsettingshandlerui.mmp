@@ -93,7 +93,7 @@ LIBRARY ConnectionUiUtilities.lib
 LIBRARY centralrepository.lib
 
 
-#if defined(ARMCC)
+#if defined(EABI)
     DEFFILE ../EABI/ApSettingsHandlerUI_EKA2.def
 #elif defined( WINSCW )
     DEFFILE ../BWinsCw/ApSettingsHandlerUI_EKA2.def

@@ -50,7 +50,7 @@ DEBUGLIBRARY efsrv.lib
 
 
 
-#if defined(ARMCC)
+#if defined(EABI)
     DEFFILE ../DisconnectDlg/EABI/DISCONNECTDLGCLIENT.def
 #elif defined( WINSCW )
     DEFFILE ../DisconnectDlg/BWinsCw/DISCONNECTDLGCLIENT.def

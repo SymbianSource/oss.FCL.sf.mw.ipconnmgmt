@@ -114,7 +114,7 @@ LIBRARY     etel3rdparty.lib
 LIBRARY     HbCore.lib
 LIBRARY     HbWidgets.lib
 
-#if defined(ARMCC)
+#if defined(EABI)
 DEFFILE ../ConnectionUiUtilities/EABI/ConnUiUtilsNotif.DEF
 #elif defined( WINSCW )
     DEFFILE ../ConnectionUiUtilities/BWinsCw/ConnUiUtilsNotif.DEF
