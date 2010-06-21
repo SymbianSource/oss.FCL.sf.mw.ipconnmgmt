@@ -493,17 +493,7 @@ void CMPMIapSelection::CompleteExplicitSnapConnectionL()
     // Check if any suitable IAP's were found, if not then complete selection with error code
     if ( validateIapId == 0 )
         {
-        if ( !( iChooseIapPref.NoteBehaviour() & TExtendedConnPref::ENoteBehaviourConnDisableQueries ) &&
-                ( iChooseIapPref.ConnType() == TMpmConnPref::EConnTypeDefault ||
-                ( iChooseIapPref.ConnType() == TMpmConnPref::EConnTypeExplicit &&
-                  iCommsDatAccess->IsInternetSnapL( 0, snap ) ) ) )
-            {
-            ImplicitConnectionL();
-            }
-        else
-            {
-            ChooseIapComplete( KErrNotFound, NULL );
-            }
+        ChooseIapComplete( KErrNotFound, NULL );
         CleanupStack::PopAndDestroy( &availableIAPList );
         return;
         }
@@ -737,9 +727,10 @@ void CMPMIapSelection::ChooseIapComplete(
         !( iChooseIapPref.NoteBehaviour() &
            TExtendedConnPref::ENoteBehaviourConnDisableNotes ) )
         {
-        TBool connectionAlreadyActive =
-            iSession->MyServer().CheckIfStarted( aPolicyPref->IapId(), 
-                                                 iSession->ConnectionId() );
+        TConnectionState state =
+            iSession->MyServer().CheckUsageOfIap( aPolicyPref->IapId(), 
+                                                  iSession->ConnectionId() );
+        TBool connectionAlreadyActive = (state == EStarted || state == EStarting || state == ERoaming);
         if ( !connectionAlreadyActive &&
                 ( iSession->IsMMSIap( aPolicyPref->IapId() ) == EFalse ) )
             {

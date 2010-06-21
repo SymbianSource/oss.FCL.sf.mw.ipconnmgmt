@@ -19,7 +19,6 @@
 #define GSCONNSETTINGSSELECTIONDLG_H
 
 #include <aknradiobuttonsettingpage.h>
-#include <AknInfoPopupNoteController.h>
 
 class CGSConnSettingsSelectionDlg : public CAknRadioButtonSettingPage
     {
@@ -32,21 +31,12 @@ public:
      * @param aResourceID               Text at top of setting pane
      * @param aCurrentSelectionIndex    Current slected item
      * @param aItemArray                Pointer to array of loaded resource texts for radio buttons
-     * @param aPopupResource            ID of popup note resource array
      * @return 
      * 
     */
     static CGSConnSettingsSelectionDlg* NewL(TInt aResourceID, 
             TInt& aCurrentSelectionIndex, 
-            const MDesCArray* aItemArray,
-            TInt aPopupResource);
-    
-    /**
-     * Symbian OS two-phased constructor
-     * 
-     * @param aPopupResource    ID of popup note resource array
-    */
-    void ConstructL(TInt aPopupResource);
+            const MDesCArray* aItemArray );
     
     /**
      * C++ default constructor.
@@ -54,45 +44,24 @@ public:
      * @param aResourceID               Text at top of setting pane
      * @param aCurrentSelectionIndex    Current slected item
      * @param aItemArray                Pointer to array of loaded resource texts for radio buttons
-     * @param aPopupResource            ID of popup note resource array
     */
     CGSConnSettingsSelectionDlg( 
             TInt aResourceID, 
             TInt& aCurrentSelectionIndex, 
-            const MDesCArray* aItemArray,
-            TInt aPopupResource);
+            const MDesCArray* aItemArray );
+			
     /**
      * Destructor.
      */
     virtual ~CGSConnSettingsSelectionDlg();
     
 private:
+
     //From CAknListBoxSettingPage
     void HandleListBoxEventL(CEikListBox* aListBox, TListBoxEvent aEventType);
     
     //From CAknSettingPage
     TKeyResponse OfferKeyEventL( const TKeyEvent& aKeyEvent, TEventCode aType);
-
-private:
-    //New Functions
-
-    /**
-    * Displays info popup on the screen
-    * 
-    */
-    void ShowInfoPopupL();
-
-private: //Private data
-
-    /**
-     * Pointer to popup note controller. Owned.
-     */
-    CAknInfoPopupNoteController* iPopupController;
-    
-    /**
-     * Pointer to loaded popup note resources. Owned.
-     */
-    CDesCArrayFlat* iPopupItems;
 
     };
 #endif // GSCONNSETTINGSSELECTIONDLG_H

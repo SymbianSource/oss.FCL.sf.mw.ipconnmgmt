@@ -241,6 +241,11 @@ class CGSConnSettingsPlugin : public CGSBaseView, public MGSPluginLoadObserver, 
          * Flag is set when wlan is supported
          */
         TBool iIsWlanSupported;
+        
+        /**
+         * Flag is uised to ignore duplicate Window's events
+         */
+        TBool iProcessing;
     };
 
 

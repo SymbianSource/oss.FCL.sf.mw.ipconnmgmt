@@ -60,6 +60,7 @@
 //
 CGSConnSettingsPlugin::CGSConnSettingsPlugin()
     : iResourceLoader( *iCoeEnv )
+    , iProcessing( EFalse )
     {
     }
 
@@ -329,8 +330,16 @@ void CGSConnSettingsPlugin::HandleListBoxSelectionL()
                 // In these cases the plugin is a dialog:
                 case EGSItemTypeSettingDialog:
                 case EGSItemTypeSingleLargeDialog:
-                     selectedPlugin->HandleSelection( EGSSelectionByMenu );
-                     break;
+                    // Ignore duplicate Window's events
+                    if( iProcessing )
+                        {
+                        return;
+                        }
+                    
+                    iProcessing = ETrue;
+                    selectedPlugin->HandleSelection( EGSSelectionByMenu );
+                    iProcessing = EFalse;
+                    break;
                 default:
                     break;
                 }

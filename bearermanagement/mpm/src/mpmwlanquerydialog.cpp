@@ -495,8 +495,9 @@ void CMPMWlanQueryDialog::StartWlanQueryL()
         }
     // if easy wlan iap and easy wlan is not already started
     // 
-    else if( iIapSelection.Session()->MyServer().CommsDatAccess()->CheckEasyWLanL( iWlanIapId )  && 
-             !iIapSelection.Session()->MyServer().CheckIfStarted( iWlanIapId, iIapSelection.Session()->ConnectionId() ) &&
+    else if( iIapSelection.Session()->MyServer().CommsDatAccess()->CheckEasyWLanL( iWlanIapId ) && 
+             iIapSelection.Session()->MyServer().CheckUsageOfIap(
+                     iWlanIapId, iIapSelection.Session()->ConnectionId() ) != EStarted &&
              iNetworkPrefs().iSsId.Length() == 0 &&
              iOverrideStatus == KErrNone )
         {

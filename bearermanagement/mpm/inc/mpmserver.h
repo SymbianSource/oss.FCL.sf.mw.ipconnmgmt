@@ -352,18 +352,21 @@ class CMPMServer : public CPolicyServer
                                  TConnectionState&   aState );
 
         /**
-        * Checks if the connection is started for the Iap Id.
+        * Checks if the connection is started for the Iap Id,
+        * returning the state.
         * @since 3.2
         * @param aIapId IAP Id of the connection
         * @param aConnId Connection Id
+        * @return Connection State, EIdle if not found
         */
-        TBool CheckIfStarted( const TUint32 aIapId, 
+        TConnectionState CheckUsageOfIap( const TUint32 aIapId, 
                               const TConnectionId aConnId );
 
         /**
-        * Checks if a connection is started with wlan iap.
+        * Checks if any WLAN connection is started.
         * @since 3.2
         * @param aCdbAccess
+		* @return IAP ID of the started WLAN connection, zero if not found
         */
         TUint32 IsWlanConnectionStartedL( const CMPMCommsDatAccess* aCdbAccess );
         
@@ -421,6 +424,7 @@ class CMPMServer : public CPolicyServer
         * preferred IAP notifications.
         * @since 3.2
         * @param aConnId Connection Id
+        * @return ETrue if registered
         */
         TBool RegisteredForBMPrefIAP( const TConnectionId aConnId );
 
@@ -623,8 +627,9 @@ class CMPMServer : public CPolicyServer
         void AppendWlanQueryQueueL( CMPMWlanQueryDialog* aDlg );
 
         /**
-        * Removes the first item from the iWlanQueryQueue.
+        * Removes the dialog from the iWlanQueryQueue.
         * @since 3.2
+        * @param aDlg dialog to be removed.
         */
         inline void RemoveFromWlanQueryQueue( CMPMWlanQueryDialog* aDlg );
 
@@ -704,6 +709,7 @@ class CMPMServer : public CPolicyServer
         * Returns the Commsdat access instance
         *
         * @since 3.2
+        * @return Commsdat access instance.
         */
         inline CMPMCommsDatAccess* CommsDatAccess();
 
@@ -719,6 +725,7 @@ class CMPMServer : public CPolicyServer
         * Starts forced roaming sequence to connected wlan
         *
         * @param aIapInfo Info about available IAPs
+        * @return Always zero...
         * @since 5.2
         */
         static TInt StartForcedRoamingToConnectedWlanL( TAny* aUpdater );
@@ -735,6 +742,7 @@ class CMPMServer : public CPolicyServer
         * Checks whether phone is in visitor network.
         *
         * @since 5.2
+		* @return ETrue if phone is in visitor network, EFalse otherwise
         */
         TBool IsVisitorNetwork() const;
         
@@ -742,6 +750,7 @@ class CMPMServer : public CPolicyServer
         * Returns the RoamingWatcher pointer
         *
         * @since 5.2
+		* @return RoamingWatcher pointer
         */
         inline CMPMRoamingWatcher* RoamingWatcher() const;
         
@@ -759,7 +768,11 @@ class CMPMServer : public CPolicyServer
         CSession2* NewSessionL( const TVersion& aVersion,
                                 const RMessage2& aMessage) const;
 
-        // Stops connection of certain IAP, zero for all connections
+        /**
+		* Stops either all connections or a certain IAP
+		*
+        * @param IAP ID to be stopped, zero for all connections
+		*/
         void StopConnections( TInt aIapId = 0 );
 
     public:
@@ -867,24 +880,28 @@ class CMPMServer : public CPolicyServer
         /**
         * Offline mode watcher updates the mode variable stored by MPM server.
         * @since 5.2
+        * @param aNewModeValue New offline mode value
         */
-        void UpdateOfflineMode( TInt newModeValue );
+        void UpdateOfflineMode( TInt aNewModeValue );
 
         /**
         * Returns true if the phone is in offline mode.
         * @since 5.2
+        * @return ETrue if phone is in offline mode, EFalse otherwise.
         */
         TBool IsPhoneOffline();
 
         /**
         * Tells the "Use WLAN in offline mode" query response.
         * @since 5.2
+        * @return Response of offline mode query (Undefined if not executed)
         */
         TOfflineWlanQueryResponse OfflineWlanQueryResponse();
 
         /**
         * Called when the "Use WLAN in offline mode" query has been responded.
         * @since 5.2
+        * @param aResponse Sets the Offline mode query response value.
         */
         void SetOfflineWlanQueryResponse( TOfflineWlanQueryResponse aResponse);
 

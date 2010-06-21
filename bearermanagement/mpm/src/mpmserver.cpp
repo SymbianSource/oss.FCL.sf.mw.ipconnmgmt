@@ -701,26 +701,25 @@ void CMPMServer::GetConnectionState( const TConnectionId    aConnId,
     }
 
 // -----------------------------------------------------------------------------
-// CMPMServer::CheckIfStarted
+// CMPMServer::CheckUsageOfIap
 // -----------------------------------------------------------------------------
 //
-TBool CMPMServer::CheckIfStarted( const TUint32 aIapId , 
-                                  const TConnectionId aConnId )
+TConnectionState CMPMServer::CheckUsageOfIap( const TUint32 aIapId , 
+                                  const TConnectionId aOwnConnId )
     {
-    MPMLOGSTRING3( "CMPMServer::CheckIfStarted - aIapId = %i, aConnId = 0x%x", 
-                  aIapId, aConnId )
+    MPMLOGSTRING3( "CMPMServer::CheckUsageOfIap - aIapId = %i, aOwnConnId = 0x%x", 
+                  aIapId, aOwnConnId )
 
-    TConnectionState state( EIdle );
-    TBool stopLoop( EFalse );
+    TConnectionState state = EIdle;
 
     // Loop all connections until EStarted is found or no more connections
     // 
-    for ( TInt i = 0; ( ( i < iActiveBMConns.Count() ) && !stopLoop ); i++ )
+    for ( TInt i = 0; i < iActiveBMConns.Count(); i++ )
         {
         // Check if IAP Id matches; exclude matching with own connection
         // 
         if ( iActiveBMConns[i].iConnInfo.iIapId == aIapId && 
-             iActiveBMConns[i].iConnInfo.iConnId != aConnId)
+             iActiveBMConns[i].iConnInfo.iConnId != aOwnConnId)
             {
             state = iActiveBMConns[i].iConnInfo.iState;  
 
@@ -728,7 +727,7 @@ TBool CMPMServer::CheckIfStarted( const TUint32 aIapId ,
             // 
             if ( state == EStarted )
                 {
-                stopLoop = ETrue;
+                break; // Breaks the for loop
                 }
             }
         }
@@ -738,44 +737,33 @@ TBool CMPMServer::CheckIfStarted( const TUint32 aIapId ,
         {
         case EStarting:
             {
-            MPMLOGSTRING( "CMPMServer::CheckIfStarted - Starting" )
+            MPMLOGSTRING( "CMPMServer::CheckUsageOfIap - Starting" )
             break;
             }
         case EStarted:
             {
-            MPMLOGSTRING( "CMPMServer::CheckIfStarted - Started" )
+            MPMLOGSTRING( "CMPMServer::CheckUsageOfIap - Started" )
             break;
             }
         case EIdle:
             {
-            MPMLOGSTRING( "CMPMServer::CheckIfStarted - Idle" )
+            MPMLOGSTRING( "CMPMServer::CheckUsageOfIap - Idle" )
             break;
             }
         case ERoaming:
             {
-            MPMLOGSTRING( "CMPMServer::CheckIfStarted - Roaming" )
+            MPMLOGSTRING( "CMPMServer::CheckUsageOfIap - Roaming" )
             break;
             }
         default:
             {
-            MPMLOGSTRING( "CMPMServer::CheckIfStarted - Unknown" )
+            MPMLOGSTRING( "CMPMServer::CheckUsageOfIap - Unknown" )
             break;
             }
         }
 #endif // _DEBUG
         
-    //Return true incase the matching connection is in EStarting state also because
-    //sometimes when connections are started simultaneously (for same iapID) 
-    //the first connection may still be in EStarting state. 
-    //
-    if ( state == EStarted || state == EStarting )
-        {
-        return ETrue;
-        }
-    else
-        {
-        return EFalse;
-        }
+    return state;
     }
 
 // -----------------------------------------------------------------------------

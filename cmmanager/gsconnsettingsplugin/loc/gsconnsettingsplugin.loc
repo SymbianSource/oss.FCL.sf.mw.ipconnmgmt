@@ -120,20 +120,5 @@
 //r: 5.2
 #define qtn_occ_sett_data_usage_home_nw_disabled "Disabled"
 
-//d: Info popup note for "Known" selection of "Join WLAN networks"
-//l: popup_preview_text_window_t1/opt5
-//w:
-//r: 5.2
-//
-#define qtn_occ_info_popup_wlan_usage_known "Phone will automatically switch from cellular data connection to a known WLAN network when available."
-
-
-//d: Info popup note for "Manual" selection of "Join WLAN networks"
-//l: popup_preview_text_window_t1/opt5
-//w:
-//r: 5.2
-//
-#define qtn_occ_info_popup_wlan_usage_manual "Phone will not switch from cellular data connection to a WLAN connection automatically. WLAN network can be taken into use via WLAN wizard."
-
 
 // End of File

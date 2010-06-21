@@ -813,8 +813,10 @@ TBool CMPMServerSession::IsConfirmFirstL( const TUint32 aIapId )
 
     // check whether a started connection exists which already 
     // uses this IAP. If so, it won't need to be confirmed again
-    // 
-    if( iMyServer.CheckIfStarted( aIapId, iConnId ) )
+    //
+    TConnectionState state = iMyServer.CheckUsageOfIap( aIapId, iConnId );
+
+    if ( state == EStarted || state == EStarting || state == ERoaming )
         {
         MPMLOGSTRING(
         "CMPMServerSession::IsConfirmFirstL - IAP already started, \
@@ -2872,7 +2874,8 @@ No notification requested" )
     if ( !( iIapSelection->MpmConnPref().NoteBehaviour() &
             TExtendedConnPref::ENoteBehaviourConnDisableNotes) )
         {
-        TBool connectionAlreadyActive = iMyServer.CheckIfStarted( aIapId, iConnId );
+        TConnectionState state = iMyServer.CheckUsageOfIap( aIapId, iConnId );
+        TBool connectionAlreadyActive = (state == EStarted || state == EStarting || state == ERoaming);
         CConnectionUiUtilities* connUiUtils = NULL;
         if (!connectionAlreadyActive )
             {

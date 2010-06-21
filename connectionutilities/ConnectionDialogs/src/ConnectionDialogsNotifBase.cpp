@@ -25,7 +25,12 @@
 #include <eikenv.h>
 #include <data_caging_path_literals.hrh>
 
+#include "ConnectionDialogsLogger.h"
 #include "ConnectionDialogsNotifBase.h"
+
+#ifdef _DEBUG
+#include <e32debug.h>
+#endif
 
 // CONSTANTS
 
@@ -157,6 +162,8 @@ TBool CConnectionDialogsNotifBase::AutolockOn()
     {
     TBool retval( EFalse );
 
+    CLOG_ENTERFN( "CConnectionDialogsNotifBase::AutolockOn" );
+    
 #ifdef RD_STARTUP_CHANGE
     TInt err( KErrNone );
     TInt autolockOn( 0 );
@@ -164,8 +171,18 @@ TBool CConnectionDialogsNotifBase::AutolockOn()
     err = RProperty::Get( KPSUidCoreApplicationUIs, 
             KCoreAppUIsAutolockStatus, 
             autolockOn );
-    retval = (err == KErrNone && autolockOn > EAutolockOff);
+    // In boot there may come EAutolockStatusUninitialized, when it should be EAutolockOn...
+    retval = (err == KErrNone && autolockOn != EAutolockOff); 
+
+#ifdef _DEBUG
+    RDebug::Print( _L("CConnectionDialogsNotifBase::AutolockOn: autolockOn: %d"), autolockOn );
+    RDebug::Print( _L("CConnectionDialogsNotifBase::AutolockOn: err: %d"), err );
+    RDebug::Print( _L("CConnectionDialogsNotifBase::AutolockOn: %d"), retval );
 #endif
+    
+#endif // RD_STARTUP_CHANGE
+    
+    CLOG_LEAVEFN( "CConnectionDialogsNotifBase::AutolockOn" );
 
     return retval; 
     }
