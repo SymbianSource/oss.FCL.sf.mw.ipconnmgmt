@@ -66,7 +66,8 @@ public slots:
     void shareIap();
     void queryDialogClosed();
     void deleteConfirmed();
-    void updateIap(const QModelIndex index);
+    void updateIap();
+    void openIap();
 
 protected:
     

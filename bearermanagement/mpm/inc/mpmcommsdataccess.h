@@ -358,6 +358,14 @@ class CMPMCommsDatAccess : public CBase
         * @return Snap id.
         */
         TUint32 DestinationIdL( CMManager::TSnapPurpose aSnapPurpose );
+        
+        /**
+        * Returns the default connection values
+        * @since symbian^4
+        * @param aType The type of the id
+        * @param aId The id of the snap or the iap
+        */
+        void GetDefaultConnectionL( TCmDefConnType& aType, TUint32& aId );
         	
         /**
         * Finds the real IAP behind the virtual IAP.

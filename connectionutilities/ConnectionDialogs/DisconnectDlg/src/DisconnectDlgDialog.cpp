@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2004 Nokia Corporation and/or its subsidiary(-ies). 
+* Copyright (c) 2004-2010 Nokia Corporation and/or its subsidiary(-ies). 
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -12,8 +12,7 @@
 * Contributors:
 *
 * Description: 
-*     Defines the pop-up selection list with the active connections.
-*
+* Defines the pop-up selection list with the active connections.
 */
 
 
@@ -26,7 +25,7 @@
 #include "ConnectionDialogsLogger.h"
 #include "ExpiryTimer.h"
 
-#include <DisconnectDlg.rsg>
+#include <disconnectdlg.rsg>
 #include <AknIconArray.h>
 #include <StringLoader.h>
 #include <uikon/eiksrvui.h>
@@ -222,19 +221,17 @@ TBool CDisconnectDlgDialog::OkToExitL( TInt aButtonId )
         TInt result = iConnModel->EndConnection( toBeClosedItem );
         iDisconnectDialogUi->iDialogRun = EFalse;
         if ( result )
-            {
-            TInt resId = R_QTN_CMON_INFO_CONN_ALREADY_END;
+            {            
             if( KNullUnit == result )
                 {
                 result = KErrNone;
                 }
             else
-                {
-                resId = R_QTN_NETW_INFO_DISCONNECT_FAILED;
+                {               
+                iConnModel->InfoNoteL( R_QTN_NETW_INFO_DISCONNECT_FAILED );
                 result = KErrGeneral;
                 }
-
-            iConnModel->InfoNoteL( resId );
+            
             iDisconnectDialogUi->CompleteL( result );
             }
         }

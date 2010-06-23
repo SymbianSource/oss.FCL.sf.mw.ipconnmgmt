@@ -23,7 +23,6 @@
 #include "mpmserversession.h"
 #include "mpmcommsdataccess.h"
 
-class CMPMWlanQueryDialog;
 class CMPMConfirmDlgStarting;
 class TMpmConnPref;
 
@@ -91,16 +90,13 @@ public: // CMPMServerSession interface
 
 public:
     /**
-     * Starts Wlan query if Iap is wlan iap.
+     * Returns true if given iap is a wlan iap.
      *
      * @param aIapId Id of Iap
-     * @param aIsRoaming True if wlan query is for roaming
-     * @return ETrue if wlan query was started
-     * @since S60 v3.2
+     * @return ETrue if iap aIap is wlan
+     * @since symbian^4
      */
-    TBool StartWlanQueryIfNeededL(
-        TUint32 aIapId,
-        TBool aIsRoaming = EFalse );
+    TBool IsIapWlanL( TUint32 aIapId );
 
     /**
      * Part of selecting best IAP at connection start. Called when WLAN scan
@@ -121,18 +117,6 @@ public:
      * preference should be passed
      */
     void ChooseIapComplete( TInt aError, const TMpmConnPref* aPolicyPref );
-
-    /**
-     * Callback function used after Wlan network has been selected. 
-     * Uses HandleUserIapSelectionL to complete IAP selection.
-     *
-     * @since 3.2
-     * @param aError Error code from selection
-     * @param aIapId Element id of IAP record if different than reported before. 
-     * May be 0, when error occurred in selection or when no new Iap id is set.
-     *
-     */
-    void UserWlanSelectionDoneL( TInt aError, TUint32 aIapId );
 
     /**
      * Stops displaying the starting dialog.
@@ -304,9 +288,6 @@ private:
 
     // Pointer to Confirmation dialog.
     CMPMConfirmDlgStarting* iConfirmDlgStarting;
-
-    // Pointer to Wlan query dialog.
-    CMPMWlanQueryDialog* iWlanDialog;
 
     // Stores the boolean value whether next best iaps 
     // exists in explicit connection start.

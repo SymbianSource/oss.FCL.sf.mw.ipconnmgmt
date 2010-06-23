@@ -26,8 +26,8 @@
 //
 CCmmBearerPriority* CCmmBearerPriority::NewL(
         const TDesC& aServiceType,
-        const TUint& aPriority,
-        const TUint& aUiPriority )
+        const TUint aPriority,
+        const TUint aUiPriority )
     {
     CCmmBearerPriority* self = CCmmBearerPriority::NewLC( aServiceType, aPriority, aUiPriority );
     CleanupStack::Pop( self );
@@ -40,8 +40,8 @@ CCmmBearerPriority* CCmmBearerPriority::NewL(
 //
 CCmmBearerPriority* CCmmBearerPriority::NewLC(
         const TDesC& aServiceType,
-        const TUint& aPriority,
-        const TUint& aUiPriority )
+        const TUint aPriority,
+        const TUint aUiPriority )
     {
     CCmmBearerPriority* self = new( ELeave ) CCmmBearerPriority( aPriority, aUiPriority );
     CleanupStack::PushL( self );
@@ -55,8 +55,8 @@ CCmmBearerPriority* CCmmBearerPriority::NewLC(
 // ---------------------------------------------------------------------------
 //
 CCmmBearerPriority::CCmmBearerPriority(
-        const TUint& aPriority,
-        const TUint& aUiPriority )
+        const TUint aPriority,
+        const TUint aUiPriority )
         :
         iPriority( aPriority ),
         iUiPriority( aUiPriority )

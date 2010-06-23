@@ -20,7 +20,7 @@
 #include <QDir>
 #include <QPluginLoader>
 #include <QStringList>
-#include <HbDataform>
+#include <HbDataForm>
 #include <HbDataFormModel>
 #include <HbDataFormViewItem>
 #include <HbParameterLengthLimiter>
@@ -88,6 +88,8 @@ CpDestinationGroup::CpDestinationGroup(CpItemDataHelper &itemDataHelper) :
         destDataItem->setContentWidgetData(QString("additionalText"),iapCount);
         destDataItem->setDestinationId(destinationList.at(i)->id());
         destDataItem->setDestinationName(destinationList.at(i)->name());
+        HbIcon destIcon(resolveDestinationIcon(destinationList.at(i)));
+        destDataItem->setEntryItemIcon(destIcon);
         bool connected = connect(destDataItem, 
                                  SIGNAL(destChanged()), 
                                  this, 
@@ -254,6 +256,8 @@ void CpDestinationGroup::createUncategorisedDestination()
         destDataItem->setContentWidgetData(QString("additionalText"),iapCount);
         destDataItem->setDestinationId(0);
         destDataItem->setDestinationName(hbTrId("txt_occ_dblist_uncategorized"));
+        HbIcon destIcon(mCmManager->getUncategorizedIcon());
+        destDataItem->setEntryItemIcon(destIcon);
         bool connected = connect(
             destDataItem, 
             SIGNAL(destChanged()), 
@@ -326,11 +330,44 @@ QString CpDestinationGroup::getDestinationAdditionalText(int iapCount)
     OstTraceFunctionEntry0(CPDESTINATIONGROUP_GETDESTINATIONADDITIONALTEXT_ENTRY);
     QString result = "";
     if (iapCount > 0) {
-        //result = hbTrId("txt_occ_dblist_internet_val_ln_access_points", iapCount);
-        result = HbParameterLengthLimiter("txt_occ_dblist_internet_val_ln_access_points").arg(iapCount);
+        result = hbTrId("txt_occ_dblist_internet_val_ln_access_points", iapCount);
     } else {
         result = hbTrId("txt_occ_dblist_internet_val_no_access_points");
     }
     OstTrace0(TRACE_FLOW, CPDESTINATIONGROUP_GETDESTINATIONADDITIONALTEXT_EXIT, "Exit");
+    return result;
+}
+
+/*!
+    Helper function for showing icons.
+    
+    \return Returns string representing given destination's icon
+ */
+QString CpDestinationGroup::resolveDestinationIcon(
+    QSharedPointer<CmDestinationShim> destination) const
+{
+    QString result(destination->getIcon());
+    
+    if (result.isEmpty()) {
+        uint metaData = destination->metadata(CMManagerShim::SnapMetadataPurpose);
+        switch (metaData) {
+            case CMManagerShim::SnapPurposeInternet:
+                result = "qtg_small_internet";
+                break;
+            case CMManagerShim::SnapPurposeIntranet:
+                result = "qtg_small_intranet";
+                break;
+            case CMManagerShim::SnapPurposeMMS:
+                result = "qtg_small_mms";
+                break;
+            case CMManagerShim::SnapPurposeOperator:
+                result = "qtg_small_operator";
+                break;
+            default:
+                // CMManagerShim::SnapPurposeUnknown
+                result = "qtg_small_favorite";
+                break;
+        }
+    }
     return result;
 }

@@ -52,6 +52,7 @@ class TestCmMgrShim : public QObject
         void tcDestinationMisc();
         void tcDestinationRefresh();
         void tcDestinationInvalidParams();
+        void tcIconOperations();
         
     private:
         // Sub test cases

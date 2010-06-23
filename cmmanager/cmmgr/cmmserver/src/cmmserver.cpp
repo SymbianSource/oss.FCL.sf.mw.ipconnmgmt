@@ -376,7 +376,9 @@ CSession2* CCmmServer::NewSessionL(
     {
     OstTraceFunctionEntry0( CCMMSERVER_NEWSESSIONL_ENTRY );
 
-    CSession2* session = CCmmSession::NewL( *const_cast<CCmmServer*>( this ), iCmManager->Cache() );
+    CSession2* session = CCmmSession::NewL(
+            *const_cast<CCmmServer*>( this ),
+            iCmManager->Cache() );
 
     OstTraceFunctionExit0( CCMMSERVER_NEWSESSIONL_EXIT );
     return session;
@@ -488,8 +490,8 @@ CCmManagerImpl* CCmmServer::CmManager()
 // -----------------------------------------------------------------------------
 //
 TBool CCmmServer::EmbeddedDestinationConflictsFromAllSessions(
-        const TUint32& aDestinationId,
-        const TUint32& aEmbeddedDestinationId )
+        const TUint32 aDestinationId,
+        const TUint32 aEmbeddedDestinationId )
     {
     OstTraceFunctionEntry0( CCMMSERVER_EMBEDDEDDESTINATIONCONFLICTSFROMALLSESSIONS_ENTRY );
 
@@ -517,7 +519,7 @@ TBool CCmmServer::EmbeddedDestinationConflictsFromAllSessions(
 // updated to, or deleted from, database.
 // ---------------------------------------------------------------------------
 //
-void CCmmServer::RefreshHandlesForAllSessions( const TUint32& aId )
+void CCmmServer::RefreshHandlesForAllSessions( const TUint32 aId )
     {
     OstTraceFunctionEntry0( CCMMSERVER_REFRESHHANDLESFORALLSESSIONS_ENTRY );
 

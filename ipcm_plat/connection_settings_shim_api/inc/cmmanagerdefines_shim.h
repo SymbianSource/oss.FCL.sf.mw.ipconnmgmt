@@ -20,6 +20,7 @@
 
 // System includes
 
+#include <QString>
 #include <cmmanagerdef.h>
 #include <cmconnectionmethoddef.h>
 #include <cmpluginwlandef.h>
@@ -64,7 +65,7 @@ namespace CMManagerShim
      *  Constants for maximum string lengths.
      */
     //! Connection name length
-    const uint CmNameLength                 = 30;
+    const uint CmNameLength                 = 50;
     //! Homepage address length
     const uint CmStartPageLength            = 1024;
     //! IPv4 IP address length

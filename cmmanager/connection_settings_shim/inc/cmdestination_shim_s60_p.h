@@ -81,6 +81,10 @@ public:
     
     void DeleteDestination();
     
+    QString GetIcon() const;
+    
+    void SetIcon(QString icon);
+    
 protected:
 
 private:
@@ -100,6 +104,10 @@ private:
     void ModifyPriorityL(CmConnectionMethodShim *cm, int index);
            
     void SetNameL(QString name);
+    
+    void GetIconL(QString &icon) const;
+    
+    void SetIconL(QString icon);
               
     CMManagerShim::CmmProtectionLevel mapCmmProtectionLevel( 
         CMManager::TProtectionLevel protectionlvl) const;

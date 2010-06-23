@@ -151,7 +151,8 @@ EXPORT_C RCmConnectionMethod RCmDestination::ConnectionMethodL(
     if ( existingHandle )
         {
         CleanupStack::PopAndDestroy( cmWrapper );
-        cmWrapper = iCmDestinationWrapper->GetMainSession()->GetConnMethodWrapperL( existingHandle );
+        cmWrapper = iCmDestinationWrapper->GetMainSession()->GetConnMethodWrapperL(
+                existingHandle );
         cmWrapper->IncreaseReferenceCounter();
         }
     else

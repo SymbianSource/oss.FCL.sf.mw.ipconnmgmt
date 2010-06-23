@@ -32,6 +32,7 @@ SOURCE          ccmpluginbaseengtextresolver.cpp
 // Component specific internal headers
 USERINCLUDE     ../inc
 USERINCLUDE     ../../cmmserver/inc
+USERINCLUDE     ../../cmmcommon/inc
 USERINCLUDE     ../traces
 
 // ADO specific internal headers

@@ -110,11 +110,14 @@ enum TBearerCreationCommonAttributes
  *                 method can have this flag set.
  * EMetaHiddenAgent: If it's set it indicates that an connection method is
  *                   hidden connection method in Agent dialog.
+ * EMetaHotSpot: If it's set it indicates that an connection method is
+ *               HotSpot connection method.
  */
 enum TCmMetaDataFields
     {
     EMetaHighlight    = 0x00000001,
-    EMetaHiddenAgent  = 0x00000002
+    EMetaHiddenAgent  = 0x00000002,
+    EMetaHotSpot      = 0x00000004
     };
 
 // FORWARD DECLARATIONS
@@ -580,10 +583,10 @@ class CCmPluginBaseEng : public CBase
          */
         virtual void DeleteBearerRecordsL() = 0;
 
-         /**
-          * Resets the bearer specific records.
-          */
-         virtual void ResetBearerRecords() = 0;
+        /**
+         * Resets the bearer specific records.
+         */
+        virtual void ResetBearerRecords() = 0;
 
         /**
          * Copies the bearer specific records to copy instance given as
@@ -644,6 +647,18 @@ class CCmPluginBaseEng : public CBase
                 CommsDat::CMDBField<TDesC>& aDNS2,
                 CommsDat::CMDBField<TBool>& aDNSFromServer );
 
+        /**
+         * Copies the values and attributes of all fields from aSource-record
+         * into aDestination record.
+         * Does not copy the record element ID. Also, does not touch any field
+         * in aDestination-record that is NULL in aSource-record.
+         * @param aSource The record that is copied from.
+         * @param aDestination The record that is copied to.
+         */
+        IMPORT_C void CopyRecordFieldsL(
+                CommsDat::CMDBRecordBase& aSource,
+                CommsDat::CMDBRecordBase& aDestination );
+
     private:
         /**
          * Handles all the Connection Method data copying to instance given as
@@ -667,18 +682,6 @@ class CCmPluginBaseEng : public CBase
         void CopyRecordDataL(
                 TUint32 aRecordIdentifier,
                 CCmPluginBaseEng* aCopyInstance );
-
-        /**
-         * Copies the values and attributes of all fields from aSource-record
-         * into aDestination record.
-         * Does not copy the record element ID. Also, does not touch any field
-         * in aDestination-record that is NULL in aSource-record.
-         * @param aSource The record that is copied from.
-         * @param aDestination The record that is copied to.
-         */
-        void CopyRecordFieldsL(
-                CommsDat::CMDBRecordBase& aSource,
-                CommsDat::CMDBRecordBase& aDestination );
 
         /**
          * Creates proxy record and sets the proxy settings enabled for this
@@ -910,14 +913,14 @@ class CCmPluginBaseEng : public CBase
         CommsDat::CCDWAPIPBearerRecord*     iWapIPBearerRecord;
         CCDIAPMetadataRecord*               iMetaDataRecord;
 
-    private:
         /**
          * IAP record id of the CM. 0 means that this is not stored to CommsDat
          * yet. If in UpdateL phase iap record has an id but iIapId == 0 -->
          * predefined iap id
          */
-        TUint32 iIapId;
+        TUint32 iCmId;
 
+    private:
         /**
          * Naming method of the CM.
          */

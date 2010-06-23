@@ -45,6 +45,7 @@ IndicatorObserver::IndicatorObserver(int argc, char* argv[]) :
     mActiveCellularConfigurations(new QList<QNetworkConfiguration>),
     mActiveWlanConfigurations(new QList<QNetworkConfiguration>),    
     mWlanEnabled(0),
+    mWlanForceDisabled(0),
     mWlanIndicatorIsActivated(false),
     mCellularIndicatorIsActivated(false)
     
@@ -79,10 +80,18 @@ IndicatorObserver::IndicatorObserver(int argc, char* argv[]) :
         KCRUidWlanDeviceSettingsRegistryId.iUid,
         KWlanOnOff);
     
+    // Also subscribe for KForceDisableWlan change indications
+    XQSettingsKey wlanForceKey(
+        XQSettingsKey::TargetCentralRepository,
+        KCRUidWlanDeviceSettingsRegistryId.iUid, 
+        KWlanForceDisable);
+    
     //Read current status of WLAN radio
     mWlanEnabled = mSettingsManager->readItemValue(wlanKey).toInt() ? true : false;
+    mWlanForceDisabled = mSettingsManager->readItemValue(wlanForceKey).toInt() ? true : false;
 
     mSettingsManager->startMonitoring(wlanKey);
+    mSettingsManager->startMonitoring(wlanForceKey);
 
     initializeIndicators();
     
@@ -140,13 +149,15 @@ void IndicatorObserver::updateWlanRadioStatus(const XQSettingsKey &key, const QV
 {
     OstTrace0(TRACE_FLOW, INDICATOROBSERVER_UPDATEWLANRADIOSTATUS_ENTRY, "-->");
     
-    // The key parameter is not used, since only WLAN ON/OFF setting is connected to this slot
-    Q_UNUSED(key);
+    // The change notification is received either for the WlanOnoff key, or the
+    // ForceDisableWlan key
+    if (KWlanOnOff == key.key()) {
+        mWlanEnabled = value.toInt() ? true : false;
+    } else {
+        mWlanForceDisabled = value.toInt() ? true : false;
+    }
     
-    // Inform about WLAN ON/OFF status change
-    mWlanEnabled = value.toInt() ? true : false;
-    
-    if (mWlanEnabled == false) {    
+    if (mWlanEnabled == false || mWlanForceDisabled == true) {    
         deactivateWlanIndicatorPlugin();
     } else {
         updateWlanIndicator();
@@ -198,7 +209,7 @@ void IndicatorObserver::updateWlanIndicator()
 
     //We do not deactivate WlanIndicator plugin here as it is done in updateWlanRadioStatus method
     //as WLAN radio status determines whether to show indicator or not
-    if ( mWlanEnabled ) {
+    if ( mWlanEnabled && !mWlanForceDisabled) {
         if(count == 0) {
             list.insert(0, wlanNotConnected);
             activateWlanIndicatorPlugin(list);

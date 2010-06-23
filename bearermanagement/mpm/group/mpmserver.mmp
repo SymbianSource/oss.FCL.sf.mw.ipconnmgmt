@@ -39,17 +39,12 @@ SOURCE            mpmconnmonreqs.cpp
 SOURCE            mpmserversession.cpp
 SOURCE            mpmserver.cpp
 SOURCE            mpmstarter.cpp
-SOURCE            mpmdisconnectdlg.cpp
 SOURCE            mpmdtmwatcher.cpp
 SOURCE            mpmroamingwatcher.cpp 
 SOURCE            mpmconfirmdlg.cpp
 SOURCE            mpmconfirmdlgstarting.cpp
 SOURCE            mpmconfirmdlgroaming.cpp
-SOURCE            mpmdefaultconnection.cpp
-SOURCE            mpmdefaultconnserver.cpp
-SOURCE            mpmdefaultconnserversession.cpp
 SOURCE            mpmcommsdataccess.cpp
-SOURCE            mpmwlanquerydialog.cpp
 SOURCE            mpmiapselection.cpp
 SOURCE            mpmcsidwatcher.cpp
 SOURCE            mpmdialogbase.cpp
@@ -65,12 +60,10 @@ MW_LAYER_SYSTEMINCLUDE
 SYSTEMINCLUDE     ../../../inc
 
 LIBRARY           euser.lib
-LIBRARY           agentdialog.lib
 LIBRARY           commdb.lib
 LIBRARY           commsdat.lib
 LIBRARY           esock.lib
 LIBRARY           connmon.lib
-LIBRARY           disconnectdlgclient.lib
 LIBRARY           commonengine.lib
 LIBRARY           featmgr.lib
 LIBRARY           centralrepository.lib

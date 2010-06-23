@@ -105,17 +105,17 @@ END_ATTRIBUTE_TABLE()
 
 const SRecordTypeInfo CCDDefConnRecord::iRecordInfo[]=
   	{
-	    { KCDTIdRecordTag,	         EUint32,    ENoAttrs, KCDTypeNameRecordTag }, 
+	    { KCDTIdRecordTag,	         EUint32,    ENoAttrs, KCDTypeNameRecordTag },
     	{ KCDTIdRecordName,	         EText,      ENotNull, KCDTypeNameRecordName},
     	{ KCDTIdDefConnType,         EUint32,    ENoAttrs, DEFCONN_TYPE },
     	{ KCDTIdDefConnUid,          EUint32,    ENoAttrs, DEFCONN_UID },
     	{ KCDTIdUsageOfWlan,         EUint32,    ENoAttrs, USAGEOFWLAN },
     	{ KCDTIdCellularDataUsageHome,     EUint32,    ENoAttrs,   CELLULAR_DATA_USAGE_HOME },
-        { KCDTIdCellularDataUsageVisitor,  EUint32,    ENoAttrs,   CELLULAR_DATA_USAGE_VISITOR },    	
+        { KCDTIdCellularDataUsageVisitor,  EUint32,    ENoAttrs,   CELLULAR_DATA_USAGE_VISITOR },
 	    { 0, 0, ENoAttrs, KCDNull }
   	};
-  	
-    
+
+
 EXPORT_C const SRecordTypeInfo* CCDDefConnRecord::GetRecordInfo()
     { 
     return iRecordInfo; 

@@ -52,6 +52,9 @@ MW_LAYER_SYSTEMINCLUDE
 LIBRARY     euser.lib
 LIBRARY     ecom.lib
 LIBRARY     commsdat.lib
-LIBRARY     cmmanagerdatabase.lib
 LIBRARY     featmgr.lib
+LIBRARY     eapsymbiantools.lib
+LIBRARY     eaptools.lib
+LIBRARY     eaptrace.lib
+LIBRARY     cmmanagerdatabase.lib
 LIBRARY     cmmpluginbase.lib

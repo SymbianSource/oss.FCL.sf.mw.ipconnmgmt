@@ -21,6 +21,8 @@
 #include <e32base.h>
 #include <rmmcustomapi.h>
 #include <featmgr.h>
+#include <gsmerror.h>     // KErrPacketDataTsyMaxPdpContextsReached 
+#include <etelpckt.h>     // KErrUmtsMaxNumOfContextExceededByNetwork
 
 #include "ConnMonServ.h"
 #include "ConnMonSess.h"
@@ -562,10 +564,10 @@ void CProgressNotifier::RunL()
         }
     else
         {
-        iEventInfo.Reset();
-
         if ( iInfoBuf().iStage != static_cast< TInt >( iEventInfo.iData ) )
             {
+            iEventInfo.Reset();
+            
             // Send only new stage info to clients
             iEventInfo.iEventType       = EConnMonConnectionStatusChange;
             iEventInfo.iConnectionId    = iConnectionId;
@@ -640,35 +642,15 @@ void CProgressNotifier::RunL()
                 }
             }
 
-        if ( iInfoBuf().iError == KErrNone )
+        // New request
+        Receive();
+            
+        if ( iInfoBuf().iError == KErrDisconnected )
             {
-            // New request
-            Receive();
-            }
-        else
-            {
-            // Connection is closing.
-            CSubConnUpDownNotifier* subConnUpDownNotifier = 0;
-            TInt err = iServer->Iap()->GetSubConnUpDownNotifier(
-                    iConnectionId,
-                    &subConnUpDownNotifier );
-
-            if ( KErrNone == err )
-                {
-                // Subconn down notifier has stopped and allinterface closed event has arrived
-                if ( !subConnUpDownNotifier->IsActive() )
-                    {
-                    subConnUpDownNotifier->SendDeletedEvent();
-                    }
-                }
-
-            if ( iInfoBuf().iError == KErrDisconnected )
-                {
-                // Enable WLAN scan when IAP availability is check for the
-                // next time because current bearer has been lost (-36).
-                // MPM needs a fresh list of available iaps.
-                iServer->Iap()->EnableWlanScan();
-                }
+            // Enable WLAN scan when IAP availability is check for the
+            // next time because current bearer has been lost (-36).
+            // MPM needs a fresh list of available iaps.
+            iServer->Iap()->EnableWlanScan();
             }
         }
     //LOGEXITFN("CProgressNotifier::RunL()")

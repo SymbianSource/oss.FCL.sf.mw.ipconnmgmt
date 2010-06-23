@@ -76,7 +76,7 @@ public:
     /**
      * Set connection method ID.
      */
-    void SetId( const TUint32& aConnMethodId );
+    void SetId( const TUint32 aConnMethodId );
 
     /**
      * Return bearer type.
@@ -91,7 +91,7 @@ public:
     /**
      * Set handle ID.
      */
-    void SetHandle( const TInt& aHandle );
+    void SetHandle( const TInt aHandle );
 
     /**
      * Get pointer to the plugin data container.
@@ -122,7 +122,7 @@ public:
      * @return Returns the value of the requested attribute if succees. Otherwise
      * leaves with KErrArgument
      */
-    TUint32 GetIntAttributeL( const TUint32& aAttribute );
+    TUint32 GetIntAttributeL( const TUint32 aAttribute );
 
     /**
      * Returns integer value identified by aAttribute. Some special cases
@@ -131,7 +131,7 @@ public:
      * @return Returns the value of the requested attribute if succees. Otherwise
      * leaves with KErrArgument
      */
-    TBool GetBoolAttributeL( const TUint32& aAttribute );
+    TBool GetBoolAttributeL( const TUint32 aAttribute );
 
     /**
      * Returns 16 bit string value identified by aAttribute.
@@ -139,7 +139,7 @@ public:
      * @return Returns the value of the requested attribute if succees. Otherwise
      * leaves with KErrArgument
      */
-    HBufC* GetStringAttributeL( const TUint32& aAttribute );
+    HBufC* GetStringAttributeL( const TUint32 aAttribute );
 
     /**
      * Returns 8 bit string value identified by aAttribute.
@@ -147,7 +147,7 @@ public:
      * @return Returns the value of the requested attribute if succees. Otherwise
      * leaves with KErrArgument
      */
-    HBufC8* GetString8AttributeL( const TUint32& aAttribute );
+    HBufC8* GetString8AttributeL( const TUint32 aAttribute );
 
     /**
      * Sets the integer value identified by aAttribute.
@@ -156,8 +156,8 @@ public:
      * @return None
      */
     void SetIntAttributeL(
-            const TUint32& aAttribute,
-            const TUint32& aValue );
+            const TUint32 aAttribute,
+            const TUint32 aValue );
 
     /**
      * Sets the integer value identified by aAttribute.
@@ -166,8 +166,8 @@ public:
      * @return None
      */
     void SetBoolAttributeL(
-            const TUint32& aAttribute,
-            const TBool& aValue );
+            const TUint32 aAttribute,
+            const TBool aValue );
 
     /**
      * Sets the 16 bit string value identified by aAttribute.
@@ -176,7 +176,7 @@ public:
      * @return None
      */
     void SetStringAttributeL(
-            const TUint32& aAttribute,
+            const TUint32 aAttribute,
             const TDesC16& aValue );
 
     /**
@@ -186,7 +186,7 @@ public:
      * @return None
      */
     void SetString8AttributeL(
-            const TUint32& aAttribute,
+            const TUint32 aAttribute,
             const TDesC8& aValue );
 
     /**
@@ -206,7 +206,7 @@ public:
      * transaction has completed successfully. Sets the internal state of this
      * connection method structure to reflect the new deleted state.
      */
-    void DeleteSuccessful( const TUint32& aNewSecondaryId );
+    void DeleteSuccessful( const TUint32 aNewSecondaryId );
 
     /**
      * After update/delete to database, refresh temporary ID to real ID if
@@ -219,7 +219,7 @@ public:
      * Removes a connection method from any open destination handle in the same
      * session.
      */
-    void RemoveConnMethodFromSessionDestinationHandles( const TUint32& aConnMethodId );
+    void RemoveConnMethodFromSessionDestinationHandles( const TUint32 aConnMethodId );
 
 private:
     // Session that owns this instance.

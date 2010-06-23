@@ -39,4 +39,9 @@ EXPORTS
 	?createDestination@CmManagerShim@@QAEPAVCmDestinationShim@@VQString@@@Z @ 38 NONAME ; class CmDestinationShim * CmManagerShim::createDestination(class QString)
 	?refresh@CmConnectionMethodShim@@QAEXXZ @ 39 NONAME ; void CmConnectionMethodShim::refresh(void)
 	?refresh@CmDestinationShim@@QAEXXZ @ 40 NONAME ; void CmDestinationShim::refresh(void)
+	?getIcon@CmConnectionMethodShim@@QBE?AVQString@@XZ @ 41 NONAME ; class QString CmConnectionMethodShim::getIcon(void) const
+	?getIcon@CmDestinationShim@@QBE?AVQString@@XZ @ 42 NONAME ; class QString CmDestinationShim::getIcon(void) const
+	?setIcon@CmDestinationShim@@QAEXVQString@@@Z @ 43 NONAME ; void CmDestinationShim::setIcon(class QString)
+	?setIcon@CmConnectionMethodShim@@QAEXVQString@@@Z @ 44 NONAME ; void CmConnectionMethodShim::setIcon(class QString)
+	?getUncategorizedIcon@CmManagerShim@@QBE?AVQString@@XZ @ 45 NONAME ; class QString CmManagerShim::getUncategorizedIcon(void) const
 

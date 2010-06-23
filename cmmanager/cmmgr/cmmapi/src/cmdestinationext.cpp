@@ -151,7 +151,8 @@ EXPORT_C RCmConnectionMethodExt RCmDestinationExt::ConnectionMethodL(
     if ( existingHandle )
         {
         CleanupStack::PopAndDestroy( cmWrapper );
-        cmWrapper = iCmDestinationWrapper->GetMainSession()->GetConnMethodWrapperL( existingHandle );
+        cmWrapper = iCmDestinationWrapper->GetMainSession()->GetConnMethodWrapperL(
+                existingHandle );
         cmWrapper->IncreaseReferenceCounter();
         }
     else
@@ -191,7 +192,8 @@ EXPORT_C RCmConnectionMethodExt RCmDestinationExt::ConnectionMethodByIDL(
     if ( existingHandle )
         {
         CleanupStack::PopAndDestroy( cmWrapper );
-        cmWrapper = iCmDestinationWrapper->GetMainSession()->GetConnMethodWrapperL( existingHandle );
+        cmWrapper = iCmDestinationWrapper->GetMainSession()->GetConnMethodWrapperL(
+                existingHandle );
         cmWrapper->IncreaseReferenceCounter();
         }
     else

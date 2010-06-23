@@ -11,7 +11,8 @@
 *
 * Contributors:
 *
-* Description:  
+* Description: 
+* Control Panel "Network Settings" view implementation.
 *
 */
 
@@ -38,6 +39,7 @@
 static const QString ipSettingsPlugins[] = {
     "cpwlansettingsplugin.qtplugin",
     "cpdestinationplugin.qtplugin",
+    "videosettingsplugin.qtplugin",
     "cpvpnmanagementplugin.qtplugin",
     "" // empty item terminates the list
 };

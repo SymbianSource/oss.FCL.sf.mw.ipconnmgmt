@@ -31,4 +31,5 @@ EXPORTS
 	_ZNK16CCmPluginBaseEng30GetGenericTableIdsToBeObservedER6RArrayImE @ 30 NONAME
 	_ZTI16CCmPluginBaseEng @ 31 NONAME
 	_ZTV16CCmPluginBaseEng @ 32 NONAME
+	_ZN16CCmPluginBaseEng17CopyRecordFieldsLERN8CommsDat14CMDBRecordBaseES2_ @ 33 NONAME
 

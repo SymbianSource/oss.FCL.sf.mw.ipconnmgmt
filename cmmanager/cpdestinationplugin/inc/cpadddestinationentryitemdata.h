@@ -59,7 +59,6 @@ private:
 	void showErrorNote();
     
 private slots:
-
     void onLaunchView();
 	
 private: // data
@@ -70,10 +69,6 @@ private: // data
 	HbInputDialog      *mDialog;
 	//! New Destination name query's OK action
 	HbAction           *mOkAction;
-	
-	//! Maximun length for destination name
-	static const int DestinationNameMaxLength = 30;
-	
 };
 
 #endif //CPADDDESTINATIONENTRYITEMDATA_H

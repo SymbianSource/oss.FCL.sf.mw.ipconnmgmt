@@ -53,7 +53,6 @@ const TInt    KMaxGetIntSettingLength = KCommsDbSvrMaxColumnNameLength * 2;
 _LIT( KIapProxyServiceSetting, "IAP\\IAPService" );
 
 // FORWARD DECLARATIONS
-class CMPMDisconnectDlg;
 class CMPMConfirmDlgRoaming;
 class CMPMCommsDatAccess;
 class CMPMIapSelection;
@@ -592,7 +591,7 @@ class CMPMServerSession : public CSession2
         * @param aMessage message from client
         */
         void HandleServerProcessErrorL(const RMessage2& aMessage);
-
+        
         /**
         * Handling of prefered IAP notification registration.
         * @since 3.1
@@ -822,7 +821,7 @@ class CMPMServerSession : public CSession2
         * @param aUid Application Uid
         */
         TBool IsBackgroundApplication( TUint32 aUid ) const;
-
+        
         /**
         * Checks if disconnect dialog should be displayed for this error
         * @since 3.2
@@ -873,9 +872,6 @@ class CMPMServerSession : public CSession2
     
         // Server class reference
         CMPMServer& iMyServer;
-
-        // Pointer to the disconnect dialog active object
-        CMPMDisconnectDlg* iDisconnectDlg;
 
         // Pointer to the roaming confirmation dialog active object
         CMPMConfirmDlgRoaming* iConfirmDlgRoaming;
@@ -945,11 +941,6 @@ class CMPMServerSession : public CSession2
         // Set when this session is user connection
 		    //
         TBool iUserConnection;
-        
-        // Set when disconnect dialog is shown to avoid 
-        // showing duplicate cellulara data usage dialog
-        //
-        TBool iDisconnectDialogShown;
     };
 
 #include "mpmserversession.inl"

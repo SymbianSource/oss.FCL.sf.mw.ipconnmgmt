@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2005-2009 Nokia Corporation and/or its subsidiary(-ies). 
+* Copyright (c) 2005-2010 Nokia Corporation and/or its subsidiary(-ies). 
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -96,8 +96,7 @@ class CMPMConnMonEvents : public CBase, public MConnectionMonitorObserver
         /**
         * Two-phased constructor.
         */
-        static CMPMConnMonEvents* NewL( CMPMServer& aServer, 
-                                        CMPMServerSession& aSession );
+        static CMPMConnMonEvents* NewL( CMPMServer& aServer );
 
         /**
         * Destructor.
@@ -243,7 +242,7 @@ class CMPMConnMonEvents : public CBase, public MConnectionMonitorObserver
         * @param aSession Pointer to session
         * @since 3.1
         */
-        void CancelScanL( CMPMServerSession& aSession );
+        void CancelScanL( CMPMServerSession* aSession );
 
         /**
         * Gets the presumed Iap Id of Connection Id.
@@ -319,7 +318,7 @@ class CMPMConnMonEvents : public CBase, public MConnectionMonitorObserver
         /**
         * 2nd phase constructor.
         */
-        void ConstructL( CMPMServerSession& aSession );
+        void ConstructL();
 
     private: // Data
         // Handle to connection monitor

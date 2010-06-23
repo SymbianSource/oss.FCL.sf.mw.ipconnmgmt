@@ -76,6 +76,10 @@ public:
 
     void Update();
     
+    QString GetIcon() const;
+    
+    void SetIcon(QString icon);
+    
     void Refresh();
     
 protected:
@@ -107,6 +111,10 @@ private:
     void SetString8AttributeL(
         CMManagerShim::ConnectionMethodAttribute attribute, 
         QString value);
+    
+    void GetIconL(QString &value) const;
+    
+    void SetIconL(QString icon);
     
     void TraceIfError(TInt error) const;
     

@@ -34,7 +34,7 @@
 // ---------------------------------------------------------------------------
 //
 CCmmConnMethodStruct* CCmmConnMethodStruct::NewL(
-        const TUint32& aConnMethodId )
+        const TUint32 aConnMethodId )
     {
     OstTraceFunctionEntry0( CCMMCONNMETHODSTRUCT_NEWL_ENTRY );
 
@@ -50,7 +50,7 @@ CCmmConnMethodStruct* CCmmConnMethodStruct::NewL(
 // ---------------------------------------------------------------------------
 //
 CCmmConnMethodStruct* CCmmConnMethodStruct::NewLC(
-        const TUint32& aConnMethodId )
+        const TUint32 aConnMethodId )
     {
     OstTraceFunctionEntry0( CCMMCONNMETHODSTRUCT_NEWLC_ENTRY );
 
@@ -138,7 +138,7 @@ TUint32 CCmmConnMethodStruct::GetId() const
 // Set the connection method ID.
 // ---------------------------------------------------------------------------
 //
-void CCmmConnMethodStruct::SetId( const TUint32& aConnMethodId )
+void CCmmConnMethodStruct::SetId( const TUint32 aConnMethodId )
     {
     iConnMethodId = aConnMethodId;
     }
@@ -218,7 +218,7 @@ void CCmmConnMethodStruct::RefreshConnMethodInstanceL(
 // references.
 // ---------------------------------------------------------------------------
 //
-TInt CCmmConnMethodStruct::SessionInstanceClosed()
+TInt CCmmConnMethodStruct::ConnMethodInstanceClosed()
     {
     OstTraceFunctionEntry0( CCMMCONNMETHODSTRUCT_SESSIONINSTANCECLOSED_ENTRY );
 
@@ -287,7 +287,7 @@ CCmPluginBaseEng* CCmmConnMethodStruct::GetPlugin()
 // connection method structure to reflect the new deleted state.
 // ---------------------------------------------------------------------------
 //
-void CCmmConnMethodStruct::DeleteSuccessful( const TUint32& aNewSecondaryId )
+void CCmmConnMethodStruct::DeleteSuccessful( const TUint32 aNewSecondaryId )
     {
     OstTraceFunctionEntry0( CCMMCONNMETHODSTRUCT_DELETESUCCESSFUL_ENTRY );
 

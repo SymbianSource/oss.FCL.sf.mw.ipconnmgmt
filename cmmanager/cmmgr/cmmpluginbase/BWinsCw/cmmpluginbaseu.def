@@ -24,4 +24,5 @@ EXPORTS
 	?UpdateL@CCmPluginBaseEng@@UAEXPAVCCmClientPluginInstance@@@Z @ 23 NONAME ; void CCmPluginBaseEng::UpdateL(class CCmClientPluginInstance *)
 	?GetStringAttributeL@CCmPluginBaseEng@@QAEPAVHBufC16@@KPAVCCmClientPluginInstance@@@Z @ 24 NONAME ; class HBufC16 * CCmPluginBaseEng::GetStringAttributeL(unsigned long, class CCmClientPluginInstance *)
 	??1CCmClientPluginInstance@@UAE@XZ @ 25 NONAME ; CCmClientPluginInstance::~CCmClientPluginInstance(void)
+	?CopyRecordFieldsL@CCmPluginBaseEng@@IAEXAAVCMDBRecordBase@CommsDat@@0@Z @ 26 NONAME ; void CCmPluginBaseEng::CopyRecordFieldsL(class CommsDat::CMDBRecordBase &, class CommsDat::CMDBRecordBase &)
 

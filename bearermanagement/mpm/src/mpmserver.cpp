@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2004-2009 Nokia Corporation and/or its subsidiary(-ies). 
+* Copyright (c) 2004-2010 Nokia Corporation and/or its subsidiary(-ies). 
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -34,12 +34,9 @@ Mobility Policy Manager server implementation.
 #include "mpmlogger.h"
 #include "mpmdtmwatcher.h"
 #include "mpmroamingwatcher.h"
-#include "mpmdisconnectdlg.h"
 #include "mpmconfirmdlgroaming.h"
 #include "mpmconfirmdlgstarting.h"
-#include "mpmdefaultconnection.h"
 #include "mpmcommsdataccess.h"
-#include "mpmwlanquerydialog.h"
 #include "mpmprivatecrkeys.h"
 #include "mpmcsidwatcher.h"
 #include "mpmdatausagewatcher.h"
@@ -86,11 +83,8 @@ CMPMServer::CMPMServer()
       iPacketServLoaded( EFalse ), 
       iDtmWatcher( NULL ), 
       iWLANScanRequired( EFalse ), 
-      iDisconnectQueue( NULL ), 
       iRoamingQueue( NULL ), 
       iStartingQueue( NULL ),
-      iWlanQueryQueue( NULL ),
-      iDefaultConnection( NULL ), 
       iConnectionCounter( 0 ),
       iOfflineMode( ECoreAppUIsNetworkConnectionAllowed )
     {
@@ -153,20 +147,12 @@ void CMPMServer::ConstructL()
     iRoamingWatcher = CMPMRoamingWatcher::NewL(iMobilePhone);
 
     iCommsDatAccess = CMPMCommsDatAccess::NewL( );
-    
-    iDisconnectQueue = new ( ELeave ) CArrayPtrFlat<CMPMDisconnectDlg>( KGranularity );
-    iDisconnectQueue->Reset();
 
     iRoamingQueue = new ( ELeave ) CArrayPtrFlat<CMPMConfirmDlgRoaming>( KGranularity );
     iRoamingQueue->Reset();
 
     iStartingQueue = new ( ELeave ) CArrayPtrFlat<CMPMConfirmDlgStarting>( KGranularity ); 
     iStartingQueue->Reset();
-
-    iWlanQueryQueue = new ( ELeave ) CArrayPtrFlat<CMPMWlanQueryDialog>( KGranularity );
-    iWlanQueryQueue->Reset();
-    
-    iDefaultConnection = CMPMDefaultConnection::NewL( this );    
 
     // Create central repository watcher and start it
     iMpmCsIdWatcher = CMpmCsIdWatcher::NewL();
@@ -235,12 +221,6 @@ CMPMServer::~CMPMServer()
         iRoamingToWlanPeriodic->Cancel();
 		delete iRoamingToWlanPeriodic;
         }
-    if ( iDisconnectQueue )
-        {
-        iDisconnectQueue->ResetAndDestroy();
-        }
-    delete iDisconnectQueue;
-
     if ( iRoamingQueue )
         {
         iRoamingQueue->ResetAndDestroy();
@@ -252,12 +232,6 @@ CMPMServer::~CMPMServer()
         iStartingQueue->ResetAndDestroy();
         }
     delete iStartingQueue;
-
-    while ( iWlanQueryQueue && iWlanQueryQueue->Count() > 0 )
-        {
-        iWlanQueryQueue->Delete( 0 );
-        }
-    delete iWlanQueryQueue;
 
     delete iEvents;
 
@@ -280,8 +254,6 @@ CMPMServer::~CMPMServer()
 
     iMobilePhone.Close();
     iTelServer.Close();
-    
-    delete iDefaultConnection;
     
     delete iMpmCsIdWatcher;    
     
@@ -859,6 +831,11 @@ void CMPMServer::RemoveSession( const CMPMServerSession* aSession )
     TInt index = iSessions.Find( aSession );
     if ( index != KErrNotFound )
         {
+        if ( Events() )
+            {
+            // Cancel WLAN scan request if one exists
+            TRAP_IGNORE( Events()->CancelScanL( iSessions[index] ) )
+            }
         iSessions.Remove( index );
         }
     }
@@ -1366,18 +1343,6 @@ void CMPMServer::DumpActiveBMConns()
 #endif // _DEBUG
     }
 
-
-// -----------------------------------------------------------------------------
-// CMPMServer::DefaultConnection
-// -----------------------------------------------------------------------------
-//
-CMPMDefaultConnection* CMPMServer::DefaultConnection()
-    {
-    MPMLOGSTRING( "CMPMServer::DefaultConnection:\
- Default Connection" )
-    return iDefaultConnection;
-    }
-
 // -----------------------------------------------------------------------------
 // CMPMServer::StartedConnectionExists
 // -----------------------------------------------------------------------------
@@ -1408,22 +1373,6 @@ TInt CMPMServer::StartedConnectionExists( TInt aIapId )
         {
         MPMLOGSTRING( "CMPMServer::StartedConnectionExists: False" )
         return KErrNotFound;
-        }
-    }
-
-// -----------------------------------------------------------------------------
-// CMPMServer::AppendWlanQueryQueueL
-// -----------------------------------------------------------------------------
-//
-void CMPMServer::AppendWlanQueryQueueL( CMPMWlanQueryDialog* aDlg )
-    {
-    if( aDlg )
-        {
-        iWlanQueryQueue->AppendL( aDlg );
-        }
-    else
-        {
-        MPMLOGSTRING( "CMPMServer::AppendWlanQueryQueueL argument NULL, Error" )
         }
     }
 

@@ -35,8 +35,8 @@ class CCmPluginBaseEng;
 NONSHARABLE_CLASS( CCmmConnMethodStruct ) : public CBase
     {
 public:
-    static CCmmConnMethodStruct* NewL( const TUint32& aConnMethodId );
-    static CCmmConnMethodStruct* NewLC( const TUint32& aConnMethodId );
+    static CCmmConnMethodStruct* NewL( const TUint32 aConnMethodId );
+    static CCmmConnMethodStruct* NewLC( const TUint32 aConnMethodId );
     ~CCmmConnMethodStruct();
 
 private:
@@ -62,7 +62,7 @@ public:
     /**
      * Set the connection method ID.
      */
-    void SetId( const TUint32& aConnMethodId );
+    void SetId( const TUint32 aConnMethodId );
 
     /**
      * Return bearer type.
@@ -91,7 +91,7 @@ public:
      * Decrease the reference counter by one. Return the remaining number of
      * references.
      */
-    TInt SessionInstanceClosed(); //TODO, rename to ConnMethodInstanceClosed ?
+    TInt ConnMethodInstanceClosed();
 
     /**
      * Set the connection method plugin pointer, bearer type and status.
@@ -118,7 +118,7 @@ public:
      * transaction has completed successfully. Sets the internal state of this
      * connection method structure to reflect the new deleted state.
      */
-    void DeleteSuccessful( const TUint32& aNewSecondaryId );
+    void DeleteSuccessful( const TUint32 aNewSecondaryId );
 
 private:
     // The connection method plugin.

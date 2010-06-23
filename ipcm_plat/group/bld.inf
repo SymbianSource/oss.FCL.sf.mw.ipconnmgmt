@@ -23,7 +23,7 @@
 #include "../disconnect_dialog_api/group/bld.inf"
 #include "../disconnect_dialog_disable_api/group/bld.inf"
 #include "../extended_connection_settings_api/group/bld.inf"
-#include "../mpm_default_connection_api/group/bld.inf"
 #include "../pdpcontextmanager2_reset_factory_settings_api/group/bld.inf"
 #include "../pdpcontextmanager2_settings_api/group/bld.inf"
 #include "../mpm_connect_screen_api/group/bld.inf"
+#include "../flextimer_api/group/bld.inf"

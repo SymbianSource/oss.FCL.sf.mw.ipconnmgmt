@@ -101,7 +101,6 @@ CCmPluginLan::~CCmPluginLan()
     OstTraceFunctionEntry0( CCMPLUGINLAN_CCMPLUGINLAN_ENTRY );
 
     ResetBearerRecords();
-    FeatureManager::UnInitializeLib();
 
     OstTraceFunctionExit0( CCMPLUGINLAN_CCMPLUGINLAN_EXIT );
     }
@@ -130,7 +129,7 @@ void CCmPluginLan::ConstructL()
     {
     OstTraceFunctionEntry0( CCMPLUGINLAN_CONSTRUCTL_ENTRY );
 
-    FeatureManager::InitializeLibL();
+    // Feature Manager is initialized by the CmmServer, so no need to do it here.
 
     CCmPluginBaseEng::ConstructL();
     
@@ -482,83 +481,103 @@ void CCmPluginLan::UpdateServiceRecordL(
 
     if ( !clientServiceRecordCopy->iRecordTag.IsNull() )
         {
-        origServiceRecord->iRecordTag.SetL( clientServiceRecordCopy->iRecordTag );
+        origServiceRecord->iRecordTag.SetL(
+                clientServiceRecordCopy->iRecordTag );
         }
     if ( !clientServiceRecordCopy->iRecordName.IsNull() )
         {
-        origServiceRecord->iRecordName.SetL( clientServiceRecordCopy->iRecordName );
+        origServiceRecord->iRecordName.SetL(
+                clientServiceRecordCopy->iRecordName );
         }
     if ( !clientServiceRecordCopy->iServiceEnableLlmnr.IsNull() )
         {
-        origServiceRecord->iServiceEnableLlmnr.SetL( clientServiceRecordCopy->iServiceEnableLlmnr );
+        origServiceRecord->iServiceEnableLlmnr.SetL(
+                clientServiceRecordCopy->iServiceEnableLlmnr );
         }
     if ( !clientServiceRecordCopy->iIfNetworks.IsNull() )
         {
-        origServiceRecord->iIfNetworks.SetL( clientServiceRecordCopy->iIfNetworks );
+        origServiceRecord->iIfNetworks.SetL(
+                clientServiceRecordCopy->iIfNetworks );
         }
     if ( !clientServiceRecordCopy->iIpNetmask.IsNull() )
         {
-        origServiceRecord->iIpNetmask.SetL( clientServiceRecordCopy->iIpNetmask );
+        origServiceRecord->iIpNetmask.SetL(
+                clientServiceRecordCopy->iIpNetmask );
         }
     if ( !clientServiceRecordCopy->iIpGateway.IsNull() )
         {
-        origServiceRecord->iIpGateway.SetL( clientServiceRecordCopy->iIpGateway );
+        origServiceRecord->iIpGateway.SetL(
+                clientServiceRecordCopy->iIpGateway );
         }
     if ( !clientServiceRecordCopy->iIpAddrFromServer.IsNull() )
         {
-        origServiceRecord->iIpAddrFromServer.SetL( clientServiceRecordCopy->iIpAddrFromServer );
+        origServiceRecord->iIpAddrFromServer.SetL(
+                clientServiceRecordCopy->iIpAddrFromServer );
         }
     if ( !clientServiceRecordCopy->iIpAddr.IsNull() )
         {
-        origServiceRecord->iIpAddr.SetL( clientServiceRecordCopy->iIpAddr );
+        origServiceRecord->iIpAddr.SetL(
+                clientServiceRecordCopy->iIpAddr );
         }
     if ( !clientServiceRecordCopy->iIpDnsAddrFromServer.IsNull() )
         {
-        origServiceRecord->iIpDnsAddrFromServer.SetL( clientServiceRecordCopy->iIpDnsAddrFromServer );
+        origServiceRecord->iIpDnsAddrFromServer.SetL(
+                clientServiceRecordCopy->iIpDnsAddrFromServer );
         }
     if ( !clientServiceRecordCopy->iIpNameServer1.IsNull() )
         {
-        origServiceRecord->iIpNameServer1.SetL( clientServiceRecordCopy->iIpNameServer1 );
+        origServiceRecord->iIpNameServer1.SetL(
+                clientServiceRecordCopy->iIpNameServer1 );
         }
     if ( !clientServiceRecordCopy->iIpNameServer2.IsNull() )
         {
-        origServiceRecord->iIpNameServer2.SetL( clientServiceRecordCopy->iIpNameServer2 );
+        origServiceRecord->iIpNameServer2.SetL(
+                clientServiceRecordCopy->iIpNameServer2 );
         }
     if ( !clientServiceRecordCopy->iIp6DnsAddrFromServer.IsNull() )
         {
-        origServiceRecord->iIp6DnsAddrFromServer.SetL( clientServiceRecordCopy->iIp6DnsAddrFromServer );
+        origServiceRecord->iIp6DnsAddrFromServer.SetL(
+                clientServiceRecordCopy->iIp6DnsAddrFromServer );
         }
     if ( !clientServiceRecordCopy->iIp6NameServer1.IsNull() )
         {
-        origServiceRecord->iIp6NameServer1.SetL( clientServiceRecordCopy->iIp6NameServer1 );
+        origServiceRecord->iIp6NameServer1.SetL(
+                clientServiceRecordCopy->iIp6NameServer1 );
         }
     if ( !clientServiceRecordCopy->iIp6NameServer2.IsNull() )
         {
-        origServiceRecord->iIp6NameServer2.SetL( clientServiceRecordCopy->iIp6NameServer2 );
+        origServiceRecord->iIp6NameServer2.SetL(
+                clientServiceRecordCopy->iIp6NameServer2 );
         }
     if ( !clientServiceRecordCopy->iIpAddrLeaseValidFrom.IsNull() )
         {
-        origServiceRecord->iIpAddrLeaseValidFrom.SetL( clientServiceRecordCopy->iIpAddrLeaseValidFrom );
+        origServiceRecord->iIpAddrLeaseValidFrom.SetL(
+                clientServiceRecordCopy->iIpAddrLeaseValidFrom );
         }
     if ( !clientServiceRecordCopy->iIpAddrLeaseValidTo.IsNull() )
         {
-        origServiceRecord->iIpAddrLeaseValidTo.SetL( clientServiceRecordCopy->iIpAddrLeaseValidTo );
+        origServiceRecord->iIpAddrLeaseValidTo.SetL(
+                clientServiceRecordCopy->iIpAddrLeaseValidTo );
         }
     if ( !clientServiceRecordCopy->iConfigDaemonManagerName.IsNull() )
         {
-        origServiceRecord->iConfigDaemonManagerName.SetL( clientServiceRecordCopy->iConfigDaemonManagerName );
+        origServiceRecord->iConfigDaemonManagerName.SetL(
+                clientServiceRecordCopy->iConfigDaemonManagerName );
         }
     if ( !clientServiceRecordCopy->iConfigDaemonName.IsNull() )
         {
-        origServiceRecord->iConfigDaemonName.SetL( clientServiceRecordCopy->iConfigDaemonName );
+        origServiceRecord->iConfigDaemonName.SetL(
+                clientServiceRecordCopy->iConfigDaemonName );
         }
     if ( !clientServiceRecordCopy->iServiceExtensionTableName.IsNull() )
         {
-        origServiceRecord->iServiceExtensionTableName.SetL( clientServiceRecordCopy->iServiceExtensionTableName );
+        origServiceRecord->iServiceExtensionTableName.SetL(
+                clientServiceRecordCopy->iServiceExtensionTableName );
         }
     if ( !clientServiceRecordCopy->iServiceExtensionTableRecordId.IsNull() )
         {
-        origServiceRecord->iServiceExtensionTableRecordId.SetL( clientServiceRecordCopy->iServiceExtensionTableRecordId ); //TODO, check this works ok.
+        origServiceRecord->iServiceExtensionTableRecordId.SetL(
+                clientServiceRecordCopy->iServiceExtensionTableRecordId ); //TODO, check this works ok.
         }
 
     origServiceRecord->SetElementId( clientServiceRecordCopy->ElementId() );
@@ -586,7 +605,6 @@ void CCmPluginLan::UpdateServiceRecordL(
 void CCmPluginLan::CreateBearerRecordsL()
     {
     OstTraceFunctionEntry0( CCMPLUGINLAN_CREATEBEARERRECORDSL_ENTRY );
-
     OstTraceFunctionExit0( CCMPLUGINLAN_CREATEBEARERRECORDSL_EXIT );
     }
 
@@ -597,7 +615,6 @@ void CCmPluginLan::CreateBearerRecordsL()
 void CCmPluginLan::LoadBearerRecordsL()
     {
     OstTraceFunctionEntry0( CCMPLUGINLAN_LOADBEARERRECORDSL_ENTRY );
-
     OstTraceFunctionExit0( CCMPLUGINLAN_LOADBEARERRECORDSL_EXIT );
     }
 
@@ -642,13 +659,13 @@ void CCmPluginLan::ServiceRecordNameLC( HBufC* &aName )
 //
 void CCmPluginLan::BearerRecordIdL( TUint32& aRecordId )
     {
-    CCDLANBearerRecord* lanBearerRecord = static_cast<CCDLANBearerRecord*>
-                        (CCDRecordBase::RecordFactoryL( KCDTIdLANBearerRecord ));
+    CCDLANBearerRecord* lanBearerRecord = static_cast<CCDLANBearerRecord*>(
+            CCDRecordBase::RecordFactoryL( KCDTIdLANBearerRecord ) );
     CleanupStack::PushL( lanBearerRecord );
 
     lanBearerRecord->iRecordName.SetL( TPtrC( KLanBearerName ) );
     if ( !lanBearerRecord->FindL( iSession ) )
-        { // bearer not found -> create dummy values
+        { // Bearer not found -> create dummy values.
         lanBearerRecord->SetRecordId( KCDNewRecordRequest );
         lanBearerRecord->iBearerAgent = KLanBearerAgent;
         lanBearerRecord->iRecordName = KLanBearerName;
@@ -659,12 +676,9 @@ void CCmPluginLan::BearerRecordIdL( TUint32& aRecordId )
         lanBearerRecord->iLanBearerPddFilename = KLanPDDFileName;
         lanBearerRecord->iLanBearerPddName = KLanPDDName;
         lanBearerRecord->iLanBearerPacketDriverName = KLanPacketDriverName;
-        lanBearerRecord->iLastSocketActivityTimeout =
-                                        (TUint32)KLanLastSocketActivityTimeout;
-        lanBearerRecord->iLastSessionClosedTimeout =
-                                        (TUint32)KLanLastSessionClosedTimeout;
-        lanBearerRecord->iLastSocketClosedTimeout =
-                                        (TUint32)KLanLastSocketClosedTimeout;
+        lanBearerRecord->iLastSocketActivityTimeout = (TUint32)KLanLastSocketActivityTimeout;
+        lanBearerRecord->iLastSessionClosedTimeout = (TUint32)KLanLastSessionClosedTimeout;
+        lanBearerRecord->iLastSocketClosedTimeout = (TUint32)KLanLastSocketClosedTimeout;
 
         lanBearerRecord->StoreL( iSession );
         }
@@ -735,17 +749,17 @@ void CCmPluginLan::ResetBearerRecords()
 // ---------------------------------------------------------------------------
 //
 void CCmPluginLan::SetDaemonNameL(
-    RPointerArray<CommsDat::CCDRecordBase>& aGenRecordArray,
-    RPointerArray<CommsDat::CCDRecordBase>& aBearerSpecRecordArray )
+        RPointerArray<CommsDat::CCDRecordBase>& aGenRecordArray,
+        RPointerArray<CommsDat::CCDRecordBase>& aBearerSpecRecordArray )
     {
     OstTraceFunctionEntry0( CCMPLUGINLAN_SETDAEMONNAMEL_ENTRY );
 
-    // we have to check first that these values has not been
-    // set(or changed) by any 3rd party sw to ensure that
-    // we don't break their settings
-    HBufC* daemonName = GetBearerStringAttributeL( ECmConfigDaemonManagerName,
-                                                   aGenRecordArray,
-                                                   aBearerSpecRecordArray );
+    // We have to check first that these values have not been set (or changed)
+    // by any 3rd party SW to ensure that we don't break their settings.
+    HBufC* daemonName = GetBearerStringAttributeL(
+            ECmConfigDaemonManagerName,
+            aGenRecordArray,
+            aBearerSpecRecordArray );
     if ( daemonName )
         {
         if ( daemonName->Compare( KDaemonManagerName ) != 0 )
@@ -758,50 +772,53 @@ void CCmPluginLan::SetDaemonNameL(
         delete daemonName;
         }
 
-    // use DHCP if we can
-    TBool ipfromSrv = GetBearerBoolAttributeL( ECmIPAddFromServer,
-                                               aGenRecordArray,
-                                               aBearerSpecRecordArray );
+    // Use DHCP if we can.
+    TBool ipfromSrv = GetBearerBoolAttributeL(
+            ECmIPAddFromServer,
+            aGenRecordArray,
+            aBearerSpecRecordArray );
     if ( ipfromSrv )
         {
-        SetBearerStringAttributeL( ECmConfigDaemonManagerName,
-                                   KDaemonManagerName,
-                                   aGenRecordArray,
-                                   aBearerSpecRecordArray );
-
-        SetBearerStringAttributeL( ECmConfigDaemonName,
-                                   KConfigDaemonName,
-                                   aGenRecordArray,
-                                   aBearerSpecRecordArray );
-
+        SetBearerStringAttributeL(
+                ECmConfigDaemonManagerName,
+                KDaemonManagerName,
+                aGenRecordArray,
+                aBearerSpecRecordArray );
+        SetBearerStringAttributeL(ECmConfigDaemonName,
+                KConfigDaemonName,
+                aGenRecordArray,
+                aBearerSpecRecordArray );
         }
     else
         {
         if ( FeatureManager::FeatureSupported( KFeatureIdIPv6 ) )
             {
-            SetBearerStringAttributeL( ECmConfigDaemonManagerName,
-                                       KDaemonManagerName,
-                                       aGenRecordArray,
-                                       aBearerSpecRecordArray );
-
-            SetBearerStringAttributeL( ECmConfigDaemonName,
-                                       KConfigDaemonName,
-                                       aGenRecordArray,
-                                       aBearerSpecRecordArray );
+            SetBearerStringAttributeL(
+                    ECmConfigDaemonManagerName,
+                    KDaemonManagerName,
+                    aGenRecordArray,
+                    aBearerSpecRecordArray );
+            SetBearerStringAttributeL(
+                    ECmConfigDaemonName,
+                    KConfigDaemonName,
+                    aGenRecordArray,
+                    aBearerSpecRecordArray );
             }
         else
             {
-            SetBearerStringAttributeL( ECmConfigDaemonManagerName,
-                                       KNullDesC(),
-                                       aGenRecordArray,
-                                       aBearerSpecRecordArray );
-
-            SetBearerStringAttributeL( ECmConfigDaemonName,
-                                       KNullDesC(),
-                                       aGenRecordArray,
-                                       aBearerSpecRecordArray );
+            SetBearerStringAttributeL(
+                    ECmConfigDaemonManagerName,
+                    KNullDesC(),
+                    aGenRecordArray,
+                    aBearerSpecRecordArray );
+            SetBearerStringAttributeL(
+                    ECmConfigDaemonName,
+                    KNullDesC(),
+                    aGenRecordArray,
+                    aBearerSpecRecordArray );
             }
         }
+
     OstTraceFunctionExit0( DUP1_CCMPLUGINLAN_SETDAEMONNAMEL_EXIT );
     }
 
@@ -825,7 +842,8 @@ TUint32 CCmPluginLan::GetBearerIntAttributeL(
         {
         case ECmInvalidAttribute:
             {
-            retVal = 0;
+            // This attribute has been deprecated since Symbian^4.
+            User::Leave( KErrNotSupported ); //TODO, update attribute definition comments.
             }
             break;
         case ECmExtensionLevel:
@@ -1479,8 +1497,9 @@ void CCmPluginLan::GetBearerTableIdsToBeObservedL(
 // CCmPluginLan::GetDefPriorityL
 // ---------------------------------------------------------------------------
 //
-TUint32 CCmPluginLan::GetDefPriorityL( const TUint32 aAttribute ) const//TODO, OST
+TUint32 CCmPluginLan::GetDefPriorityL( const TUint32 aAttribute ) const
     {
+    OstTraceFunctionEntry0( CCMPLUGINLAN_GETDEFPRIORITYL_ENTRY );
 
     TUint32 retVal( KDataMobilitySelectionPolicyPriorityWildCard );
 
@@ -1493,7 +1512,6 @@ TUint32 CCmPluginLan::GetDefPriorityL( const TUint32 aAttribute ) const//TODO, O
     if ( priorityRecord->FindL( iSession ) )
         {
         priorityRecord->LoadL( iSession );
-
         switch ( aAttribute )
             {
             case ECmDefaultPriority:
@@ -1512,6 +1530,7 @@ TUint32 CCmPluginLan::GetDefPriorityL( const TUint32 aAttribute ) const//TODO, O
         }
     CleanupStack::PopAndDestroy( priorityRecord );
 
+    OstTraceFunctionExit0( CCMPLUGINLAN_GETDEFPRIORITYL_EXIT );
     return retVal;
     }
 

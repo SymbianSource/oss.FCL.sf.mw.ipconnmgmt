@@ -1,0 +1,58 @@
+/*
+* Copyright (c) 2009-2010 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description: 
+*      Project specification for LAN Plugin.   
+*      
+*
+*/
+
+#include <platform_paths.hrh>
+
+TARGET      cmpluginvpn.dll
+UID         0x10009D8D 0x10281BBE
+
+TARGETTYPE		PLUGIN
+
+CAPABILITY      CAP_ECOM_PLUGIN
+VENDORID        VID_DEFAULT
+
+SOURCEPATH  ../src
+
+SOURCE      cmpluginvpnproxy.cpp
+SOURCE      cmpluginvpn.cpp
+
+SOURCEPATH  ../data
+
+START RESOURCE 10281BBE.rss
+TARGET cmpluginvpn.rsc
+END
+
+// Component specific internal headers 
+USERINCLUDE         ../inc 
+USERINCLUDE         ../../../cmmcommon/inc
+USERINCLUDE         ../traces
+
+
+// ADO specific internal headers 
+SYSTEMINCLUDE		../../../database/inc
+
+//Macro to /epoc32 headers
+MW_LAYER_SYSTEMINCLUDE
+
+LIBRARY euser.lib
+LIBRARY	ecom.lib
+LIBRARY featmgr.lib
+LIBRARY commsdat.lib
+LIBRARY	cmmpluginbase.lib
+LIBRARY cmmanagerdatabase.lib

@@ -145,7 +145,10 @@ void CCmDestinationWrapper::GetConnMethodAsEmbeddedDestL(
         }
 
     iCmManagerApi = aCmManagerApi;
-    iCmDestinationApi.ConnectAndGetConnMethodAsEmbeddedDestL( *aCmManagerApi, aConnMethodHandle, aExistingHandle );
+    iCmDestinationApi.ConnectAndGetConnMethodAsEmbeddedDestL(
+            *aCmManagerApi,
+            aConnMethodHandle,
+            aExistingHandle );
     if ( !aExistingHandle )
         {
         iCmManagerApi->StoreDestinationWrapper( this );

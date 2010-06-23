@@ -49,9 +49,8 @@ const TInt    KPhoneRetryCount   = 7;
 //
 const TInt    KPhoneRetryTimeout = 100000;
 
-// The granularity with which iDisconnectQueue will allocate memory chunks. 
-// If set to two there will be space for two instances of CMPMDisconnectDlg
-// before new memory will be allocated.
+// The granularity with which roaming and starting dialogs will allocate memory chunks. 
+// If set to two there will be space for two instances before new memory will be allocated.
 const TInt    KGranularity       = 2;
 
 // Security policy definitions
@@ -187,11 +186,9 @@ void PanicServer( TInt aPanic );
 class CMPMConnMonEvents;
 class CMPMServerSession;
 class CMPMDtmWatcher;
-class CMPMDisconnectDlg;
 class CMPMConfirmDlgRoaming;
 class CMPMConfirmDlgStarting;
 class CMPMDefaultConnection;
-class CMPMWlanQueryDialog;
 
 // CLASS DECLARATION
 /**
@@ -589,13 +586,6 @@ class CMPMServer : public CPolicyServer
         inline TBool IsWLANScanRequired() const;
 
         /**
-        * Get the DisconnectQueue.
-        * @since 3.2
-        * @return Pointer to the DisconnectQueue.
-        */
-        inline CArrayPtrFlat<CMPMDisconnectDlg>* DisconnectQueue();
-
-        /**
         * Get the RoamingQueue.
         * @since 3.2
         * @return Pointer to the RoamingQueue.
@@ -608,40 +598,6 @@ class CMPMServer : public CPolicyServer
         * @return Pointer to the StartingQueue.
         */
         inline CArrayPtrFlat<CMPMConfirmDlgStarting>* StartingQueue();
-
-        /**
-        * Appends aDlg to the iWlanQueryQueue.
-        * @since 3.2
-        * @param aDlg Pointer to the CMPMConfirmDlgWlanQuery object.
-        */
-        void AppendWlanQueryQueueL( CMPMWlanQueryDialog* aDlg );
-
-        /**
-        * Removes the first item from the iWlanQueryQueue.
-        * @since 3.2
-        */
-        inline void RemoveFromWlanQueryQueue( CMPMWlanQueryDialog* aDlg );
-
-        /**
-        * Get the WlanQueryQueue.
-        * @since 3.2
-        * @return Pointer to the WlanQueryQueue.
-        */
-        inline CArrayPtrFlat<CMPMWlanQueryDialog>* WlanQueryQueue();
-
-        /**
-        * Get the first item in iWlanQueryQueue.
-        * @since 3.2
-        * @return Pointer to the first item in iWlanQueryQueue.
-        */
-        inline CMPMWlanQueryDialog* FirstInWlanQueryQueue();
-
-        /**
-        * Get the Default Connection object.
-        * @since 3.2
-        * @return Pointer to the Default Connection object.
-        */
-        CMPMDefaultConnection* DefaultConnection(); 
 
         /**
         * Returns true if there is a started connection
@@ -915,20 +871,11 @@ class CMPMServer : public CPolicyServer
         // Is WLAN scan required or not before displaying Connection Dialog
         TBool iWLANScanRequired;
 
-        // Solves problem with overlapping Disconnect Dialogs
-        CArrayPtrFlat<CMPMDisconnectDlg>* iDisconnectQueue;
-
         // Solves problem with overlapping Roaming Dialogs
         CArrayPtrFlat<CMPMConfirmDlgRoaming>* iRoamingQueue;
 
         // Solves problem with overlapping Starting Dialogs
         CArrayPtrFlat<CMPMConfirmDlgStarting>* iStartingQueue;
-
-        // Solves problem with overlapping Wlan Queries
-        CArrayPtrFlat<CMPMWlanQueryDialog>* iWlanQueryQueue;
-        
-        // Handles Default Connection selection
-        CMPMDefaultConnection* iDefaultConnection;
 
         // Keeps track of the number of connections
         TUint iConnectionCounter;

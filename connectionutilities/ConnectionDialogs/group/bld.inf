@@ -27,7 +27,6 @@ PRJ_EXPORTS
 // export iby files
 ../rom/agentdialog.iby				CORE_MW_LAYER_IBY_EXPORT_PATH(agentdialog.iby)
 ../rom/cconndlg.iby				CORE_MW_LAYER_IBY_EXPORT_PATH(cconndlg.iby)
-../rom/cconndlgResources.iby			LANGUAGE_MW_LAYER_IBY_EXPORT_PATH(cconndlgResources.iby)
 
 ../rom/ConnectionDialogs.iby			CORE_MW_LAYER_IBY_EXPORT_PATH(ConnectionDialogs.iby)
 
