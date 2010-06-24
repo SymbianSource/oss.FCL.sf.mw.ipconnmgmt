@@ -401,36 +401,6 @@ void TestCpPacketDataApPlugin::tcScrollToBottom()
 }
 
 /**
- * Tests "prompt" password checkbox.
- */
-void TestCpPacketDataApPlugin::tcChangePromptPassword()
-{
-    // Ensure prompt for password is unchecked
-    bool prompt = subGetBool(CMManagerShim::PacketDataIFPromptForAuth);
-    if (prompt) {
-        // Disable prompt for password
-        HbAutoTest::mouseClick(mMainWindow, mPasswordPromptWidget);
-    }
-    
-    // Enable prompt for password and verify
-    HbAutoTest::mouseClick(mMainWindow, mPasswordPromptWidget);
-    subVerifyBool(
-        CMManagerShim::PacketDataIFPromptForAuth,
-        true);
-    
-    // Verify that password lineedit is disabled, following steps will
-    // fail if editing is allowed
-    HbAutoTest::mouseClick(mMainWindow, mPasswordWidget);
-    QTest::qWait(waitTime);
-
-    // Disable prompt for password and verify
-    HbAutoTest::mouseClick(mMainWindow, mPasswordPromptWidget);
-    subVerifyBool(
-        CMManagerShim::PacketDataIFPromptForAuth,
-        false);
-}
-
-/**
  * Tests changing of password.
  */
 void TestCpPacketDataApPlugin::tcChangePassword()
@@ -1208,9 +1178,6 @@ void TestCpPacketDataApPlugin::subGetUiWidgets()
     mUserNameWidget = subGetWidgetByIndex(
         mTestView->mForm,
         iterator.index(2, apGroupIndex));
-    mPasswordPromptWidget = subGetWidgetByIndex(
-        mTestView->mForm,
-        iterator.index(3, apGroupIndex));
     mPasswordWidget = subGetWidgetByIndex(
         mTestView->mForm,
         iterator.index(4, apGroupIndex));

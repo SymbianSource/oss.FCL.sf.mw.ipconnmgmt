@@ -20,7 +20,7 @@
 #include "WepWpaQueryDlg.h"
 #include "ConnUiUtilsNotif.h"
 
-#include <ConnUiUtilsNotif.rsg>
+#include <connuiutilsnotif.rsg>
 #include <StringLoader.h>
 
 

@@ -26,7 +26,7 @@
 #include <aknnotewrappers.h>
 #include <aknnotedialog.h>
 #include <connectionuiutilities.mbg>
-#include <ConnUiUtilsNotif.rsg>
+#include <connuiutilsnotif.rsg>
 #include <StringLoader.h>
 #include <data_caging_path_literals.hrh>
 #include <uikon/eiksrvui.h>
@@ -65,7 +65,9 @@ CSelectWLANDlg::CSelectWLANDlg( CSelectWLanDlgPlugin* aPlugin, TInt aIndex,
 : CAknListQueryDialog( &aIndex ),
   iPlugin( aPlugin ),
   iNetworkArray( aNetworkArray ),
-  iFromOkToExit( EFalse )
+  iFromOkToExit( EFalse ),
+  iWaitDialog( NULL ),
+  iExpiryTimer( NULL )
     {
     }
 

@@ -40,6 +40,14 @@ SOURCES += src/cpiapitem.cpp \
 
 TRANSLATIONS = cpdestinationplugin.ts
 
+# Temporary solution to fix tracecompiler
+# When tracecompiler is fixed, this can be removed
+symbian: {
+
+    MMP_RULES += "USERINCLUDE traces"
+
+}
+
 symbian:
 { 
     TARGET.EPOCALLOWDLLDATA = 1

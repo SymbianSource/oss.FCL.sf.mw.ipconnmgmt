@@ -64,7 +64,12 @@ enum T802Dot11InformationElementID
 // ---------------------------------------------------------
 //
 CWlanNetworkDataProvider::CWlanNetworkDataProvider() 
-: CBase()
+: CBase(),
+#ifndef __WINS__
+  iWlanMgmt( NULL ),
+  iScanInfo( NULL ),
+#endif // !__WINS__
+  iNetworkInfoArray( NULL )
     {
     }
 
@@ -85,7 +90,7 @@ CWlanNetworkDataProvider::~CWlanNetworkDataProvider()
         }
     delete iWlanMgmt;
     delete iScanInfo;
-#endif
+#endif // !__WINS__
 
     CLOG_LEAVEFN( "CWlanNetworkDataProvider::~CWlanNetworkDataProvider" );
     }
@@ -277,7 +282,7 @@ void CWlanNetworkDataProvider::AddNetworkL( TDes8& aNetworkName,
                                    TWlanConnectionExtentedSecurityMode aExtSecurityMode,
                                    TBool aProtectedSetupSupported )
     {
-    TBuf<KWlanMaxSsidLength> networkName16;
+    TName networkName16;
     networkName16.Copy( aNetworkName );
     TInt index = iNetworkInfoArray->GetArrayIndex( networkName16 );
 

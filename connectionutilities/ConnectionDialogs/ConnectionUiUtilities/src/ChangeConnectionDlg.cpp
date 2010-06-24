@@ -27,7 +27,7 @@
 #include <WlanCdbCols.h>
 
 #include <data_caging_path_literals.hrh>
-#include <ConnectionUiUtilities.rsg>
+#include <connectionuiutilities.rsg>
 
 #include "ChangeConnectionDlg.h"
 #include "ActiveCChangeConnectionDlg.h"
@@ -52,7 +52,8 @@ CChangeConnectionDlg::CChangeConnectionDlg( TInt aIndex,
   iIAPId( aIAPId ),
   iConnectionName( aConnectionName ),
   iIsWLANFeatureSupported( EFalse ),
-  iActiveDlg( aActiveDlg )
+  iActiveDlg( aActiveDlg ),
+  iExpiryTimer( NULL )
     {
     }
 

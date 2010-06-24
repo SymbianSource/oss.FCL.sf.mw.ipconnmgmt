@@ -69,7 +69,6 @@ CpPacketDataApView::CpPacketDataApView(
         mConnectionNameItem(0),
         mAccessPointNameItem(0),
         mUserNameItem(0),
-        mPromptForAuthItem(0),
         mPasswordItem(0),
         mAuthenticationItem(0),
         mHomepageItem(0),
@@ -170,23 +169,6 @@ void CpPacketDataApView::createAccessPointSettingsGroup()
         SLOT(userNameChanged()));
     mApSettingsGroupItem->appendChild(mUserNameItem);
     
-    // Prompt for password
-    mPromptForAuthItem = new CpSettingFormItemData(
-        HbDataFormModelItem::CheckBoxItem,
-        hbTrId("txt_occ_setlabel_password"));
-    mPromptForAuthItem->setContentWidgetData("text",
-        hbTrId("txt_occ_setlabel_password_val_prompt"));
-    // Construct map to link item values to setting values
-    mPromptForAuthMap.insert(Qt::Unchecked, false); // Do not prompt
-    mPromptForAuthMap.insert(Qt::Checked, true); // Prompt for password
-    // Connect signal and add item to group
-    mForm->addConnection(
-        mPromptForAuthItem,
-        SIGNAL(stateChanged(int)),
-        this,
-        SLOT(promptForAuthChanged(int)));
-    mApSettingsGroupItem->appendChild(mPromptForAuthItem);
-    
     // Password
     mPasswordItem = new CpSettingFormItemData(
         HbDataFormModelItem::TextItem,
@@ -262,17 +244,6 @@ void CpPacketDataApView::updateAccessPointSettingsGroup()
     QString userName = mCmConnectionMethod->getStringAttribute(
         CMManagerShim::PacketDataIFAuthName);
     mUserNameItem->setContentWidgetData("text", userName);
-    
-    // Prompt for password
-    bool promptForAuth = mCmConnectionMethod->getBoolAttribute(
-        CMManagerShim::PacketDataIFPromptForAuth);
-    mPromptForAuthItem->setContentWidgetData("checkState",
-        mPromptForAuthMap.key(promptForAuth));
-    if (promptForAuth) {
-        mPasswordItem->setEnabled(false);
-    } else {
-        mPasswordItem->setEnabled(true);
-    }
     
     // Password
     QString password = mCmConnectionMethod->getStringAttribute(
@@ -446,28 +417,6 @@ void CpPacketDataApView::userNameChanged()
     (void)tryUpdate();
     
     OstTraceFunctionExit0(CPPACKETDATAAPVIEW_USERNAMECHANGED_EXIT);
-}
-
-/*!
-    Updates prompt for password setting to CommsDat.
-*/
-void CpPacketDataApView::promptForAuthChanged(int state)
-{
-    OstTraceFunctionEntry0(CPPACKETDATAAPVIEW_PROMPTFORAUTHCHANGED_ENTRY);
-    
-    // If prompt for auth is selected, password edit should be disabled.
-    if (state == Qt::Checked) {
-        mPasswordItem->setEnabled(false);
-    } else {
-        mPasswordItem->setEnabled(true);
-    }
-    // Update to CommsDat
-    mCmConnectionMethod->setBoolAttribute(
-        CMManagerShim::PacketDataIFPromptForAuth,
-        mPromptForAuthMap.value(static_cast<Qt::CheckState>(state)));
-    (void)tryUpdate();
-    
-    OstTraceFunctionExit0(CPPACKETDATAAPVIEW_PROMPTFORAUTHCHANGED_EXIT);
 }
 
 /*!

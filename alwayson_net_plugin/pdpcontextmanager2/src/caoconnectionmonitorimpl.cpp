@@ -127,10 +127,16 @@ CAOConnectionMonitorImpl::CAOConnectionMonitorImpl(
     MAOConnectionMonitorObserver& aObserver, MAOSettings& aSettings ):
     iObserver( aObserver ),
     iSettings( aSettings ),
+    iTelephony( NULL ),
     iWNRegPckg( iWNReg ),
     iWNRegChangePckg( iWNChangeReg ),
+    iNWRegistrationStatus( NULL ),
+    iNWRegistrationStatusChange( NULL ),
+    iBearer( NULL ), 
+    iMyConnectionId( 0 ),
     iConnectionAlive( EFalse ),
-    iBearerValue( KBearerNotSearched )
+    iBearerValue( KBearerNotSearched ),
+    iCounter( 0 )
     {
     LOG_1( _L("CAOConnectionMonitorImpl::CAOConnectionMonitorImpl") );
     }

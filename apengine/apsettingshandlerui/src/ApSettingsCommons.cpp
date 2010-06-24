@@ -24,7 +24,7 @@
 #include <eikenv.h>
 #include <ApSettingsHandlerCommons.h>
 #include "ApSettingsHandlerUI.hrh"
-#include <ApSetUI.rsg>
+#include <apsetui.rsg>
 #include <AknQueryDialog.h>
 #include <aknnotedialog.h>
 #include <StringLoader.h>

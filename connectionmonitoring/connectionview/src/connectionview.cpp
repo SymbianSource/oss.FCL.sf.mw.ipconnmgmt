@@ -15,7 +15,7 @@
 *
 */
 
-#include <QTranslator>
+#include <HbTranslator>
 #include <QLocale>
 #include <QList>
 #include <HbLabel>
@@ -55,11 +55,7 @@ ConnectionView::ConnectionView():
 {
     OstTraceFunctionEntry0( CONNECTIONVIEW_CONNECTIONVIEW_ENTRY );
     // Install localization
-    QTranslator *translator = new QTranslator(this);
-    QString lang = QLocale::system().name(); 
-    QString path = "Z:/resource/qt/translations/"; 
-    translator->load("connectionview_" + lang, path);
-    qApp->installTranslator(translator);
+    HbTranslator *translator(new HbTranslator("connectionview"));
     
     // Register custom layout location
     bool registerStatus = HbStyleLoader::registerFilePath(":/layout/");

@@ -88,9 +88,13 @@ void CConnectionDialogsNotifBase::Release()
 // ---------------------------------------------------------
 //
 CConnectionDialogsNotifBase::CConnectionDialogsNotifBase()
-: iCancelled( EFalse ), 
+: iReplySlot( 0 ),
+  iCancelled( EFalse ),
   iResource( 0 )
     {
+    iInfo.iUid = TUid::Null();
+    iInfo.iChannel = TUid::Null();
+    iInfo.iPriority = 0;
     }
 
 

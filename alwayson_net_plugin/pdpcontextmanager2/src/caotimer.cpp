@@ -228,7 +228,12 @@ TBool CAOTimer::UnconnectTimerDisabled() const
 //
 CAOTimer::CAOTimer( MAOTimerObserver& aObserver, MAOSettings& aSettings ):
     iObserver( aObserver ),
-    iSettings( aSettings )
+    iSettings( aSettings ),
+    iRetryTimer( NULL ),
+    iRetryTimerCount( 0 ),
+    iCurrentRetryTimerInterval( 0 ), 
+    iConnectionTimer( NULL ),
+    iUnconnectTimer( NULL )
     {
     LOG_1( _L("CAOTimer::CAOTimer") );
     }

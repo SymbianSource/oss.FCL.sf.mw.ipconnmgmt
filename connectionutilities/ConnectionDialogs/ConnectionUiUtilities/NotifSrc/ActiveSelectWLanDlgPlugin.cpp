@@ -18,7 +18,7 @@
 
 // INCLUDE FILES
 #include <AknWaitDialog.h>
-#include <ConnUiUtilsNotif.rsg>
+#include <connuiutilsnotif.rsg>
 #include <AknGlobalNote.h>
 #include <StringLoader.h>
 #include <centralrepository.h>
@@ -84,7 +84,11 @@ void CActiveSelectWLanDlgPlugin::ConstructL()
 CActiveSelectWLanDlgPlugin::CActiveSelectWLanDlgPlugin( 
                                                 CSelectWLanDlgPlugin* aPlugin )
 : CActive( EPriorityStandard ), 
-  iPlugin( aPlugin )
+  iPlugin( aPlugin ),
+  iWlanDataProv( NULL ),
+  iPeriodic( NULL),
+  iResultsListDialog( NULL),
+  iWaitDialog( NULL )
     {
     }
     

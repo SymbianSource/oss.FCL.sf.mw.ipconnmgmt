@@ -56,13 +56,14 @@ CpIpSettingsView::CpIpSettingsView(QGraphicsItem *parent) :
 {
     HbDataForm *form = new HbDataForm();
     this->setWidget(form);
+    form->setHeading(hbTrId("txt_occ_subhead_network_settings"));
     CpPluginUtility::addCpItemPrototype(form);
     HbDataFormModel *model = new HbDataFormModel(form);
 
     // The parameter given as 0 is a HbDataForm pointer, not parent
     mItemDataHelper = new CpItemDataHelper(0);
     mItemDataHelper->setParent(this);
-    
+
     HbDataFormModelItem *modelItem;
     CpPluginInterface *plugin = NULL;
     QDir pluginsDir("\\resource\\qt\\plugins\\controlpanel");

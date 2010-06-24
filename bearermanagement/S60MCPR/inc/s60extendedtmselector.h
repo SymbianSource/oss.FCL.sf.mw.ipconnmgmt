@@ -25,9 +25,6 @@ S60 IP TM selector.
 
 #include <comms-infras/simpleselectorbase.h>
 
-// Forward declaration
-class ESock::CMetaConnectionProviderBase;
-
 /**
  * TS60ProviderSelectorFactory
  */

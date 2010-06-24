@@ -58,7 +58,6 @@ class TestCpPacketDataApPlugin : public QObject
         void tcChangeUserName();
         void tcChangeUserName_data();
         void tcScrollToBottom();
-        void tcChangePromptPassword();
         void tcChangePassword();
         void tcChangePassword_data();
         void tcChangeAuthenticationMode();
@@ -128,7 +127,6 @@ class TestCpPacketDataApPlugin : public QObject
         HbWidget *mConnectionNameWidget;
         HbWidget *mAccessPointNameWidget;
         HbWidget *mUserNameWidget;
-        HbWidget *mPasswordPromptWidget;
         HbWidget *mPasswordWidget;
         HbWidget *mAuthenticationWidget;
         HbWidget *mHomepageWidget;

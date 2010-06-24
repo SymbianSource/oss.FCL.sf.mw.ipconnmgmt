@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2004-2009 Nokia Corporation and/or its subsidiary(-ies). 
+* Copyright (c) 2004-2010 Nokia Corporation and/or its subsidiary(-ies). 
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -411,6 +411,18 @@ class CMPMServerSession : public CSession2
          * @since 5.1
          */
         TBool UseUserConnPref();
+        
+        /**
+         * Returns VPN user connection usage status.
+         * @return ETrue if VPN user connection is used in this session.
+         */
+        inline TBool VpnUserConnectionUsed() const;
+
+        /**
+         * Sets VPN user connection usage status.
+         * @param aEnabled Informs if VPN user connection is used.
+         */
+        void SetVpnUserConnectionUsed( const TBool aEnabled );
         
         /**
         * Returns id of the client.
@@ -926,21 +938,26 @@ class CMPMServerSession : public CSession2
         //    
         CMPMIapSelection* iIapSelection;
 
-				// Stored state of migrating to carrier
-				// 
-				TMigrateToCarrierState iMigrateState;
+        // Stored state of migrating to carrier
+        // 
+        TMigrateToCarrierState iMigrateState;
 
-				// Last Iap notified using PreferredIap-notification
-				//
-				TUint32 iLastNotifiedIap;
-		
-		    // Iap to which connection is migrating
+        // Last Iap notified using PreferredIap-notification
+        //
+        TUint32 iLastNotifiedIap;
+    
+        // Iap to which connection is migrating
         //
         TUint32 iMigrateIap;
 
         // Set when this session is user connection
-		    //
+        //
         TBool iUserConnection;
+
+        // Set when this session uses VPN user connection
+        //
+        TBool iVpnUserConnectionUsed;        
+
     };
 
 #include "mpmserversession.inl"

@@ -117,7 +117,7 @@ NONSHARABLE_CLASS( TMpmSnapBuffer )
     public:
         // Zero values 
         inline void Reset();    
-        inline const TInt Count() const;
+        inline TInt Count() const;
 
     public:
         TUint   iCount;
@@ -275,7 +275,7 @@ protected:
     
 public:
     enum { EConnS60PolicyPref = 0x0f }; // TConnPref has defined up to 0x07.
-    inline TPolicyConnPref::TPolicyConnPref()
+    inline TPolicyConnPref()
     : TConnPref( TPolicyConnPref::EConnS60PolicyPref )
         {
         SetIapId( 0 );
@@ -391,7 +391,7 @@ public:
         EConnTypeExplicit
     };
     
-    inline TMpmConnPref::TMpmConnPref()
+    inline TMpmConnPref()
     : TConnPref( TMpmConnPref::EConnPrefMpm )
         {
         SetSnapPurpose( CMManager::ESnapPurposeUnknown );

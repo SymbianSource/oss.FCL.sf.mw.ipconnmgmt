@@ -59,8 +59,9 @@ LOCAL_C void CreateNotifiersL(
 
 EXPORT_C CArrayPtr<MEikSrvNotifierBase2>* NotifierArray()
     {
-    CArrayPtrFlat<MEikSrvNotifierBase2>* array = new (ELeave) 
-                    CArrayPtrFlat<MEikSrvNotifierBase2>( KPluginGranularity );
+    CArrayPtrFlat<MEikSrvNotifierBase2>* array = NULL;
+    TRAP_IGNORE( array = new (ELeave) 
+                    CArrayPtrFlat<MEikSrvNotifierBase2>( KPluginGranularity ); )
 
     if ( array )
         {

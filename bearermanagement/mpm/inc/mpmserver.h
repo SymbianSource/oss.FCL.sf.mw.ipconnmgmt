@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2004-2009 Nokia Corporation and/or its subsidiary(-ies). 
+* Copyright (c) 2004-2010 Nokia Corporation and/or its subsidiary(-ies). 
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -34,12 +34,13 @@ Mobility Policy Manager server class definitions.
 #include "mpmcommon.h"
 #include "rmpm.h"
 #include "mpmroamingwatcher.h"
+#include "mpmvpntogglewatcher.h"
 
 
 class CMPMCommsDatAccess;
 class CMpmCsIdWatcher;
 class CMpmDataUsageWatcher;
-class CMpmOfflineWatcher;
+class CMpmVpnToggleWatcher;
 
 // CONSTANTS
 _LIT( KMPMPanicCategory, "Mobility Policy Manager Server" );
@@ -265,7 +266,8 @@ class TActiveBMConn
 *  @lib MPMServer.exe
 *  @since 3.0
 */
-class CMPMServer : public CPolicyServer
+class CMPMServer : public CPolicyServer,
+                   public MMpmVpnToggleWatcherNotify
     {
     public: // Constructors and destructor
 
@@ -693,6 +695,20 @@ class CMPMServer : public CPolicyServer
     public: // Functions from base classes
 
         /**
+         * From MMpmVpnToggleWatcherNotify. Sets values for VPN toggle after
+         * VPN toggle key changes in central repository.
+         * @param aVpnPreferred Informs if VPN connection is preferred
+         *                      connection
+         * @param aVpnIapId VPN IAP Id, which is used for VPN connection, when
+         *                  VPN connection is preferred                           
+         * @param aSnapId SNAP Id SNAP Id, which is used for VPN connection,
+         *                when VPN connection is preferred
+         */
+         void SetVpnToggleValuesL( const TBool aVpnPreferred,
+                                   const TUint32 aVpnIapId,
+                                   const TUint32 aSnapId );
+
+        /**
         * From CServer2. Creates a new session for a client.
         * @since 3.0
         * @param aVersion Version information
@@ -704,7 +720,7 @@ class CMPMServer : public CPolicyServer
 
         // Stops connection of certain IAP, zero for all connections
         void StopConnections( TInt aIapId = 0 );
-
+                
     public:
 
         /**
@@ -746,6 +762,34 @@ class CMPMServer : public CPolicyServer
          * @return ETrue if user connection is in internet snap
          */
         TBool UserConnectionInInternet() const;
+
+        /**
+         * Mark that there is an active VPN user connection.
+         */
+        void AddVpnUserConnectionSession();
+        
+        /**
+         * Mark that VPN user connection is not active
+         */
+        void RemoveVpnUserConnectionSession();
+        
+        /**
+         * Informs if VPN user connection is used with given MPM preferences
+         * and application.
+         * @param aMpmConnPref MPM connection preferences.
+         * @param aAppUid Application UID
+         * @return Informs if VPN connection is preferred
+         */        
+        TBool UseVpnUserConnection( const TMpmConnPref aMpmConnPref,
+                                    const TUint32 aAppUid ) const;
+        
+        /**
+         * Prepares VPN user connection.
+         * @param aMpmConnPref Connection preferences, which are modified
+         *                     for VPN user connection (returned)
+         * @return Informs if preparation was successful.                                         
+         */
+        TBool PrepareVpnUserConnection( TMpmConnPref& aMpmConnPref );
                 
         /**
          * Handle to central repository watcher
@@ -753,6 +797,12 @@ class CMPMServer : public CPolicyServer
          * @return Pointer to watcher object.
          */
         inline CMpmCsIdWatcher* CsIdWatcher();
+
+        /**
+         * Handle to VPN toggle central repository watcher
+         * @return Pointer to watcher object.
+         */
+        inline CMpmVpnToggleWatcher* VpnToggleWatcher();
 
         /**
         * Returns server session instance that corresponds to given
@@ -889,6 +939,10 @@ class CMPMServer : public CPolicyServer
         // Set when user connection in internet snap
         TBool iUserConnectionInInternet;
         
+        // Count of sessions using VPN user connection
+        //
+        TInt iVpnUserConnectionSessionCount;        
+        
         /**
          * Handle to central repository watcher
          * Own.
@@ -896,14 +950,15 @@ class CMPMServer : public CPolicyServer
         CMpmCsIdWatcher* iMpmCsIdWatcher;
 
         /**
-         * Handle to central repository watcher
+         * Handle to VPN toggle central repository watcher.
+         * Own.
          */
-        CMpmDataUsageWatcher* iMpmDataUsageWatcher;
+        CMpmVpnToggleWatcher* iMpmVpnToggleWatcher;
 
         /**
          * Handle to central repository watcher
          */
-        CMpmOfflineWatcher* iMpmOfflineWatcher;
+        CMpmDataUsageWatcher* iMpmDataUsageWatcher;
 
         // Dedicated clients
         RArray<TUint32> iDedicatedClients;

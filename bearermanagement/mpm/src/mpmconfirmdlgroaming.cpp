@@ -67,6 +67,8 @@ CMPMConfirmDlgRoaming::CMPMConfirmDlgRoaming(
       iIAP( aIAP ),
       iDialogType( aDialogType ),
       iConfirmDlg( NULL ),
+      iMsgQuery( EMsgQueryCancelled ),
+      iError( 0 ),
       iReconnect( aReconnect )
     {
     }

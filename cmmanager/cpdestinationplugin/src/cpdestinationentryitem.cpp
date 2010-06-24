@@ -534,7 +534,11 @@ void CpDestinationEntryItemData::fetchReferencedAps(
             for (int i = 0; i < apIds.count(); i++) {
                 CmConnectionMethodShim *cm;
                 cm = cmm->connectionMethod(apIds.at(i));
-                apList.append(QSharedPointer<CmConnectionMethodShim>(cm));
+                if (!cm->getBoolAttribute(CMManagerShim::CmHidden)) {
+                    apList.append(QSharedPointer<CmConnectionMethodShim>(cm));
+                } else {
+                    delete cm;
+                }
             }
         } else {
             destination = cmm->destination(mDestinationId);
@@ -542,7 +546,12 @@ void CpDestinationEntryItemData::fetchReferencedAps(
             for (int i = 0; i < apCount; i++) {
                 CmConnectionMethodShim *cm = NULL;
                 cm = destination->connectionMethod(i);
-                apList.append(QSharedPointer<CmConnectionMethodShim>(cm));
+                if (!cm->getBoolAttribute(CMManagerShim::CmDestination)
+                     && !cm->getBoolAttribute(CMManagerShim::CmHidden)) {
+                    apList.append(QSharedPointer<CmConnectionMethodShim>(cm));
+                } else {
+                    delete cm;
+                }
             }
             delete destination;
         }

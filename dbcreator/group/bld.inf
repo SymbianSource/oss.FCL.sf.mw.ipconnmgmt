@@ -22,7 +22,6 @@ PRJ_PLATFORMS
 DEFAULT
 
 PRJ_EXPORTS
-../conf/CI_commsdatcreator.confml				MW_LAYER_CONFML(CI_commsdatcreator.confml)
 ../conf/commsdatcreator.confml				MW_LAYER_CONFML(commsdatcreator.confml)
 ../conf/commsdatcreator_01.gcfml			MW_LAYER_GCFML(commsdatcreator_01.gcfml)
 ../conf/commsdatcreator.implml          MW_LAYER_CRML(commsdatcreator.implml)
