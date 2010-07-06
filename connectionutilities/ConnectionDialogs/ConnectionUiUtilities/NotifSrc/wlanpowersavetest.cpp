@@ -24,7 +24,7 @@
 
 #include <uikon/eiksrvui.h>
 #include <StringLoader.h>
-#include <ConnUiUtilsNotif.rsg>
+#include <connuiutilsnotif.rsg>
 
 // ================= MEMBER FUNCTIONS =======================
 //

@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2004-2009 Nokia Corporation and/or its subsidiary(-ies). 
+* Copyright (c) 2004-2010 Nokia Corporation and/or its subsidiary(-ies). 
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -21,13 +21,15 @@ PRJ_PLATFORMS
 DEFAULT
 
 PRJ_EXPORTS
-../inc/rmpm.h                   |../../../inc/rmpm.h
-../inc/rmpm.inl                 |../../../inc/rmpm.inl
-../rom/mpm.iby                  CORE_MW_LAYER_IBY_EXPORT_PATH(mpm.iby)
-../rom/mpmserver.iby            CORE_MW_LAYER_IBY_EXPORT_PATH(mpmserver.iby)
-../conf/mpm.confml              MW_LAYER_CONFML(mpm.confml)
-../conf/mpm_101f6d12.crml       MW_LAYER_CRML(mpm_101f6d12.crml)
-../conf/mpm_101f6d50.crml       MW_LAYER_CRML(mpm_101f6d50.crml)
+../inc/rmpm.h                           |../../../inc/rmpm.h
+../inc/rmpm.inl                         |../../../inc/rmpm.inl
+../rom/mpm.iby                          CORE_MW_LAYER_IBY_EXPORT_PATH(mpm.iby)
+../rom/mpmserver.iby                    CORE_MW_LAYER_IBY_EXPORT_PATH(mpmserver.iby)
+../conf/mpm.confml                      MW_LAYER_CONFML(mpm.confml)
+../conf/mpm_101f6d12.crml               MW_LAYER_CRML(mpm_101f6d12.crml)
+../conf/mpm_101f6d50.crml               MW_LAYER_CRML(mpm_101f6d50.crml)
+../conf/mpmvpntoggleapi.confml          MW_LAYER_CONFML(mpmvpntoggleapi.confml)
+../conf/mpmvpntoggleapi_20016a88.crml   MW_LAYER_CRML(mpmvpntoggleapi_20016a88.crml)
 
 PRJ_MMPFILES
 mpmclient.mmp

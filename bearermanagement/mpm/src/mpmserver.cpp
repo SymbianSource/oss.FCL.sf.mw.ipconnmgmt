@@ -39,10 +39,12 @@ Mobility Policy Manager server implementation.
 #include "mpmcommsdataccess.h"
 #include "mpmprivatecrkeys.h"
 #include "mpmcsidwatcher.h"
+#include "mpmvpntogglewatcher.h"
 #include "mpmdatausagewatcher.h"
 #include "mpmpropertydef.h"
-#include "mpmofflinewatcher.h"
 
+static const TUint32 KUidKmdServer = 0x1000088A;
+    
 // ============================= LOCAL FUNCTIONS ===============================
 
 // -----------------------------------------------------------------------------
@@ -82,11 +84,22 @@ CMPMServer::CMPMServer()
       iTSYLoaded( EFalse ),
       iPacketServLoaded( EFalse ), 
       iDtmWatcher( NULL ), 
+      iRoamingWatcher( NULL ),
       iWLANScanRequired( EFalse ), 
       iRoamingQueue( NULL ), 
       iStartingQueue( NULL ),
       iConnectionCounter( 0 ),
-      iOfflineMode( ECoreAppUIsNetworkConnectionAllowed )
+      iUserConnection( EFalse ),
+      iUserConnectionInInternet( EFalse ),
+      iVpnUserConnectionSessionCount( 0 ),
+      iMpmCsIdWatcher( NULL ),
+      iMpmVpnToggleWatcher( NULL ),
+      iMpmDataUsageWatcher( NULL ),
+      iCommsDatAccess( NULL ),
+      iConnUiUtils( NULL ),
+      iOfflineMode( ECoreAppUIsNetworkConnectionAllowed ),
+      iOfflineWlanQueryResponse( EOfflineResponseUndefined ),      
+      iRoamingToWlanPeriodic( NULL )
     {
     }
 
@@ -157,6 +170,9 @@ void CMPMServer::ConstructL()
     // Create central repository watcher and start it
     iMpmCsIdWatcher = CMpmCsIdWatcher::NewL();
     iMpmCsIdWatcher->StartL();
+    
+    // Create VPN toggle central repository watcher and start it
+    iMpmVpnToggleWatcher = CMpmVpnToggleWatcher::NewL( *this );
 
     // Create another central repository watcher and start it
     TRAPD( duwErr, iMpmDataUsageWatcher = CMpmDataUsageWatcher::NewL( this ) );
@@ -168,18 +184,6 @@ void CMPMServer::ConstructL()
         {
         iMpmDataUsageWatcher = NULL;
         MPMLOGSTRING( "CMPMServer::ConstructL: CMpmDataUsageWatcher::NewL() failed!" )
-        }
-
-    // Create another central repository watcher and start it
-    TRAPD( owErr, iMpmOfflineWatcher = CMpmOfflineWatcher::NewL( this ) );
-    if (owErr == KErrNone)
-        {
-        iMpmOfflineWatcher->StartL();
-        }
-    else
-        {
-        iMpmOfflineWatcher = NULL;
-        MPMLOGSTRING( "CMPMServer::ConstructL: CMpmOfflineWatcher::NewL() failed!" )
         }
 
     // Read dedicated clients from the central repository
@@ -256,10 +260,10 @@ CMPMServer::~CMPMServer()
     iTelServer.Close();
     
     delete iMpmCsIdWatcher;    
-    
+       
+    delete iMpmVpnToggleWatcher;
+ 
     delete iMpmDataUsageWatcher;    
-
-    delete iMpmOfflineWatcher;    
 
     iDedicatedClients.Close();
 
@@ -268,6 +272,57 @@ CMPMServer::~CMPMServer()
     delete iConnUiUtils;
     }
 
+// -----------------------------------------------------------------------------
+// CMPMServer::SetVpnToggleValuesL
+// -----------------------------------------------------------------------------
+//
+void CMPMServer::SetVpnToggleValuesL( const TBool aVpnPreferred,
+                                      const TUint32 /*aVpnIapId*/,
+                                      const TUint32 /*aSnapId*/ )
+    {
+    MPMLOGSTRING2("CMPMServer::SetVpnToggleValues, VPN connection preferred: %d",
+            aVpnPreferred)
+    if ( aVpnPreferred )
+        {
+        // Stop Internet connections, except if VPN user connection
+        // would not be made with current preferences when reconnecting.
+        for (TInt index = 0; index < iSessions.Count(); index++)
+            {
+            CMPMServerSession* session = iSessions[index];
+            TUint32 iapId = GetBMIap( session->ConnectionId() );
+            TUint32 snapId = GetBMSnap( session->ConnectionId() );
+            
+            if ( (session->ChooseBestIapCalled()) &&
+                 (!session->IapSelectionL()->MpmConnPref().MandateIap()) &&
+                 (session->AppUid() != KUidKmdServer) &&                 
+                 (!session->UserConnection()) &&                 
+                 iCommsDatAccess->IsInternetSnapL(iapId, snapId) )
+                {
+                // Stop connection.
+                MPMLOGSTRING2( "CMPMServer::SetVpnToggleValuesL: \
+ Disconnected Connection Id = 0x%x", session->ConnectionId() )            
+                session->ClientErrorNotificationL(KErrForceDisconnected);
+                }
+            }        
+        }
+    else
+        {
+        // Stop connections, which use VPN user connection.
+        for (TInt index = 0; index < iSessions.Count(); index++)
+            {
+            CMPMServerSession* session = iSessions[index];
+            if ( session->VpnUserConnectionUsed() )
+                {
+                session->SetVpnUserConnectionUsed( EFalse );                    
+                // Stop connection.
+                MPMLOGSTRING2( "CMPMServer::SetVpnToggleValuesL: \
+ Disconnected Connection Id = 0x%x", session->ConnectionId() )            
+                session->ClientErrorNotificationL(KErrForceDisconnected);
+                }
+            }
+        ASSERT( iVpnUserConnectionSessionCount == 0 );
+        }    
+    }
 
 // -----------------------------------------------------------------------------
 // CMPMServer::NewSessionL
@@ -1772,6 +1827,126 @@ void CMPMServer::StopCellularConns()
             }
         }
     stoppedIaps.Close();
+    }
+
+// -----------------------------------------------------------------------------
+// CMPMServer::AddVpnUserConnectionSession
+// -----------------------------------------------------------------------------
+//
+void CMPMServer::AddVpnUserConnectionSession()
+    {
+    iVpnUserConnectionSessionCount++;
+    }
+
+// -----------------------------------------------------------------------------
+// CMPMServer::RemoveVpnUserConnectionSession
+// -----------------------------------------------------------------------------
+//
+void CMPMServer::RemoveVpnUserConnectionSession()
+    {    
+    ASSERT( iVpnUserConnectionSessionCount > 0 );
+    iVpnUserConnectionSessionCount--;
+    }
+
+// ---------------------------------------------------------------------------
+// CMPMServer::UseVpnUserConnection
+// Informs if VPN user connection is used with given MPM preferences and
+// application.
+// ---------------------------------------------------------------------------
+//
+TBool CMPMServer::UseVpnUserConnection( const TMpmConnPref aMpmConnPref,
+                                        const TUint32 aAppUid ) const
+    {    
+    if ( iMpmVpnToggleWatcher->IsVpnConnectionPreferred() &&
+         !aMpmConnPref.MandateIap() &&
+         aAppUid != KUidKmdServer &&
+         aAppUid != iMpmCsIdWatcher->ConnectScreenId() )
+        {
+        // VPN connection is preferred connection, connection preferences are
+        // not mandatet and client is not KMD server or Connect Screen.            
+        if ( aMpmConnPref.ConnType() == TMpmConnPref::EConnTypeDefault ||
+             aMpmConnPref.ConnType() == TMpmConnPref::EConnTypeImplicit )
+            {
+            // Default or implicit connection is requested.
+            // VPN user connection is used.
+            return ETrue;
+            }
+        else
+            {
+            // Explicit connection is requested.
+            TBool internetSnap(EFalse);    
+            TRAPD( err, internetSnap = iCommsDatAccess->IsInternetSnapL( aMpmConnPref.IapId(),
+                                                                         aMpmConnPref.SnapId() ) );
+            if ( err == KErrNone &&
+                 internetSnap )
+                {
+                // Connection belongs to Internet SNAP.
+                // VPN user connection is used.
+                return ETrue;
+                }
+            }
+        }
+    
+    // VPN user connection is not used.
+    return EFalse;    
+    }
+
+// -----------------------------------------------------------------------------
+// CMPMServer::PrepareVpnUserConnection
+// -----------------------------------------------------------------------------
+//
+TBool CMPMServer::PrepareVpnUserConnection( TMpmConnPref& aMpmConnPref )
+    {
+    // Get VPN IAP Id or SNAP Id, which is used for VPN user connection. 
+    TUint32 vpnIapId = iMpmVpnToggleWatcher->VpnIapId();
+    TUint32 snapId = iMpmVpnToggleWatcher->SnapId();
+
+    // Check first if SNAP Id is set, in which case VPN IAP Id is ignored.
+    if ( snapId != 0 )
+        {
+        TBool intranetSnap( EFalse );   
+        TRAPD( err , intranetSnap = 
+            iCommsDatAccess->IsIntranetSnapL( snapId ) );
+        if ( (err != KErrNone) ||
+             (!intranetSnap) )
+            {
+            // SNAP is not intranet SNAP.
+            // Reset VPN toggle values and continue without using VPN user
+            // connection.
+            MPMLOGSTRING3( "CMPMServer::PrepareVpnUserConnection failed, \
+SNAP Id=%d, err=%d", snapId, err );
+        
+            iMpmVpnToggleWatcher->ResetVpnToggleValues();        
+            return EFalse;
+            }        
+        aMpmConnPref.SetIapId( 0 );
+        aMpmConnPref.SetSnapId( snapId );               
+        }
+    else
+        {
+        // Validate that IAP is VPN IAP. 
+        TMPMBearerType bearerType = EMPMBearerTypeNone;
+        TRAPD( err, bearerType = iCommsDatAccess->GetBearerTypeL( vpnIapId ) );        
+        if ( (err != KErrNone) ||
+             (bearerType != EMPMBearerTypeVpn) )
+            {        
+            // IAP is not valid VPN IAP.
+            // Reset VPN toggle values and continue without using VPN user
+            // connection.
+            MPMLOGSTRING4( "CMPMServer::PrepareVpnUserConnection failed, \
+IAP Id=%d, err=%d, bearerType=%d", vpnIapId, err, bearerType );
+        
+            iMpmVpnToggleWatcher->ResetVpnToggleValues();
+            return EFalse;
+            }
+        aMpmConnPref.SetIapId( vpnIapId );
+        aMpmConnPref.SetSnapId( 0 );            
+        }
+   
+    aMpmConnPref.SetConnType( TMpmConnPref::EConnTypeExplicit );
+    
+    // VPN user connection will be activated.
+    return ETrue;        
     }
 
 // ---------------------------------------------------------------------------

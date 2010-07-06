@@ -18,7 +18,7 @@
 
 
 // INCLUDE FILES
-#include  <ConnectionMonitorUi.rsg>
+#include  <connectionmonitorui.rsg>
 #include  "ConnectionMonitorUiDetailsView.h"
 #include  "ConnectionMonitorUiDetailsContainer.h" 
 #include  "ConnectionMonitorUi.hrh"

@@ -23,7 +23,7 @@
 //#include <EIKON.mbg>
 #include <avkon.mbg>
 #include <aknkeys.h>
-#include <ApSetUI.rsg>
+#include <apsetui.rsg>
 #include <featmgr.h>
 
 #include "ApSelectorListbox.h"

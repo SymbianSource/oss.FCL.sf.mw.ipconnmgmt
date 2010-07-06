@@ -20,7 +20,7 @@
 // INCLUDE FILES
 //#include <nifvar.h>
 #include <StringLoader.h>
-#include <ConnectionMonitorUi.rsg>
+#include <connectionmonitorui.rsg>
 #include <ConnectionMonitorUi.mbg>
 //#include <Avkon.rsg>
 

@@ -89,7 +89,9 @@ namespace CMManagerShim
      *  Enumerations for connection method attributes.
      */
     enum ConnectionMethodAttribute {
-        // Common attributes        
+        // Common attributes
+        //! From TConnectionMethodCommonAttributes in cmconnectionmethoddef.h
+        CmDestination                   = CMManager::ECmDestination,
         //! From TConnectionMethodCommonAttributes in cmconnectionmethoddef.h
         CmBearerType                    = CMManager::ECmBearerType,
         //! From TConnectionMethodCommonAttributes in cmconnectionmethoddef.h
@@ -138,6 +140,8 @@ namespace CMManagerShim
         CmProxyServerName               = CMManager::ECmProxyServerName,
         //! From TConnectionMethodCommonAttributes in cmconnectionmethoddef.h
         CmProxyPortNumber               = CMManager::ECmProxyPortNumber,
+        //! From TConnectionMethodCommonAttributes in cmconnectionmethoddef.h
+        CmMetaHotSpot                   = CMManager::ECmMetaHotSpot,
 
         // Packet data specific attributes
         /*!

@@ -528,6 +528,7 @@ TBool CConnectionStatusPopup::ResolveErrorCodeL( TInt aErrorCode )
         case KErrGprsReactivationRequested:
         case KErrGprsOfflineMode:
             icon = EIconCellular;
+            // These were GPRS; fall through
         case KErrWlanOff:
         case KErrWlanForceOff:
             textPtr.Set( Ktxt_occ_dpopinfo_connection_unavailable );

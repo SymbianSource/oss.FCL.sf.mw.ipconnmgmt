@@ -79,9 +79,11 @@ CTelephony::TRegistrationStatus
 // Constructor
 // ---------------------------------------------------------------------------
 //
-CAOConnectionMonitor::CAOConnectionMonitor()
+CAOConnectionMonitor::CAOConnectionMonitor():
+    iConnectionMonitorImpl( NULL )
     {
     LOG_1( _L("CAOConnectionMonitor::CAOConnectionMonitor") );
+
     }
 
 // ---------------------------------------------------------------------------

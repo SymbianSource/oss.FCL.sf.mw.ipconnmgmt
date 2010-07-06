@@ -25,7 +25,7 @@
 #include <eikmenup.h>
 
 #include <ApListItem.h>
-#include <ApSetUI.rsg>
+#include <apsetui.rsg>
 
 #include <featmgr.h>
 

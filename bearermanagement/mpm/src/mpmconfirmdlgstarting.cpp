@@ -81,9 +81,11 @@ CMPMConfirmDlgStarting::CMPMConfirmDlgStarting(
       iIAP( aIAP ),
       iDialogType( aDialogType ),
       iConfirmDlg( NULL ),
+      iMsgQuery( EMsgQueryCancelled ),
       iPref( aPref ),
       iServer( aServer ),
       iSession ( aSession ),
+      iError( 0 ),
       iIapState( aIapState )
     {
     }

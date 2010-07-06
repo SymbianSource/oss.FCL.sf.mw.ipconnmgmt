@@ -24,7 +24,7 @@
 #include "ConnUiUtilsNotif.h"
 #include "ConnectionDialogsLogger.h"
 
-#include <ConnUiUtilsNotif.rsg>
+#include <connuiutilsnotif.rsg>
 #include <StringLoader.h>
 
 #include <ConnectionUiUtilities.h>
@@ -39,7 +39,9 @@
 //
 CWlanPowerSaveQueryNotif::CWlanPowerSaveQueryNotif()
     :
-    iDisable( EFalse )
+    iDialog( NULL ),
+    iDisable( EFalse ),
+    iExitAsync( NULL )
     {
     }
 

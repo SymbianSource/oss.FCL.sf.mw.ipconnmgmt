@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2007-2009 Nokia Corporation and/or its subsidiary(-ies). 
+* Copyright (c) 2007-2010 Nokia Corporation and/or its subsidiary(-ies). 
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -2150,6 +2150,31 @@ TBool CMPMCommsDatAccess::IsInternetSnapL(CMDBSession& db, TUint32 aSnapId)
     CleanupStack::PopAndDestroy( metaSet );
     CleanupStack::PopAndDestroy( snapAPr );
     return ret;
+    }
+
+// -----------------------------------------------------------------------------
+// CMPMCommsDatAccess::IsIntranetSnapL
+// -----------------------------------------------------------------------------
+//
+TBool CMPMCommsDatAccess::IsIntranetSnapL( TUint32 aSnapId )
+    {
+    MPMLOGSTRING( "CMPMCommsDatAccess::IsIntranetSnapL" )
+
+    RCmManager rCmManager;
+    rCmManager.OpenLC();
+
+    RCmDestination dest = rCmManager.DestinationL( aSnapId );
+    CleanupClosePushL(dest);
+    TInt snapMetadata = dest.MetadataL( CMManager::ESnapMetadataPurpose );
+    CleanupStack::PopAndDestroy( &dest );
+    CleanupStack::PopAndDestroy( &rCmManager );
+    
+    if ( snapMetadata == CMManager::ESnapPurposeIntranet )
+        {
+        return ETrue;
+        }
+    
+    return EFalse;            
     }
 
 // -----------------------------------------------------------------------------

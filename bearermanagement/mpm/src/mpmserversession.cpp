@@ -69,9 +69,19 @@ CMPMServerSession::CMPMServerSession(CMPMServer& aServer)
     : CSession2(), 
       iMyServer( aServer ),
       iConfirmDlgRoaming( NULL ),
+      iConnId( 0 ),
+      iNotifRequested( EFalse ),
+      iPreferredIAPRequested( EFalse ),
+      iOfflineFeatureSupported( EFalse ),
+      iEasyWlanIap( 0 ),
+      iAppUid( 0 ),
       iStoredIapInfo(),
       iIapSelection( NULL ),
-      iMigrateState( EMigrateNone )
+      iMigrateState( EMigrateNone ),
+      iLastNotifiedIap( 0 ),
+      iMigrateIap( 0 ),
+      iUserConnection( 0 ),
+      iVpnUserConnectionUsed( EFalse )
     {
     }
 
@@ -108,12 +118,19 @@ CMPMServerSession::~CMPMServerSession()
     // 
     iMyServer.RemoveSession( this );
 
-    if (UserConnection())
+    if (VpnUserConnectionUsed())
+        {
+        SetVpnUserConnectionUsed( EFalse );
+    
+    MPMLOGSTRING( "CMPMServerSession::~CMPMServerSession -\
+ VPN user connection usage ended" )    
+        }
+    else if (UserConnection())
         {
         iMyServer.ClearUserConnection();
         ClearUserConnection();
         
-        MPMLOGSTRING( "CMPMServerSession::HandleServerApplicationConnectionEnds -\
+        MPMLOGSTRING( "CMPMServerSession::~CMPMServerSession -\
 User connection deactivated" )
         }   
 
@@ -429,7 +446,21 @@ while extracting TCommDbConnPref from TConnPref" )
     
     MPMLOGSTRING3( "CMPMServerSession::HandleServerChooseIapL - iap %d \
 connType %d", mpmConnPref.IapId(), mpmConnPref.ConnType() )
-    
+
+
+    if ( iMyServer.UseVpnUserConnection(mpmConnPref,
+                                        AppUid()) )
+        {
+        // VPN user connection needs to be used.
+        TBool prepareOk = iMyServer.PrepareVpnUserConnection( mpmConnPref );
+        if ( prepareOk )
+            {
+            SetVpnUserConnectionUsed( ETrue );
+            MPMLOGSTRING( "CMPMServerSession::HandleServerChooseIapL -\
+ VPN user connection used" )                    
+            }
+        }
+            
     iIapSelection->ChooseIapL( mpmConnPref );
 
     if ( iAppUid == iMyServer.CsIdWatcher()->ConnectScreenId() )
@@ -708,7 +739,14 @@ void CMPMServerSession::HandleServerApplicationConnectionEnds(
     //
     TConnectionId endId = aMessage.Int0();
 
-    if (UserConnection())
+    if (VpnUserConnectionUsed())
+        {
+        SetVpnUserConnectionUsed( EFalse );
+
+        MPMLOGSTRING( "CMPMServerSession::HandleServerApplicationConnectionEnds -\
+ VPN user connection usage ended" )    
+        }
+    else if (UserConnection())
         {
         iMyServer.ClearUserConnection();
         ClearUserConnection();
@@ -1510,8 +1548,10 @@ Warning: ChooseBestIap has not been called yet" )
         case EStarted:
             // Process error according to the fact that the connection 
             // has already been started.
+            // KErrConnectionTerminated is received when user disconnects
+            // connection from Settings/Connection mgr.
             //         
-            if ( ( error == KErrCancel ) || ( error == KErrTimedOut ) )
+            if ( ( error == KErrCancel ) || ( error == KErrTimedOut ) || ( error == KErrConnectionTerminated ) )
                 {
                 neededAction = EPropagateError;
 
@@ -3422,6 +3462,24 @@ TBool CMPMServerSession::UseUserConnPref()
         }
     
     return EFalse;
+    }
+
+// -----------------------------------------------------------------------------
+// CMPMServerSession::SetVpnUserConnectionUsed
+// -----------------------------------------------------------------------------
+//
+void CMPMServerSession::SetVpnUserConnectionUsed( const TBool aUseVpnUserConnection )
+    {
+    if ( aUseVpnUserConnection )
+        {
+        iVpnUserConnectionUsed = ETrue;
+        iMyServer.AddVpnUserConnectionSession();        
+        }
+    else 
+        {
+        iVpnUserConnectionUsed = EFalse;
+        iMyServer.RemoveVpnUserConnectionSession();        
+        }
     }
 
 // -----------------------------------------------------------------------------

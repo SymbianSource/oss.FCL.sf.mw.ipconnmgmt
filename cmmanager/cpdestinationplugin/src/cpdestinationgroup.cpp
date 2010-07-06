@@ -79,7 +79,7 @@ CpDestinationGroup::CpDestinationGroup(CpItemDataHelper &itemDataHelper) :
     // Create Destination list
     for (int i = 0; i < destinationList.count(); i++) {
         QString iapCount = 
-			getDestinationAdditionalText(destinationList.at(i)->connectionMethodCount());
+			getDestinationAdditionalText(destinationList.at(i));
         
         // Create new destination entry
         CpDestinationEntryItemData *destDataItem;
@@ -126,13 +126,14 @@ CpDestinationGroup::~CpDestinationGroup()
 void CpDestinationGroup::addDestination(const QString &dest, int destId)
 {
     OstTraceFunctionEntry0(CPDESTINATIONGROUP_ADDDESTINATION_ENTRY);
-    QString iapCount = getDestinationAdditionalText(0);
     
     // Create UI item for new destination
     CpDestinationEntryItemData *destDataItem;
     destDataItem = new CpDestinationEntryItemData(*mItemDataHelper);
     destDataItem->setContentWidgetData(QString("text"), dest);
-    destDataItem->setContentWidgetData(QString("additionalText"), iapCount);
+    destDataItem->setContentWidgetData(
+        QString("additionalText"), 
+        hbTrId("txt_occ_dblist_internet_val_no_access_points"));
     destDataItem->setDestinationId(destId);
     destDataItem->setDestinationName(dest);
     connect(destDataItem, SIGNAL(destChanged()), this, SLOT(updateDestinationInformation()));
@@ -206,7 +207,6 @@ CpBearerApPluginInterface *CpDestinationGroup::findBearerPlugin(int apId)
 void CpDestinationGroup::updateDestinationInformation()
 {
 	OstTraceFunctionEntry0(CPDESTINATIONGROUP_UPDATEDESTINATIONINFORMATION_ENTRY);
-	int apCount = 0;
 	// "Add Destination" child is removed from count (childCount() -1)
     for (int i = 0; i < childCount() - 1; i++) {
         CpDestinationEntryItemData  *destDataItem = 
@@ -222,16 +222,9 @@ void CpDestinationGroup::updateDestinationInformation()
                 this->removeChild(index);
                 mUncategorisedShown = false;
                 continue;
-            }
-            apCount = apList.count();  
-        } else {
-            CmDestinationShim *destination;
-            destination = mCmManager->destination(destDataItem->destinationId());
-            apCount = destination->connectionMethodCount();
-            delete destination;
+            } 
         }
-
-        QString iapCount = getDestinationAdditionalText(apCount);
+        QString iapCount = getDestinationAdditionalText(destDataItem->destinationId());
         destDataItem->setContentWidgetData(QString("additionalText"), iapCount);
         destDataItem->setContentWidgetData(QString("text"), destDataItem->destinationName());
     }
@@ -252,7 +245,7 @@ void CpDestinationGroup::createUncategorisedDestination()
         CpDestinationEntryItemData *destDataItem;
         destDataItem = new CpDestinationEntryItemData(*mItemDataHelper);
         destDataItem->setContentWidgetData(QString("text"), hbTrId("txt_occ_dblist_uncategorized"));
-        QString iapCount = getDestinationAdditionalText(apList.count());
+        QString iapCount = getDestinationAdditionalText(0);
         destDataItem->setContentWidgetData(QString("additionalText"),iapCount);
         destDataItem->setDestinationId(0);
         destDataItem->setDestinationName(hbTrId("txt_occ_dblist_uncategorized"));
@@ -290,6 +283,8 @@ void CpDestinationGroup::fetchDestinations(
             destination = mCmManager->destination(destArray[i]);
             if (!destination->isHidden()) {
                 destinationList.append(QSharedPointer<CmDestinationShim>(destination));
+            } else {
+                delete destination;
             }
         }
     } catch (const std::exception&) {
@@ -321,20 +316,77 @@ void CpDestinationGroup::loadBearerPlugins()
 }
 
 /*!
-    Helper function to be used in localisation.
+    Helper function to be used in localisation. (Overloaded)
     
     \return Returns correct localized QString according to access point count.
  */
-QString CpDestinationGroup::getDestinationAdditionalText(int iapCount)
+QString CpDestinationGroup::getDestinationAdditionalText(QSharedPointer<CmDestinationShim> destination)
 {
     OstTraceFunctionEntry0(CPDESTINATIONGROUP_GETDESTINATIONADDITIONALTEXT_ENTRY);
     QString result = "";
+    int iapCount = destination->connectionMethodCount();
+    int counter = 0;
+    for (int i = 0; i < iapCount; i++) {
+        CmConnectionMethodShim *cm = destination->connectionMethod(i);
+        if (cm->getBoolAttribute(CMManagerShim::CmDestination)
+            || cm->getBoolAttribute(CMManagerShim::CmHidden)) {
+            counter++;
+        }
+        delete cm; 
+    }
+    iapCount = iapCount - counter;
     if (iapCount > 0) {
         result = hbTrId("txt_occ_dblist_internet_val_ln_access_points", iapCount);
     } else {
         result = hbTrId("txt_occ_dblist_internet_val_no_access_points");
     }
     OstTrace0(TRACE_FLOW, CPDESTINATIONGROUP_GETDESTINATIONADDITIONALTEXT_EXIT, "Exit");
+    return result;
+}
+
+/*!
+    Helper function to be used in localisation. (Overloaded)
+    
+    \return Returns correct localized QString according to access point count.
+ */
+QString CpDestinationGroup::getDestinationAdditionalText(int destinationId)
+{
+    OstTraceFunctionEntry0(CPDESTINATIONGROUP_GETDESTINATIONADDITIONALTEXT2_ENTRY);
+    QString result = "";
+    int iapCount = 0;
+    int counter = 0;
+    if (destinationId == 0) {
+        QList<uint> apList;
+        mCmManager->connectionMethod(apList);
+        iapCount = apList.count();
+        for (int i = 0; i < iapCount; i++) {
+            CmConnectionMethodShim *cm = mCmManager->connectionMethod(apList[i]);
+            if (cm->getBoolAttribute(CMManagerShim::CmDestination)
+                || cm->getBoolAttribute(CMManagerShim::CmHidden)) {
+                counter++;
+            }
+            delete cm; 
+        }
+    } else {
+        CmDestinationShim *destination = mCmManager->destination(destinationId);
+        iapCount = destination->connectionMethodCount();
+        for (int i = 0; i < iapCount; i++) {
+            CmConnectionMethodShim *cm = destination->connectionMethod(i);
+            if (cm->getBoolAttribute(CMManagerShim::CmDestination)
+                || cm->getBoolAttribute(CMManagerShim::CmHidden)) {
+                counter++;
+            }
+            delete cm; 
+        }
+        delete destination;
+    }
+    iapCount = iapCount - counter;
+    if (iapCount > 0) {
+        result = hbTrId("txt_occ_dblist_internet_val_ln_access_points", iapCount);
+    } else {
+        result = hbTrId("txt_occ_dblist_internet_val_no_access_points");
+    }
+    OstTrace0(TRACE_FLOW, CPDESTINATIONGROUP_GETDESTINATIONADDITIONALTEXT2_EXIT, "Exit");
     return result;
 }
 

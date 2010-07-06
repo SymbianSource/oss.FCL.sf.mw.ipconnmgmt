@@ -25,7 +25,7 @@
 
 #include <e32property.h>         // For RProperty 
 #include <UikonInternalPSKeys.h> // For KPSUidUikon and KUikGlobalNotesAllowed.
-#include <ConnUiUtilsNotif.rsg>
+#include <connuiutilsnotif.rsg>
 
 
 // ================= MEMBER FUNCTIONS =======================

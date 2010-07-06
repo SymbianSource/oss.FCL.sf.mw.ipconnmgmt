@@ -23,7 +23,7 @@
 #include <AknIconArray.h>
 #include <AknsUtils.h>
 
-#include <ApSetUI.rsg>
+#include <apsetui.rsg>
 #include <apsettings.mbg>
 
 #include <featmgr.h>

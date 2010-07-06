@@ -46,7 +46,7 @@
 #include "ActiveCChangeConnectionDlg.h"
 #include "connectionstatuspopup.h"
 
-#include <ConnectionUiUtilities.rsg>
+#include <connectionuiutilities.rsg>
 #include <data_caging_path_literals.hrh>
 
 #include "ConnectionDialogsLogger.h"
@@ -85,7 +85,11 @@ CConnectionUiUtilitiesImpl* CConnectionUiUtilitiesImpl::NewL()
 //
 CConnectionUiUtilitiesImpl::CConnectionUiUtilitiesImpl() 
 : iResOffset( 0 ),
-  iIsWlanSupported( EFalse )
+  iIsWlanSupported( EFalse ),
+  iDummy( EFalse ),
+  iDummySecMode( EWlanConnectionSecurityOpen ),
+  iDummyExtSecMode( EWlanConnectionExtentedSecurityModeOpen ),
+  iConnStatusPopup( NULL )
     {
     for ( TInt i = 0; i < KNumberOfWrappedDialogs; i++ )
         {

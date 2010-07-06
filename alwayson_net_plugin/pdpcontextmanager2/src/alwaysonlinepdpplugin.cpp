@@ -67,7 +67,8 @@ CAlwaysOnlinePDPPlugin::~CAlwaysOnlinePDPPlugin()
 // ---------------------------------------------------------------------------
 //
 CAlwaysOnlinePDPPlugin::CAlwaysOnlinePDPPlugin():
-    CAlwaysOnlineEComInterface()
+    CAlwaysOnlineEComInterface(),
+    iAlwaysOnServer( NULL )
     {
     }
 

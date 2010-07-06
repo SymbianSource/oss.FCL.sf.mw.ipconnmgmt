@@ -29,7 +29,7 @@
 #include <bautils.h>
 #include <textresolver.h>
 
-#include <DisconnectDlg.rsg>
+#include <disconnectdlg.rsg>
 #include <data_caging_path_literals.hrh>
 
 

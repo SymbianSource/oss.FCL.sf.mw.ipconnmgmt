@@ -19,7 +19,7 @@
 
 // INCLUDE FILES
 #include <StringLoader.h>
-#include <ConnUiUtilsNotif.rsg>
+#include <connuiutilsnotif.rsg>
 
 #include "NetworkInfoBase.h"
 #include "ConnUiUtilsNotif.hrh"
@@ -35,9 +35,12 @@
 // ---------------------------------------------------------
 //
 CNetworkInfoBase::CNetworkInfoBase()
-: iOthersEntry( EFalse ),
-  iProtectedSetupSupported( EFalse )
-  
+: iSignalStrength( ESignalStrengthMin ),
+  iNetworkMode( ENetworkModeInfrastructure ),
+  iSecurityMode( EWlanConnectionSecurityOpen ),
+  iOthersEntry( EFalse ),
+  iProtectedSetupSupported( EFalse ),
+  iExtendedSecurityMode( EWlanConnectionExtentedSecurityModeOpen )
     {
     }
 

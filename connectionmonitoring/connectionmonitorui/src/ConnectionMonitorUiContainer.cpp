@@ -33,7 +33,7 @@
 #include "FeatureManagerWrapper.h"
 #include "ActiveWrapper.h"
 
-#include <ConnectionMonitorUi.rsg>
+#include <connectionmonitorui.rsg>
 #include <ConnectionMonitorUi.mbg>
 #include <data_caging_path_literals.hrh>
 

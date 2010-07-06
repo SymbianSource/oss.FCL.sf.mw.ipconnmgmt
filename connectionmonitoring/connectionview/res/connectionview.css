@@ -31,4 +31,5 @@ HbLabel#mConnectionLabel::text
 {
     font-variant: secondary;
     text-height: var(hb-param-text-height-tiny);
+    text-line-count-max: 1;
 }

@@ -47,7 +47,9 @@ IndicatorObserver::IndicatorObserver(int argc, char* argv[]) :
     mWlanEnabled(0),
     mWlanForceDisabled(0),
     mWlanIndicatorIsActivated(false),
-    mCellularIndicatorIsActivated(false)
+    mCellularIndicatorIsActivated(false),
+    mWlanIndicator(NULL),
+    mCellularIndicator(NULL)
     
 {
     OstTrace0(TRACE_FLOW, INDICATOROBSERVER_CONSTRUCTOR_ENTRY, "-->");
@@ -98,6 +100,7 @@ IndicatorObserver::IndicatorObserver(int argc, char* argv[]) :
     OstTrace0(TRACE_FLOW, INDICATOROBSERVER_CONSTRUCTOR_EXIT, "<--");
 }
 
+
 /*!
     IndicatorObserver::~IndicatorObserver
 */
@@ -124,6 +127,9 @@ IndicatorObserver::~IndicatorObserver()
         delete mActiveWlanConfigurations;
         }
     
+    delete mCellularIndicator;
+    delete mWlanIndicator;
+    
     OstTrace0(TRACE_FLOW, INDICATOROBSERVER_DESTRUCTOR_EXIT, "<--");
 }
 
@@ -134,6 +140,25 @@ void IndicatorObserver::initializeIndicators()
 {
 
     OstTrace0(TRACE_FLOW, INDICATOROBSERVER_INITIALIZEINDICATORS_ENTRY, "-->");
+    
+    // create the indicators and make connections
+    mCellularIndicator = new HbIndicator();  
+    // connect the user activated slot here, so that the indicator know to start the connview in case
+    // the user taps the indicator
+    bool conn = QObject::connect(
+                    mCellularIndicator, 
+                    SIGNAL(userActivated(const QString&, const QVariantMap&)), 
+                    this, 
+                    SLOT(userActivateCellularIndicator(const QString&, const QVariantMap&)));
+    
+    mWlanIndicator = new HbIndicator();  
+    // connect the user activated slot here, so that the indicator know to start the wlan sniffer in case
+    // the user taps the indicator
+    conn = QObject::connect(
+                    mWlanIndicator, 
+                    SIGNAL(userActivated(const QString&, const QVariantMap&)), 
+                    this, 
+                    SLOT(userActivateWlanIndicator(const QString&, const QVariantMap&)));
     
     findActiveConfigurations();
     updateWlanIndicator();
@@ -285,6 +310,30 @@ void IndicatorObserver::handleConfigurationChanged(const QNetworkConfiguration& 
     OstTrace0(TRACE_FLOW, INDICATOROBSERVER_HANDLECONFIGURATIONCHANGED_EXIT, "<--");
 }
 
+void IndicatorObserver::userActivateCellularIndicator(const QString &type, const QVariantMap &data)
+{
+    OstTrace0(TRACE_FLOW, INDICATOROBSERVER_USERACTIVATECELLULARINDICATOR_ENTRY, "-->");
+    
+    Q_UNUSED(data);
+    Q_UNUSED(type);
+    // Show connection view
+    QProcess::startDetached("connview");
+    
+    OstTrace0(TRACE_FLOW, INDICATOROBSERVER_USERACTIVATECELLULARINDICATOR_EXIT, "<--");
+}
+
+void IndicatorObserver::userActivateWlanIndicator(const QString &type, const QVariantMap &data)
+{
+    OstTrace0(TRACE_FLOW, INDICATOROBSERVER_USERACTIVATEWLANINDICATOR_ENTRY, "-->");
+    
+    Q_UNUSED(data);
+    Q_UNUSED(type);
+    // Show wlan list view
+    QProcess::startDetached("WlanSniffer");
+
+    OstTrace0(TRACE_FLOW, INDICATOROBSERVER_USERACTIVATEWLANINDICATOR_EXIT, "<--");
+}
+
 /*!
     IndicatorObserver::activateCellularIndicatorPlugin
 */
@@ -292,9 +341,8 @@ void IndicatorObserver::activateCellularIndicatorPlugin(QList<QVariant> list)
 {
     OstTrace0(TRACE_FLOW, INDICATOROBSERVER_ACTIVATECELLULARINDICATORPLUGIN_ENTRY, "-->");
     
-    HbIndicator indicator;    
-    bool success = indicator.activate("com.nokia.hb.indicator.connectivity.cellularindicatorplugin/1.0", list);
-    
+    bool success = mCellularIndicator->activate("com.nokia.hb.indicator.connectivity.cellularindicatorplugin/1.0", list);
+     
     if (!success) {
         mCellularIndicatorIsActivated = false;
         OstTrace0(TRACE_FLOW, INDICATOROBSERVER_CELLULAR_INDICATOR_ACTIVATION_FAILED, "Cellular indicator activation failed"); 
@@ -312,8 +360,7 @@ void IndicatorObserver::deactivateCellularIndicatorPlugin()
 {
     OstTrace0(TRACE_FLOW, INDICATOROBSERVER_DEACTIVATECELLULARINDICATORPLUGIN_ENTRY, "-->");
     
-    HbIndicator indicator;
-    indicator.deactivate("com.nokia.hb.indicator.connectivity.cellularindicatorplugin/1.0");
+    mCellularIndicator->deactivate("com.nokia.hb.indicator.connectivity.cellularindicatorplugin/1.0");
     mCellularIndicatorIsActivated = false;
     
     OstTrace0(TRACE_FLOW, INDICATOROBSERVER_DEACTIVATECELLULARINDICATORPLUGIN_EXIT, "<--");
@@ -325,10 +372,9 @@ void IndicatorObserver::deactivateCellularIndicatorPlugin()
 void IndicatorObserver::activateWlanIndicatorPlugin(QList<QVariant> list)
 {
     OstTrace0(TRACE_FLOW, INDICATOROBSERVER_ACTIVATEWLANINDICATORPLUGIN_ENTRY, "-->");
-
-    HbIndicator indicator;
-    bool success = indicator.activate("com.nokia.hb.indicator.connectivity.wlanindicatorplugin/1.0", list);
     
+    bool success = mWlanIndicator->activate("com.nokia.hb.indicator.connectivity.wlanindicatorplugin/1.0", list);
+   
     if (!success) {
         mWlanIndicatorIsActivated = false;
         OstTrace0(TRACE_FLOW, INDICATOROBSERVER_WLAN_INDICATOR_ACTIVATION_FAILED, "WLAN indicator activation failed"); 
@@ -346,8 +392,7 @@ void IndicatorObserver::deactivateWlanIndicatorPlugin()
 {
     OstTrace0(TRACE_FLOW, INDICATOROBSERVER_DEACTIVATEWLANINDICATORPLUGIN_ENTRY, "-->");
 
-    HbIndicator indicator;
-    indicator.deactivate("com.nokia.hb.indicator.connectivity.wlanindicatorplugin/1.0");
+    mWlanIndicator->deactivate("com.nokia.hb.indicator.connectivity.wlanindicatorplugin/1.0");
     mWlanIndicatorIsActivated = false;
     
     OstTrace0(TRACE_FLOW, INDICATOROBSERVER_DEACTIVATEWLANINDICATORPLUGIN_EXIT, "<--");   

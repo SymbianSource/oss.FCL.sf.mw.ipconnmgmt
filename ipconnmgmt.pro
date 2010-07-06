@@ -12,9 +12,12 @@
 # Contributors:
 #
 # Description:
+# Qt project file for ipconnmgmt package.
 #
 
 TEMPLATE = subdirs
+
+CONFIG += ordered
 
 SUBDIRS  += \
     ipcm_plat \
@@ -22,8 +25,6 @@ SUBDIRS  += \
     cmmanager \
     connectionmonitoring
 
-CONFIG += ordered
-
-symbian*: {
-    SYMBIAN_PLATFORMS = WINSCW ARMV5
-} 
+symbian {
+    BLD_INF_RULES.prj_exports += "$${LITERAL_HASH}include \"./group/bld.inf\""
+}

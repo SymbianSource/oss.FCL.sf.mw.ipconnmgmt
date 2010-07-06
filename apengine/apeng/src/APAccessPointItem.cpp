@@ -24,7 +24,7 @@
 #include    <f32file.h>
 #include    <bautils.h>
 #include    <barsc.h>
-#include    <ApEngine.rsg>
+#include    <apengine.rsg>
 #include    "ApAccessPointItem.h"
 #include    "ApEngineConsts.h"
 #include    "ApEngineCommons.h"

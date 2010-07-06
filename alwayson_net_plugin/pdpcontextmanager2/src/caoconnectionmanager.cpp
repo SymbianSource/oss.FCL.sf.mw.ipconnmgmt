@@ -208,7 +208,9 @@ CAOConnectionManager::CAOConnectionManager(
                                         MAOConnectionManagerObserver& aObserver,
                                         MAOSettings& aSettings ):
     iObserver( aObserver ),
-    iSettings( aSettings )
+    iSettings( aSettings ),
+    iConnection( NULL ),
+    iConnectionMonitor( NULL ) 
     {
     LOG_1( _L("CAOConnectionManager::CAOConnectionManager") );
     }

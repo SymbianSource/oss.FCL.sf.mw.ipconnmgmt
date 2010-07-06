@@ -25,6 +25,7 @@
 #include <xqsettingskey.h>
 
 class XQSettingsManager;
+class HbIndicator;
 
 QTM_USE_NAMESPACE
 
@@ -61,11 +62,15 @@ public:
     void activateWlanIndicatorPlugin(QList<QVariant> list);
     
     void deactivateWlanIndicatorPlugin();
-        
+    
 private slots:
     void updateWlanRadioStatus(const XQSettingsKey &key, const QVariant &value);
 
     void handleConfigurationChanged(const QNetworkConfiguration& config);
+    
+    void userActivateCellularIndicator(const QString &type, const QVariantMap &data);
+
+    void userActivateWlanIndicator(const QString &type, const QVariantMap &data);
     
 private:
     /*!
@@ -107,6 +112,16 @@ private:
         Indicates whether cellular indicator plugin is activated
     */
     bool mCellularIndicatorIsActivated;
+    
+    /*!
+         Pointer to the WLAN indicator
+     */
+    HbIndicator *mWlanIndicator;
+    
+    /*!
+         Pointer to the cellular indicator
+     */
+    HbIndicator *mCellularIndicator;
 
     friend class ObserverTester;
     

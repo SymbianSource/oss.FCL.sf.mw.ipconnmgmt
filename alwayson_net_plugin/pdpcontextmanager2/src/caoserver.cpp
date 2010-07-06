@@ -197,7 +197,20 @@ CAOServer::~CAOServer()
 // CAOServer::CAOServer
 // ---------------------------------------------------------------------------
 //
-CAOServer::CAOServer()
+CAOServer::CAOServer():
+    iConnectionManager( NULL ),
+    iTimer( NULL ),
+    iRAUManager( NULL ),
+    iSettings( NULL ),
+    iGpds( NULL ),
+    iPointerStatePool( NULL ),
+    iAsyncReactivation( NULL ),
+    iFailure( MAOConnectionManager::EDisconnected ),
+    iActivationFailure( ETrue),
+    iCurrentState( NULL ),
+    iPDPPropertySubscriber( NULL ), 
+    iAsyncSetup( NULL ),
+    iCenRepObserver( NULL )
     {
     LOG_1( _L("CAOServer::CAOServer") );
     }
@@ -950,15 +963,16 @@ void CAOServer::CurrentCellularDataUsageChangedL( const TInt aValue )
         &StateToDesC( CurrentState()->StateName() ) );
     
     if ( aValue != ECmCellularDataUsageDisabled )
-        {
-        TAOState* newState = NULL;
+       {
         	
         if ( CurrentState()->StateName() == TAOState::EStateDisabled )
             {
-            newState = iCurrentState->HandleEnableAlwaysOnL();
+              iCurrentState->HandleEnableAlwaysOnL();
             }
         else
             {
+            TAOState* newState = NULL;
+            
             // Behaviour is the same as if unconnect timer had expired
             iTimer->StopUnconnectTimer();
             newState = iCurrentState->HandleUnconnectTimerExpiredL();

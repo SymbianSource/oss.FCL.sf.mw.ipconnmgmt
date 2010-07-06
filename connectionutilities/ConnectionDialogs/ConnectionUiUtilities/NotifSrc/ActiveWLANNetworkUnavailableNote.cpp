@@ -19,7 +19,7 @@
 // INCLUDE FILES
 #include "ActiveWLANNetworkUnavailableNote.h"
 
-#include <ConnUiUtilsNotif.rsg>
+#include <connuiutilsnotif.rsg>
 #include <AknGlobalNote.h>
 #include <StringLoader.h>
 
