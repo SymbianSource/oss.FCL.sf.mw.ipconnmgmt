@@ -94,8 +94,8 @@ HbIndicatorInterface* CellularIndicatorPlugin::createIndicator(
     Q_UNUSED(indicatorType)
     
     // Install localization
-    HbTranslator *translator(new HbTranslator("cellularindicatorplugin"));
-    
+    mTranslator = QSharedPointer<HbTranslator>(new HbTranslator("cellularindicatorplugin"));
+        
     OstTraceFunctionExit0( CELLULARINDICATORPLUGIN_CREATEINDICATOR_EXIT );
     return this;
 }

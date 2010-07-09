@@ -167,7 +167,7 @@ public:
             CCmmConnMethodInstance& aConnMethodInstance );
 
     /**
-     * Re-loads a destination record if needed and copies the latest version to
+     * Reloads a destination record if needed and copies the latest version to
      * the session instance given as parameter.
      */
     void LoadDestinationRecordL(
@@ -237,7 +237,7 @@ public:
             CCmmDestinationInstance& aDestinationInstance,
             const TUint32 aValue );
 
-    void DbChangeDetected( const TUint32 aTableId );
+    void DbChangeDetectedL( const TUint32 aTableId );
     void DbChangeError( const TUint32 aTableId );
 
     void CloseDestination( CCmmDestinationInstance& aDestinationInstance );
@@ -582,6 +582,12 @@ private:
      */
     void DeleteDestinationForcedL( CCmmDestinationInstance& aDestinationInstance );
 
+    /**
+     * Informs all the loaded iaps if something related to their tables
+     * changed in commsdat.
+     */
+    void NotifyPluginsForTableChangesL( const TUint32 aTableId );
+
 private:
     // Monitors changes in the database.
     CCmmListenerManager* iListenerManager; // Owned.
@@ -627,6 +633,11 @@ private:
     // Counter to generate new unique IDs. These are used to link new objects
     // without valid IDs between session side and cache.
     TUint32 iCurrentTemporaryId;
+
+    // Destination network table ID.
+    CommsDat::TMDBElementId iSnapTableId;
+    // Destination metadata table ID.
+    CommsDat::TMDBElementId iSnapMetadataTableId;
     };
 
 #endif // CMMCACHE_H_

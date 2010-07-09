@@ -190,9 +190,14 @@ public:
             const TDesC8& aValue );
 
     /**
+     * Gets the current status value.
+     */
+    TCmmConnMethodStatus GetStatus() const;
+
+    /**
      * Sets a new status value.
      */
-    void SetStatus( const TCmmConnMethodStatus& aStatus );
+    void SetStatus( const TCmmConnMethodStatus aStatus );
 
     /*
      * Called after this connection method has been updated and database
@@ -242,6 +247,9 @@ private:
 
     // Connection method handle status.
     TCmmConnMethodStatus iStatus;
+
+    // Current status of the loaded commsdat records of this connection method.
+    TCmmRecordStatus iRecordStatus;
 
     // Subsession handle ID.
     TInt iHandle;

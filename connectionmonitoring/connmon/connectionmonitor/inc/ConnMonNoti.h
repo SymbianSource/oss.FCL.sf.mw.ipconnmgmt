@@ -673,6 +673,35 @@ NONSHARABLE_CLASS( CSubConnUpDownNotifier ) : public CActive
         * @return void.
         */
         void SetInterfaceClosed();
+        
+        /**
+        * Tells whether interface has been closed or not.
+        * @since
+        * @return ETrue if interface has been closed, otherwise EFalse.
+        */
+        TBool InterfaceClosed();
+
+        /**
+        * Sets link layer status to closed.
+        * @since
+        * @return void.
+        */
+        void SetLinkLayerClosed();
+        
+        /**
+        * Sets link layer status to NOT closed.
+        * @since
+        * @return void.
+        */
+        void SetLinkLayerOpen();
+        
+        /**
+        * Return ETrue if KLinkLayerClosed has been received.
+        * @since
+        * @return ETrue if KLinkLayerClosed has been received, otherwise returns EFalse.
+        */
+        TBool LinkLayerClosed();
+
 
     private: // Methods from base classes
          /**
@@ -700,6 +729,7 @@ NONSHARABLE_CLASS( CSubConnUpDownNotifier ) : public CActive
         TUint                         iTotalUplinkDataVolume;
         TBool                         iDeleteSent;
         TBool                         iInterfaceClosed;
+        TBool                         iLinkLayerClosed;
     };
 
 /**

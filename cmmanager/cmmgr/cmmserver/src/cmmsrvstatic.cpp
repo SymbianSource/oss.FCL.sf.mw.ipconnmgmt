@@ -41,7 +41,8 @@ static void RunServerL()
     // Initialisation complete, now signal the client.
     RProcess::Rendezvous( KErrNone );
 
-    // Ready to run.
+    // Ready to run. This will return only when CCmmDelayedShutdown calls
+    // CActiveScheduler::Stop().
     CActiveScheduler::Start();
 
     // Cleanup the server and scheduler.

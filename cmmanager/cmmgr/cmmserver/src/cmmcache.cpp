@@ -125,6 +125,9 @@ CCmmCache::CCmmCache(
     iBearerPriorityCache = NULL;
     iCurrentTemporaryId = KTemporaryIdCounterStart;
 
+    iSnapTableId = 0;
+    iSnapMetadataTableId = 0;
+
     OstTraceFunctionExit0( DUP1_CCMMCACHE_CCMMCACHE_EXIT );
     }
 
@@ -143,6 +146,41 @@ void CCmmCache::ConstructL()
             iCmManagerImpl->TableId( ECmmDbBearerPriorityRecord ) );
     iListenerManager = CCmmListenerManager::NewL( this );
     iInstanceMapping = CCmmInstanceMapping::NewL( *this );
+
+    // Create CommsDat listeners to detect changes to the database from external sources.
+    RArray<TUint32> tableIdArray;
+    CleanupClosePushL( tableIdArray );
+
+    iSnapTableId = iCmManagerImpl->TableId( ECmmDbSnapRecord );
+    iSnapMetadataTableId = iCmManagerImpl->TableId( ECmmDestMetadataRecord );
+
+    // Instancemapping needs notifications on following tables.
+    tableIdArray.Append( CommsDat::KCDTIdIAPRecord );
+    tableIdArray.Append( CommsDat::KCDTIdVPNServiceRecord );
+    tableIdArray.Append( iSnapTableId );
+    tableIdArray.Append( iSnapMetadataTableId );
+
+    // Destinations need notifications on following tables.
+    tableIdArray.Append( CommsDat::KCDTIdNetworkRecord );
+    tableIdArray.Append( CommsDat::KCDTIdAccessPointRecord );
+    // Destination metadata table was already added.
+
+    // Connection methods need notifications on following tables.
+    TInt pluginCount( iPlugins->Count() );
+    if ( pluginCount )
+        {
+        ( *iPlugins )[0]->GetGenericTableIdsToBeObservedL( tableIdArray );
+        for( TInt i = 0; i < pluginCount; i++ )
+            {
+            ( *iPlugins )[i]->GetBearerTableIdsToBeObservedL( tableIdArray );
+            }
+        }
+
+    for ( TInt i = 0; i < tableIdArray.Count(); i++ )
+        {
+        iListenerManager->AddListenerL( tableIdArray[i] );
+        }
+    CleanupStack::PopAndDestroy( &tableIdArray );
 
     OstTraceFunctionExit0( CCMMCACHE_CONSTRUCTL_EXIT );
     }
@@ -270,14 +308,17 @@ void CCmmCache::OpenConnMethodL(
     if ( !aDestinationInstance )
         {
         // Check connection method exists in database.
-        validAttributes = iInstanceMapping->ValidConnMethodId( aConnMethodId ); // Embedded destinations not included.
+        // Embedded destinations not included.
+        validAttributes = iInstanceMapping->ValidConnMethodId( aConnMethodId );
         }
     else
         {
         // Check connection method is inside the destination.
-        if ( aDestinationInstance->ValidConnMethodIdInDestinationIncludeEmbedded( aConnMethodId ) )
+        if ( aDestinationInstance->
+                ValidConnMethodIdInDestinationIncludeEmbedded( aConnMethodId ) )
             {
-            // Check connection method (can be embedded destination too) exists in database.
+            // Check connection method (can be embedded destination too)
+            // exists in database.
             if ( iInstanceMapping->ValidConnMethodId( aConnMethodId ) ||
                     iInstanceMapping->ValidDestinationId( aConnMethodId ) )
                 {
@@ -296,9 +337,17 @@ void CCmmCache::OpenConnMethodL(
     TInt index = FindConnMethodFromCache( aConnMethodId );
     if ( index != KErrNotFound )
         {
+        // Update data from commsdat if necessary.
+        if ( iConnMethodArray[index]->GetRecordStatus() == ECmmRecordStatusExpired )
+            {
+            iConnMethodArray[index]->ReloadPluginDataIfNeededL();
+            // CopyDataL() will set the internal state of aConnMethodInstance.
+            }
+
         // Already open in cache. Copy the connection method data to session
         // instance.
-        aConnMethodInstance.CopyDataL( iConnMethodArray[index] ); // Will increase reference counter.
+        // Will increase reference counter.
+        aConnMethodInstance.CopyDataL( iConnMethodArray[index] );
         }
     else
         {
@@ -339,7 +388,15 @@ void CCmmCache::RefreshConnMethodL( CCmmConnMethodInstance& aConnMethodInstance 
         return;
         }
 
-    iConnMethodArray[index]->RefreshConnMethodInstanceL( aConnMethodInstance );
+    iConnMethodArray[index]->ReloadPluginDataIfNeededL();
+    if ( iConnMethodArray[index]->GetStatus() == ECmmConnMethodStatusValid
+            || iConnMethodArray[index]->GetStatus() == ECmmConnMethodStatusToBeDeleted )
+        {
+        iConnMethodArray[index]->GetPlugin()->GetPluginDataL( 
+                aConnMethodInstance.GetPluginDataInstance() );
+        }
+    // Internal state need to be set to the same state as after a successfull update.
+    aConnMethodInstance.UpdateSuccessful();
 
     OstTraceFunctionExit0( DUP1_CCMMCACHE_REFRESHCONNMETHODL_EXIT );
     }
@@ -475,7 +532,7 @@ void CCmmCache::CreateCopyOfConnMethodL(
     }
 
 // ---------------------------------------------------------------------------
-// Re-loads a destination record if needed and copies the latest version to
+// Reloads a destination record if needed and copies the latest version to
 // the session instance given as parameter.
 // ---------------------------------------------------------------------------
 //
@@ -1618,13 +1675,117 @@ TBool CCmmCache::DestinationExistsWithMetadataPurposeL(
 // needed.
 // ---------------------------------------------------------------------------
 //
-void CCmmCache::DbChangeDetected( const TUint32 aTableId )
+void CCmmCache::DbChangeDetectedL( const TUint32 aTableId )
     {
     OstTraceFunctionEntry0( CCMMCACHE_DBCHANGEDETECTED_ENTRY );
 
-    (void)aTableId; //TODO
-    // Flag the table as: currently not up-to-date
+    if ( aTableId == iSnapMetadataTableId )
+        {
+        for ( TInt i = 0; i < iDestinationArray.Count(); i++ )
+            {
+            iDestinationArray[i]->NotifyRecordChange( ECmmDestMetadataRecord );
+            }
+        }
+    else if ( aTableId == CommsDat::KCDTIdNetworkRecord )
+        {
+        // Affects destinations.
+        for ( TInt i = 0; i < iDestinationArray.Count(); i++ )
+            {
+            iDestinationArray[i]->NotifyRecordChange( ECmmDestNetworkRecord );
+            }
+        }
+    else if ( aTableId == CommsDat::KCDTIdAccessPointRecord )
+        {
+        // Affects destinations.
+        for ( TInt i = 0; i < iDestinationArray.Count(); i++ )
+            {
+            iDestinationArray[i]->NotifyRecordChange( ECmmDestApRecord );
+            }
+        }
+
+    // Notify Connection Methods about the table changes in CommsDat.
+    NotifyPluginsForTableChangesL( aTableId );
+
+    // Update instancemapping.
+    iInstanceMapping->RefreshL();
+
     OstTraceFunctionExit0( CCMMCACHE_DBCHANGEDETECTED_EXIT );
+    }
+
+// ---------------------------------------------------------------------------
+// Informs all the loaded iaps if something related to their tables
+// changed in commsdat.
+// ---------------------------------------------------------------------------
+//
+void CCmmCache::NotifyPluginsForTableChangesL( const TUint32 aTableId )
+    {
+    OstTraceFunctionEntry0( CCMMCACHE_NOTIFYPLUGINSFORTABLECHANGESL_ENTRY );
+
+    if ( iConnMethodArray.Count() )
+        {
+        RArray<TUint32> tableIdArray;
+        CleanupClosePushL( tableIdArray );
+
+        // Check if change concerns some table generic for all iaps
+        ( *iPlugins )[0]->GetGenericTableIdsToBeObservedL( tableIdArray );
+        TBool generic( EFalse );
+        for( TInt i = 0; i < tableIdArray.Count(); i++ )
+            {
+            if ( aTableId == tableIdArray[i] )
+                {
+                generic = ETrue;
+                break;
+                }
+            }
+
+        if ( generic )
+            {
+            // generic-->Notify all iaps
+            for( TInt i = 0; i < iConnMethodArray.Count(); i++ )
+                {
+                iConnMethodArray[i]->NotifyRecordChange( aTableId );
+                }
+            }
+        else
+            {
+            // Not generic: Check bearer specific tables
+            RArray<TUint32> affectedBearersArray;
+            CleanupClosePushL( affectedBearersArray );
+            for( TInt i = 0; i < iPlugins->Count(); i++ )
+                {
+                tableIdArray.Reset();
+                ( *iPlugins )[i]->GetBearerTableIdsToBeObservedL( tableIdArray );
+                TInt idCount = tableIdArray.Count();
+                for( TInt j = 0; j < idCount; j++ )
+                    {
+                    if ( aTableId == tableIdArray[j] )
+                        {
+                        // Save the bearer type id which is affected
+                        affectedBearersArray.AppendL(
+                                ( *iPlugins )[i]->GetBearerInfoIntL(
+                                        CMManager::ECmBearerType ) );
+                        }
+                    }
+                }
+
+            // Go through all the loaded iaps and notify all the iaps
+            // which have the same bearer type saved above
+            for( TInt i = 0; i < iConnMethodArray.Count(); i++ )
+                {
+                for( TInt j = 0; j < affectedBearersArray.Count(); j++ )
+                    {
+                    if ( iConnMethodArray[i]->GetBearerType() == affectedBearersArray[j] )
+                        {
+                        iConnMethodArray[i]->NotifyRecordChange( aTableId );
+                        break;
+                        }
+                    }
+                }
+            CleanupStack::PopAndDestroy( &affectedBearersArray );
+            }
+        CleanupStack::PopAndDestroy( &tableIdArray );
+        }
+    OstTraceFunctionExit0( CCMMCACHE_NOTIFYPLUGINSFORTABLECHANGESL_EXIT );
     }
 
 // ---------------------------------------------------------------------------
@@ -1639,6 +1800,15 @@ void CCmmCache::DbChangeError( const TUint32 aTableId )
 
     (void)aTableId; //TODO
     // Flag the table as: permanently not up-to-date
+
+    //TODO, How to do this?
+    // Implement some 'status locked' flags that are always checked before changing status back to 'loaded' after reading database?
+    // Or move record status info to CCmmCache-class?
+    // What about plugins?
+	// Or just ignore errors with notifiers?
+
+    // For now, just ignore errors.
+
     OstTraceFunctionExit0( CCMMCACHE_DBCHANGEERROR_EXIT );
     }
 
@@ -2128,13 +2298,15 @@ void CCmmCache::OpenConnectionMethodInstanceL(
 
     // Find out the connection method bearer type.
     TUint32 bearerType( 0 );
-    User::LeaveIfError( iInstanceMapping->GetConnMethodBearerType( aConnMethodId, bearerType ) );
+    User::LeaveIfError( iInstanceMapping->
+            GetConnMethodBearerType( aConnMethodId, bearerType ) );
 
     // Check bearer type support and create plugin instance.
     CCmPluginBaseEng* plugin = NULL;
     for ( TInt i = 0; i < iPlugins->Count(); i++ )
         {
-        if ( ( *iPlugins )[i]->GetBearerInfoIntL( CMManager::ECmBearerType ) == bearerType )
+        if ( ( *iPlugins )[i]->GetBearerInfoIntL(
+                CMManager::ECmBearerType ) == bearerType )
             {
             TCmPluginInitParam pluginParams( Session() );
             plugin = ( *iPlugins )[i]->CreateInstanceL( pluginParams );
@@ -2181,7 +2353,8 @@ TUint32 CCmmCache::GetConnectionMethodInfoIntL(
     if ( index != KErrNotFound )
         {
         // Already open in cache. Copy the connection method to session instance.
-        cmInstance->CopyDataL( iConnMethodArray[index] ); // Will increase reference counter.
+        // Will increase reference counter.
+        cmInstance->CopyDataL( iConnMethodArray[index] );
         }
     else
         {
@@ -2215,7 +2388,8 @@ TBool CCmmCache::GetConnectionMethodInfoBoolL(
     if ( index != KErrNotFound )
         {
         // Already open in cache. Copy the connection method to session instance.
-        cmInstance->CopyDataL( iConnMethodArray[index] ); // Will increase reference counter.
+        // Will increase reference counter.
+        cmInstance->CopyDataL( iConnMethodArray[index] );
         }
     else
         {
@@ -2249,7 +2423,8 @@ HBufC* CCmmCache::GetConnectionMethodInfoStringL(
     if ( index != KErrNotFound )
         {
         // Already open in cache. Copy the connection method to session instance.
-        cmInstance->CopyDataL( iConnMethodArray[index] ); // Will increase reference counter.
+        // Will increase reference counter.
+        cmInstance->CopyDataL( iConnMethodArray[index] );
         }
     else
         {

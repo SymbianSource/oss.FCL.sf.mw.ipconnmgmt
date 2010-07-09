@@ -295,6 +295,7 @@ CCmPluginPacketData::CCmPluginPacketData(
     iBearerRecordId = 0;
     iBearerRecordName = NULL;
     iPacketDataQoSRecord = NULL;
+    iBearerPriorityTableId = 0;
 
     OstTraceFunctionExit0( DUP1_CCMPLUGINPACKETDATA_CCMPLUGINPACKETDATA_EXIT );
     }
@@ -813,250 +814,10 @@ void CCmPluginPacketData::UpdateServiceRecordL(
 
     // Client's copy of packet service record.
     CCDWCDMAPacketServiceRecord* clientServiceRecordCopy =
-            static_cast<CCDWCDMAPacketServiceRecord*>( aGenRecordArray[KServiceRecordIndex] );
+            static_cast<CCDWCDMAPacketServiceRecord*>(
+                    aGenRecordArray[KServiceRecordIndex] );
 
-    if ( !clientServiceRecordCopy->iRecordTag.IsNull() )
-        {
-        origServiceRecord->iRecordTag.SetL(
-                clientServiceRecordCopy->iRecordTag );
-        }
-    if ( !clientServiceRecordCopy->iRecordName.IsNull() )
-        {
-        origServiceRecord->iRecordName.SetL(
-                clientServiceRecordCopy->iRecordName );
-        }
-
-    if ( !clientServiceRecordCopy->iServiceEnableLlmnr.IsNull() )
-        {
-        origServiceRecord->iServiceEnableLlmnr.SetL(
-                clientServiceRecordCopy->iServiceEnableLlmnr );
-        }
-
-    if ( !clientServiceRecordCopy->iGPRSAPN.IsNull() )
-        {
-        origServiceRecord->iGPRSAPN.SetL(
-                clientServiceRecordCopy->iGPRSAPN );
-        }
-    if ( !clientServiceRecordCopy->iGPRSPDPType.IsNull() )
-        {
-        origServiceRecord->iGPRSPDPType.SetL(
-                clientServiceRecordCopy->iGPRSPDPType );
-        }
-    if ( !clientServiceRecordCopy->iGPRSPDPAddress.IsNull() )
-        {
-        origServiceRecord->iGPRSPDPAddress.SetL(
-                clientServiceRecordCopy->iGPRSPDPAddress );
-        }
-    if ( !clientServiceRecordCopy->iGPRSReqPrecedence.IsNull() )
-        {
-        origServiceRecord->iGPRSReqPrecedence.SetL(
-                clientServiceRecordCopy->iGPRSReqPrecedence );
-        }
-    if ( !clientServiceRecordCopy->iGPRSReqDelay.IsNull() )
-        {
-        origServiceRecord->iGPRSReqDelay.SetL(
-                clientServiceRecordCopy->iGPRSReqDelay );
-        }
-    if ( !clientServiceRecordCopy->iGPRSReqReliability.IsNull() )
-        {
-        origServiceRecord->iGPRSReqReliability.SetL(
-                clientServiceRecordCopy->iGPRSReqReliability );
-        }
-    if ( !clientServiceRecordCopy->iGPRSReqPeakThroughput.IsNull() )
-        {
-        origServiceRecord->iGPRSReqPeakThroughput.SetL(
-                clientServiceRecordCopy->iGPRSReqPeakThroughput );
-        }
-    if ( !clientServiceRecordCopy->iGPRSReqMeanThroughput.IsNull() )
-        {
-        origServiceRecord->iGPRSReqMeanThroughput.SetL(
-                clientServiceRecordCopy->iGPRSReqMeanThroughput );
-        }
-    if ( !clientServiceRecordCopy->iGPRSMinPrecedence.IsNull() )
-        {
-        origServiceRecord->iGPRSMinPrecedence.SetL(
-                clientServiceRecordCopy->iGPRSMinPrecedence );
-        }
-    if ( !clientServiceRecordCopy->iGPRSMinDelay.IsNull() )
-        {
-        origServiceRecord->iGPRSMinDelay.SetL(
-                clientServiceRecordCopy->iGPRSMinDelay );
-        }
-    if ( !clientServiceRecordCopy->iGPRSMinReliability.IsNull() )
-        {
-        origServiceRecord->iGPRSMinReliability.SetL(
-                clientServiceRecordCopy->iGPRSMinReliability );
-        }
-    if ( !clientServiceRecordCopy->iGPRSMinPeakThroughput.IsNull() )
-        {
-        origServiceRecord->iGPRSMinPeakThroughput.SetL(
-                clientServiceRecordCopy->iGPRSMinPeakThroughput );
-        }
-    if ( !clientServiceRecordCopy->iGPRSMinMeanThroughput.IsNull() )
-        {
-        origServiceRecord->iGPRSMinMeanThroughput.SetL(
-                clientServiceRecordCopy->iGPRSMinMeanThroughput );
-        }
-    if ( !clientServiceRecordCopy->iGPRSDataCompression.IsNull() )
-        {
-        origServiceRecord->iGPRSDataCompression.SetL(
-                clientServiceRecordCopy->iGPRSDataCompression );
-        }
-    if ( !clientServiceRecordCopy->iGPRSHeaderCompression.IsNull() )
-        {
-        origServiceRecord->iGPRSHeaderCompression.SetL(
-                clientServiceRecordCopy->iGPRSHeaderCompression );
-        }
-    if ( !clientServiceRecordCopy->iGPRSUseEdge.IsNull() )
-        {
-        origServiceRecord->iGPRSUseEdge.SetL(
-                clientServiceRecordCopy->iGPRSUseEdge );
-        }
-    if ( !clientServiceRecordCopy->iGPRSAnonymousAccess.IsNull() )
-        {
-        origServiceRecord->iGPRSAnonymousAccess.SetL(
-                clientServiceRecordCopy->iGPRSAnonymousAccess );
-        }
-    if ( !clientServiceRecordCopy->iGPRSIfParams.IsNull() )
-        {
-        origServiceRecord->iGPRSIfParams.SetL(
-                clientServiceRecordCopy->iGPRSIfParams );
-        }
-    if ( !clientServiceRecordCopy->iGPRSIfNetworks.IsNull() )
-        {
-        origServiceRecord->iGPRSIfNetworks.SetL(
-                clientServiceRecordCopy->iGPRSIfNetworks );
-        }
-    if ( !clientServiceRecordCopy->iGPRSIfPromptForAuth.IsNull() )
-        {
-        origServiceRecord->iGPRSIfPromptForAuth.SetL(
-                clientServiceRecordCopy->iGPRSIfPromptForAuth );
-        }
-    if ( !clientServiceRecordCopy->iGPRSIfAuthName.IsNull() )
-        {
-        origServiceRecord->iGPRSIfAuthName.SetL(
-                clientServiceRecordCopy->iGPRSIfAuthName );
-        }
-    if ( !clientServiceRecordCopy->iGPRSIfAuthPass.IsNull() )
-        {
-        origServiceRecord->iGPRSIfAuthPass.SetL(
-                clientServiceRecordCopy->iGPRSIfAuthPass );
-        }
-    if ( !clientServiceRecordCopy->iGPRSIfAuthRetries.IsNull() )
-        {
-        origServiceRecord->iGPRSIfAuthRetries.SetL(
-                clientServiceRecordCopy->iGPRSIfAuthRetries );
-        }
-    if ( !clientServiceRecordCopy->iGPRSIPNetMask.IsNull() )
-        {
-        origServiceRecord->iGPRSIPNetMask.SetL(
-                clientServiceRecordCopy->iGPRSIPNetMask );
-        }
-    if ( !clientServiceRecordCopy->iGPRSIPGateway.IsNull() )
-        {
-        origServiceRecord->iGPRSIPGateway.SetL(
-                clientServiceRecordCopy->iGPRSIPGateway );
-        }
-    if ( !clientServiceRecordCopy->iGPRSIPAddrFromServer.IsNull() )
-        {
-        origServiceRecord->iGPRSIPAddrFromServer.SetL(
-                clientServiceRecordCopy->iGPRSIPAddrFromServer );
-        }
-    if ( !clientServiceRecordCopy->iGPRSIPAddr.IsNull() )
-        {
-        origServiceRecord->iGPRSIPAddr.SetL(
-                clientServiceRecordCopy->iGPRSIPAddr );
-        }
-    if ( !clientServiceRecordCopy->iGPRSIPDNSAddrFromServer.IsNull() )
-        {
-        origServiceRecord->iGPRSIPDNSAddrFromServer.SetL(
-                clientServiceRecordCopy->iGPRSIPDNSAddrFromServer );
-        }
-    if ( !clientServiceRecordCopy->iGPRSIPNameServer1.IsNull() )
-        {
-        origServiceRecord->iGPRSIPNameServer1.SetL(
-                clientServiceRecordCopy->iGPRSIPNameServer1 );
-        }
-    if ( !clientServiceRecordCopy->iGPRSIPNameServer2.IsNull() )
-        {
-        origServiceRecord->iGPRSIPNameServer2.SetL(
-                clientServiceRecordCopy->iGPRSIPNameServer2 );
-        }
-    if ( !clientServiceRecordCopy->iGPRSIP6DNSAddrFromServer.IsNull() )
-        {
-        origServiceRecord->iGPRSIP6DNSAddrFromServer.SetL(
-                clientServiceRecordCopy->iGPRSIP6DNSAddrFromServer );
-        }
-    if ( !clientServiceRecordCopy->iGPRSIP6NameServer1.IsNull() )
-        {
-        origServiceRecord->iGPRSIP6NameServer1.SetL(
-                clientServiceRecordCopy->iGPRSIP6NameServer1 );
-        }
-    if ( !clientServiceRecordCopy->iGPRSIP6NameServer2.IsNull() )
-        {
-        origServiceRecord->iGPRSIP6NameServer2.SetL(
-                clientServiceRecordCopy->iGPRSIP6NameServer2 );
-        }
-    if ( !clientServiceRecordCopy->iGPRSIPAddrLeaseValidFrom.IsNull() )
-        {
-        origServiceRecord->iGPRSIPAddrLeaseValidFrom.SetL(
-                clientServiceRecordCopy->iGPRSIPAddrLeaseValidFrom );
-        }
-    if ( !clientServiceRecordCopy->iGPRSIPAddrLeaseValidTo.IsNull() )
-        {
-        origServiceRecord->iGPRSIPAddrLeaseValidTo.SetL(
-                clientServiceRecordCopy->iGPRSIPAddrLeaseValidTo );
-        }
-    if ( !clientServiceRecordCopy->iGPRSConfigDaemonManagerName.IsNull() )
-        {
-        origServiceRecord->iGPRSConfigDaemonManagerName.SetL(
-                clientServiceRecordCopy->iGPRSConfigDaemonManagerName );
-        }
-    if ( !clientServiceRecordCopy->iGPRSConfigDaemonName.IsNull() )
-        {
-        origServiceRecord->iGPRSConfigDaemonName.SetL(
-                clientServiceRecordCopy->iGPRSConfigDaemonName );
-        }
-    if ( !clientServiceRecordCopy->iGPRSEnableLCPExtension.IsNull() )
-        {
-        origServiceRecord->iGPRSEnableLCPExtension.SetL(
-                clientServiceRecordCopy->iGPRSEnableLCPExtension );
-        }
-    if ( !clientServiceRecordCopy->iGPRSDisablePlainTextAuth.IsNull() )
-        {
-        origServiceRecord->iGPRSDisablePlainTextAuth.SetL(
-                clientServiceRecordCopy->iGPRSDisablePlainTextAuth );
-        }
-    if ( !clientServiceRecordCopy->iGPRSAPType.IsNull() )
-        {
-        origServiceRecord->iGPRSAPType.SetL(
-                clientServiceRecordCopy->iGPRSAPType );
-        }
-    if ( !clientServiceRecordCopy->iGPRSQOSWarningTimeOut.IsNull() )
-        {
-        origServiceRecord->iGPRSQOSWarningTimeOut.SetL(
-                clientServiceRecordCopy->iGPRSQOSWarningTimeOut );
-        }
-    if ( !clientServiceRecordCopy->iGPRSR5DataCompression.IsNull() )
-        {
-        origServiceRecord->iGPRSR5DataCompression.SetL(
-                clientServiceRecordCopy->iGPRSR5DataCompression );
-        }
-    if ( !clientServiceRecordCopy->iGPRSR5HeaderCompression.IsNull() )
-        {
-        origServiceRecord->iGPRSR5HeaderCompression.SetL(
-                clientServiceRecordCopy->iGPRSR5HeaderCompression );
-        }
-    if ( !clientServiceRecordCopy->iGPRSPacketFlowIdentifier.IsNull() )
-        {
-        origServiceRecord->iGPRSPacketFlowIdentifier.SetL(
-                clientServiceRecordCopy->iGPRSPacketFlowIdentifier );
-        }
-    if ( !clientServiceRecordCopy->iGPRSUmtsGprsRelease.IsNull() )
-        {
-        origServiceRecord->iGPRSUmtsGprsRelease.SetL(
-                clientServiceRecordCopy->iGPRSUmtsGprsRelease );
-        }
+    CopyRecordFieldsL( *clientServiceRecordCopy, *origServiceRecord );
 
     if ( iPacketDataQoSRecord )
         {
@@ -1069,6 +830,8 @@ void CCmPluginPacketData::UpdateServiceRecordL(
         {
         origServiceRecord->SetRecordId( KCDNewRecordRequest );
         origServiceRecord->StoreL( iSession );
+        // Have to be "reloaded" to get possible default values from template records.
+        origServiceRecord->LoadL( iSession );
 
         // Update received element ID to client's copy too.
         clientServiceRecordCopy->SetElementId( origServiceRecord->ElementId() );
@@ -1077,6 +840,8 @@ void CCmPluginPacketData::UpdateServiceRecordL(
         {
         origServiceRecord->ModifyL( iSession );
         }
+
+    CopyRecordFieldsL( *origServiceRecord, *clientServiceRecordCopy );
 
     OstTraceFunctionExit0( CCMPLUGINPACKETDATA_UPDATESERVICERECORDL_EXIT );
     }
@@ -1105,6 +870,7 @@ void CCmPluginPacketData::UpdateBearerRecordsL(
         {
         iPacketDataQoSRecord->SetRecordId( KCDNewRecordRequest );
         iPacketDataQoSRecord->StoreL( iSession );
+        iPacketDataQoSRecord->LoadL( iSession );
         packetDataQoSRecord->SetElementId( iPacketDataQoSRecord->ElementId() );
 
         // Set service record to point to QoS record.
@@ -1119,6 +885,8 @@ void CCmPluginPacketData::UpdateBearerRecordsL(
         {
         iPacketDataQoSRecord->ModifyL( iSession );
         }
+
+    CopyRecordFieldsL( *iPacketDataQoSRecord, *packetDataQoSRecord );
 
     OstTraceFunctionExit0( CCMPLUGINPACKETDATA_UPDATEBEARERRECORDSL_EXIT );
     }

@@ -45,7 +45,7 @@ CellularPromptDialog::CellularPromptDialog(const QVariantMap &parameters)
     OstTraceFunctionEntry0( CELLULARPROMPTDIALOG_CELLULARPROMPTDIALOG_ENTRY );
 
     // Install localization
-    HbTranslator *translator(new HbTranslator("cellularpromptdialog"));
+    mTranslator = QSharedPointer<HbTranslator>(new HbTranslator("cellularpromptdialog"));
 
     createDialog(parameters);
     mClose = false;

@@ -2979,7 +2979,7 @@ TInt CConnMonIAP::UpdateActivity( const TUint& aConnectionId, const TUint& aActi
 // CConnMonIAP::GetDeleteNotifyStatus
 // -----------------------------------------------------------------------------------
 //
-TInt CConnMonIAP::GetDeleteNotifyStatus( TConnInfo& aConnection, TBool& aSent )
+TInt CConnMonIAP::GetDeleteNotifyStatus( TConnInfo& aConnection )
     {
     TInt index( KErrNotFound );
 
@@ -2997,29 +2997,6 @@ TInt CConnMonIAP::GetDeleteNotifyStatus( TConnInfo& aConnection, TBool& aSent )
 
     aConnection.iConnectionId = iConnInfos[index].iConnectionId;
     aConnection.iBearer = iConnInfos[index].iBearer;
-
-    TInt connectionStatus( 0 );
-    GetConnectionStatus( index, connectionStatus );
-
-    if ( ( iConnInfos[index].iConnDownNotifier != 0 ) &&
-         ( iConnInfos[index].iProgressNotifier != 0 ) )
-        {
-        if ( !iConnInfos[index].iConnDownNotifier->DeleteSent() &&
-             !iConnInfos[index].iConnDownNotifier->IsActive() &&
-             ( !iConnInfos[index].iProgressNotifier->IsActive() ||
-               ( connectionStatus != KLinkLayerOpen ) ) )
-            {
-            aSent = EFalse;
-            }
-        else
-            {
-            aSent = ETrue;
-            }
-        }
-    else
-        {
-        aSent = EFalse;
-        }
 
     return KErrNone;
     }

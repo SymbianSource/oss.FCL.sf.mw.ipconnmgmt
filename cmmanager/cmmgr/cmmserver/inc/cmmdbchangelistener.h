@@ -55,7 +55,13 @@ public:
 
 private: // Methods from base class
     void DoCancel();
-    void RunL(); // Don't leave, or implement RunError() //TODO, implement RunError()
+    void RunL();
+
+    /**
+     * From CActive, handles leaves from RunL.
+     * @param aLeaveCode The leave code.
+     */
+    TInt RunError( TInt aLeaveCode );
 
 private:
     TInt RequestNotification();

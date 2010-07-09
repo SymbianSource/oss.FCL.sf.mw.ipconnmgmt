@@ -401,10 +401,9 @@ NONSHARABLE_CLASS( CConnMonIAP )
          * closed event.
          * @since
          * @param aConnection The connection info. On return, will contain connection id.
-         * @param aSent On return, value is ETrue if event has been sent, EFalse otherwise.
          * @return KErrNone if successfull, otherwise a system wide error code.
          */
-        TBool GetDeleteNotifyStatus( TConnInfo& aConnection, TBool& aSent );
+        TBool GetDeleteNotifyStatus( TConnInfo& aConnection );
 
         /**
          * Gets a pointer to the activity notifier object for the given connection id.

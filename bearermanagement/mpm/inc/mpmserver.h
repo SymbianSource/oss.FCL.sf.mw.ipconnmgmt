@@ -34,6 +34,7 @@ Mobility Policy Manager server class definitions.
 #include "mpmcommon.h"
 #include "rmpm.h"
 #include "mpmroamingwatcher.h"
+#include "mpmdatausagewatcher.h"
 #include "mpmvpntogglewatcher.h"
 
 
@@ -689,7 +690,14 @@ class CMPMServer : public CPolicyServer,
         * @since 5.2
         */
         inline CMPMRoamingWatcher* RoamingWatcher() const;
-        
+
+        /**
+        * Returns the DataUsageWatcher pointer
+        *
+        * @since 5.2
+        * @return DataUsageWatcher pointer
+        */
+        inline CMpmDataUsageWatcher* DataUsageWatcher() const;        
         
         
     public: // Functions from base classes

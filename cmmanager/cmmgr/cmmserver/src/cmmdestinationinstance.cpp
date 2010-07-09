@@ -469,7 +469,7 @@ HBufC* CCmmDestinationInstance::GetLocalisedDestinationNameL()
             break;
         }
 
-    // Not Internet, operator or intranet, or something went wrong. 
+    // Not Internet, operator or intranet, or something went wrong.
     if ( !isLocalised || ( isLocalised && !resolvedText ) )
         {
         resolvedText = TPtrC( iNetworkRecord->iRecordName ).AllocL();
@@ -710,7 +710,7 @@ void CCmmDestinationInstance::SetProtectionL(
     }
 
 // ---------------------------------------------------------------------------
-// Return true if protection level has been changed. 
+// Return true if protection level has been changed.
 // ---------------------------------------------------------------------------
 //
 TBool CCmmDestinationInstance::ProtectionChanged()
@@ -813,24 +813,21 @@ TInt CCmmDestinationInstance::AddConnMethodL(
     // The final position will be between 0 and relevantCount.
     TInt index( relevantCount );
 
-    // If this is a virtual IAP that doesn't point to an IAP, position it at
-    // the end of the list.
+    TBool positionFound( EFalse );
     TBool connMethodIsVirtual = aConnMethodInstance.GetBoolAttributeL( CMManager::ECmVirtual );
-    TUint32 linkedIapId( 0 );
     if ( connMethodIsVirtual )
         {
         // Ask link information only if this is a virtual IAP.
-        linkedIapId = aConnMethodInstance.GetIntAttributeL( CMManager::ECmNextLayerIapId );
+        TUint32 linkedIapId = aConnMethodInstance.GetIntAttributeL( CMManager::ECmNextLayerIapId );
         if ( linkedIapId == 0 )
             {
+            // If this is a virtual IAP that doesn't point to an IAP, position it at
+            // the end of the list.
             item.iPriority = CMManager::KDataMobilitySelectionPolicyPriorityWildCard;
             index = relevantCount;
+            positionFound = ETrue;
             }
-        }
-    else
-        {
-        TBool positionFound( EFalse );
-        if ( connMethodIsVirtual )
+        else
             {
             // If this is a virtual IAP that links to another IAP, position it
             // as if it was that IAP.
@@ -849,31 +846,31 @@ TInt CCmmDestinationInstance::AddConnMethodL(
             bearerType = linkedItem.iBearerType;
             bearerPriority = linkedItem.iBearerPriority;
             }
+        }
 
-        if ( !positionFound )
+    if ( !positionFound )
+        {
+        // Search for any connection methods with the same bearer type.
+        for ( TInt i = 0; i < relevantCount; i++ )
             {
-            // Search for any connection methods with the same bearer type.
-            for ( TInt i = 0; i < relevantCount; i++ )
+            if ( iConnMethodItemArray[i].iBearerType == bearerType )
                 {
-                if ( iConnMethodItemArray[i].iBearerType == bearerType )
-                    {
-                    index = i + 1;
-                    positionFound = ETrue;
-                    // Don't break, need find last item.
-                    }
+                index = i + 1;
+                positionFound = ETrue;
+                // Don't break, need find last item.
                 }
             }
-        if ( !positionFound )
+        }
+    if ( !positionFound )
+        {
+        // No connection method found with the same bearer type. Position
+        // the connection method according to bearer priority.
+        for ( TInt i = 0; i < relevantCount; i++ )
             {
-            // No connection method found with the same bearer type. Position
-            // the connection method according to bearer priority.
-            for ( TInt i = 0; i < relevantCount; i++ )
+            if ( iConnMethodItemArray[i].iBearerPriority >= bearerPriority )
                 {
-                if ( iConnMethodItemArray[i].iBearerPriority >= bearerPriority )
-                    {
-                    index = i;
-                    break;
-                    }
+                index = i;
+                break;
                 }
             }
         }

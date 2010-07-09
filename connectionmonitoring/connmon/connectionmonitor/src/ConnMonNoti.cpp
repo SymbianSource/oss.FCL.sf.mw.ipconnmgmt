@@ -170,10 +170,8 @@ void CConnUpDownNotifier::RunL()
                 }
             else
                 {
-                TBool alreadyNotified( EFalse );
-
                 // This updates the correct 'iConnectionId' and 'iBearer' to connInfo
-                TInt ret = iServer->Iap()->GetDeleteNotifyStatus( connInfo, alreadyNotified );
+                TInt ret = iServer->Iap()->GetDeleteNotifyStatus( connInfo );
 
                 if ( ret == KErrNone )
                     {
@@ -202,8 +200,11 @@ void CConnUpDownNotifier::RunL()
                                 iServer->Iap()->EnableWlanScan();
                                 }
 
-                            // Progress and subconn notifiers have died and no delete has been sent
-                            subConnUpDownNotifier->SendDeletedEvent();
+                            if ( subConnUpDownNotifier->LinkLayerClosed() )
+                                { 
+                                // KLinkLayerClosed already received, finish with this connection
+                                subConnUpDownNotifier->SendDeletedEvent();
+                                }
                             }
                         else
                             {
@@ -598,6 +599,7 @@ void CProgressNotifier::RunL()
                         if ( !subConnUpDownNotifier->IsActive() )
                             {
                             subConnUpDownNotifier->Receive();
+                            subConnUpDownNotifier->SetLinkLayerOpen();
                             }
                         }
 
@@ -631,8 +633,30 @@ void CProgressNotifier::RunL()
                         {
                         LOGIT("CProgressNotifier::RunL triggered HandleAvailabilityChange()")
                         iServer->AvailabilityManager()->HandleAvailabilityChange();	
-                        }	    
+                        }
+                        	    
                     }
+                else if ( iInfoBuf().iStage == KLinkLayerClosed )
+                    {
+                    CSubConnUpDownNotifier* subConnUpDownNotifier = 0;
+
+                    TInt err = iServer->Iap()->GetSubConnUpDownNotifier(
+                               iConnectionId,
+                               &subConnUpDownNotifier );
+
+                    if ( KErrNone == err )
+                        {
+                        subConnUpDownNotifier->SetLinkLayerClosed();
+                        	
+                        if ( subConnUpDownNotifier->InterfaceClosed() )
+                            {
+                            // EInterfaceDown has arrived before KLinkLayerClosed
+                            // Let's finish with this connection.	
+                            subConnUpDownNotifier->SendDeletedEvent();
+                            return;
+                            }
+                        }	
+                    }		    
 
                 iFilter = KNoFiltering;
                 }
@@ -2116,6 +2140,8 @@ void CSubConnUpDownNotifier::SendDeletedEvent()
     {
     if ( !iDeleteSent )
         {
+        LOGIT("CSubConnUpDownNotifier::SendDeletedEvent")
+        	
         iEventInfo.Reset();
 
         iEventInfo.iEventType       = EConnMonDeleteConnection;
@@ -2176,6 +2202,41 @@ void CSubConnUpDownNotifier::SetInterfaceClosed()
     iInterfaceClosed = ETrue;
     }
 
+// -----------------------------------------------------------------------------
+// CSubConnUpDownNotifier::InterfaceClosed
+// -----------------------------------------------------------------------------
+//
+TBool CSubConnUpDownNotifier::InterfaceClosed()
+    {
+    return iInterfaceClosed;
+    }
+
+// -----------------------------------------------------------------------------
+// CSubConnUpDownNotifier::SetLinkLayerClosed
+// -----------------------------------------------------------------------------
+//
+void CSubConnUpDownNotifier::SetLinkLayerClosed()
+    {
+    iLinkLayerClosed = ETrue;
+    }
+
+// -----------------------------------------------------------------------------
+// CSubConnUpDownNotifier::SetLinkLayerOpen
+// -----------------------------------------------------------------------------
+//
+void CSubConnUpDownNotifier::SetLinkLayerOpen()
+    {
+    iLinkLayerClosed = EFalse;
+    }
+
+// -----------------------------------------------------------------------------
+// CSubConnUpDownNotifier::LinkLayerClosed
+// -----------------------------------------------------------------------------
+//
+TBool CSubConnUpDownNotifier::LinkLayerClosed()
+    {
+    return iLinkLayerClosed;
+    }
 
 // -----------------------------------------------------------------------------
 // CSubConnUpDownNotifier::DoCancel
@@ -2219,7 +2280,10 @@ void CSubConnUpDownNotifier::RunL()
                 // Is progress notifier still alive
                 if ( !progressNotifier->IsActive() )
                     {
+                    iStatus = KErrDied;
+                    // might delete this object                     	
                     SendDeletedEvent();
+                    return;
                     }
                 }
             }
@@ -2240,6 +2304,8 @@ void CSubConnUpDownNotifier::RunL()
             LOGIT3("SERVER: EVENT -> Connection %d closed, u: %d, d: %d",
                     iConnectionId, iTotalUplinkDataVolume, iTotalDownlinkDataVolume)
 
+            iStatus = KErrDisconnected;
+ 
             CProgressNotifier* progressNotifier = 0;
             TInt err = iServer->Iap()->GetProgressNotifier( iConnectionId, &progressNotifier );
             if ( err == KErrNone )
@@ -2247,15 +2313,17 @@ void CSubConnUpDownNotifier::RunL()
                 // Progess notifier has stopped and allinterface closed event has arrived
                 if ( !progressNotifier->IsActive() )
                     {
+                    // might delete this object
                     SendDeletedEvent();
+                    return;
                     }
                 }
             else
                 {
+                // might delete this object                	
                 SendDeletedEvent();
+                return;
                 }
-
-            iStatus = KErrDisconnected;
             }
         else if ( ( event.iSubConnectionUniqueId == 0 ) &&
                   ( event.iEventType == ESubConnectionOpened ) )

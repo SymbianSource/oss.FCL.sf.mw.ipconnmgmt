@@ -165,6 +165,7 @@ void CpPacketDataApAdvancedView::createIpGroup()
             SIGNAL(currentIndexChanged(int)),
             this,
             SLOT(changeNetworkType(int)));
+        mNetworkType->setContentWidgetData("objectName", "networkTypeCB");
         mIpGroup->appendChild(mNetworkType);
         
         mCurrentNetworkType = getNetworkType();
@@ -305,6 +306,7 @@ void CpPacketDataApAdvancedView::createIpv4SettingItems()
         SIGNAL(stateChanged(int)),
         this,
         SLOT(changeIpv4AddressMode(int)));
+    mIpv4Automatic->setContentWidgetData("objectName", "ipv4AutomaticCB");
     mIpGroup->appendChild(mIpv4Automatic);
     
     // Phone IP address
@@ -316,6 +318,7 @@ void CpPacketDataApAdvancedView::createIpv4SettingItems()
         SIGNAL(editingFinished()),
         this,
         SLOT(changeIpv4Address()));
+    mIpv4Address->setContentWidgetData("objectName", "ipv4AddressEdit");
     mIpGroup->appendChild(mIpv4Address);
     
     // DNS addresses
@@ -331,6 +334,7 @@ void CpPacketDataApAdvancedView::createIpv4SettingItems()
         SIGNAL(stateChanged(int)), 
         this,
         SLOT(changeIpv4DnsMode(int)));
+    mIpv4DnsAutomatic->setContentWidgetData("objectName", "ipv4DnsAutomaticCB");
     mIpGroup->appendChild(mIpv4DnsAutomatic);
     
     // Primary DNS address
@@ -342,6 +346,7 @@ void CpPacketDataApAdvancedView::createIpv4SettingItems()
         SIGNAL(editingFinished()), 
         this,
         SLOT(changeIpv4PrimaryDnsAddress()));
+    mIpv4DnsAddress1->setContentWidgetData("objectName", "ipv4DnsAddress1Edit");
     mIpGroup->appendChild(mIpv4DnsAddress1);
     
     // Secondary DNS address
@@ -353,6 +358,7 @@ void CpPacketDataApAdvancedView::createIpv4SettingItems()
         SIGNAL(editingFinished()), 
         this,
         SLOT(changeIpv4SecondaryDnsAddress()));
+    mIpv4DnsAddress2->setContentWidgetData("objectName", "ipv4DnsAddress2Edit");
     mIpGroup->appendChild(mIpv4DnsAddress2);
     
     OstTraceFunctionExit0(CPPACKETDATAAPADVANCEDVIEW_CREATEIPV4SETTINGITEMS_EXIT);
@@ -424,6 +430,7 @@ void CpPacketDataApAdvancedView::createIpv6SettingItems()
         SIGNAL(currentIndexChanged(int)),
         this,
         SLOT(changeIpv6DnsMode(int)));
+    mIpv6DnsAutomatic->setContentWidgetData("objectName", "ipv6DnsAutomaticCB");
     mIpGroup->appendChild(mIpv6DnsAutomatic);
     
     // Primary DNS address
@@ -435,6 +442,7 @@ void CpPacketDataApAdvancedView::createIpv6SettingItems()
         SIGNAL(editingFinished()),
         this,
         SLOT(changeIpv6PrimaryDnsAddress()));
+    mIpv6DnsAddress1->setContentWidgetData("objectName", "ipv6DnsAddress1Edit");
     mIpGroup->appendChild(mIpv6DnsAddress1);
     
     // Secondary DNS address
@@ -445,7 +453,8 @@ void CpPacketDataApAdvancedView::createIpv6SettingItems()
         mIpv6DnsAddress2,
         SIGNAL(editingFinished()),
         this,
-        SLOT(changeIpv6SecondaryDnsAddress()));  
+        SLOT(changeIpv6SecondaryDnsAddress()));
+    mIpv6DnsAddress2->setContentWidgetData("objectName", "ipv6DnsAddress2Edit");
     mIpGroup->appendChild(mIpv6DnsAddress2);
     
     OstTraceFunctionExit0(CPPACKETDATAAPADVANCEDVIEW_CREATEIPV6SETTINGITEMS_EXIT);
@@ -502,6 +511,7 @@ void CpPacketDataApAdvancedView::createProxyGroup()
         SIGNAL(editingFinished()),
         this,
         SLOT(changeProxyServer()));
+    mProxyServer->setContentWidgetData("objectName", "proxyServerEdit");
     mProxyGroup->appendChild(mProxyServer);
     
     // Proxy port number
@@ -513,6 +523,7 @@ void CpPacketDataApAdvancedView::createProxyGroup()
         SIGNAL(editingFinished()),
         this,
         SLOT(changeProxyPort()));
+    mProxyPort->setContentWidgetData("objectName", "proxyPortEdit");
     mProxyGroup->appendChild(mProxyPort);
     
     OstTraceFunctionExit0(CPPACKETDATAAPADVANCEDVIEW_CREATEPROXYGROUP_EXIT);

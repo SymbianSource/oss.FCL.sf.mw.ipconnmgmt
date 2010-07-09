@@ -387,18 +387,7 @@ class CCmPluginBaseEng : public CBase
          * @param aTableIdArray A reference to an array where iap related generic
          * table ids are added.
          */
-        IMPORT_C void GetGenericTableIdsToBeObserved( RArray<TUint32>& aTableIdArray ) const;
-
-        /**
-         * Requests CommsDat table ids to be observed for changes by the cmm
-         * server. If a table used is not mentioned to be modified a bearer
-         * shouldn't return this. Bearers do not reset the array before adding
-         * ids.
-         * @param aTableIdArray A reference to an array where plugin must add
-         * the ids of the tables it want's to be observed.
-         */
-        IMPORT_C virtual void GetBearerTableIdsToBeObservedL(
-                RArray<TUint32>& aTableIdArray ) const = 0;
+        IMPORT_C void GetGenericTableIdsToBeObservedL( RArray<TUint32>& aTableIdArray ) const;
 
     public: // plugin interface
         /**
@@ -608,6 +597,17 @@ class CCmPluginBaseEng : public CBase
          * points to.
          */
         virtual void BearerRecordNameLC( HBufC* &aBearerName ) = 0;
+
+        /**
+         * Requests CommsDat table ids to be observed for changes by the cmm
+         * server. If a table used is not mentioned to be modified a bearer
+         * shouldn't return this. Bearers do not reset the array before adding
+         * ids.
+         * @param aTableIdArray A reference to an array where plugin must add
+         * the ids of the tables it want's to be observed.
+         */
+        IMPORT_C virtual void GetBearerTableIdsToBeObservedL(
+                RArray<TUint32>& aTableIdArray ) const = 0;
 
     protected:
         /**

@@ -90,9 +90,10 @@ CCmmConnMethodStruct::CCmmConnMethodStruct( TUint32 aConnMethodId )
     OstTraceFunctionEntry0( DUP1_CCMMCONNMETHODSTRUCT_CCMMCONNMETHODSTRUCT_ENTRY );
 
     iConnMethodPlugin = NULL;
+    iReferenceCounter = 0;
     iBearerType = 0;
     iStatus = ECmmConnMethodStatusNotSaved;
-    iReferenceCounter = 0;
+    iRecordStatus = ECmmRecordStatusBlank;
 
     OstTraceFunctionExit0( DUP1_CCMMCONNMETHODSTRUCT_CCMMCONNMETHODSTRUCT_EXIT );
     }
@@ -172,13 +173,11 @@ void CCmmConnMethodStruct::SetStatus( const TCmmConnMethodStatus& aStatus )
     }
 
 // ---------------------------------------------------------------------------
-// Refresh the connection method data in this cache side object to be in synch
-// with the database and copy that data back to the session side connection
-// method instance given as parameter.
+// Reload the connection method data in this cache side object to be in synch
+// with the database(only if needed).
 // ---------------------------------------------------------------------------
 //
-void CCmmConnMethodStruct::RefreshConnMethodInstanceL(
-        CCmmConnMethodInstance& aConnMethodInstance )
+void CCmmConnMethodStruct::ReloadPluginDataIfNeededL()
     {
     OstTraceFunctionEntry0( CCMMCONNMETHODSTRUCT_REFRESHCONNMETHODINSTANCEL_ENTRY );
 
@@ -192,12 +191,11 @@ void CCmmConnMethodStruct::RefreshConnMethodInstanceL(
         case ECmmConnMethodStatusValid:
         case ECmmConnMethodStatusToBeDeleted:
             {
-            //TODO, add record status check later and only call Reload() if necessary. TCmmRecordStatus
-            //if ( !aConnMethodStruct->UpToDate() )
-            //    {
+            if ( iRecordStatus == ECmmRecordStatusExpired )
+                {
                 iConnMethodPlugin->ReLoadL();
-            //    }
-            iConnMethodPlugin->GetPluginDataL( aConnMethodInstance.GetPluginDataInstance() );
+                SetRecordStatus( ECmmRecordStatusLoaded );
+                }
             }
             break;
         case ECmmConnMethodStatusNotSaved: // This is checked before.
@@ -206,9 +204,6 @@ void CCmmConnMethodStruct::RefreshConnMethodInstanceL(
             User::Leave( KErrCorrupt );  // Error, invalid status.
             break;
         }
-
-    // Internal state need to be set to the same state as after a successfull update.
-    aConnMethodInstance.UpdateSuccessful();
 
     OstTraceFunctionExit0( CCMMCONNMETHODSTRUCT_REFRESHCONNMETHODINSTANCEL_EXIT );
     }
@@ -256,16 +251,26 @@ void CCmmConnMethodStruct::SetPlugin(
 
     switch ( aStatus )
         {
-        // Fallthrough intended
         case ECmmConnMethodStatusNotSaved:
-        case ECmmConnMethodStatusValid:
+            {
             iStatus = aStatus;
+            iRecordStatus = ECmmRecordStatusUnsaved;
+            }
+            break;
+        case ECmmConnMethodStatusValid:
+            {
+            iStatus = aStatus;
+            iRecordStatus = ECmmRecordStatusLoaded;
+            }
             break;
         case ECmmConnMethodStatusChanged:
         case ECmmConnMethodStatusToBeDeleted:
+        // Fallthrough intended.
         default:
+            {
             iStatus = ECmmConnMethodStatusChanged;
             ASSERT( 0 ); // Error, invalid status as argument.
+            }
             break;
         }
 
@@ -307,7 +312,40 @@ void CCmmConnMethodStruct::UpdateSuccessful()
     {
     OstTraceFunctionEntry0( CCMMCONNMETHODSTRUCT_UPDATESUCCESSFUL_ENTRY );
     iStatus = ECmmConnMethodStatusValid;
+    SetRecordStatus( ECmmRecordStatusLoaded );
+
     OstTraceFunctionExit0( CCMMCONNMETHODSTRUCT_UPDATESUCCESSFUL_EXIT );
+    }
+
+// ---------------------------------------------------------------------------
+// Set the record status.
+// ---------------------------------------------------------------------------
+//
+void CCmmConnMethodStruct::SetRecordStatus( const TCmmRecordStatus aStatus )
+    {
+    iRecordStatus = aStatus;
+    }
+
+// ---------------------------------------------------------------------------
+// Notify about a possible change in database on specified record table.
+// ---------------------------------------------------------------------------
+//
+void CCmmConnMethodStruct::NotifyRecordChange( const TUint32 /*aRecordType*/ )
+    {
+    // Only change status if it is currently ECmmRecordStatusLoaded.
+    if ( iRecordStatus == ECmmRecordStatusLoaded )
+        {
+        iRecordStatus = ECmmRecordStatusExpired;
+        }
+    }
+
+// ---------------------------------------------------------------------------
+// Return the status of the records.
+// ---------------------------------------------------------------------------
+//
+TCmmRecordStatus CCmmConnMethodStruct::GetRecordStatus() const
+    {
+    return iRecordStatus;
     }
 
 // End of file

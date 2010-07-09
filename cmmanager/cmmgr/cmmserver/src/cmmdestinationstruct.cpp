@@ -406,10 +406,57 @@ void CCmmDestinationStruct::SetStatus( const TCmmDestinationStatus& aStatus )
     }
 
 // ---------------------------------------------------------------------------
+// Notify about a possible change in database on specified record table.
+// ---------------------------------------------------------------------------
+//
+void CCmmDestinationStruct::NotifyRecordChange( const TCmmDbRecords aRecordType )
+    {
+    OstTraceFunctionEntry0( CCMMDESTINATIONSTRUCT_NOTIFYRECORDCHANGE_ENTRY );
+
+    // Only change status if it is currently ECmmRecordStatusLoaded.
+    switch ( aRecordType )
+        {
+        case ECmmDestNetworkRecord:
+            {
+            if ( iNetworkRecordStatus == ECmmRecordStatusLoaded )
+                {
+                iNetworkRecordStatus = ECmmRecordStatusExpired;
+                }
+            }
+            break;
+        case ECmmDestApRecord:
+            {
+            if ( iDestApRecordStatus == ECmmRecordStatusLoaded )
+                {
+                iDestApRecordStatus = ECmmRecordStatusExpired;
+                }
+            }
+            break;
+        case ECmmDestMetadataRecord:
+            {
+            if ( iMetadataRecordStatus == ECmmRecordStatusLoaded )
+                {
+                iMetadataRecordStatus = ECmmRecordStatusExpired;
+                }
+            }
+            break;
+        case ECmmDbSnapRecord:
+        case ECmmDbBearerPriorityRecord:
+        case ECmmDbDefConnRecord:
+        // Fallthrough intended.
+        default:
+            // The record table doesn't affect destinations, just ignore it.
+            break;
+        }
+
+    OstTraceFunctionExit0( CCMMDESTINATIONSTRUCT_NOTIFYRECORDCHANGE_EXIT );
+    }
+
+// ---------------------------------------------------------------------------
 // Set the record status for all records.
 // ---------------------------------------------------------------------------
 //
-void CCmmDestinationStruct::SetStatusForAllRecords( const TCmmRecordStatus& aStatus )
+void CCmmDestinationStruct::SetStatusForAllRecords( const TCmmRecordStatus aStatus )
     {
     OstTraceFunctionEntry0( CCMMDESTINATIONSTRUCT_SETSTATUSFORALLRECORDS_ENTRY );
 
@@ -527,7 +574,7 @@ void CCmmDestinationStruct::RefreshDestinationInstanceL(
     }
 
 // ---------------------------------------------------------------------------
-// Re-loads a destination record if needed and copies the latest version to
+// Reloads a destination record if needed and copies the latest version to
 // the session instance given as parameter.
 // ---------------------------------------------------------------------------
 //
@@ -550,23 +597,6 @@ void CCmmDestinationStruct::LoadRecordL(
     // ECmmRecordStatusExpired   Load record from database
     // ECmmRecordStatusModified  Error, session side only status
     // ECmmRecordStatusUnsaved   Skip load, not in database
-
-    //TODO, temporary block start
-    // Remove this codeblock after database change listeners are in place. This
-    // will force a database reload.
-    if ( iNetworkRecordStatus == ECmmRecordStatusLoaded )
-        {
-        iNetworkRecordStatus = ECmmRecordStatusExpired;
-        }
-    if ( iDestApRecordStatus == ECmmRecordStatusLoaded )
-        {
-        iDestApRecordStatus = ECmmRecordStatusExpired;
-        }
-    if ( iMetadataRecordStatus == ECmmRecordStatusLoaded )
-        {
-        iMetadataRecordStatus = ECmmRecordStatusExpired;
-        }
-    //TODO, temporary block end
 
     CommsDat::CCDRecordBase* aRecordPointer;
 
@@ -661,7 +691,7 @@ void CCmmDestinationStruct::UpdateL(
         {
         case ECmmDestinationStatusValid:
             {
-            if ( iStatus != ECmmDestinationStatusValid ) //TODO, how will external db changes affect this?
+            if ( iStatus != ECmmDestinationStatusValid )
                 {
                 // Error, a 'valid'-status on session side implies a 'valid'-status on cache side.
                 User::Leave( KErrCorrupt );

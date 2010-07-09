@@ -22,7 +22,10 @@
 #include <hbindicatorinterface.h>
 #include <QtCore/QProcess>
 #include <QtCore/QVariant>
+#include <QSharedPointer>
 
+// Forward declarations
+class HbTranslator;
 
 /**
  * This class describes cellular indicator plug-in
@@ -81,6 +84,10 @@ private: // data
     QVariant mParameter;
     // Process to start external programs
     QProcess process;
+    
+    // Translator for the localisation Text Id's
+    QSharedPointer<HbTranslator> mTranslator;
+
 };
 
 

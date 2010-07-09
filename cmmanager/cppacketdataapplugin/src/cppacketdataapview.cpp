@@ -143,6 +143,7 @@ void CpPacketDataApView::createAccessPointSettingsGroup()
         SIGNAL(editingFinished()),
         this,
         SLOT(connectionNameChanged()));
+    mConnectionNameItem->setContentWidgetData("objectName", "connectionNameEdit");
     mApSettingsGroupItem->appendChild(mConnectionNameItem);
     
     // Access point name
@@ -155,6 +156,7 @@ void CpPacketDataApView::createAccessPointSettingsGroup()
         SIGNAL(editingFinished()),
         this,
         SLOT(accessPointNameChanged()));
+    mAccessPointNameItem->setContentWidgetData("objectName", "accessPointNameEdit");
     mApSettingsGroupItem->appendChild(mAccessPointNameItem);
     
     // User name
@@ -167,19 +169,21 @@ void CpPacketDataApView::createAccessPointSettingsGroup()
         SIGNAL(editingFinished()),
         this,
         SLOT(userNameChanged()));
+    mUserNameItem->setContentWidgetData("objectName", "userNameEdit");
     mApSettingsGroupItem->appendChild(mUserNameItem);
     
     // Password
     mPasswordItem = new CpSettingFormItemData(
         HbDataFormModelItem::TextItem,
         hbTrId("txt_occ_setlabel_password"));
-    mPasswordItem->setContentWidgetData("echoMode", "Password");
+    mPasswordItem->setContentWidgetData("echoMode", "PasswordEchoOnEdit");
     // Connect signal and add item to group
     mForm->addConnection(
         mPasswordItem,
         SIGNAL(editingFinished()),
         this,
         SLOT(passwordChanged()));
+    mPasswordItem->setContentWidgetData("objectName", "passwordEdit");
     mApSettingsGroupItem->appendChild(mPasswordItem);
     
     // Authentication
@@ -201,6 +205,7 @@ void CpPacketDataApView::createAccessPointSettingsGroup()
         SIGNAL(currentIndexChanged(int)),
         this,
         SLOT(authenticationChanged(int)));
+    mAuthenticationItem->setContentWidgetData("objectName", "authenticationCB");
     mApSettingsGroupItem->appendChild(mAuthenticationItem);
     
     // Homepage
@@ -213,6 +218,7 @@ void CpPacketDataApView::createAccessPointSettingsGroup()
         SIGNAL(editingFinished()),
         this,
         SLOT(homepageChanged()));
+    mHomepageItem->setContentWidgetData("objectName", "homePageEdit");
     mApSettingsGroupItem->appendChild(mHomepageItem);
     
     // Read settings from CommsDat and update widgets

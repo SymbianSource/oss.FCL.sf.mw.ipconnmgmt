@@ -19,6 +19,7 @@
 #define __CONNECTIONVIEW_H__
 
 #include <QObject>
+#include <QSharedPointer>
 #include <HbMainWindow>
 #include <HbDialog>
 #include <QStringList>
@@ -31,6 +32,10 @@
 #include <HbLabel>
 #include <qnetworksession.h>
 #include <qnetworkconfigmanager.h>
+
+// Forward declarations
+class HbTranslator;
+
 
 QTM_USE_NAMESPACE
 
@@ -137,6 +142,9 @@ class ConnectionView: public HbMainWindow
         
         /* The id of the timer used to close the application */
         int mClosingTimer;
+        
+        /* Translator for the localisation Text Id's */
+        QSharedPointer<HbTranslator> mTranslator;
         
         /* definition for unit test purposes */
         friend class TestConnectionView;

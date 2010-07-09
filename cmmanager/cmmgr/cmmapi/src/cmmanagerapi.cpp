@@ -356,7 +356,7 @@ TInt RCmManagerApi::GetConnectionMethodInfoBool(
     {
     OstTraceFunctionEntry0( RCMMANAGERAPI_GETCONNECTIONMETHODINFOBOOL_ENTRY );
 
-    TPckg<TUint32> pckg( aValue );
+    TPckg<TBool> pckg( aValue );
     TIpcArgs args( aIapId, aAttribute, &pckg );
     TInt err = SendReceive( ECmmGetConnMethodInfoBool, args );
 

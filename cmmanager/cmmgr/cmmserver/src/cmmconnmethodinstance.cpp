@@ -104,6 +104,7 @@ CCmmConnMethodInstance::CCmmConnMethodInstance(
     iConnMethodId = 0;
     iBearerType = 0;
     iStatus = ECmmConnMethodStatusChanged;
+    iRecordStatus = ECmmRecordStatusBlank;
     iHandle = 0;
 
     OstTraceFunctionExit0( DUP1_CCMMCONNMETHODINSTANCE_CCMMCONNMETHODINSTANCE_EXIT );
@@ -256,11 +257,13 @@ void CCmmConnMethodInstance::CopyDataL( CCmmConnMethodStruct* aConnMethodStruct 
         case ECmmConnMethodStatusToBeDeleted:
             {
             iStatus = ECmmConnMethodStatusChanged;
+            iRecordStatus = ECmmRecordStatusUnsaved;
             }
             break;
         case ECmmConnMethodStatusValid:
             {
             iStatus = ECmmConnMethodStatusValid;
+            iRecordStatus = ECmmRecordStatusLoaded;
             }
             break;
         case ECmmConnMethodStatusChanged:
@@ -466,6 +469,8 @@ void CCmmConnMethodInstance::SetIntAttributeL(
 
     iPlugin->SetIntAttributeL( aAttribute, aValue, iPluginDataInstance );
 
+    iRecordStatus = ECmmRecordStatusModified;
+
     OstTraceFunctionExit0( CCMMCONNMETHODINSTANCE_SETINTATTRIBUTEL_EXIT );
     }
 
@@ -485,6 +490,8 @@ void CCmmConnMethodInstance::SetBoolAttributeL(
         }
 
     iPlugin->SetBoolAttributeL( aAttribute, aValue, iPluginDataInstance );
+
+    iRecordStatus = ECmmRecordStatusModified;
 
     OstTraceFunctionExit0( CCMMCONNMETHODINSTANCE_SETBOOLATTRIBUTEL_EXIT );
     }
@@ -506,6 +513,8 @@ void CCmmConnMethodInstance::SetStringAttributeL(
 
     iPlugin->SetStringAttributeL( aAttribute, aValue, iPluginDataInstance );
 
+    iRecordStatus = ECmmRecordStatusModified;
+
     OstTraceFunctionExit0( CCMMCONNMETHODINSTANCE_SETSTRINGATTRIBUTEL_EXIT );
     }
 
@@ -526,6 +535,8 @@ void CCmmConnMethodInstance::SetString8AttributeL(
 
     iPlugin->SetString8AttributeL( aAttribute, aValue, iPluginDataInstance );
 
+    iRecordStatus = ECmmRecordStatusModified;
+
     OstTraceFunctionExit0( CCMMCONNMETHODINSTANCE_SETSTRING8ATTRIBUTEL_EXIT );
     }
 
@@ -533,7 +544,7 @@ void CCmmConnMethodInstance::SetString8AttributeL(
 // Sets a new status value.
 // ---------------------------------------------------------------------------
 //
-void CCmmConnMethodInstance::SetStatus( const TCmmConnMethodStatus& aStatus )
+void CCmmConnMethodInstance::SetStatus( const TCmmConnMethodStatus aStatus )
     {
     OstTraceFunctionEntry0( CCMMCONNMETHODINSTANCE_SETSTATUS_ENTRY );
 
@@ -553,6 +564,7 @@ void CCmmConnMethodInstance::UpdateSuccessful()
     OstTraceFunctionEntry0( CCMMCONNMETHODINSTANCE_UPDATESUCCESSFUL_ENTRY );
 
     SetStatus( ECmmConnMethodStatusValid );
+    iRecordStatus = ECmmRecordStatusLoaded;
 
     OstTraceFunctionExit0( CCMMCONNMETHODINSTANCE_UPDATESUCCESSFUL_EXIT );
     }
@@ -568,6 +580,7 @@ void CCmmConnMethodInstance::DeleteSuccessful( const TUint32 aNewSecondaryId )
     OstTraceFunctionEntry0( CCMMCONNMETHODINSTANCE_DELETESUCCESSFUL_ENTRY );
 
     SetStatus( ECmmConnMethodStatusChanged );
+    iRecordStatus = ECmmRecordStatusModified;
     SetId( aNewSecondaryId );
 
     OstTraceFunctionExit0( CCMMCONNMETHODINSTANCE_DELETESUCCESSFUL_EXIT );
@@ -604,6 +617,15 @@ void CCmmConnMethodInstance::RemoveConnMethodFromSessionDestinationHandles(
         {
         iCmmSession->RemoveConnMethodFromDestinationHandles( aConnMethodId );
         }
+    }
+
+// ---------------------------------------------------------------------------
+// Gets the current status value.
+// ---------------------------------------------------------------------------
+//
+TCmmConnMethodStatus CCmmConnMethodInstance::GetStatus() const
+    {
+    return iStatus;
     }
 
 // End of file
