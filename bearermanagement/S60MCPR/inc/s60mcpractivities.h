@@ -24,7 +24,7 @@ S60 MCPR's activities.
 #define S60MCPR_ACTIVITIES_H
 
 #include <comms-infras/mobilitymcpractivities.h>
-
+#include <platform/elements/mm_context.h>
 #include "s60mcprstates.h"
 
 // Forward declarations
@@ -50,13 +50,24 @@ namespace S60MCprActivities
  * S60 MCPR's connection selection activity related
  * states, transitions and forks.
  * 
- * The activity doesn't need activity class because it
- * reuses the Symbian's core implementation for 
- * selection.
- * 
  */
 namespace S60MCprSelectActivity
     {
+
+    class CS60SelectActivity : public MCprActivities::CSelectNextLayerActivity
+        {
+        public: // Methods
+            static MeshMachine::CNodeActivityBase* NewL(const MeshMachine::TNodeActivity& aActivitySig, MeshMachine::AMMNodeBase& aNode);
+    
+            // Overrides CNodeActivityBase's implementation
+            virtual void Cancel(MeshMachine::TNodeContextBase& aContext);
+        
+        private:  // Methods
+            
+            // C++ constructor
+            CS60SelectActivity(const MeshMachine::TNodeActivity& aActivitySig, MeshMachine::AMMNodeBase& aNode);
+        };
+    
     /**
      * Execution context definition for meshmachine activities. 
      */
@@ -109,11 +120,6 @@ namespace S60MCprSelectActivity
  * S60MCprSimpleSelectActivity namespace packages the
  * S60 MCPR's connection selection activity related
  * states, transitions and forks.
- * 
- * The activity doesn't need activity class because it
- * reuses the Symbian's core implementation for 
- * selection.
- * 
  */
 namespace S60MCprSimpleSelectActivity
     {

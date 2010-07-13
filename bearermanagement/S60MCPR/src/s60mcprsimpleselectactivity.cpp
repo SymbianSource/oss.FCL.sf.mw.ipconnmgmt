@@ -42,6 +42,36 @@ using namespace S60MCprActivities;
 //
 namespace S60MCprSelectActivity
     {
+    // Overrides CNodeActivityBase method implementation
+    void CS60SelectActivity::Cancel(MeshMachine::TNodeContextBase& aContext)
+        {
+        S60MCPRLOGSTRING1("S60MCPR<%x>::CS60SelectActivity::Cancel()",(TInt*)&aContext.Node())        
+        __ASSERT_DEBUG(aContext.iNodeActivity, User::Panic(KS60MCprPanic, KPanicNoActivity));
+        CSelectNextLayerActivity& ac = 
+            static_cast<CSelectNextLayerActivity&>( *aContext.iNodeActivity );
+        
+        if (!ac.iTierManager.IsNull() && ac.iTierManager == PostedToNodeId())
+            {
+            S60MCPRLOGSTRING1("S60MCPR<%x>::CS60SelectActivity::Cancel() Forwarding TCancel to TM",(TInt*)&aContext.Node())    
+            RClientInterface::OpenPostMessageClose(TNodeCtxId(ActivityId(), iNode.Id()), PostedToNodeId(), TEBase::TCancel().CRef());
+            SetError( KErrCancel );
+            }
+        else
+            {
+            CSelectNextLayerActivity::Cancel(aContext);
+            }
+        }
+    
+    MeshMachine::CNodeActivityBase* CS60SelectActivity::NewL(const MeshMachine::TNodeActivity& aActivitySig, MeshMachine::AMMNodeBase& aNode)
+        {
+        return new(ELeave) CS60SelectActivity( aActivitySig, aNode );
+        }
+    
+    CS60SelectActivity::CS60SelectActivity(const MeshMachine::TNodeActivity& aActivitySig, MeshMachine::AMMNodeBase& aNode)
+        : CSelectNextLayerActivity(aActivitySig, aNode)
+        {
+        }
+
     // -----------------------------------------------------------------------------
     // TAwaitingSelectNextLayer
     // -----------------------------------------------------------------------------
@@ -170,8 +200,7 @@ namespace S60MCprSelectActivity
 		CleanupStack::PushL(nextAP);
 		node.ConnPrefList().AppendL(nextAP);
 		CleanupStack::Pop();
-		/* END OF HACK */
-		
+		/* END OF HACK */	
         // Attach. 399 attach shouldn't be visible here.
         if ( prefs.Scope()&TSelectionPrefs::ESelectFromExisting )
             {
@@ -194,7 +223,7 @@ namespace S60MCprSelectActivity
             newPrefs.SetPrefs( ippprefs );
             TCFSelector::TSimpleSelect msg(newPrefs);
             iContext.iNodeActivity->PostRequestTo(ac.iTierManager, msg);
-            }
+            }     
         }
     }
 
