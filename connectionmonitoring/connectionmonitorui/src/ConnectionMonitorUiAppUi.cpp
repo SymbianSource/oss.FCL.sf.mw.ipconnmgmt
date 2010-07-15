@@ -388,15 +388,7 @@ void CConnectionMonitorUiAppUi::EventL(
                     {
                     CleanupStack::PushL( connectionInfo );
                     iConnectionArray->AppendL( connectionInfo );
-                    CleanupStack::Pop( connectionInfo );
-										
-                    if ( iView->Id() != KDetailsViewId )
-                        {
-                  	  	// Avkon: This is needed due to events' timing issues:
-                    		CConnectionMonitorUiView* view =
-                        	    ( CConnectionMonitorUiView* )iView;
-                    	view->HandleItemAdditionL();
-                    	}
+                    CleanupStack::Pop( connectionInfo );                   
                     }
                 }
             
@@ -756,11 +748,11 @@ void CConnectionMonitorUiAppUi::HandleForegroundEventL( TBool aForeground )
             ((CConnectionMonitorUiDetailsView*) iView)->ActivateMainViewL();
             activateMainView = EFalse;
             }
-            
+       
         TInt interval( KTickInterval );
         if ( iTimerObserver )
   	        {
-	          interval = iTimerObserver->GetTickInerval();	
+	          interval = iTimerObserver->GetTickInerval();
 	          }
         StartTimerL( interval );
         }

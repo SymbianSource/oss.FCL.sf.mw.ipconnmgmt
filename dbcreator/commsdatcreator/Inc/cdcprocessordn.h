@@ -117,10 +117,10 @@ class CProcessorDN : public CProcessorBase
     
     private:
         /**
-        * Tells whether the current destination has the internet metadata set.
-        * @return ETrue if the destination is Internet, EFalse otherwise.
+        * Helper function for creating destinations. 
+        * @param aDnId Destination ID for the new destination
         */
-//        TBool IsInternet();
+        void CreateDestination( TInt aDnId );
         
     private:
     

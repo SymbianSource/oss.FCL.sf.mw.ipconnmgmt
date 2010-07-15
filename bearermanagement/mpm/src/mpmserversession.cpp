@@ -814,9 +814,7 @@ TBool CMPMServerSession::IsConfirmFirstL( const TUint32 aIapId )
     // check whether a started connection exists which already 
     // uses this IAP. If so, it won't need to be confirmed again
     //
-    TConnectionState state = iMyServer.CheckUsageOfIap( aIapId, iConnId );
-
-    if ( state == EStarted || state == EStarting || state == ERoaming )
+    if ( iMyServer.CheckUsageOfIap( aIapId, iConnId ) == EStarted )
         {
         MPMLOGSTRING(
         "CMPMServerSession::IsConfirmFirstL - IAP already started, \
@@ -1614,8 +1612,10 @@ Unknown state %d", state )
         {
         // Process error according to the fact that the connection 
         // has already been started.
-        //         
-        if ( ( error == KErrCancel ) || ( error == KErrTimedOut ) )
+        // KErrConnectionTerminated is received when user disconnects
+        // connection from Settings/Connection mgr.
+        //       
+        if ( ( error == KErrCancel ) || ( error == KErrTimedOut ) || ( error == KErrConnectionTerminated ) )
             {
             neededAction = EPropagateError;
 

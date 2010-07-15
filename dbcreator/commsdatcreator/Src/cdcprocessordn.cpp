@@ -145,16 +145,7 @@ void CProcessorDN::ProcessTagL( TBool /*aFieldIDPresent*/ )
                 break;
                 }
             }
-        if (dnId == -1)
-            {
-            iDestination = iCmManager->CreateDestinationL( KDefaultDestinationName );        
-            CLOG_WRITE( "Destinaton created without dnId.");
-            }
-        else
-            {
-            iDestination = iCmManager->CreateDestinationL( KDefaultDestinationName, dnId);        
-            CLOG_WRITE_FORMAT( "Destinaton created. dnId:%d", dnId);
-            }
+        CreateDestination(dnId);
         }
         
     HBufC *destName( NULL );
@@ -466,6 +457,36 @@ void CProcessorDN::DoLogL()
     CLOG_WRITE( "\t \r\n" )
 
     CleanupStack::PopAndDestroy( tmp ); // Removes tmp.
+    }
+
+// ---------------------------------------------------------
+// CProcessorDN::CreateDestination
+// ---------------------------------------------------------
+//
+void CProcessorDN::CreateDestination(TInt aDnId)
+    {
+    if (aDnId == -1)
+        {
+        iDestination = iCmManager->CreateDestinationL( KDefaultDestinationName );        
+        CLOG_WRITE( "Destinaton created without dnId.");
+        }
+    else
+        {
+        TRAPD( err, iDestination = iCmManager->CreateDestinationL( KDefaultDestinationName, aDnId ) );
+        switch ( err )
+            {
+            case KErrNone:
+                CLOG_WRITE_FORMAT( "Destination created. dnId:%d", aDnId);
+                break;
+            case KErrAlreadyExists:
+                CLOG_WRITE_FORMAT( "Destination already exists dnId:%d. Creation failed.", aDnId);
+                iDestination = iCmManager->DestinationL( aDnId );
+                break;
+            default:
+                CLOG_WRITE( "Destination reading failed.");
+                break;
+            }
+        }
     }
 
 // End of File.

@@ -179,8 +179,8 @@ void CConfirmationQueryNotif::Cancel()
         
         if ( iDialogVisitor )
             {
-            delete iDialog;
-            iDialog = NULL;
+            delete iDialogVisitor;
+            iDialogVisitor = NULL;
             }
         }
     

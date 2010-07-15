@@ -91,11 +91,6 @@ class CConnectionMonitorUiView : public CAknView, public MEikListBoxObserver
         */
         void ConnectionKeyObserver() const;
 
-        /**
-        * Workaround for Avkon event sequence problem, occuring when
-        * connection list has been added elements.
-        */
-        void HandleItemAdditionL();
 
     protected: 
         /**

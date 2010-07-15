@@ -156,7 +156,7 @@ void CProcessorGlobal::ConstructL()
     // Create General connection settings struct and set the default values
     iGenConnSettings = new (ELeave) TCmGenConnSettings;
     iGenConnSettings->iUsageOfWlan = ECmUsageOfWlanKnown;
-    iGenConnSettings->iCellularDataUsageHome = ECmCellularDataUsageAutomatic;
+    iGenConnSettings->iCellularDataUsageHome = ECmCellularDataUsageConfirm;
     iGenConnSettings->iCellularDataUsageVisitor = ECmCellularDataUsageConfirm;
 
     CLOG_WRITE( "Initialising FeatureManager\n" )   
@@ -267,10 +267,19 @@ void CProcessorGlobal::ProcessTagL( TBool /*aFieldIDPresent*/ )
                     CCDSNAPMetadataRecord* defaultRecord = new( ELeave )
                             CCDSNAPMetadataRecord( snapTable->TableId() );
                     CleanupStack::PushL( defaultRecord );
-                    defaultRecord->SetRecordId( KCDNewRecordRequest );
                     defaultRecord->iMetadata.SetL( 0 );
-                    defaultRecord->iIcon.SetL( icon );
-                    defaultRecord->StoreL( *iSession );
+                    
+                    if ( !defaultRecord->FindL( *iSession ) )
+                        {
+                        defaultRecord->SetRecordId( KCDNewRecordRequest );
+                        defaultRecord->iIcon.SetL( icon );
+                        defaultRecord->StoreL( *iSession );
+                        }
+                    else
+                        {
+                        defaultRecord->iIcon.SetL( icon );
+                        defaultRecord->ModifyL( *iSession );
+                        }
                     
                     CleanupStack::PopAndDestroy( defaultRecord ); // defaultRecord
                     CleanupStack::PopAndDestroy( snapTable ); // snapTable

@@ -734,7 +734,7 @@ void CMPMIapSelection::ChooseIapComplete(
         if ( !connectionAlreadyActive &&
                 ( iSession->IsMMSIap( aPolicyPref->IapId() ) == EFalse ) )
             {
-            CConnectionUiUtilities* connUiUtils;
+            CConnectionUiUtilities* connUiUtils( NULL );
             TRAPD( popupError, connUiUtils = CConnectionUiUtilities::NewL() );
             if ( popupError == KErrNone )
         	    {

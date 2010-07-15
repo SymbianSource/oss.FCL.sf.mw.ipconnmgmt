@@ -232,6 +232,8 @@ void CConnectionMonitorUiContainer::OnEventL(
             case EConnMonDeleteConnection:
                 {
                 CMUILOGGER_WRITE( "OnEventL EConnMonDeleteConnection" );
+                CMUILOGGER_WRITE_F( "validIndex: %b", validIndex );
+                
                 iListBox->UpdateScrollBarsL();
                 break;
                 }
@@ -240,10 +242,6 @@ void CConnectionMonitorUiContainer::OnEventL(
             case EConnMonDeleteSubConnection:
                 {
                 CMUILOGGER_WRITE( "OnEventL StatusChange SubConnection" );
-                if ( validIndex )
-                    {
-                    iListBox->DrawItem( aIndex );
-                    }
                 break;
                 }
             default:
@@ -266,7 +264,11 @@ void CConnectionMonitorUiContainer::OnTimerEventL()
     {
     iListBox->DrawNow();
     TInt iNewConnectionCount = iConnectionArray->MdcaCount();
-    if ( iOldConnectionCount > iNewConnectionCount )
+    if( iOldConnectionCount < iNewConnectionCount )
+       {
+        iListBox->HandleItemAdditionL();
+        }
+    else if ( iOldConnectionCount > iNewConnectionCount )
         {
         iListBox->HandleItemRemovalL();
         }
