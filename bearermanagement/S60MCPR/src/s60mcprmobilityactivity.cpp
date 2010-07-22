@@ -325,7 +325,11 @@ namespace S60MCprMobilityActivity
     //
     CS60MobilityActivity::CS60MobilityActivity( const MeshMachine::TNodeActivity& aActivitySig, 
                                                 MeshMachine::AMMNodeBase& aNode )
-        :   S60MCprStates::CS60ErrorRecoveryActivity( aActivitySig, aNode )
+        :   S60MCprStates::CS60ErrorRecoveryActivity( aActivitySig, aNode ),
+            iCurrentAssumedAPId( 0 ),
+            iPreferredAPId( 0 ),
+            iIsUpgrade( EFalse ),
+            iIsSeamless( EFalse )
         {}
 
 

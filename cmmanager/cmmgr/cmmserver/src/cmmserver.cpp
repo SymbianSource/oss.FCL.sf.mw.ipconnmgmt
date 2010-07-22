@@ -34,29 +34,29 @@ const TUint CCmmServer::iCmmRangeCount = 12;
 
 const TInt CCmmServer::iCmmRanges[iCmmRangeCount] =
     {
-    0,      //   0-10
-    11,     //  11-14
-    15,     //  15-21
-    22,     //  22-99
-    100,    // 100-112
-    113,    // 113-126
-    127,    // 127-199
-    200,    // 200-205
-    206,    // 206-210
-    211,    // 211-214
-    215,    // 215-220
-    221     // 221-KMaxInt
+    0,      //  1.   0-11
+    12,     //  2.  12-15
+    16,     //  3.  16-22
+    23,     //  4.  23-99
+    100,    //  5. 100-113
+    114,    //  6. 114-128
+    129,    //  7. 129-199
+    200,    //  8. 200-205
+    206,    //  9. 206-210
+    211,    // 10. 211-214
+    215,    // 11. 215-220
+    221     // 12. 221-KMaxInt
     };
 
 const TUint8 CCmmServer::iCmmElementIndex[iCmmRangeCount] =
     {
-    CPolicyServer::EAlwaysPass,     // 0-10
-    CPolicyServer::ECustomCheck,    // 11-14
-    CPolicyServer::ECustomCheck,    // 15-21
-    CPolicyServer::ENotSupported,   // 22-99
-    CPolicyServer::EAlwaysPass,     // 100-112
-    CPolicyServer::ECustomCheck,    // 113-126
-    CPolicyServer::ENotSupported,   // 127-199
+    CPolicyServer::EAlwaysPass,     // 0-11
+    CPolicyServer::ECustomCheck,    // 12-15
+    CPolicyServer::ECustomCheck,    // 16-22
+    CPolicyServer::ENotSupported,   // 23-99
+    CPolicyServer::EAlwaysPass,     // 100-113
+    CPolicyServer::ECustomCheck,    // 114-128
+    CPolicyServer::ENotSupported,   // 129-199
     CPolicyServer::EAlwaysPass,     // 200-205
     CPolicyServer::ECustomCheck,    // 206-210
     CPolicyServer::ECustomCheck,    // 211-214
@@ -73,12 +73,12 @@ const CPolicyServer::TPolicyElement CCmmServer::iCmmElements[] =
     {_INIT_SECURITY_POLICY_C1(ECapabilityNetworkControl), CPolicyServer::EFailClient},
     };
 
-const CPolicyServer::TPolicy CCmmServer::iCmmPolicy = //TODO, check comments
+const CPolicyServer::TPolicy CCmmServer::iCmmPolicy =
     {
     CPolicyServer::EAlwaysPass, // Specifies all connect attempts should pass
     iCmmRangeCount,     // Count of ranges
-    iCmmRanges,         // 0-999, 1000-1008, 1009...
-    iCmmElementIndex,   // Only range 1000-1008 are checked
+    iCmmRanges,         // 0-11, 12-15, 16...
+    iCmmElementIndex,   // What to do for each range
     iCmmElements        // The list of policy elements
     };
 
@@ -96,7 +96,7 @@ CPolicyServer::TCustomResult CCmmServer::CustomSecurityCheckL(
     {
     switch ( aMessage.Function() )
         {
-        // ***********  2nd range: 11-14 *************
+        // ***********  2nd range: 12-15 *************
         case ECmmGetConnMethodInfoInt:
         case ECmmGetConnMethodInfoBool:
         case ECmmGetConnMethodInfoString:
@@ -127,7 +127,7 @@ CPolicyServer::TCustomResult CCmmServer::CustomSecurityCheckL(
                 case CMManager::EWlanWapiPsk:
                 case CMManager::EWlanWapiPskFormat:
                 // 802.1x:
-                case CMManager::EWlan802_1xAllowUnencrypted: //TODO, should this be here?
+                case CMManager::EWlan802_1xAllowUnencrypted:
                 // Authentication:
                 case CMManager::ECmIFAuthName:
                 case CMManager::EPacketDataIFAuthName:
@@ -139,38 +139,31 @@ CPolicyServer::TCustomResult CCmmServer::CustomSecurityCheckL(
                         EPass : EFail;
                     }
                 default:
-                    // By default reading does not need any capabilities
+                    // By default reading does not need any capabilities.
                     return EPass;
                 }
             }
-        // ***********  3rd range: 15-21 *************
+        // ***********  3rd range: 16-22 *************
         case ECmmUpdateBearerPriorityArray:
         case ECmmWriteDefaultConnection:
         case ECmmWriteGeneralConnectionSettings:
-            {
-            // ECapabilityWriteDeviceData is needed for writing
-            return ( iCmmElements[1].iPolicy.CheckPolicy( aMessage ) ) ?
-                EPass : EFail;
-            }
+        // At this phase all capabilities are not checked because of
+        // it's too heavy operation...
+        // At Session phase the protection of the destination and/or
+        // connection method is checked. If protected, 
+        // ECapabilityNetworkControl is checked.
         case ECmmCopyConnMethod:
         case ECmmMoveConnMethod:
         case ECmmRemoveConnMethod:
         case ECmmRemoveAllReferences:
             {
-            // At this phase capability is not checked because of
-            // it's too heavy operation...
-            // At later phase the protection of the target destination
-            // and/or connection method is checked.
-            return EPass;
-            }
-        // ***********  6th range: 113-126 *************
-        case EDestCreateDestinationWithName:
-        case EDestCreateDestinationWithNameAndId:
-            {
             // ECapabilityWriteDeviceData is needed for writing
             return ( iCmmElements[1].iPolicy.CheckPolicy( aMessage ) ) ?
                 EPass : EFail;
             }
+        // ***********  6th range: 114-128 *************
+        case EDestCreateDestinationWithName:
+        case EDestCreateDestinationWithNameAndId:
         case EDestIsConnected:
         case EDestAddConnMethod:
         case EDestAddEmbeddedDestination:
@@ -183,34 +176,32 @@ CPolicyServer::TCustomResult CCmmServer::CustomSecurityCheckL(
         case EDestSetHidden:
         case EDestUpdate:
         case EDestDelete:
-            {
-            // At this phase capability is not checked because of
-            // it's too heavy operation...
-            // At Session phase the protection of the destination and/or
-            // connection method is checked. If destination/connection method
-            // is protected ECapabilityNetworkControl is required from a
-            // client.
-            return EPass;
-            }
-        // ***********  9th range: 206-210 *************
-        case ECMCreateConnMethod:
-        case ECMCreateConnMethodWithId:
+        case EDestSetIcon:
             {
             // ECapabilityWriteDeviceData is needed for writing
             return ( iCmmElements[1].iPolicy.CheckPolicy( aMessage ) ) ?
                 EPass : EFail;
             }
+        // ***********  9th range: 206-210 *************
+
+        // ECapabilityWriteDeviceData is needed for writing
+        case ECMCreateConnMethod:
+        case ECMCreateConnMethodWithId:
+        
+        // At this phase all capabilities are not checked because of
+        // it's too heavy operation...
+        // At Session phase the protection of the destination and/or
+        // connection method is checked. If protected, 
+        // ECapabilityNetworkControl is checked.
         case ECMCreateConnMethodToDest:
         case ECMCreateConnMethodToDestWithId:
         case ECMCreateCopyOfExisting:
             {
-            // At this phase capability is not checked because of
-            // it's too heavy operation...
-            // At Session phase the protection of the destination and/or
-            // connection method is checked.
-            return EPass;
+            return ( iCmmElements[1].iPolicy.CheckPolicy( aMessage ) ) ?
+                EPass : EFail;
             }
         // ***********  11th range: 215-220 *************
+        // Protection of the CM is checked later(protected needs ECapabilityNetworkControl)
         case ECMSetIntAttribute:
         case ECMSetBoolAttribute:
         case ECMSetStringAttribute:
@@ -235,7 +226,7 @@ CPolicyServer::TCustomResult CCmmServer::CustomSecurityCheckL(
                 case CMManager::EWlanWapiPsk:
                 case CMManager::EWlanWapiPskFormat:
                 // 802.1x:
-                case CMManager::EWlan802_1xAllowUnencrypted: //TODO, should this be here?
+                case CMManager::EWlan802_1xAllowUnencrypted:
                 // Authentication:
                 case CMManager::ECmIFAuthName:
                 case CMManager::EPacketDataIFAuthName:
@@ -257,12 +248,57 @@ CPolicyServer::TCustomResult CCmmServer::CustomSecurityCheckL(
         case ECMDelete:
         case ECMUpdate:
             {
-            // ECapabilityWriteDeviceData
+            // ECapabilityWriteDeviceData (if protected, ECapabilityNetworkControl
+            // is checked later).
             return ( iCmmElements[1].iPolicy.CheckPolicy( aMessage ) ) ?
                 EPass : EFail;
             }
         default:
             return EPass;
+        }
+    }
+
+/**
+ * This is for checking client's capabilities at later phase after
+ * protections of destination/connection method have been checked
+ * first.
+ */
+CPolicyServer::TCustomResult CCmmServer::CapabilityCheckWithProtection( 
+        const RMessage2& aMessage )
+    {
+    switch ( aMessage.Function() )
+        {
+        case ECmmCopyConnMethod:
+        case ECmmMoveConnMethod:
+        case ECmmRemoveConnMethod:
+        case ECmmRemoveAllReferences:
+        case EDestAddConnMethod:
+        case EDestDeleteConnMethod:
+        case EDestAddEmbeddedDestination:
+        case EDestRemoveConnMethod:
+        case EDestModifyPriority:
+        case EDestSetName:
+        case EDestSetMetadata:
+        case EDestSetProtection:
+        case EDestSetHidden:
+        case EDestUpdate:
+        case EDestDelete:
+        case EDestSetIcon:
+        case ECMCreateConnMethodToDest:
+        case ECMCreateConnMethodToDestWithId:
+        case ECMUpdate:
+        case ECMDelete:
+        case ECMSetIntAttribute:
+        case ECMSetBoolAttribute:
+        case ECMSetStringAttribute:
+        case ECMSetString8Attribute:
+            {
+            // ECapabilityNetworkControl
+            return ( iCmmElements[3].iPolicy.CheckPolicy( aMessage ) ) ? EPass : EFail;
+            }
+        default:
+            // Execution should never come here.
+            return EFail;
         }
     }
 
@@ -340,7 +376,12 @@ CSession2* CCmmServer::NewSessionL(
     {
     OstTraceFunctionEntry0( CCMMSERVER_NEWSESSIONL_ENTRY );
 
-    return CCmmSession::NewL( *const_cast<CCmmServer*>( this ), iCmManager->Cache() );
+    CSession2* session = CCmmSession::NewL(
+            *const_cast<CCmmServer*>( this ),
+            iCmManager->Cache() );
+
+    OstTraceFunctionExit0( CCMMSERVER_NEWSESSIONL_EXIT );
+    return session;
     }
 
 // -----------------------------------------------------------------------------
@@ -376,6 +417,7 @@ void CCmmServer::DecrementSessions()
             iShutdown->Start();
             }
         }
+
     OstTraceFunctionExit0( CCMMSERVER_DECREMENTSESSIONS_EXIT );
     }
 
@@ -387,7 +429,10 @@ CObjectCon* CCmmServer::NewContainerL()
     {
     OstTraceFunctionEntry0( CCMMSERVER_NEWCONTAINERL_ENTRY );
 
-    return iContainerIndex->CreateL();
+    CObjectCon* container = iContainerIndex->CreateL();
+
+    OstTraceFunctionExit0( CCMMSERVER_NEWCONTAINERL_EXIT );
+    return container;
     }
 
 // -----------------------------------------------------------------------------
@@ -419,7 +464,6 @@ TInt CCmmServer::RunError( TInt aError )
     ReStart();
 
     OstTraceFunctionExit0( CCMMSERVER_RUNERROR_EXIT );
-
     return KErrNone;
     }
 
@@ -446,8 +490,8 @@ CCmManagerImpl* CCmmServer::CmManager()
 // -----------------------------------------------------------------------------
 //
 TBool CCmmServer::EmbeddedDestinationConflictsFromAllSessions(
-        const TUint32& aDestinationId,
-        const TUint32& aEmbeddedDestinationId )
+        const TUint32 aDestinationId,
+        const TUint32 aEmbeddedDestinationId )
     {
     OstTraceFunctionEntry0( CCMMSERVER_EMBEDDEDDESTINATIONCONFLICTSFROMALLSESSIONS_ENTRY );
 
@@ -475,7 +519,7 @@ TBool CCmmServer::EmbeddedDestinationConflictsFromAllSessions(
 // updated to, or deleted from, database.
 // ---------------------------------------------------------------------------
 //
-void CCmmServer::RefreshHandlesForAllSessions( const TUint32& aId )
+void CCmmServer::RefreshHandlesForAllSessions( const TUint32 aId )
     {
     OstTraceFunctionEntry0( CCMMSERVER_REFRESHHANDLESFORALLSESSIONS_ENTRY );
 

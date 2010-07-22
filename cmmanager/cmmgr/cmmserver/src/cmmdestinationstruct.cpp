@@ -18,7 +18,6 @@
 
 
 #include <datamobilitycommsdattypes.h>
-#include <cmpluginembdestinationdef.h>
 #include <in_sock.h> // KAfInet
 
 #include "cmmdestinationstruct.h"
@@ -42,11 +41,14 @@ const TUint KDefaultTierManagerTagId = KAfInet;
 CCmmDestinationStruct* CCmmDestinationStruct::NewL(
         CCmmCache* aCache,
         CCmmTransactionHandler* aTransactionHandler,
-        const TUint32& aDestinationId )
+        const TUint32 aDestinationId )
     {
     OstTraceFunctionEntry0( CCMMDESTINATIONSTRUCT_NEWL_ENTRY );
 
-    CCmmDestinationStruct* self = CCmmDestinationStruct::NewLC( aCache, aTransactionHandler, aDestinationId );
+    CCmmDestinationStruct* self = CCmmDestinationStruct::NewLC(
+            aCache,
+            aTransactionHandler,
+            aDestinationId );
     CleanupStack::Pop( self );
 
     OstTraceFunctionExit0( CCMMDESTINATIONSTRUCT_NEWL_EXIT );
@@ -63,11 +65,15 @@ CCmmDestinationStruct* CCmmDestinationStruct::NewL(
         CCmmCache* aCache,
         CCmmTransactionHandler* aTransactionHandler,
         const TDesC& aName,
-        const TUint32& aDestinationId )
+        const TUint32 aDestinationId )
     {
     OstTraceFunctionEntry0( DUP1_CCMMDESTINATIONSTRUCT_NEWL_ENTRY );
 
-    CCmmDestinationStruct* self = CCmmDestinationStruct::NewLC( aCache, aTransactionHandler, aName, aDestinationId );
+    CCmmDestinationStruct* self = CCmmDestinationStruct::NewLC(
+            aCache,
+            aTransactionHandler,
+            aName,
+            aDestinationId );
     CleanupStack::Pop( self );
 
     OstTraceFunctionExit0( DUP1_CCMMDESTINATIONSTRUCT_NEWL_EXIT );
@@ -82,11 +88,13 @@ CCmmDestinationStruct* CCmmDestinationStruct::NewL(
 CCmmDestinationStruct* CCmmDestinationStruct::NewLC(
         CCmmCache* aCache,
         CCmmTransactionHandler* aTransactionHandler,
-        const TUint32& aDestinationId )
+        const TUint32 aDestinationId )
     {
     OstTraceFunctionEntry0( CCMMDESTINATIONSTRUCT_NEWLC_ENTRY );
 
-    CCmmDestinationStruct* self = new( ELeave ) CCmmDestinationStruct( aCache, aTransactionHandler );
+    CCmmDestinationStruct* self = new( ELeave ) CCmmDestinationStruct(
+            aCache,
+            aTransactionHandler );
     CleanupStack::PushL( self );
     self->ConstructL( aDestinationId );
 
@@ -104,11 +112,13 @@ CCmmDestinationStruct* CCmmDestinationStruct::NewLC(
         CCmmCache* aCache,
         CCmmTransactionHandler* aTransactionHandler,
         const TDesC& aName,
-        const TUint32& aDestinationId )
+        const TUint32 aDestinationId )
     {
     OstTraceFunctionEntry0( DUP1_CCMMDESTINATIONSTRUCT_NEWLC_ENTRY );
 
-    CCmmDestinationStruct* self = new( ELeave ) CCmmDestinationStruct( aCache, aTransactionHandler );
+    CCmmDestinationStruct* self = new( ELeave ) CCmmDestinationStruct(
+            aCache,
+            aTransactionHandler );
     CleanupStack::PushL( self );
     self->ConstructL( aName, aDestinationId );
 
@@ -169,12 +179,13 @@ CCmmDestinationStruct::CCmmDestinationStruct(
 // Opens an existing destination based on ID.
 // ---------------------------------------------------------------------------
 //
-void CCmmDestinationStruct::ConstructL( const TUint32& aDestinationId )
+void CCmmDestinationStruct::ConstructL( const TUint32 aDestinationId )
     {
     OstTraceFunctionEntry0( CCMMDESTINATIONSTRUCT_CONSTRUCTL_ENTRY );
 
     // Check ID is in valid range.
-    if ( aDestinationId <= KCmDefaultDestinationAPTagId || aDestinationId >= KCmMaxDestinationAPTagId )
+    if ( aDestinationId <= KCmDefaultDestinationAPTagId ||
+            aDestinationId >= KCmMaxDestinationAPTagId )
         {
         User::Leave( KErrArgument );
         }
@@ -211,7 +222,6 @@ void CCmmDestinationStruct::ConstructL( const TUint32& aDestinationId )
         // Not found -> fill in with default values.
         iMetadataRecord->iSNAP = iId;
         iMetadataRecord->iMetadata = 0;
-        iMetadataRecord->iIcon = 0;
         iMetadataRecord->SetRecordId( KCDNewRecordRequest );
         iMetadataRecordStatus = ECmmRecordStatusUnsaved;
         }
@@ -231,7 +241,7 @@ void CCmmDestinationStruct::ConstructL( const TUint32& aDestinationId )
 // Creates a new destination. With name and optionally also with ID.
 // ---------------------------------------------------------------------------
 //
-void CCmmDestinationStruct::ConstructL( const TDesC& aName, const TUint32& aDestinationId )
+void CCmmDestinationStruct::ConstructL( const TDesC& aName, const TUint32 aDestinationId )
     {
     OstTraceFunctionEntry0( DUP1_CCMMDESTINATIONSTRUCT_CONSTRUCTL_ENTRY );
 
@@ -286,7 +296,7 @@ void CCmmDestinationStruct::ConstructL( const TDesC& aName, const TUint32& aDest
 // Set the destination ID.
 // ---------------------------------------------------------------------------
 //
-void CCmmDestinationStruct::SetId( const TUint32& aId )
+void CCmmDestinationStruct::SetId( const TUint32 aId )
     {
     iId = aId;
     }
@@ -415,7 +425,7 @@ void CCmmDestinationStruct::SetStatusForAllRecords( const TCmmRecordStatus& aSta
 // the reference counter by one.
 // ---------------------------------------------------------------------------
 //
-void CCmmDestinationStruct::CreateSessionInstanceL(
+void CCmmDestinationStruct::CreateDestinationInstanceL(
         CCmmDestinationInstance& aDestinationInstance )
     {
     OstTraceFunctionEntry0( CCMMDESTINATIONSTRUCT_CREATESESSIONINSTANCEL_ENTRY );
@@ -432,7 +442,7 @@ void CCmmDestinationStruct::CreateSessionInstanceL(
     // NULL. When update is called, copy the records into the cache also.
     //
 
-    switch ( iStatus ) //TODO, add missing status values
+    switch ( iStatus )
         {
         case ECmmDestinationStatusNotSaved:
             {
@@ -463,6 +473,8 @@ void CCmmDestinationStruct::CreateSessionInstanceL(
             aDestinationInstance.SetStatus( ECmmDestinationStatusValid );
             }
             break;
+        case ECmmDestinationStatusChanged:
+        case ECmmDestinationStatusToBeDeleted:
         default:
             User::Leave( KErrCorrupt ); // Invalid status.
             break;
@@ -475,7 +487,9 @@ void CCmmDestinationStruct::CreateSessionInstanceL(
     }
 
 // ---------------------------------------------------------------------------
-// TODO
+// Refresh the data contained in aDestinationInstance. This means reloading
+// the data from database if necessary. After this call the contents of
+// aDestinationInstance will reflect the current state in the database. 
 // ---------------------------------------------------------------------------
 //
 void CCmmDestinationStruct::RefreshDestinationInstanceL(
@@ -629,6 +643,9 @@ void CCmmDestinationStruct::UpdateL(
     {
     OstTraceFunctionEntry0( CCMMDESTINATIONSTRUCT_UPDATEL_ENTRY );
 
+    TBool setProtection( EFalse );
+    CMManager::TProtectionLevel protLevel( CMManager::EProtLevel0 );
+
     // Structure:
     // - Use ModifyL() or StoreL() according to own status (new destination or
     //   changes to existing one).
@@ -668,6 +685,15 @@ void CCmmDestinationStruct::UpdateL(
 
             recordPointer = NULL;
 
+            // Set protections on network record as needed.
+            protLevel = aDestinationInstance.CurrentProtectionLevelL();
+            if ( protLevel == CMManager::EProtLevel1 ||
+                    protLevel == CMManager::EProtLevel2 )
+                {
+                setProtection = ETrue;
+                }
+            SetAttribute( instanceNetworkRecord, CommsDat::ECDProtectedWrite, setProtection );
+
             switch ( iStatus )
                 {
                 case ECmmDestinationStatusNotSaved:
@@ -677,9 +703,6 @@ void CCmmDestinationStruct::UpdateL(
                     // Store network record first, the record ID is needed for
                     // destination access point record.
                     // Record ID for network record is set during construction.
-
-                    //TODO, Check method call from old CmManager:
-                    //TODO, SetAttribute( iData->iNetworkRecord, ECDProtectedWrite, ProtectionLevel() == EProtLevel1 );
                     instanceNetworkRecord->StoreL( iTransactionHandler->Session() );
 
                     // If ID is out of valid range, it means this destination was created
@@ -691,7 +714,8 @@ void CCmmDestinationStruct::UpdateL(
                         {
                         id = instanceNetworkRecord->RecordId() + KCmDefaultDestinationAPTagId;
                         instanceDestApRecord->iRecordTag = id;
-                        instanceDestApRecord->iCustomSelectionPolicy = ( id - KCmDefaultDestinationAPTagId );
+                        instanceDestApRecord->iCustomSelectionPolicy =
+                                ( id - KCmDefaultDestinationAPTagId );
                         instanceMetadataRecord->iSNAP = id;
                         }
                     instanceDestApRecord->StoreL( iTransactionHandler->Session() );
@@ -704,8 +728,6 @@ void CCmmDestinationStruct::UpdateL(
                     {
                     // This destination already exists in database and is beeing modified.
 
-                    //TODO, Check method call from old CmManager:
-                    //TODO, SetAttribute( iData->iNetworkRecord, ECDProtectedWrite, ProtectionLevel() == EProtLevel1 );
                     instanceNetworkRecord->ModifyL( iTransactionHandler->Session() );
                     instanceDestApRecord->ModifyL( iTransactionHandler->Session() );
                     if ( iMetadataRecordStatus == ECmmRecordStatusUnsaved )
@@ -734,9 +756,12 @@ void CCmmDestinationStruct::UpdateL(
             iDestApRecordStatus = ECmmRecordStatusBlank;
             iNetworkRecordStatus = ECmmRecordStatusBlank;
             iMetadataRecordStatus = ECmmRecordStatusBlank;
-            iDestApRecord = static_cast<CommsDat::CCDAccessPointRecord*>( CopyRecordL( ECmmDestApRecord, instanceDestApRecord ) );
-            iNetworkRecord = static_cast<CommsDat::CCDNetworkRecord*>( CopyRecordL( ECmmDestNetworkRecord, instanceNetworkRecord ) );
-            iMetadataRecord = static_cast<CCDSNAPMetadataRecord*>( CopyRecordL( ECmmDestMetadataRecord, instanceMetadataRecord ) );
+            iDestApRecord = static_cast<CommsDat::CCDAccessPointRecord*>(
+                    CopyRecordL( ECmmDestApRecord, instanceDestApRecord ) );
+            iNetworkRecord = static_cast<CommsDat::CCDNetworkRecord*>(
+                    CopyRecordL( ECmmDestNetworkRecord, instanceNetworkRecord ) );
+            iMetadataRecord = static_cast<CCDSNAPMetadataRecord*>(
+                    CopyRecordL( ECmmDestMetadataRecord, instanceMetadataRecord ) );
 
             instanceDestApRecord = NULL;
             instanceNetworkRecord = NULL;
@@ -781,6 +806,10 @@ void CCmmDestinationStruct::UpdateL(
             // Initial record for destination itself.
             snapRecord1->iSNAP = id;
             snapRecord1->iRecordName.SetL( iNetworkRecord->iRecordName.GetL() );
+
+            // Set protections on snap record.
+            SetAttribute( snapRecord1, CommsDat::ECDProtectedWrite, setProtection );
+
             if ( existingRecordCount > index )
                 {
                 snapRecord1->SetElementId( snapRecordSet->iRecords[index]->ElementId() );
@@ -820,9 +849,16 @@ void CCmmDestinationStruct::UpdateL(
                             connMethodRealId );
                     }
 
-                //TODO, if protection level is 1 (dest AND CMs), set ECDProtectedWrite. See oldimplementation.
+                // Set protections on destination contents as needed.
+                setProtection = EFalse;
+                protLevel = aDestinationInstance.CurrentProtectionLevelL();
+                if ( protLevel == CMManager::EProtLevel1 )
+                    {
+                    setProtection = ETrue;
+                    }
+                SetAttribute( snapRecord2, CommsDat::ECDProtectedWrite, setProtection );
 
-                if ( aDestinationInstance.iConnMethodItemArray[i].iBearerType == KUidEmbeddedDestination )
+                if ( aDestinationInstance.iConnMethodItemArray[i].IsEmbedded() )
                     {
                     // Embedded destination.
                     snapRecord2->iEmbeddedSNAP = ( TInt )connMethodRealId;
@@ -830,15 +866,28 @@ void CCmmDestinationStruct::UpdateL(
                     snapRecord2->iPriority =
                             CMManager::KDataMobilitySelectionPolicyPriorityWildCard;
                     aDestinationInstance.iConnMethodItemArray[i].iPriority =
-                            CMManager::KDataMobilitySelectionPolicyPriorityWildCard; // Update this just in case.
+                            CMManager::KDataMobilitySelectionPolicyPriorityWildCard;
                     }
                 else
                     {
                     // Normal connection method.
                     snapRecord2->iEmbeddedSNAP = 0;
-                    snapRecord2->iIAP = ( KCDMaskShowField & CommsDat::KCDTIdIAPRecord ) | ( connMethodRealId << 8 );
-                    snapRecord2->iPriority = i + 1; // Priority values start from 1.
-                    aDestinationInstance.iConnMethodItemArray[i].iPriority = i + 1; // Update this just in case.
+                    snapRecord2->iIAP = CommsDat::KCDTIdIAPRecord | ( connMethodRealId << 8 );
+                    // If the connection method is a virtual IAP that doesn't
+                    // link to an IAP, set priority to wildcard.
+                    if ( aDestinationInstance.iConnMethodItemArray[i].IsVirtual() &&
+                            aDestinationInstance.iConnMethodItemArray[i].LinkedIapId() == 0 )
+                        {
+                        snapRecord2->iPriority =
+                                CMManager::KDataMobilitySelectionPolicyPriorityWildCard;
+                        aDestinationInstance.iConnMethodItemArray[i].iPriority =
+                                CMManager::KDataMobilitySelectionPolicyPriorityWildCard;
+                        }
+                    else
+                        {
+                        snapRecord2->iPriority = i + 1; // Priority values start from 1.
+                        aDestinationInstance.iConnMethodItemArray[i].iPriority = i + 1;
+                        }
                     }
 
                 if ( existingRecordCount > index )
@@ -895,30 +944,6 @@ void CCmmDestinationStruct::UpdateL(
 void CCmmDestinationStruct::DeleteL()
     {
     OstTraceFunctionEntry0( CCMMDESTINATIONSTRUCT_DELETEL_ENTRY );
-
-    // Check general status.
-    /*switch ( iStatus ) //TODO, already done? yes, cleanup
-        {
-        case ECmmDestinationStatusNotSaved:
-            {
-            // Doesn'texist in database.
-            User::Leave( KErrNotFound );
-            }
-            break;
-        case ECmmDestinationStatusValid:
-            // Proceed.
-            break;
-        case ECmmDestinationStatusToBeDeleted:
-            {
-            // Already deleted, nothing to do.
-            return;
-            }
-        case ECmmDestinationStatusChanged:
-        default:
-            ASSERT( 0 ); // Error, invalid argument.
-            User::Leave( KErrCorrupt );
-            break;
-        }*/
 
     // Check status for records.
     switch ( iNetworkRecordStatus )
@@ -1018,7 +1043,7 @@ void CCmmDestinationStruct::DeleteL()
 // references is returned.
 // ---------------------------------------------------------------------------
 //
-TInt CCmmDestinationStruct::SessionInstanceClosed()
+TInt CCmmDestinationStruct::DestinationInstanceClosed()
     {
     OstTraceFunctionEntry0( CCMMDESTINATIONSTRUCT_SESSIONINSTANCECLOSED_ENTRY );
 
@@ -1185,6 +1210,28 @@ void CCmmDestinationStruct::SetDefaultProtocolL()
     }
 
 // -----------------------------------------------------------------------------
+// Set attribute flag on the given record.
+// -----------------------------------------------------------------------------
+void CCmmDestinationStruct::SetAttribute(
+        CommsDat::CCDRecordBase* aRecord,
+        TUint32 aAttribute,
+        TBool aSet )
+    {
+    OstTraceFunctionEntry0( CCMMDESTINATIONSTRUCT_SETATTRIBUTE_ENTRY );
+
+    if ( aSet )
+        {
+        aRecord->SetAttributes( aAttribute );
+        }
+    else
+        {
+        aRecord->ClearAttributes( aAttribute );
+        }
+
+    OstTraceFunctionExit0( CCMMDESTINATIONSTRUCT_SETATTRIBUTE_EXIT );
+    }
+
+// -----------------------------------------------------------------------------
 // Creates a copy of a record of the given type.
 // -----------------------------------------------------------------------------
 CommsDat::CCDRecordBase* CCmmDestinationStruct::CopyRecordL(
@@ -1332,6 +1379,10 @@ CommsDat::CCDRecordBase* CCmmDestinationStruct::CopyRecordL(
             if ( !source->iIcon.IsNull() )
                 {
                 metadataRecord->iIcon.SetL( source->iIcon );
+                }
+            if ( !source->iIconFileName.IsNull() )
+                {
+                metadataRecord->iIconFileName.SetL( source->iIconFileName );
                 }
             metadataRecord->SetElementId( source->ElementId() );
 

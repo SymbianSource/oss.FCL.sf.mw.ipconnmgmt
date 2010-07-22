@@ -15,7 +15,7 @@
 *
 */
 
-#include <QTranslator>
+#include <HbTranslator>
 #include <QLocale>
 #include <QList>
 #include <HbLabel>
@@ -45,12 +45,8 @@ CellularPromptDialog::CellularPromptDialog(const QVariantMap &parameters)
     OstTraceFunctionEntry0( CELLULARPROMPTDIALOG_CELLULARPROMPTDIALOG_ENTRY );
 
     // Install localization
-    QTranslator *translator = new QTranslator(this);
-    QString lang = QLocale::system().name(); 
-    QString path = "Z:/resource/qt/translations/"; 
-    translator->load("cellularpromptdialog_" + lang, path);
-    qApp->installTranslator(translator);
-    
+    HbTranslator *translator(new HbTranslator("cellularpromptdialog"));
+
     createDialog(parameters);
     mClose = false;
     

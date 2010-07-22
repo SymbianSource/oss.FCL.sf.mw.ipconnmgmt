@@ -47,6 +47,7 @@ protected:
 protected slots:
 
 private:
+    Q_DISABLE_COPY(CpIpSettingsView)
 
 private slots:
     

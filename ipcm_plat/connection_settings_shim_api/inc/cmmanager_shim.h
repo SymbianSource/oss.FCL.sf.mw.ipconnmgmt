@@ -119,6 +119,14 @@ public:
      */ 
     void allDestinations(QList<uint> &destArray) const;
     
+    /*!
+     * Gets the "Uncategorized" icon identifier(name). It can
+     * contain path information.
+     * 
+     * @return Name of the Icon
+     */      
+    QString getUncategorizedIcon() const;
+    
 protected:
 
 private:

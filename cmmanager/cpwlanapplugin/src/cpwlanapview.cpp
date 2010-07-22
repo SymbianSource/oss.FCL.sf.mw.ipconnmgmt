@@ -32,6 +32,7 @@
 #include <HbPopup>
 #include <HbMessageBox>
 #include <HbAction>
+#include <HbStringUtil>
 #include <wlanmgmtcommon.h>
 #include <cpitemdatahelper.h>
 #include <cpsettingformitemdata.h>
@@ -79,6 +80,7 @@ CpWlanApView::CpWlanApView(
         mWlanNetworkNameItem(0),
         mNetworkStatusItem(0),
         mNetworkModeItem(0),
+        mAdHocChannelItem(0),
         mSecurityModeItem(0),
         mHomepageItem(0),
         mSecuritySettingsGroupItem(0),
@@ -221,28 +223,15 @@ void CpWlanApView::createAccessPointSettingsGroup()
         SLOT(networkModeChanged(int)));
     mApSettingsGroupItem->appendChild(mNetworkModeItem);
     
+    // Ad-hoc channel
+    // Added dynamically according to set network mode
+    
     // Security mode
     mSecurityModeItem = new CpSettingFormItemData(
         HbDataFormModelItem::ComboBoxItem,
         hbTrId("txt_occ_setlabel_wlan_security_mode"));
-    // Load WLAN security plugins and construct map
-    mSecurityModeMap.insert(0, NULL); // open mode
-    // Load all security plugins and construct map
-    loadSecurityPlugins();
-    // Add items to combobox
-    QStringList securityModeItems;
-    foreach (CpWlanSecurityPluginInterface *plugin, mSecurityModeMap) {
-        if (plugin) {
-            // Add security mode from plugin
-            securityModeItems
-                << hbTrId(plugin->securityModeTextId().toLatin1());
-        } else {
-            // Add open mode
-            securityModeItems
-                << hbTrId("txt_occ_setlabel_wlan_security_mode_val_open");
-        }
-    }
-    mSecurityModeItem->setContentWidgetData("items", securityModeItems);
+    // Security modes added dynamically according to set network mode
+
     // Connect signal and add item to group
     mForm->addConnection(
         mSecurityModeItem,
@@ -296,28 +285,19 @@ void CpWlanApView::updateAccessPointSettingsGroup()
         mNetworkStatusMap.key(scanSsid));
     
     // Network mode
-    int networkMode =  mCmConnectionMethod->getIntAttribute(
-        CMManagerShim::WlanConnectionMode);
+    CMManagerShim::WlanConnMode networkMode =
+		static_cast<CMManagerShim::WlanConnMode>
+      	(mCmConnectionMethod->getIntAttribute(
+            CMManagerShim::WlanConnectionMode));
     mNetworkModeItem->setContentWidgetData(
         "currentIndex",
         mNetworkModeMap.key(networkMode));
     
+    // Ad-hoc channel
+    updateAdHocChannelItem(networkMode);
+    
     // Security mode
-    QVariant securityMode = mCmConnectionMethod->getIntAttribute(
-        CMManagerShim::WlanSecurityMode);
-    // Iterate through the map to find correct security plugin and set
-    // mode index
-    int securityModeIndex = 0;
-    QMapIterator<int, CpWlanSecurityPluginInterface *> i(mSecurityModeMap);
-    while (i.hasNext()) {
-        i.next();
-        if (i.value()
-            && i.value()->securityMode() == securityMode.toInt()) {
-            securityModeIndex = i.key();
-        }
-    }
-    mSecurityModeItem->setContentWidgetData("currentIndex",
-        securityModeIndex);
+    updateSecurityModeItem(networkMode);
     
     // Homepage
     QString homepage = mCmConnectionMethod->getStringAttribute(
@@ -330,7 +310,8 @@ void CpWlanApView::updateAccessPointSettingsGroup()
 /*!
     Loads all WLAN security plugins.
 */
-void CpWlanApView::loadSecurityPlugins()
+void CpWlanApView::loadSecurityPlugins(
+    CMManagerShim::WlanConnMode networkMode)
 {
     OstTraceFunctionEntry0(CPWLANAPVIEW_LOADSECURITYPLUGINS_ENTRY);
     
@@ -357,12 +338,16 @@ void CpWlanApView::loadSecurityPlugins()
         }
     }
     
-    // Add security plugins to map
+    // Add security plugins to map. If network mode is ad-hoc, only WEP
+    // is allowed.
     int i;
     i = mSecurityModeMap.size();
     foreach (CpWlanSecurityPluginInterface *plugin, plugins) {
-        mSecurityModeMap.insert(i, plugin);
-        i++;
+        if (networkMode != CMManagerShim::Adhoc
+            || plugin->securityMode() == CMManagerShim::WlanSecModeWep) {
+            mSecurityModeMap.insert(i, plugin);
+            i++;
+        }
     }
     
     OstTraceFunctionExit0(CPWLANAPVIEW_LOADSECURITYPLUGINS_EXIT);
@@ -473,6 +458,132 @@ void CpWlanApView::handleUpdateError()
 }
 
 /*!
+    Updates Ad-hoc channel item. Setting item is shown if network mode is
+    ad-hoc, otherwise it is not shown.
+ */
+void CpWlanApView::updateAdHocChannelItem(
+    CMManagerShim::WlanConnMode networkMode)
+{
+    if (networkMode == CMManagerShim::Infra) {
+        // Infrastructure
+        if (mAdHocChannelItem) {
+            mApSettingsGroupItem->removeChild(
+                mApSettingsGroupItem->indexOf(mAdHocChannelItem));
+            mAdHocChannelItem = NULL;
+        }
+    } else {
+        // Ad-hoc
+        if (!mAdHocChannelItem) {
+            // Ad-hoc channel item not shown, add it
+            mAdHocChannelItem = new CpSettingFormItemData(
+                HbDataFormModelItem::ComboBoxItem,
+                hbTrId("txt_occ_setlabel_adhoc_channel"));
+            // Add items to combobox
+            QStringList adHocChannelItems;
+            adHocChannelItems
+                << hbTrId("txt_occ_setlabel_adhoc_channel_val_automatic");
+            for (int i = WlanAdHocChannelMinValue;
+                i <= WlanAdHocChannelMaxValue;
+                i++) {
+                QString channel;
+                channel.setNum(i);
+                adHocChannelItems << HbStringUtil::convertDigits(channel);
+            }
+            mAdHocChannelItem->setContentWidgetData(
+                "items",
+                adHocChannelItems);
+            // Connect signal and add item to group
+            mForm->addConnection(
+                mAdHocChannelItem,
+                SIGNAL(currentIndexChanged(int)),
+                this,
+                SLOT(adHocChannelChanged(int)));
+            // Add item after the network mode item
+            mApSettingsGroupItem->insertChild(
+                mApSettingsGroupItem->indexOf(mNetworkModeItem) + 1,
+                mAdHocChannelItem);
+        }
+        // Update ad-hoc item
+        int adHocChannelId = mCmConnectionMethod->getIntAttribute(
+            CMManagerShim::WlanChannelID);
+        mAdHocChannelItem->setContentWidgetData(
+            "currentIndex",
+            adHocChannelId);
+    }
+}
+
+/*!
+    Updates security mode item.
+ */
+void CpWlanApView::updateSecurityModeItem(
+    CMManagerShim::WlanConnMode networkMode)
+{
+    // Load WLAN security plugins and construct map
+    mSecurityModeMap.clear();
+    mSecurityModeMap.insert(0, NULL); // open mode
+    loadSecurityPlugins(networkMode);
+    
+    // Add items to combobox
+    QStringList securityModeItems;
+    foreach (CpWlanSecurityPluginInterface *plugin, mSecurityModeMap) {
+        if (plugin) {
+            // Add security mode from plugin
+            securityModeItems
+                << hbTrId(plugin->securityModeTextId().toLatin1());
+        } else {
+            // Add open mode
+            securityModeItems
+                << hbTrId("txt_occ_setlabel_wlan_security_mode_val_open");
+        }
+    }
+    // Remove connection before setting new content, because combobox
+    // will emit currentIndexChanged signal and we don't want that.
+    mForm->removeConnection(
+        mSecurityModeItem,
+        SIGNAL(currentIndexChanged(int)),
+        this,
+        SLOT(securityModeChanged(int)));
+    mSecurityModeItem->setContentWidgetData("items", securityModeItems);
+    mForm->addConnection(
+        mSecurityModeItem,
+        SIGNAL(currentIndexChanged(int)),
+        this,
+        SLOT(securityModeChanged(int)));
+    
+    uint securityMode = mCmConnectionMethod->getIntAttribute(
+        CMManagerShim::WlanSecurityMode);
+    // Iterate through the map to find correct security plugin and set
+    // mode index
+    int securityModeIndex = 0;
+    QMapIterator<int, CpWlanSecurityPluginInterface *> i(mSecurityModeMap);
+    while (i.hasNext()) {
+        i.next();
+        if (i.value()
+            && i.value()->securityMode() == securityMode) {
+            securityModeIndex = i.key();
+        }
+    }
+    mSecurityModeItem->setContentWidgetData("currentIndex",
+        securityModeIndex);
+    
+    if (securityMode != CMManagerShim::WlanSecModeOpen
+        && securityModeIndex == 0) {
+        // Security plugin implementing the selected security mode not found,
+        // set security mode to open also in CommsDat  
+        mCmConnectionMethod->setIntAttribute(
+            CMManagerShim::WlanSecurityMode,
+            CMManagerShim::WlanSecModeOpen);
+        // Try update
+        try {
+            mCmConnectionMethod->update();
+        }
+        catch (const std::exception&) {
+            // Error in update, but can't show error notes at this point
+        }
+    }
+}
+
+/*!
     Stores connection name.
 */
 void CpWlanApView::connectionNameChanged()
@@ -547,7 +658,8 @@ void CpWlanApView::networkStatusChanged(int index)
     OstTraceFunctionEntry0(CPWLANAPVIEW_NETWORKSTATUSCHANGED_ENTRY);
     
     // Update to CommsDat
-    mCmConnectionMethod->setBoolAttribute(CMManagerShim::WlanScanSSID,
+    mCmConnectionMethod->setBoolAttribute(
+        CMManagerShim::WlanScanSSID,
         mNetworkStatusMap.value(index));
     (void)tryUpdate();
     
@@ -562,11 +674,36 @@ void CpWlanApView::networkModeChanged(int index)
     OstTraceFunctionEntry0(CPWLANAPVIEW_NETWORKMODECHANGED_ENTRY);
     
     // Update to CommsDat
-    mCmConnectionMethod->setIntAttribute(CMManagerShim::WlanConnectionMode,
+    mCmConnectionMethod->setIntAttribute(
+        CMManagerShim::WlanConnectionMode,
         mNetworkModeMap.value(index));
-    (void)tryUpdate();
+    if (tryUpdate()) {
+        // If mode is ad-hoc, ad-hoc channel item must be shown
+        CMManagerShim::WlanConnMode networkMode =
+            static_cast<CMManagerShim::WlanConnMode>
+                (mNetworkModeMap.value(index));
+        updateAdHocChannelItem(networkMode);
+		// Also security mode list may need updating
+        updateSecurityModeItem(networkMode);
+    }
     
     OstTraceFunctionExit0(CPWLANAPVIEW_NETWORKMODECHANGED_EXIT);
+}
+
+/*!
+    Stores ad-hoc channel ID.
+*/
+void CpWlanApView::adHocChannelChanged(int index)
+{
+    OstTraceFunctionEntry0(CPWLANAPVIEW_ADHOCCHANNELCHANGED_ENTRY);
+    
+    // Update to CommsDat
+    mCmConnectionMethod->setIntAttribute(
+        CMManagerShim::WlanChannelID,
+        index);
+    (void)tryUpdate();
+    
+    OstTraceFunctionExit0(CPWLANAPVIEW_ADHOCCHANNELCHANGED_EXIT);
 }
 
 /*!
@@ -580,10 +717,12 @@ void CpWlanApView::securityModeChanged(int index)
     CpWlanSecurityPluginInterface *plugin = mSecurityModeMap.value(index);
     // Update to CommsDat
     if (plugin) {
-        mCmConnectionMethod->setIntAttribute(CMManagerShim::WlanSecurityMode,
+        mCmConnectionMethod->setIntAttribute(
+            CMManagerShim::WlanSecurityMode,
             plugin->securityMode());
     } else {
-        mCmConnectionMethod->setIntAttribute(CMManagerShim::WlanSecurityMode,
+        mCmConnectionMethod->setIntAttribute(
+            CMManagerShim::WlanSecurityMode,
             CMManagerShim::WlanSecModeOpen);
     }
     (void)tryUpdate();

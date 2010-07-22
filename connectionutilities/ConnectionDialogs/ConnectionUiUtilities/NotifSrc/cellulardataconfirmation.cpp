@@ -18,7 +18,7 @@
 
 // INCLUDE FILES
 #include <StringLoader.h>
-#include <ConnUiUtilsNotif.rsg>
+#include <connuiutilsnotif.rsg>
 #include <hb/hbcore/hbsymbianvariant.h>
 #include "ConnectionDialogsLogger.h"
 #include "cellulardataconfirmation.h"

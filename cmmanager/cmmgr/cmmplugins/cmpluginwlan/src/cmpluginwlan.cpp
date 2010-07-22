@@ -24,7 +24,9 @@
 #include <cmpluginwlandef.h>
 #include <cmcommonconstants.h>
 #include <featmgr.h>
+#include <EapGeneralSettings.h>
 
+#include "datamobilitycommsdattypes.h"
 #include "cmpluginwlan.h"
 #include "cmwlancoveragecheck.h"
 #include "cmmanagerdef.h"
@@ -52,13 +54,11 @@ const TBool KDefIp6DnsAddrFromServer = ETrue;
 
 const TInt KWlanServiceRecordIndex = 0;
 
-const TUint32 KDefaultPriorityWLan = 0;
-
 const TInt KWlanLastSocketActivityTimeout = -1;
 const TInt KWlanLastSessionClosedTimeout = 1;
 const TInt KWlanLastSocketClosedTimeout = -1;
 
-/// Modem bearer names for WLAN connection methods
+/// Modem bearer names for WLAN connection methods.
 _LIT( KModemBearerWLAN, "WLANBearer" );
 
 _LIT( KWlanBearerName, "WLANBearer" );
@@ -95,7 +95,6 @@ CCmPluginWlan::~CCmPluginWlan()
     OstTraceFunctionEntry0( CCMPLUGINWLAN_CCMPLUGINWLAN_ENTRY );
 
     ResetBearerRecords();
-    FeatureManager::UnInitializeLib();
 
     OstTraceFunctionExit0( CCMPLUGINWLAN_CCMPLUGINWLAN_EXIT );
     }
@@ -143,43 +142,50 @@ void CCmPluginWlan::ConstructL()
     {
     OstTraceFunctionEntry0( CCMPLUGINWLAN_CONSTRUCTL_ENTRY );
 
-    FeatureManager::InitializeLibL();
+    // Feature Manager is initialized by the CmmServer, so no need to do it here.
 
     if ( ! FeatureManager::FeatureSupported( KFeatureIdProtocolWlan ) )
         {
-        FeatureManager::UnInitializeLib();
-
         User::Leave( KErrNotSupported );
         }
 
     CCmPluginBaseEng::ConstructL();
 
-    // get WLAN table id
-    TRAP_IGNORE( iWlanTableId = CCDWlanServiceRecord::TableIdL( iSession ) );
+    // Get bearer priority table ID.
+    TRAP_IGNORE( iBearerPriorityTableId =
+            CCDGlobalBearerTypePriorizationRecord::TableIdL( iSession ) );
 
+    if ( !iBearerPriorityTableId )
+        {
+        iBearerPriorityTableId =
+                CCDGlobalBearerTypePriorizationRecord::CreateTableL( iSession );
+        }
+
+    TMDBElementId tableId( 0 );
+
+    TRAP_IGNORE( tableId = CCDWlanDeviceSettingsRecord::TableIdL( iSession ) );
+    if ( !tableId )
+        {
+        CCDWlanDeviceSettingsRecord::CreateTableL( iSession );
+        }
+
+    // Get WLAN table ID.
+    TRAP_IGNORE( iWlanTableId = CCDWlanServiceRecord::TableIdL( iSession ) );
     if ( !iWlanTableId )
         {
         iWlanTableId = CCDWlanServiceRecord::CreateTableL( iSession );
+        }
 
-        TMDBElementId tableId = 0;
+    TRAP_IGNORE( tableId = CCDWLANSecSSIDTable::TableIdL( iSession ) );
+    if ( !tableId )
+        {
+        CCDWLANSecSSIDTable::CreateTableL( iSession );
+        }
 
-        TRAP_IGNORE( tableId = CCDWlanDeviceSettingsRecord::TableIdL( iSession ) );
-        if ( !tableId )
-            {
-            CCDWlanDeviceSettingsRecord::CreateTableL( iSession );
-            }
-
-        TRAP_IGNORE( tableId = CCDWLANSecSSIDTable::TableIdL( iSession ) );
-        if ( !tableId )
-            {
-            CCDWLANSecSSIDTable::CreateTableL( iSession );
-            }
-
-        TRAP_IGNORE( tableId = CCDDestNWTable::TableIdL( iSession ) );
-        if ( !tableId )
-            {
-            CCDDestNWTable::CreateTableL( iSession );
-            }
+    TRAP_IGNORE( tableId = CCDDestNWTable::TableIdL( iSession ) );
+    if ( !tableId )
+        {
+        CCDDestNWTable::CreateTableL( iSession );
         }
 
     iWAPISupported = FeatureManager::FeatureSupported( KFeatureIdFfWlanWapi );
@@ -296,7 +302,8 @@ TUint32 CCmPluginWlan::GetBearerIntAttributeL(
         {
         case ECmInvalidAttribute:
             {
-            retVal = 0;
+            // This attribute has been deprecated since Symbian^4.
+            User::Leave( KErrNotSupported );
             }
             break;
         case ECmExtensionLevel:
@@ -312,12 +319,12 @@ TUint32 CCmPluginWlan::GetBearerIntAttributeL(
             break;
         case ECmDefaultUiPriority:
             {
-            retVal = KDefaultPriorityWLan;
+            retVal = GetDefPriorityL( aAttribute );
             }
             break;
         case ECmDefaultPriority:
             {
-            retVal = KDefaultPriorityWLan;
+            retVal = GetDefPriorityL( aAttribute );
             }
             break;
         case EWlanServiceId:
@@ -453,7 +460,7 @@ TBool CCmPluginWlan::GetBearerBoolAttributeL(
             break;
         case EWlan802_1xAllowUnencrypted:
             {
-            retVal = static_cast<TBool>( wlanServiceRecord->iWlanWpaKeyLength );
+            retVal = static_cast<TBool>( wlanServiceRecord->iWlanWpaKeyLength );//TODO, change typecast to if-else structure?
             }
             break;
         default:
@@ -1232,8 +1239,8 @@ TBool CCmPluginWlan::CanHandleIapIdL( TUint32 aIapId ) const
 
     TBool retVal( EFalse );
 
-    CCDIAPRecord *iapRecord = static_cast<CCDIAPRecord *>
-                        ( CCDRecordBase::RecordFactoryL(KCDTIdIAPRecord) );
+    CCDIAPRecord *iapRecord = static_cast<CCDIAPRecord *>(
+            CCDRecordBase::RecordFactoryL(KCDTIdIAPRecord) );
 
     CleanupStack::PushL( iapRecord );
     iapRecord->SetRecordId( aIapId );
@@ -1271,11 +1278,11 @@ TBool CCmPluginWlan::CanHandleIapIdL( CCDIAPRecord *aIapRecord ) const
         tmprec->iWlanServiceId.SetL( ( TUint32 )( aIapRecord->iService ) );
         if ( tmprec->FindL( iSession ) )
             {
-            // we found at least one WLAN using this IAP,
+            // Found at least one WLAN using this IAP.
             retVal = ETrue;
             }
 
-        CleanupStack::PopAndDestroy(tmprec);
+        CleanupStack::PopAndDestroy( tmprec );
         }
 
     OstTraceFunctionExit0( DUP1_CCMPLUGINWLAN_CANHANDLEIAPIDL_EXIT );
@@ -1290,9 +1297,21 @@ void CCmPluginWlan::DeleteBearerRecordsL()
     {
     OstTraceFunctionEntry0( CCMPLUGINWLAN_DELETEBEARERRECORDSL_ENTRY );
 
+    // Save the wlan service record id for the EAP settings deletion 
+    TUint wlanServiceRecordId = iWlanServiceRecord->RecordId();
+    
     // As base class deletes service record, in this case LAN, only WLAN
     // related stuff needs to be deleted.
     iWlanServiceRecord->DeleteL( iSession );
+    
+    // Delete EAP specific
+    CEapGeneralSettings* eapSettings( NULL );
+    TRAPD( err, eapSettings = CEapGeneralSettings::NewL( ELan, wlanServiceRecordId ) );
+    if ( err == KErrNone )
+        {
+        eapSettings->DeleteAllEapSettings();
+        delete eapSettings;
+        }
 
     OstTraceFunctionExit0( CCMPLUGINWLAN_DELETEBEARERRECORDSL_EXIT );
     }
@@ -1307,8 +1326,8 @@ void CCmPluginWlan::LoadServiceRecordL()
 
     if ( TPtrC( KCDTypeNameLANService ) == iIapRecord->iServiceType )
         {
-        iServiceRecord = static_cast<CCDLANServiceRecord *>
-                    ( CCDRecordBase::RecordFactoryL( KCDTIdLANServiceRecord ) );
+        iServiceRecord = static_cast<CCDLANServiceRecord*>(
+                CCDRecordBase::RecordFactoryL( KCDTIdLANServiceRecord ) );
 
         ServiceRecord().SetRecordId( iIapRecord->iService );
         ServiceRecord().LoadL( iSession );
@@ -1362,11 +1381,10 @@ void CCmPluginWlan::CreateServiceRecordL()
     delete iServiceRecord;
     iServiceRecord = NULL;
 
-    iServiceRecord = static_cast<CCDLANServiceRecord*>
-                (CCDRecordBase::RecordFactoryL( KCDTIdLANServiceRecord ) );
+    iServiceRecord = static_cast<CCDLANServiceRecord*>(
+            CCDRecordBase::RecordFactoryL( KCDTIdLANServiceRecord ) );
 
-    CCDLANServiceRecord* lanServiceRecord = static_cast<CCDLANServiceRecord *>( iServiceRecord );
-
+    CCDLANServiceRecord* lanServiceRecord = static_cast<CCDLANServiceRecord*>( iServiceRecord );
 
     if ( FeatureManager::FeatureSupported( KFeatureIdIPv6 ) )
         {
@@ -1401,7 +1419,7 @@ void CCmPluginWlan::CreateServiceRecordL()
         lanServiceRecord->iConfigDaemonName.SetL( KEmpty );
         }
 
-    // create WLAN service record
+    // Create WLAN service record.
     CreateWlanServiceRecordL();
 
     OstTraceFunctionExit0( CCMPLUGINWLAN_CREATESERVICERECORDL_EXIT );
@@ -1422,9 +1440,11 @@ void CCmPluginWlan::CreateWlanServiceRecordL()
     iWlanServiceRecord = new( ELeave ) CCDWlanServiceRecord ( iWlanTableId );
     iWlanServiceRecord->SetRecordId( KCDNewRecordRequest );
 
+    // Some attributes need to have default values set.
     iWlanServiceRecord->iRecordName.SetL( iIapRecord->iRecordName );
     iWlanServiceRecord->iWlanConnMode.SetL( CMManager::EInfra );
     iWlanServiceRecord->iWlanSecMode.SetL( CMManager::EWlanSecModeOpen );
+    iWlanServiceRecord->iWlanAuthMode.SetL( CMManager::EWlanAuthModeOpen );
     iWlanServiceRecord->iWlanScanSSID.SetL( EFalse );
 
     OstTraceFunctionExit0( CCMPLUGINWLAN_CREATEWLANSERVICERECORDL_EXIT );
@@ -2226,9 +2246,13 @@ TUint32 CCmPluginWlan::GetBearerInfoIntL( TUint32 aAttribute ) const
             }
             break;
         case ECmDefaultUiPriority:
+            {
+            retVal = GetDefPriorityL( aAttribute );
+            }
+            break;
         case ECmDefaultPriority:
             {
-            retVal = KDefaultPriorityWLan;
+            retVal = GetDefPriorityL( aAttribute );
             }
             break;
         case ECmExtensionLevel:
@@ -2612,6 +2636,47 @@ TUint8 CCmPluginWlan::ConvertHexCharToNumberL( const TUint8 aHexChar )
         User::Leave( KErrArgument );
         }
     return result;
+    }
+
+// ---------------------------------------------------------------------------
+// CCmPluginWlan::GetDefPriorityL
+// ---------------------------------------------------------------------------
+//
+TUint32 CCmPluginWlan::GetDefPriorityL( const TUint32 aAttribute ) const
+    {
+    OstTraceFunctionEntry0( CCMPLUGINWLAN_GETDEFPRIORITYL_ENTRY );
+
+    TUint32 retVal( KDataMobilitySelectionPolicyPriorityWildCard );
+
+    CCDGlobalBearerTypePriorizationRecord* priorityRecord =
+            new( ELeave ) CCDGlobalBearerTypePriorizationRecord( iBearerPriorityTableId );
+    CleanupStack::PushL( priorityRecord );
+
+    priorityRecord->iServiceType.SetL( TPtrC( KCDTypeNameLANService ) );
+
+    if ( priorityRecord->FindL( iSession ) )
+        {
+        priorityRecord->LoadL( iSession );
+        switch ( aAttribute )
+            {
+            case ECmDefaultPriority:
+                {
+                retVal = priorityRecord->iPriority;
+                }
+                break;
+            case ECmDefaultUiPriority:
+                {
+                retVal = priorityRecord->iUIPriority;
+                }
+                break;
+            default:
+                break;
+            }
+        }
+    CleanupStack::PopAndDestroy( priorityRecord );
+
+    OstTraceFunctionExit0( CCMPLUGINWLAN_GETDEFPRIORITYL_EXIT );
+    return retVal;
     }
 
 // End of File

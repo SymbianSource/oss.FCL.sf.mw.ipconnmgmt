@@ -77,10 +77,10 @@ CpIapItem::CpIapItem(
     bool apProtected,
     CpBearerApPluginInterface *bearerPlugin) :
     CpSettingFormEntryItemData(CpSettingFormEntryItemData::ButtonEntryItem, itemDataHelper), 
-    mItemDataHelper(&itemDataHelper),
     mIapId(iapId), 
     mIapName(iapName),
     mDestId(destId),
+    mItemDataHelper(&itemDataHelper),
     mBearerPlugin(bearerPlugin),
     mMoveOngoing(false),
     mDialog(0),
@@ -103,6 +103,11 @@ CpIapItem::CpIapItem(
             this,
             SLOT(showItemMenu(QPointF)));
         itemDataHelper.addConnection(this,SIGNAL(clicked()),this,SLOT(onLaunchView()));
+        itemDataHelper.addConnection(
+            this,
+            SIGNAL(visibleChanged()),
+            this, 
+            SLOT(updateIap()));
     }
     OstTraceFunctionExit0(CPIAPITEM_CPIAPITEM_EXIT);
 }
@@ -223,6 +228,7 @@ void CpIapItem::deleteConfirmed()
             CmConnectionMethodShim *cm = destination->connectionMethodByID(mIapId);
             destination->deleteConnectionMethod(cm);
             destination->update();
+            delete cm;
             delete destination;
         } else {
             CmConnectionMethodShim *cm = mCmm->connectionMethod(mIapId);
@@ -246,10 +252,9 @@ void CpIapItem::deleteConfirmed()
 /*!
     Updates access point item name when the item becomes visible.
  */
-void CpIapItem::updateIap(const QModelIndex index)
+void CpIapItem::updateIap()
 {
     OstTrace0( TRACE_FLOW, CPIAPITEM_UPDATEIAP_ENTRY, "CpIapItem::updateIap entry" );
-    Q_UNUSED(index);
     try {
         CmConnectionMethodShim *cm = mCmm->connectionMethod(mIapId);
         this->setContentWidgetData("text", cm->getStringAttribute(CMManagerShim::CmName));
@@ -257,15 +262,15 @@ void CpIapItem::updateIap(const QModelIndex index)
     } catch (const std::exception&) {
         OstTrace0( TRACE_NORMAL, CPIAPITEM_UPDATEIAP, "CpIapItem::updateIap: exception caught, CM name reading failed" );
     }
-    // Disconnect because we need to do this only after returning
-    // from accees point settings view
-    CpItemDataHelper *itemDataHelper = new CpItemDataHelper();
-    itemDataHelper->disconnectFromForm( 
-        SIGNAL(itemShown(const QModelIndex)),
-        this, 
-        SLOT(updateIap(const QModelIndex)));
-    delete itemDataHelper;
     OstTrace0( TRACE_FLOW, DUP1_CPIAPITEM_UPDATEIAP_EXIT, "CpIapItem::updateIap exit" );
+}
+
+/*!
+    Opens Iap settings view.
+ */
+void CpIapItem::openIap()
+{
+    onLaunchView();
 }
 
 /*!
@@ -277,16 +282,16 @@ CpBaseSettingView *CpIapItem::createSettingView() const
 {
     OstTraceFunctionEntry0(CPIAPITEM_CREATESETTINGVIEW_ENTRY);
     CpBaseSettingView *view = NULL;
-    CpItemDataHelper *itemDataHelper = new CpItemDataHelper();
     if (mBearerPlugin != NULL) {
-        CpIapItem *iap = const_cast<CpIapItem*>(this);
-        itemDataHelper->connectToForm( 
-            SIGNAL(itemShown(const QModelIndex)),
-            iap, 
-            SLOT(updateIap(const QModelIndex)));
-        view = mBearerPlugin->createSettingView(mIapId);
+        CmConnectionMethodShim *cm = mCmm->connectionMethod(mIapId);
+        bool cmConnected = cm->getBoolAttribute(CMManagerShim::CmConnected);
+        delete cm;
+        
+        // Do not open connected AP
+        if (!cmConnected) {
+            view = mBearerPlugin->createSettingView(mIapId);
+        }
     }
-    delete itemDataHelper;
     OstTraceFunctionExit0(CPIAPITEM_CREATESETTINGVIEW_EXIT);
     return view;
 }
@@ -446,9 +451,13 @@ HbMenu *CpIapItem::createItemMenu(
     OstTraceFunctionEntry0(CPIAPITEM_CREATEITEMMENU_ENTRY);
     HbMenu* menu = new HbMenu();
     menu->setAttribute(Qt::WA_DeleteOnClose);
+    HbAction* openIapAction 
+            = menu->addAction(hbTrId("txt_common_menu_open"));
+    bool connected = connect(openIapAction, SIGNAL(triggered()), this, SLOT(openIap()));
+    Q_ASSERT(connected);
     HbAction* moveIapAction 
         = menu->addAction(hbTrId("txt_occ_menu_move_to_other_destination"));
-    bool connected = connect(moveIapAction, SIGNAL(triggered()), this, SLOT(moveIap()));
+    connected = connect(moveIapAction, SIGNAL(triggered()), this, SLOT(moveIap()));
     Q_ASSERT(connected);
     HbAction* deleteIapAction 
         = menu->addAction(hbTrId("txt_common_menu_delete"));
@@ -465,6 +474,7 @@ HbMenu *CpIapItem::createItemMenu(
        
     if (cmConnected) {
         // Disable operations for connected APs
+        openIapAction->setDisabled(true);
         moveIapAction->setDisabled(true);
         deleteIapAction->setDisabled(true);
         shareIapAction->setDisabled(true);

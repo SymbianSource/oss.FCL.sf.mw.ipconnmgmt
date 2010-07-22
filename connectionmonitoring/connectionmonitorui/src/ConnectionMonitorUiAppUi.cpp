@@ -23,7 +23,7 @@
 #include <AknUtils.h>
 #include <cmmanagerext.h>
 #include <nifvar.h>
-#include <ConnectionMonitorUi.rsg>
+#include <connectionmonitorui.rsg>
 #include "ConnectionMonitorUi.hrh"
 #include "ConnectionMonitorUiAppUi.h"
 #include "ConnectionMonitorUiView.h"

@@ -7,7 +7,6 @@
   <systemModel>
     <layer name="mw_layer">
       <module name="ipconnmgmt">
-        <unit unitID="netdo.ipconnmgmt" mrp="" bldFile="&layer_real_source_path;/group" name="ipconnmgmt" />
         <unit unitID="netdo.ipconnmgmtqt" mrp="" bldFile="&layer_real_source_path;" name="ipconnmgmtqt" proFile="ipconnmgmt.pro" qmakeArgs="-r"/>
       </module>
     </layer>

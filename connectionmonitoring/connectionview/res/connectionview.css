@@ -26,3 +26,10 @@ HbPushButton#disconnectButton
 {
     max-width: expr(var(hb-param-screen-short-edge)-var(hb-param-margin-gene-left)-var(hb-param-margin-gene-right));
 }
+
+HbLabel#mConnectionLabel::text
+{
+    font-variant: secondary;
+    text-height: var(hb-param-text-height-tiny);
+    text-line-count-max: 1;
+}

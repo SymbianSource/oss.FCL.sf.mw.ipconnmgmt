@@ -178,7 +178,6 @@ EXPORT_C HBufC* RCmConnectionMethod::GetStringAttributeL(
     else
         {
         CleanupStack::PopAndDestroy( buffer );
-        buffer = NULL;
         buffer = KNullDesC().AllocL();
         }
 
@@ -211,7 +210,6 @@ EXPORT_C HBufC8* RCmConnectionMethod::GetString8AttributeL(
     else
         {
         CleanupStack::PopAndDestroy( buffer8 );
-        buffer8 = NULL;
         buffer8 = KNullDesC8().AllocL();
         }
 
@@ -495,21 +493,44 @@ EXPORT_C HBufC* RCmConnectionMethod::GetIconL() const
     {
     OstTraceFunctionEntry0( RCMCONNECTIONMETHOD_GETICONL_ENTRY );
 
-    User::Leave( KErrNotSupported );
+    if ( !iCmConnectionMethodWrapper || !iCmConnectionMethodWrapper->SessionConnected() )
+        {
+        User::Leave( KErrBadHandle );
+        }
+
+    HBufC* buffer = HBufC::NewLC( KCmmStringLengthMax );
+    TInt err = iCmConnectionMethodWrapper->GetStringAttribute( CMManager::ECmBearerIcon, buffer );
+    User::LeaveIfError( err );
+
+    if ( buffer->Length() > 0 )
+        {
+        CleanupStack::Pop( buffer );
+        }
+    else
+        {
+        CleanupStack::PopAndDestroy( buffer );
+        buffer = KNullDesC().AllocL();
+        }
 
     OstTraceFunctionExit0( RCMCONNECTIONMETHOD_GETICONL_EXIT );
-    return NULL;
+    return buffer;
     }
 
 //-----------------------------------------------------------------------------
 //  RCmConnectionMethod::SetIconL()
 //-----------------------------------------------------------------------------
 //
-EXPORT_C void RCmConnectionMethod::SetIconL( const TDesC& /*aIcon*/ )
+EXPORT_C void RCmConnectionMethod::SetIconL( const TDesC& aIcon )
     {
     OstTraceFunctionEntry0( RCMCONNECTIONMETHOD_SETICONL_ENTRY );
 
-    User::Leave( KErrNotSupported );
+    if ( !iCmConnectionMethodWrapper || !iCmConnectionMethodWrapper->SessionConnected() )
+        {
+        User::Leave( KErrBadHandle );
+        }
+
+    TInt err = iCmConnectionMethodWrapper->SetStringAttribute( CMManager::ECmBearerIcon, aIcon );
+    User::LeaveIfError( err );
 
     OstTraceFunctionExit0( RCMCONNECTIONMETHOD_SETICONL_EXIT );
     }

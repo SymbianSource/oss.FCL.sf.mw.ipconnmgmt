@@ -340,8 +340,9 @@ NONSHARABLE_CLASS( CCmPluginWlan ) : public CCmPluginBaseEng
          * @param aSourceRecord A record where to copy from.
          * @param aDestRecord A record where to copy to.
          */
-        void CopyWlanServiceRecordL( CCDWlanServiceRecord* aSourceRecord,
-                                     CCDWlanServiceRecord* aDestRecord);
+        void CopyWlanServiceRecordL(
+                CCDWlanServiceRecord* aSourceRecord,
+                CCDWlanServiceRecord* aDestRecord);
 
         /**
          * Copies the bearer specific records to copy instance.
@@ -361,8 +362,9 @@ NONSHARABLE_CLASS( CCmPluginWlan ) : public CCmPluginBaseEng
          * @param aAttribute Identifies the attribute to be checked.
          * @param aValue A value to be checked.
          */
-        void CheckSecurityAttributeValidityL( const TUint32 aAttribute,
-                                              const TUint32 aValue );
+        void CheckSecurityAttributeValidityL(
+                const TUint32 aAttribute,
+                const TUint32 aValue );
 
         /**
          * Convert a 8-bit string in ascii format to hex format. Ownership of
@@ -382,17 +384,28 @@ NONSHARABLE_CLASS( CCmPluginWlan ) : public CCmPluginBaseEng
          */
         TUint8 ConvertHexCharToNumberL( const TUint8 aHexChar );
 
+        /**
+         * Returns the default priority value identified with the parameter.
+         * @param aAttribute Indentifies the default priority value requested.
+         */
+        TUint32 GetDefPriorityL( const TUint32 aAttribute ) const;
+
     private: // Data
 
         /**
-         * WLan service record.
+         * WLAN service record.
          */
         CCDWlanServiceRecord* iWlanServiceRecord;
 
         /**
-         * WLAN table id.
+         * WLAN table ID.
          */
         CommsDat::TMDBElementId iWlanTableId;
+
+        /**
+         * Bearer priority table ID.
+         */
+        CommsDat::TMDBElementId iBearerPriorityTableId;
 
         /**
          * Boolean to save the WAPI support info.

@@ -163,7 +163,7 @@ NONSHARABLE_CLASS( CConnDlgAuthenticationPlugin ) :
                                             public CConnectionDialogsNotifBase
     {
 public:
-    CConnDlgAuthenticationPlugin::CConnDlgAuthenticationPlugin();
+    CConnDlgAuthenticationPlugin();
 
     /**
     * NewL function

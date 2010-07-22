@@ -1063,6 +1063,63 @@ void TestCmMgrShim::tcDestinationInvalidParams()
     delete dest;
 }
 
+/**
+ * Test case for setting and getting icon from CM Manager
+ * -Creates a legacy WLAN connection method (i.e. does not belong to
+ *  any destination).
+ * -Sets & Gets Icon
+ * -Creates destination
+ * -Sets & Gets Icon
+ * -Deletes the connection method. 
+ */
+void TestCmMgrShim::tcIconOperations()
+{
+    // Create the connection method
+    CmConnectionMethodShim *cm = mCmManagerShim->createConnectionMethod(
+        CMManagerShim::BearerTypeWlan);
+    QVERIFY(cm != NULL);
+    
+    // Update to CommsDat
+    cm->update();
+    
+    // Create a new destination
+    CmDestinationShim *dest;
+    dest = mCmManagerShim->createDestination("TestDestination");
+    QVERIFY(dest != NULL);
+       
+    // Update to CommsDat
+    dest->update();
+
+    // Set icon
+    QString testString("TestIconName");
+    cm->setIcon(testString);
+    
+    // Update to CommsDat
+    cm->update();
+    
+    // Set icon
+    dest->setIcon(testString);
+    
+    // Update to CommsDat
+    dest->update();
+     
+    // Check icon
+    QString resultString = cm->getIcon();
+    QCOMPARE(resultString, testString);
+
+    // Check destination icon
+    QString resultDestString = dest->getIcon();
+    QCOMPARE(resultDestString, testString);
+
+    // Delete the connection method
+    cm->deleteConnectionMethod();
+    delete cm;
+    
+    // Delete the destination
+    dest->deleteDestination();
+    delete dest;
+}
+
 // -----------------------------------------------------------------------------
 // SUB TEST CASES
 // -----------------------------------------------------------------------------

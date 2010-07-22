@@ -66,6 +66,7 @@ START_ATTRIBUTE_TABLE( CCDSNAPMetadataRecord, 0, 0 )
     X_REGISTER_ATTRIBUTE( CCDSNAPMetadataRecord, iSNAP, TMDBNum )
     X_REGISTER_ATTRIBUTE( CCDSNAPMetadataRecord, iMetadata, TMDBNum )
     X_REGISTER_ATTRIBUTE( CCDSNAPMetadataRecord, iIcon, TMDBNum )
+    X_REGISTER_ATTRIBUTE( CCDSNAPMetadataRecord, iIconFileName, TMDBLongText )
     X_REGISTER_ATTRIBUTE( CCDRecordBase, iRecordTag, TMDBNum )
     X_REGISTER_ATTRIBUTE( CCDRecordBase, iRecordName,TMDBText )
 END_ATTRIBUTE_TABLE()
@@ -74,6 +75,7 @@ START_ATTRIBUTE_TABLE( CCDIAPMetadataRecord, 0, 0 )
     X_REGISTER_ATTRIBUTE( CCDIAPMetadataRecord, iIAP, TMDBNum )
     X_REGISTER_ATTRIBUTE( CCDIAPMetadataRecord, iMetadata, TMDBNum )
     X_REGISTER_ATTRIBUTE( CCDIAPMetadataRecord, iSeamlessness, TMDBNum )
+    X_REGISTER_ATTRIBUTE( CCDIAPMetadataRecord, iIconFileName, TMDBLongText )
     X_REGISTER_ATTRIBUTE( CCDRecordBase, iRecordTag, TMDBNum )
     X_REGISTER_ATTRIBUTE( CCDRecordBase, iRecordName, TMDBText )
 END_ATTRIBUTE_TABLE()
@@ -201,6 +203,8 @@ const SRecordTypeInfo CCDSNAPMetadataRecord::iRecordInfo[]=
 		  ENoAttrs,                         KCDTypeNameSNAPMetadataMetadata },
 		{ KCDTIdSNAPMetadataIcon,           EInt,  	
 		  ENoAttrs,                         KCDTypeNameSNAPMetadataIcon },
+        { KCDTIdSNAPMetadataIconFileName,   ELongText,
+          ENoAttrs,                         KCDTypeNameSNAPMetadataIconFileName },
   		{ 0,                                0,          
   		  ENoAttrs,                         KCDNull }
   	};
@@ -217,6 +221,8 @@ const SRecordTypeInfo CCDIAPMetadataRecord::iRecordInfo[]=
 		  ENoAttrs,                         KCDTypeNameIAPMetadataMetadata },
 		{ KCDTIdIAPMetadataSeamlessness,    EInt,  	    
 		  ENoAttrs,                         KCDTypeNameIAPMetadataSeamlessness },
+        { KCDTIdIAPMetadataIconFileName,    ELongText,
+          ENoAttrs,                         KCDTypeNameIAPMetadataIconFileName },
   		{ 0,                                0,          
   		  ENoAttrs,                         KCDNull }
   	};
@@ -361,26 +367,26 @@ EXPORT_C CCDVirtualIAPNextLayerRecord::
       iNextLayerSNAP( ( aElementId & KCDMaskShowRecordType ) | KCDTIdVirtualNextLayerSNAP),
       iNextLayerIAP( (aElementId & KCDMaskShowRecordType ) | KCDTIdVirtualNextLayerIAP)
       {}
-  
-EXPORT_C TMDBElementId 
+
+EXPORT_C TMDBElementId
     CCDVirtualIAPNextLayerRecord::CreateTableL( CMDBSession& aSession )
     {
     const SGenericRecordTypeInfo KVirtualIAPNextLayerTableFormat[] = {
-        SGenericRecordTypeInfo( KCDTIdRecordTag,                EUint32,    
-                                ENoAttrs,                       KCDTypeNameRecordTag ),
-        SGenericRecordTypeInfo( KCDTIdRecordName,               EText,      
-                                ENotNull,                       KCDTypeNameRecordName ),    
-        SGenericRecordTypeInfo( KCDTIdVirtualIAP,               EInt,    
-                                ENotNull,                       KCDTypeNameVirtualIAP ),
-        SGenericRecordTypeInfo( KCDTIdVirtualNextLayerSNAP,     EInt,    
-                                ENoAttrs,                       KCDTypeNameVirtualIAPNextLayerSNAP ),   
-        SGenericRecordTypeInfo( KCDTIdVirtualNextLayerIAP,      EInt,    
-                                ENoAttrs,                       KCDTypeNameVirtualIAPNextLayerIAP ),       
+        SGenericRecordTypeInfo( KCDTIdRecordTag,            EUint32,
+                                ENoAttrs,                   KCDTypeNameRecordTag ),
+        SGenericRecordTypeInfo( KCDTIdRecordName,           EText,
+                                ENotNull,                   KCDTypeNameRecordName ),    
+        SGenericRecordTypeInfo( KCDTIdVirtualIAP,           EInt,
+                                ENotNull,                   KCDTypeNameVirtualIAP ),
+        SGenericRecordTypeInfo( KCDTIdVirtualNextLayerSNAP, EInt,
+                                ENoAttrs,                   KCDTypeNameVirtualIAPNextLayerSNAP ),
+        SGenericRecordTypeInfo( KCDTIdVirtualNextLayerIAP,  EInt,
+                                ENoAttrs,                   KCDTypeNameVirtualIAPNextLayerIAP ),
         SGenericRecordTypeInfo( 0, 0, ENoAttrs, KCDNull )
         };
 
-    return ::CreateTableL( aSession, 
-                           TPtrC( KCDTypeNameVirtualIAPNextLayer ), 
+    return ::CreateTableL( aSession,
+                           TPtrC( KCDTypeNameVirtualIAPNextLayer ),
                            KVirtualIAPNextLayerTableFormat );
     }
 
@@ -401,27 +407,27 @@ EXPORT_C CCDGlobalBearerTypePriorizationRecord::
           KCDTIdGlobalServiceUIPriority )
         {}
 
-EXPORT_C TMDBElementId 
+EXPORT_C TMDBElementId
     CCDGlobalBearerTypePriorizationRecord::CreateTableL( CMDBSession& aSession )
     {
-   const SGenericRecordTypeInfo KGlobalBearerTypeTableFormat[] = {
-        SGenericRecordTypeInfo( KCDTIdRecordTag,                EUint32,    
-                                ENoAttrs,                       KCDTypeNameRecordTag ),
-        SGenericRecordTypeInfo( KCDTIdRecordName,                EText,      
-                                ENotNull,                       KCDTypeNameRecordName ),    
-        SGenericRecordTypeInfo( KCDTIdGlobalServiceType,        EText,    
-                                ENotNull,                       KCDTypeNameGlobalServiceType ),
-        SGenericRecordTypeInfo( KCDTIdGlobalServicePriority,    EInt,    
-                                ENoAttrs,                       KCDTypeNameGlobalServicePriority ),   
-        SGenericRecordTypeInfo( KCDTIdGlobalServiceUIPriority,    EInt,    
-                                ENoAttrs,                       KCDTypeNameGlobalServiceUIPriority ),       
-        SGenericRecordTypeInfo( 0, 0, ENoAttrs, KCDNull )       
+    const SGenericRecordTypeInfo KGlobalBearerTypeTableFormat[] = {
+        SGenericRecordTypeInfo( KCDTIdRecordTag,             EUint32,
+                                ENoAttrs,                    KCDTypeNameRecordTag ),
+        SGenericRecordTypeInfo( KCDTIdRecordName,            EText,
+                                ENotNull,                    KCDTypeNameRecordName ),
+        SGenericRecordTypeInfo( KCDTIdGlobalServiceType,     EText,
+                                ENotNull,                    KCDTypeNameGlobalServiceType ),
+        SGenericRecordTypeInfo( KCDTIdGlobalServicePriority, EInt,
+                                ENoAttrs,                    KCDTypeNameGlobalServicePriority ),
+        SGenericRecordTypeInfo( KCDTIdGlobalServiceUIPriority, EInt,
+                                ENoAttrs,                    KCDTypeNameGlobalServiceUIPriority ),
+        SGenericRecordTypeInfo( 0, 0, ENoAttrs, KCDNull )
     };
-    return ::CreateTableL( aSession, 
-                           TPtrC( KCDTypeNameGlobalService ), 
+    return ::CreateTableL( aSession,
+                           TPtrC( KCDTypeNameGlobalService ),
                            KGlobalBearerTypeTableFormat );
     }
-    
+
 EXPORT_C TMDBElementId 
     CCDGlobalBearerTypePriorizationRecord::TableIdL( CMDBSession& aSession )
     {
@@ -440,44 +446,44 @@ CCDDataMobilitySelectionPolicyRecord( TMDBElementId aElementId )
           iPriority( ( aElementId & KCDMaskShowRecordType ) | 
           KCDTIdDataMobilitySelectionPolicyPriority )
         {}
- 
-EXPORT_C TMDBElementId 
+
+EXPORT_C TMDBElementId
     CCDDataMobilitySelectionPolicyRecord::CreateTableL( CMDBSession& aSession )
     {
     const SGenericRecordTypeInfo KDataMobilitySelectionPolicyTableFormat[] = {
-        SGenericRecordTypeInfo( KCDTIdRecordTag,        EUint32,    
-                                ENoAttrs,               KCDTypeNameRecordTag ),
-        SGenericRecordTypeInfo( KCDTIdRecordName,        EText,      
-                                ENotNull,               KCDTypeNameRecordName ),    
-        SGenericRecordTypeInfo( KCDTIdDataMobilitySelectionPolicyNetwork,        EInt,    
-                                ENotNull,               KCDTypeNameDataMobilitySelectionPolicySNAP ),       
-        SGenericRecordTypeInfo( KCDTIdDataMobilitySelectionPolicyIAP,            ELink,    
-                                ENoAttrs,               KCDTypeNameDataMobilitySelectionPolicyIAP ),       
-        SGenericRecordTypeInfo( KCDTIdDataMobilitySelectionPolicyEmbeddedSNAP,    EInt,    
-                                ENoAttrs,               KCDTypeNameDataMobilitySelectionPolicyEmbeddedSNAP ),       
-        SGenericRecordTypeInfo( KCDTIdDataMobilitySelectionPolicyPriority,    EInt,    
-                                ENotNull,               KCDTypeNameDataMobilitySelectionPolicyPriority ),
-        SGenericRecordTypeInfo( 0, 0, ENoAttrs, KCDNull )       
+        SGenericRecordTypeInfo( KCDTIdRecordTag, EUint32,
+                                ENoAttrs, KCDTypeNameRecordTag ),
+        SGenericRecordTypeInfo( KCDTIdRecordName, EText,
+                                ENotNull, KCDTypeNameRecordName ),
+        SGenericRecordTypeInfo( KCDTIdDataMobilitySelectionPolicyNetwork, EInt,
+                                ENotNull, KCDTypeNameDataMobilitySelectionPolicySNAP ),
+        SGenericRecordTypeInfo( KCDTIdDataMobilitySelectionPolicyIAP, ELink,
+                                ENoAttrs, KCDTypeNameDataMobilitySelectionPolicyIAP ),
+        SGenericRecordTypeInfo( KCDTIdDataMobilitySelectionPolicyEmbeddedSNAP, EInt,
+                                ENoAttrs, KCDTypeNameDataMobilitySelectionPolicyEmbeddedSNAP ),
+        SGenericRecordTypeInfo( KCDTIdDataMobilitySelectionPolicyPriority, EInt,
+                                ENotNull, KCDTypeNameDataMobilitySelectionPolicyPriority ),
+        SGenericRecordTypeInfo( 0, 0, ENoAttrs, KCDNull )
     };
 
-    return ::CreateTableL( aSession, 
-                           TPtrC( KCDTypeNameDataMobilitySelectionPolicy ), 
+    return ::CreateTableL( aSession,
+                           TPtrC( KCDTypeNameDataMobilitySelectionPolicy ),
                            KDataMobilitySelectionPolicyTableFormat );
     }
-    
-EXPORT_C TMDBElementId 
+
+EXPORT_C TMDBElementId
     CCDDataMobilitySelectionPolicyRecord::TableIdL( CMDBSession& aSession )
     {
     return ::TableIdL( aSession, TPtrC( KCDTypeNameDataMobilitySelectionPolicy ) );
     }
 
 EXPORT_C CCDMIPServiceExtRecord::CCDMIPServiceExtRecord( TMDBElementId aElementId )
-        : CCDRecordBase( aElementId ), 
+        : CCDRecordBase( aElementId ),
           iMIP4( ( aElementId & KCDMaskShowRecordType ) | KCDTIdMIPMIP4 ),
           iMIP6( ( aElementId & KCDMaskShowRecordType ) | KCDTIdMIPMIP6 )
         {}
-        
-EXPORT_C TMDBElementId 
+
+EXPORT_C TMDBElementId
     CCDMIPServiceExtRecord::CreateTableL( CMDBSession& aSession )
     {
     const SGenericRecordTypeInfo KMIPServiceExtTableFormat[] = {
@@ -510,7 +516,9 @@ EXPORT_C CCDSNAPMetadataRecord::CCDSNAPMetadataRecord( TMDBElementId aElementId 
           iMetadata( ( aElementId & KCDMaskShowRecordType ) | 
           KCDTIdSNAPMetadataMetadata ),
           iIcon( ( aElementId & KCDMaskShowRecordType ) | 
-          KCDTIdSNAPMetadataIcon )
+          KCDTIdSNAPMetadataIcon ),
+          iIconFileName( ( aElementId & KCDMaskShowRecordType ) |
+          KCDTIdSNAPMetadataIconFileName )
         {}
 
 EXPORT_C TMDBElementId 
@@ -527,6 +535,8 @@ EXPORT_C TMDBElementId
                                 ENoAttrs,               KCDTypeNameSNAPMetadataMetadata ),
         SGenericRecordTypeInfo( KCDTIdSNAPMetadataIcon,        EUint32,    
                                 ENoAttrs,               KCDTypeNameSNAPMetadataIcon ),
+        SGenericRecordTypeInfo( KCDTIdSNAPMetadataIconFileName,    ELongText,
+                                ENoAttrs, KCDTypeNameSNAPMetadataIconFileName ),
         SGenericRecordTypeInfo( 0, 0, ENoAttrs, KCDNull )       
     };
 
@@ -548,31 +558,35 @@ EXPORT_C CCDIAPMetadataRecord::CCDIAPMetadataRecord( TMDBElementId aElementId )
           iMetadata( ( aElementId & KCDMaskShowRecordType ) | 
           KCDTIdIAPMetadataMetadata ),
           iSeamlessness( ( aElementId & KCDMaskShowRecordType ) | 
-          KCDTIdIAPMetadataSeamlessness )
+          KCDTIdIAPMetadataSeamlessness ),
+          iIconFileName( ( aElementId & KCDMaskShowRecordType ) |
+          KCDTIdIAPMetadataIconFileName )
         {}
 
-EXPORT_C TMDBElementId 
+EXPORT_C TMDBElementId
     CCDIAPMetadataRecord::CreateTableL( CMDBSession& aSession )
     {
     const SGenericRecordTypeInfo KIAPMetadataTableFormat[] = {
-        SGenericRecordTypeInfo( KCDTIdRecordTag,                EUint32,    
-                                ENoAttrs,                       KCDTypeNameRecordTag ),
-        SGenericRecordTypeInfo( KCDTIdRecordName,                EText,      
-                                ENotNull,                       KCDTypeNameRecordName ),    
-        SGenericRecordTypeInfo( KCDTIdIAPMetadataIAP,            ELink,    
-                                ENotNull,                       KCDTypeNameIAPMetadataIAP ),       
-        SGenericRecordTypeInfo( KCDTIdIAPMetadataMetadata,        EUint32,    
-                                ENoAttrs,               KCDTypeNameIAPMetadataMetadata ),
-        SGenericRecordTypeInfo( KCDTIdIAPMetadataSeamlessness, EInt,    
-                                ENoAttrs,                       KCDTypeNameIAPMetadataSeamlessness ),
+        SGenericRecordTypeInfo( KCDTIdRecordTag, EUint32,
+                                ENoAttrs, KCDTypeNameRecordTag ),
+        SGenericRecordTypeInfo( KCDTIdRecordName, EText,
+                                ENotNull, KCDTypeNameRecordName ),
+        SGenericRecordTypeInfo( KCDTIdIAPMetadataIAP, ELink,
+                                ENotNull, KCDTypeNameIAPMetadataIAP ),
+        SGenericRecordTypeInfo( KCDTIdIAPMetadataMetadata, EUint32,
+                                ENoAttrs, KCDTypeNameIAPMetadataMetadata ),
+        SGenericRecordTypeInfo( KCDTIdIAPMetadataSeamlessness, EInt,
+                                ENoAttrs, KCDTypeNameIAPMetadataSeamlessness ),
+        SGenericRecordTypeInfo( KCDTIdIAPMetadataIconFileName, ELongText,
+                                ENoAttrs, KCDTypeNameIAPMetadataIconFileName ),
         SGenericRecordTypeInfo( 0, 0, ENoAttrs, KCDNull )
     };
 
-    return ::CreateTableL( aSession, 
-                           TPtrC( KCDTypeNameIAPMetadata ), 
+    return ::CreateTableL( aSession,
+                           TPtrC( KCDTypeNameIAPMetadata ),
                            KIAPMetadataTableFormat );
     }
-    
+
 EXPORT_C TMDBElementId 
     CCDIAPMetadataRecord::TableIdL( CMDBSession& aSession )
     {

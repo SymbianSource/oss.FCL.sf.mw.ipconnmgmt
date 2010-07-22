@@ -34,7 +34,7 @@
 // ---------------------------------------------------------------------------
 //
 CCmmConnMethodStruct* CCmmConnMethodStruct::NewL(
-        const TUint32& aConnMethodId )
+        const TUint32 aConnMethodId )
     {
     OstTraceFunctionEntry0( CCMMCONNMETHODSTRUCT_NEWL_ENTRY );
 
@@ -50,7 +50,7 @@ CCmmConnMethodStruct* CCmmConnMethodStruct::NewL(
 // ---------------------------------------------------------------------------
 //
 CCmmConnMethodStruct* CCmmConnMethodStruct::NewLC(
-        const TUint32& aConnMethodId )
+        const TUint32 aConnMethodId )
     {
     OstTraceFunctionEntry0( CCMMCONNMETHODSTRUCT_NEWLC_ENTRY );
 
@@ -138,7 +138,7 @@ TUint32 CCmmConnMethodStruct::GetId() const
 // Set the connection method ID.
 // ---------------------------------------------------------------------------
 //
-void CCmmConnMethodStruct::SetId( const TUint32& aConnMethodId )
+void CCmmConnMethodStruct::SetId( const TUint32 aConnMethodId )
     {
     iConnMethodId = aConnMethodId;
     }
@@ -172,11 +172,9 @@ void CCmmConnMethodStruct::SetStatus( const TCmmConnMethodStatus& aStatus )
     }
 
 // ---------------------------------------------------------------------------
-// TODO
-//
-// Refresh the relevant connection method data in cache side object to be in
-// synch with database and copy that data back to this session side connection
-// method object.
+// Refresh the connection method data in this cache side object to be in synch
+// with the database and copy that data back to the session side connection
+// method instance given as parameter.
 // ---------------------------------------------------------------------------
 //
 void CCmmConnMethodStruct::RefreshConnMethodInstanceL(
@@ -220,7 +218,7 @@ void CCmmConnMethodStruct::RefreshConnMethodInstanceL(
 // references.
 // ---------------------------------------------------------------------------
 //
-TInt CCmmConnMethodStruct::SessionInstanceClosed()
+TInt CCmmConnMethodStruct::ConnMethodInstanceClosed()
     {
     OstTraceFunctionEntry0( CCMMCONNMETHODSTRUCT_SESSIONINSTANCECLOSED_ENTRY );
 
@@ -236,8 +234,7 @@ TInt CCmmConnMethodStruct::SessionInstanceClosed()
     }
 
 // ---------------------------------------------------------------------------
-// Set the connection method plugin. Updates status and sets reference
-// counter to 1.
+// Set the connection method plugin pointer, bearer type and status.
 // ---------------------------------------------------------------------------
 //
 void CCmmConnMethodStruct::SetPlugin(
@@ -251,13 +248,13 @@ void CCmmConnMethodStruct::SetPlugin(
     // when data is copied into it.
     if ( iReferenceCounter != 0 )
         {
-        ASSERT( 0 ); // Error.
+        ASSERT( 0 ); // Error, wrong internal status.
         }
 
     iConnMethodPlugin = aPlugin;
     iBearerType = aBearerType;
 
-    switch ( aStatus ) //TODO, add missing status
+    switch ( aStatus )
         {
         // Fallthrough intended
         case ECmmConnMethodStatusNotSaved:
@@ -265,9 +262,10 @@ void CCmmConnMethodStruct::SetPlugin(
             iStatus = aStatus;
             break;
         case ECmmConnMethodStatusChanged:
+        case ECmmConnMethodStatusToBeDeleted:
         default:
             iStatus = ECmmConnMethodStatusChanged;
-            ASSERT( 0 ); // Error, invalid status.
+            ASSERT( 0 ); // Error, invalid status as argument.
             break;
         }
 
@@ -289,7 +287,7 @@ CCmPluginBaseEng* CCmmConnMethodStruct::GetPlugin()
 // connection method structure to reflect the new deleted state.
 // ---------------------------------------------------------------------------
 //
-void CCmmConnMethodStruct::DeleteSuccessful( const TUint32& aNewSecondaryId )
+void CCmmConnMethodStruct::DeleteSuccessful( const TUint32 aNewSecondaryId )
     {
     OstTraceFunctionEntry0( CCMMCONNMETHODSTRUCT_DELETESUCCESSFUL_ENTRY );
 

@@ -130,3 +130,13 @@ void CmDestinationShim::deleteDestination()
 {
     d_ptr->DeleteDestination();
 }
+
+QString CmDestinationShim::getIcon() const
+{    
+    return d_ptr->GetIcon();
+}
+
+void CmDestinationShim::setIcon(QString icon)
+{    
+    d_ptr->SetIcon(icon);
+}

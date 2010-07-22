@@ -67,7 +67,9 @@ enum TS60SelectorPanic
 // -----------------------------------------------------------------------------
 //
 CSimpleS60SelectorBase::CSimpleS60SelectorBase( const Meta::SMetaData& aSelectionPreferences )
-    :    ASimpleSelectorBase( aSelectionPreferences )
+    :    ASimpleSelectorBase( aSelectionPreferences ),
+         iDefaultAp( 0 ),
+         iSubSessionUniqueId( 0 )
     {
     }
 

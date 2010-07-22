@@ -45,8 +45,11 @@ IndicatorObserver::IndicatorObserver(int argc, char* argv[]) :
     mActiveCellularConfigurations(new QList<QNetworkConfiguration>),
     mActiveWlanConfigurations(new QList<QNetworkConfiguration>),    
     mWlanEnabled(0),
+    mWlanForceDisabled(0),
     mWlanIndicatorIsActivated(false),
-    mCellularIndicatorIsActivated(false)
+    mCellularIndicatorIsActivated(false),
+    mWlanIndicator(NULL),
+    mCellularIndicator(NULL)
     
 {
     OstTrace0(TRACE_FLOW, INDICATOROBSERVER_CONSTRUCTOR_ENTRY, "-->");
@@ -79,18 +82,24 @@ IndicatorObserver::IndicatorObserver(int argc, char* argv[]) :
         KCRUidWlanDeviceSettingsRegistryId.iUid,
         KWlanOnOff);
     
-    //Read current status of WLAN radio
-    //mWlanEnabled = mSettingsManager->readItemValue(wlanKey).toInt() ? true : false;
-    mWlanEnabled = true; 
-    //TODO: Replace above code with commented code when WlanOnOff implementation is in release.
-    //TODO: Remeber to add check for read failure(call error() method from settings manager).
+    // Also subscribe for KForceDisableWlan change indications
+    XQSettingsKey wlanForceKey(
+        XQSettingsKey::TargetCentralRepository,
+        KCRUidWlanDeviceSettingsRegistryId.iUid, 
+        KWlanForceDisable);
     
+    //Read current status of WLAN radio
+    mWlanEnabled = mSettingsManager->readItemValue(wlanKey).toInt() ? true : false;
+    mWlanForceDisabled = mSettingsManager->readItemValue(wlanForceKey).toInt() ? true : false;
+
     mSettingsManager->startMonitoring(wlanKey);
+    mSettingsManager->startMonitoring(wlanForceKey);
 
     initializeIndicators();
     
     OstTrace0(TRACE_FLOW, INDICATOROBSERVER_CONSTRUCTOR_EXIT, "<--");
 }
+
 
 /*!
     IndicatorObserver::~IndicatorObserver
@@ -118,6 +127,9 @@ IndicatorObserver::~IndicatorObserver()
         delete mActiveWlanConfigurations;
         }
     
+    delete mCellularIndicator;
+    delete mWlanIndicator;
+    
     OstTrace0(TRACE_FLOW, INDICATOROBSERVER_DESTRUCTOR_EXIT, "<--");
 }
 
@@ -128,6 +140,25 @@ void IndicatorObserver::initializeIndicators()
 {
 
     OstTrace0(TRACE_FLOW, INDICATOROBSERVER_INITIALIZEINDICATORS_ENTRY, "-->");
+    
+    // create the indicators and make connections
+    mCellularIndicator = new HbIndicator();  
+    // connect the user activated slot here, so that the indicator know to start the connview in case
+    // the user taps the indicator
+    bool conn = QObject::connect(
+                    mCellularIndicator, 
+                    SIGNAL(userActivated(const QString&, const QVariantMap&)), 
+                    this, 
+                    SLOT(userActivateCellularIndicator(const QString&, const QVariantMap&)));
+    
+    mWlanIndicator = new HbIndicator();  
+    // connect the user activated slot here, so that the indicator know to start the wlan sniffer in case
+    // the user taps the indicator
+    conn = QObject::connect(
+                    mWlanIndicator, 
+                    SIGNAL(userActivated(const QString&, const QVariantMap&)), 
+                    this, 
+                    SLOT(userActivateWlanIndicator(const QString&, const QVariantMap&)));
     
     findActiveConfigurations();
     updateWlanIndicator();
@@ -143,16 +174,15 @@ void IndicatorObserver::updateWlanRadioStatus(const XQSettingsKey &key, const QV
 {
     OstTrace0(TRACE_FLOW, INDICATOROBSERVER_UPDATEWLANRADIOSTATUS_ENTRY, "-->");
     
-    // The key parameter is not used, since only WLAN ON/OFF setting is connected to this slot
-    Q_UNUSED(key);
+    // The change notification is received either for the WlanOnoff key, or the
+    // ForceDisableWlan key
+    if (KWlanOnOff == key.key()) {
+        mWlanEnabled = value.toInt() ? true : false;
+    } else {
+        mWlanForceDisabled = value.toInt() ? true : false;
+    }
     
-    // Inform about WLAN ON/OFF status change
-    Q_UNUSED(value); //TODO: to be removed with final implementation. To keep compiler satisfied.
-    //    mWlanEnabled = value.toInt() ? true : false;
-    
-    mWlanEnabled = true; //TODO: Replace with above code when WlanOnOff implementation is in release
-    
-    if (mWlanEnabled == false) {    
+    if (mWlanEnabled == false || mWlanForceDisabled == true) {    
         deactivateWlanIndicatorPlugin();
     } else {
         updateWlanIndicator();
@@ -204,7 +234,7 @@ void IndicatorObserver::updateWlanIndicator()
 
     //We do not deactivate WlanIndicator plugin here as it is done in updateWlanRadioStatus method
     //as WLAN radio status determines whether to show indicator or not
-    if ( mWlanEnabled ) {
+    if ( mWlanEnabled && !mWlanForceDisabled) {
         if(count == 0) {
             list.insert(0, wlanNotConnected);
             activateWlanIndicatorPlugin(list);
@@ -280,6 +310,30 @@ void IndicatorObserver::handleConfigurationChanged(const QNetworkConfiguration& 
     OstTrace0(TRACE_FLOW, INDICATOROBSERVER_HANDLECONFIGURATIONCHANGED_EXIT, "<--");
 }
 
+void IndicatorObserver::userActivateCellularIndicator(const QString &type, const QVariantMap &data)
+{
+    OstTrace0(TRACE_FLOW, INDICATOROBSERVER_USERACTIVATECELLULARINDICATOR_ENTRY, "-->");
+    
+    Q_UNUSED(data);
+    Q_UNUSED(type);
+    // Show connection view
+    QProcess::startDetached("connview");
+    
+    OstTrace0(TRACE_FLOW, INDICATOROBSERVER_USERACTIVATECELLULARINDICATOR_EXIT, "<--");
+}
+
+void IndicatorObserver::userActivateWlanIndicator(const QString &type, const QVariantMap &data)
+{
+    OstTrace0(TRACE_FLOW, INDICATOROBSERVER_USERACTIVATEWLANINDICATOR_ENTRY, "-->");
+    
+    Q_UNUSED(data);
+    Q_UNUSED(type);
+    // Show wlan list view
+    QProcess::startDetached("WlanSniffer");
+
+    OstTrace0(TRACE_FLOW, INDICATOROBSERVER_USERACTIVATEWLANINDICATOR_EXIT, "<--");
+}
+
 /*!
     IndicatorObserver::activateCellularIndicatorPlugin
 */
@@ -287,9 +341,8 @@ void IndicatorObserver::activateCellularIndicatorPlugin(QList<QVariant> list)
 {
     OstTrace0(TRACE_FLOW, INDICATOROBSERVER_ACTIVATECELLULARINDICATORPLUGIN_ENTRY, "-->");
     
-    HbIndicator indicator;    
-    bool success = indicator.activate("com.nokia.hb.indicator.connectivity.cellularindicatorplugin/1.0", list);
-    
+    bool success = mCellularIndicator->activate("com.nokia.hb.indicator.connectivity.cellularindicatorplugin/1.0", list);
+     
     if (!success) {
         mCellularIndicatorIsActivated = false;
         OstTrace0(TRACE_FLOW, INDICATOROBSERVER_CELLULAR_INDICATOR_ACTIVATION_FAILED, "Cellular indicator activation failed"); 
@@ -307,8 +360,7 @@ void IndicatorObserver::deactivateCellularIndicatorPlugin()
 {
     OstTrace0(TRACE_FLOW, INDICATOROBSERVER_DEACTIVATECELLULARINDICATORPLUGIN_ENTRY, "-->");
     
-    HbIndicator indicator;
-    indicator.deactivate("com.nokia.hb.indicator.connectivity.cellularindicatorplugin/1.0");
+    mCellularIndicator->deactivate("com.nokia.hb.indicator.connectivity.cellularindicatorplugin/1.0");
     mCellularIndicatorIsActivated = false;
     
     OstTrace0(TRACE_FLOW, INDICATOROBSERVER_DEACTIVATECELLULARINDICATORPLUGIN_EXIT, "<--");
@@ -320,10 +372,9 @@ void IndicatorObserver::deactivateCellularIndicatorPlugin()
 void IndicatorObserver::activateWlanIndicatorPlugin(QList<QVariant> list)
 {
     OstTrace0(TRACE_FLOW, INDICATOROBSERVER_ACTIVATEWLANINDICATORPLUGIN_ENTRY, "-->");
-
-    HbIndicator indicator;
-    bool success = indicator.activate("com.nokia.hb.indicator.connectivity.wlanindicatorplugin/1.0", list);
     
+    bool success = mWlanIndicator->activate("com.nokia.hb.indicator.connectivity.wlanindicatorplugin/1.0", list);
+   
     if (!success) {
         mWlanIndicatorIsActivated = false;
         OstTrace0(TRACE_FLOW, INDICATOROBSERVER_WLAN_INDICATOR_ACTIVATION_FAILED, "WLAN indicator activation failed"); 
@@ -341,8 +392,7 @@ void IndicatorObserver::deactivateWlanIndicatorPlugin()
 {
     OstTrace0(TRACE_FLOW, INDICATOROBSERVER_DEACTIVATEWLANINDICATORPLUGIN_ENTRY, "-->");
 
-    HbIndicator indicator;
-    indicator.deactivate("com.nokia.hb.indicator.connectivity.wlanindicatorplugin/1.0");
+    mWlanIndicator->deactivate("com.nokia.hb.indicator.connectivity.wlanindicatorplugin/1.0");
     mWlanIndicatorIsActivated = false;
     
     OstTrace0(TRACE_FLOW, INDICATOROBSERVER_DEACTIVATEWLANINDICATORPLUGIN_EXIT, "<--");   

@@ -163,6 +163,19 @@ void CmManagerShimPrivate::AllDestinations(QList<uint> &destArray) const
     OstTraceFunctionExit0(CMMANAGERSHIMPRIVATE_ALLDESTINATIONS_EXIT);
 }
 
+QString CmManagerShimPrivate::GetUncategorizedIcon() const
+{    
+    OstTraceFunctionEntry0(CMMANAGERSHIMPRIVATE_GETUNCATEGORIZEDICON_ENTRY);
+    
+    QString icon;
+    TRAPD(error, GetUncategorizedIconL(icon));
+    TraceIfError(error);
+    qt_symbian_throwIfError(error);
+    
+    OstTraceFunctionExit0(CMMANAGERSHIMPRIVATE_GETUNCATEGORIZEDICON_EXIT);
+    return icon;
+}
+
 void CmManagerShimPrivate::ConnectionMethodL(
     QList<uint> &cmArray,
     bool legacyOnly) const
@@ -193,6 +206,13 @@ void CmManagerShimPrivate::AllDestinationsL(QList<uint> &destArray) const
     }
     // Free memory
     destinationIdArray.Reset();
+}
+
+void CmManagerShimPrivate::GetUncategorizedIconL(QString &icon) const
+{
+    HBufC* iconName = iCmManager.GetUncategorizedIconL();
+    icon = QString::fromUtf16(iconName->Ptr(), iconName->Length());
+    delete iconName;
 }
 
 /*!

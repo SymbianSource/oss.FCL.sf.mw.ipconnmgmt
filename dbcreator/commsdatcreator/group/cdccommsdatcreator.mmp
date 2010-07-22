@@ -73,3 +73,4 @@ LIBRARY        cmmanager.lib
 LIBRARY        cmmanagerdatabase.lib
 LIBRARY        flogger.lib 
 LIBRARY        centralrepository.lib
+LIBRARY        eaptools.lib

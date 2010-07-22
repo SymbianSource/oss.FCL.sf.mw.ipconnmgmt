@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2004-2009 Nokia Corporation and/or its subsidiary(-ies). 
+* Copyright (c) 2004-2010 Nokia Corporation and/or its subsidiary(-ies). 
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -34,12 +34,13 @@ Mobility Policy Manager server class definitions.
 #include "mpmcommon.h"
 #include "rmpm.h"
 #include "mpmroamingwatcher.h"
+#include "mpmvpntogglewatcher.h"
 
 
 class CMPMCommsDatAccess;
 class CMpmCsIdWatcher;
 class CMpmDataUsageWatcher;
-class CMpmOfflineWatcher;
+class CMpmVpnToggleWatcher;
 
 // CONSTANTS
 _LIT( KMPMPanicCategory, "Mobility Policy Manager Server" );
@@ -49,15 +50,18 @@ const TInt    KPhoneRetryCount   = 7;
 //
 const TInt    KPhoneRetryTimeout = 100000;
 
-// The granularity with which iDisconnectQueue will allocate memory chunks. 
-// If set to two there will be space for two instances of CMPMDisconnectDlg
-// before new memory will be allocated.
+// The granularity with which roaming and starting dialogs will allocate memory chunks. 
+// If set to two there will be space for two instances before new memory will be allocated.
 const TInt    KGranularity       = 2;
 
 // Security policy definitions
 
 //Total number of ranges
 const TUint KMPMPolicyRangeCount = 2;
+
+// roaming to connected wlan wait interval
+// in micro seconds (10 sec)
+const TInt KRoamingToWlanUpdateInterval = 10000000; 
  
 //Definition of the ranges of IPC numbers
 const TInt KMPMPolicyRanges[KMPMPolicyRangeCount] = 
@@ -183,11 +187,9 @@ void PanicServer( TInt aPanic );
 class CMPMConnMonEvents;
 class CMPMServerSession;
 class CMPMDtmWatcher;
-class CMPMDisconnectDlg;
 class CMPMConfirmDlgRoaming;
 class CMPMConfirmDlgStarting;
 class CMPMDefaultConnection;
-class CMPMWlanQueryDialog;
 
 // CLASS DECLARATION
 /**
@@ -264,7 +266,8 @@ class TActiveBMConn
 *  @lib MPMServer.exe
 *  @since 3.0
 */
-class CMPMServer : public CPolicyServer
+class CMPMServer : public CPolicyServer,
+                   public MMpmVpnToggleWatcherNotify
     {
     public: // Constructors and destructor
 
@@ -585,13 +588,6 @@ class CMPMServer : public CPolicyServer
         inline TBool IsWLANScanRequired() const;
 
         /**
-        * Get the DisconnectQueue.
-        * @since 3.2
-        * @return Pointer to the DisconnectQueue.
-        */
-        inline CArrayPtrFlat<CMPMDisconnectDlg>* DisconnectQueue();
-
-        /**
         * Get the RoamingQueue.
         * @since 3.2
         * @return Pointer to the RoamingQueue.
@@ -604,40 +600,6 @@ class CMPMServer : public CPolicyServer
         * @return Pointer to the StartingQueue.
         */
         inline CArrayPtrFlat<CMPMConfirmDlgStarting>* StartingQueue();
-
-        /**
-        * Appends aDlg to the iWlanQueryQueue.
-        * @since 3.2
-        * @param aDlg Pointer to the CMPMConfirmDlgWlanQuery object.
-        */
-        void AppendWlanQueryQueueL( CMPMWlanQueryDialog* aDlg );
-
-        /**
-        * Removes the first item from the iWlanQueryQueue.
-        * @since 3.2
-        */
-        inline void RemoveFromWlanQueryQueue( CMPMWlanQueryDialog* aDlg );
-
-        /**
-        * Get the WlanQueryQueue.
-        * @since 3.2
-        * @return Pointer to the WlanQueryQueue.
-        */
-        inline CArrayPtrFlat<CMPMWlanQueryDialog>* WlanQueryQueue();
-
-        /**
-        * Get the first item in iWlanQueryQueue.
-        * @since 3.2
-        * @return Pointer to the first item in iWlanQueryQueue.
-        */
-        inline CMPMWlanQueryDialog* FirstInWlanQueryQueue();
-
-        /**
-        * Get the Default Connection object.
-        * @since 3.2
-        * @return Pointer to the Default Connection object.
-        */
-        CMPMDefaultConnection* DefaultConnection(); 
 
         /**
         * Returns true if there is a started connection
@@ -699,6 +661,14 @@ class CMPMServer : public CPolicyServer
         void StartForcedRoamingToWlanL( const TConnMonIapInfo& aIapInfo );
         
         /**
+        * Starts forced roaming sequence to connected wlan
+        *
+        * @param aIapInfo Info about available IAPs
+        * @since 5.2
+        */
+        static TInt StartForcedRoamingToConnectedWlanL( TAny* aUpdater );
+        
+        /**
         * Starts forced roaming sequence from WLAN if necessary
         *
         * @param aIapInfo Info about available IAPs
@@ -725,6 +695,20 @@ class CMPMServer : public CPolicyServer
     public: // Functions from base classes
 
         /**
+         * From MMpmVpnToggleWatcherNotify. Sets values for VPN toggle after
+         * VPN toggle key changes in central repository.
+         * @param aVpnPreferred Informs if VPN connection is preferred
+         *                      connection
+         * @param aVpnIapId VPN IAP Id, which is used for VPN connection, when
+         *                  VPN connection is preferred                           
+         * @param aSnapId SNAP Id SNAP Id, which is used for VPN connection,
+         *                when VPN connection is preferred
+         */
+         void SetVpnToggleValuesL( const TBool aVpnPreferred,
+                                   const TUint32 aVpnIapId,
+                                   const TUint32 aSnapId );
+
+        /**
         * From CServer2. Creates a new session for a client.
         * @since 3.0
         * @param aVersion Version information
@@ -736,7 +720,7 @@ class CMPMServer : public CPolicyServer
 
         // Stops connection of certain IAP, zero for all connections
         void StopConnections( TInt aIapId = 0 );
-
+                
     public:
 
         /**
@@ -778,6 +762,34 @@ class CMPMServer : public CPolicyServer
          * @return ETrue if user connection is in internet snap
          */
         TBool UserConnectionInInternet() const;
+
+        /**
+         * Mark that there is an active VPN user connection.
+         */
+        void AddVpnUserConnectionSession();
+        
+        /**
+         * Mark that VPN user connection is not active
+         */
+        void RemoveVpnUserConnectionSession();
+        
+        /**
+         * Informs if VPN user connection is used with given MPM preferences
+         * and application.
+         * @param aMpmConnPref MPM connection preferences.
+         * @param aAppUid Application UID
+         * @return Informs if VPN connection is preferred
+         */        
+        TBool UseVpnUserConnection( const TMpmConnPref aMpmConnPref,
+                                    const TUint32 aAppUid ) const;
+        
+        /**
+         * Prepares VPN user connection.
+         * @param aMpmConnPref Connection preferences, which are modified
+         *                     for VPN user connection (returned)
+         * @return Informs if preparation was successful.                                         
+         */
+        TBool PrepareVpnUserConnection( TMpmConnPref& aMpmConnPref );
                 
         /**
          * Handle to central repository watcher
@@ -785,6 +797,12 @@ class CMPMServer : public CPolicyServer
          * @return Pointer to watcher object.
          */
         inline CMpmCsIdWatcher* CsIdWatcher();
+
+        /**
+         * Handle to VPN toggle central repository watcher
+         * @return Pointer to watcher object.
+         */
+        inline CMpmVpnToggleWatcher* VpnToggleWatcher();
 
         /**
         * Returns server session instance that corresponds to given
@@ -903,20 +921,11 @@ class CMPMServer : public CPolicyServer
         // Is WLAN scan required or not before displaying Connection Dialog
         TBool iWLANScanRequired;
 
-        // Solves problem with overlapping Disconnect Dialogs
-        CArrayPtrFlat<CMPMDisconnectDlg>* iDisconnectQueue;
-
         // Solves problem with overlapping Roaming Dialogs
         CArrayPtrFlat<CMPMConfirmDlgRoaming>* iRoamingQueue;
 
         // Solves problem with overlapping Starting Dialogs
         CArrayPtrFlat<CMPMConfirmDlgStarting>* iStartingQueue;
-
-        // Solves problem with overlapping Wlan Queries
-        CArrayPtrFlat<CMPMWlanQueryDialog>* iWlanQueryQueue;
-        
-        // Handles Default Connection selection
-        CMPMDefaultConnection* iDefaultConnection;
 
         // Keeps track of the number of connections
         TUint iConnectionCounter;
@@ -930,6 +939,10 @@ class CMPMServer : public CPolicyServer
         // Set when user connection in internet snap
         TBool iUserConnectionInInternet;
         
+        // Count of sessions using VPN user connection
+        //
+        TInt iVpnUserConnectionSessionCount;        
+        
         /**
          * Handle to central repository watcher
          * Own.
@@ -937,14 +950,15 @@ class CMPMServer : public CPolicyServer
         CMpmCsIdWatcher* iMpmCsIdWatcher;
 
         /**
-         * Handle to central repository watcher
+         * Handle to VPN toggle central repository watcher.
+         * Own.
          */
-        CMpmDataUsageWatcher* iMpmDataUsageWatcher;
+        CMpmVpnToggleWatcher* iMpmVpnToggleWatcher;
 
         /**
          * Handle to central repository watcher
          */
-        CMpmOfflineWatcher* iMpmOfflineWatcher;
+        CMpmDataUsageWatcher* iMpmDataUsageWatcher;
 
         // Dedicated clients
         RArray<TUint32> iDedicatedClients;
@@ -961,6 +975,12 @@ class CMPMServer : public CPolicyServer
         
         // Is WLAN usage already accepted in this offline session.
         TOfflineWlanQueryResponse iOfflineWlanQueryResponse;
+        
+        // Timer to start roaming to connected WLAN network 
+        CPeriodic* iRoamingToWlanPeriodic;
+
+        // TConnMonIapInfo Info about available IAPs
+        TConnMonIapInfo iConnMonIapInfo;
     };
 
 #include "mpmserver.inl"

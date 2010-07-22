@@ -17,7 +17,7 @@
 
 
 #include <appinfo.rh>
-#include <ConnectionMonitorUi.rsg>
+#include <connectionmonitorui.rsg>
 #include <data_caging_paths_strings.hrh>
 
 UID2 KUidAppRegistrationResourceFile

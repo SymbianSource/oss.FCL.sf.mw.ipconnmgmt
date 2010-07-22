@@ -207,6 +207,31 @@ void CmConnectionMethodShimPrivate::Update()
     OstTraceFunctionExit0(CMCONNECTIONMETHODSHIMPRIVATE_UPDATE_EXIT);
 }
 
+QString CmConnectionMethodShimPrivate::GetIcon() const
+{
+    OstTraceFunctionEntry0(CMCONNECTIONMETHODSHIMPRIVATE_GETICON_ENTRY);
+    
+    QString value;
+    TRAPD(error, GetIconL(value));
+    TraceIfError(error);
+    qt_symbian_throwIfError(error);
+    
+    OstTraceFunctionExit0(CMCONNECTIONMETHODSHIMPRIVATE_GETICON_EXIT);
+    return value;
+}
+
+void CmConnectionMethodShimPrivate::SetIcon(
+    QString icon)
+{
+    OstTraceFunctionEntry0(CMCONNECTIONMETHODSHIMPRIVATE_SETICON_ENTRY);
+    
+    TRAPD(error, SetIconL(icon));
+    TraceIfError(error);
+    qt_symbian_throwIfError(error);
+
+    OstTraceFunctionExit0(CMCONNECTIONMETHODSHIMPRIVATE_SETICON_EXIT);
+}
+
 void CmConnectionMethodShimPrivate::Refresh()
 {
     OstTraceFunctionEntry0(CMCONNECTIONMETHODSHIMPRIVATE_REFRESH_ENTRY);
@@ -265,6 +290,21 @@ void CmConnectionMethodShimPrivate::SetString8AttributeL(
     QByteArray tempValue = value.toLatin1();
     TPtrC8 valuePtr(reinterpret_cast<const unsigned char*>(tempValue.data()));
     iCm.SetString8AttributeL(attribute, valuePtr);
+}
+
+void CmConnectionMethodShimPrivate::GetIconL( 
+    QString &value) const
+{
+    HBufC* buf = iCm.GetIconL();
+    value = QString::fromUtf16(buf->Ptr(), buf->Length());
+    delete buf;
+}
+
+void CmConnectionMethodShimPrivate::SetIconL(
+    QString icon)
+{
+    TPtrC16 valuePtr(reinterpret_cast<const TUint16*>(icon.utf16()));
+    iCm.SetIconL(valuePtr);
 }
 
 /*!

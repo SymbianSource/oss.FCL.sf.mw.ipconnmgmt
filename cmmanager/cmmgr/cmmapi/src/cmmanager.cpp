@@ -210,7 +210,6 @@ EXPORT_C HBufC* RCmManager::GetBearerInfoStringL(
     else
         {
         CleanupStack::PopAndDestroy( buffer );
-        buffer = NULL;
         buffer = KNullDesC().AllocL();
         }
 
@@ -244,7 +243,6 @@ EXPORT_C HBufC8* RCmManager::GetBearerInfoString8L(
     else
         {
         CleanupStack::PopAndDestroy( buffer8 );
-        buffer8 = NULL;
         buffer8 = KNullDesC8().AllocL();
         }
 
@@ -324,7 +322,6 @@ EXPORT_C HBufC* RCmManager::GetConnectionMethodInfoStringL(
     else
         {
         CleanupStack::PopAndDestroy( buffer );
-        buffer = NULL;
         buffer = KNullDesC().AllocL();
         }
 
@@ -358,7 +355,6 @@ EXPORT_C HBufC8* RCmManager::GetConnectionMethodInfoString8L(
     else
         {
         CleanupStack::PopAndDestroy( buffer8 );
-        buffer8 = NULL;
         buffer8 = KNullDesC8().AllocL();
         }
 
@@ -909,10 +905,27 @@ EXPORT_C HBufC* RCmManager::GetUncategorizedIconL() const
     {
     OstTraceFunctionEntry0( RCMMANAGER_GETUNCATEGORIZEDICONL_ENTRY );
 
-    User::Leave( KErrNotSupported );
+    if ( !iCmManagerApi )
+        {
+        User::Leave( KErrBadHandle );
+        }
+
+    HBufC* buffer = HBufC::NewLC( KCmmStringLengthMax );
+    TInt err = iCmManagerApi->GetUncategorizedIcon( buffer );
+    User::LeaveIfError( err );
+
+    if ( buffer->Length() > 0 )
+        {
+        CleanupStack::Pop( buffer );
+        }
+    else
+        {
+        CleanupStack::PopAndDestroy( buffer );
+        buffer = KNullDesC().AllocL();
+        }
 
     OstTraceFunctionExit0( RCMMANAGER_GETUNCATEGORIZEDICONL_EXIT );
-    return NULL;
+    return buffer;
     }
 
 // End of file

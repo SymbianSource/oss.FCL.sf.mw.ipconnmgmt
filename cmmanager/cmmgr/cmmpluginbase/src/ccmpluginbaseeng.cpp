@@ -20,8 +20,10 @@
 #include <datamobilitycommsdattypes.h>
 #include <cmpluginbaseeng.h>
 #include <cmpsettingsconsts.h>
-#include <FeatMgr.h>
+#include <featmgr.h>
+#include <cmpluginembdestinationdef.h>
 
+#include "cmmserverdefs.h"
 #include "ccmpluginbaseengtextresolver.h"
 
 #include "OstTraceDefinitions.h"
@@ -33,7 +35,7 @@
 using namespace CMManager;
 using namespace CommsDat;
 
-const TInt KApMaxConnNameLength = 30;
+const TInt KApMaxConnNameLength = 50;
 _LIT( KFormatPostfix, "%02d" );
 _LIT( KFormatLargePostfix, "%d" );
 _LIT( KFormatNameWithPostfix, "%S(%S)" );
@@ -94,8 +96,6 @@ EXPORT_C CCmClientPluginInstance::~CCmClientPluginInstance()
 //
 void CCmClientPluginInstance::ConstructL()
     {
-    OstTraceFunctionEntry0( CCMCLIENTPLUGININSTANCE_CONSTRUCTL_ENTRY );
-    OstTraceFunctionExit0( CCMCLIENTPLUGININSTANCE_CONSTRUCTL_EXIT );
     }
 
 
@@ -138,7 +138,7 @@ EXPORT_C CCmPluginBaseEng::CCmPluginBaseEng( TCmPluginInitParam *aInitParam )
     iWapIPBearerRecord = NULL;
     iMetaDataRecord = NULL;
 
-    iIapId = 0;
+    iCmId = 0;
     iMetadataTableId = 0;
     iLocationEnabled = EFalse;
 
@@ -153,7 +153,7 @@ EXPORT_C CCmPluginBaseEng::~CCmPluginBaseEng()
     {
     OstTraceFunctionEntry0( DUP1_CCMPLUGINBASEENG_CCMPLUGINBASEENG_ENTRY );
 
-    iIapId = 0;
+    iCmId = 0;
     delete iIapRecord; iIapRecord = NULL;
     delete iProxyRecord; iProxyRecord = NULL;
     delete iServiceRecord; iServiceRecord = NULL;
@@ -299,7 +299,7 @@ EXPORT_C void CCmPluginBaseEng::ReLoadL()
 
     ResetBearerRecords();
 
-    LoadL( iIapId );
+    LoadL( iCmId );
 
     OstTraceFunctionExit0( CCMPLUGINBASEENG_RELOAD_EXIT );
     }
@@ -311,6 +311,13 @@ EXPORT_C void CCmPluginBaseEng::ReLoadL()
 EXPORT_C void CCmPluginBaseEng::LoadL( TUint32 aIapId )
     {
     OstTraceFunctionEntry0( CCMPLUGINBASEENG_LOADL_ENTRY );
+
+    // Embedded destination must be handled separately first.
+    if ( aIapId > KCmDefaultDestinationAPTagId )
+        {
+        iCmId = aIapId;
+        return;
+        }
 
     DoLoadL( aIapId );
 
@@ -325,37 +332,37 @@ EXPORT_C void CCmPluginBaseEng::CreateNewL( TUint32 aCmId )
     {
     OstTraceFunctionEntry0( CCMPLUGINBASEENG_CREATENEWL_ENTRY );
 
-    if ( iIapId )
+    if ( iCmId )
         // we already have IAP id ->
         {
         User::Leave( KErrAlreadyExists );
         }
 
-    // optional record is disabled in default
+    // Optional record, disabled by default.
     iLocationEnabled = EFalse;
 
-    // create mandatory records
-    iIapRecord = static_cast<CCDIAPRecord *>
-                          (CCDRecordBase::RecordFactoryL(KCDTIdIAPRecord));
-    iNetworkRecord = static_cast<CCDNetworkRecord *>
-                          (CCDRecordBase::RecordFactoryL(KCDTIdNetworkRecord));
-    iProxyRecord = static_cast<CCDProxiesRecord *>
-                  (CCDRecordBase::RecordFactoryL(KCDTIdProxiesRecord));
+    // Create mandatory records.
+    iIapRecord = static_cast<CCDIAPRecord*>(
+            CCDRecordBase::RecordFactoryL( KCDTIdIAPRecord ) );
+    iNetworkRecord = static_cast<CCDNetworkRecord*>(
+            CCDRecordBase::RecordFactoryL( KCDTIdNetworkRecord ) );
+    iProxyRecord = static_cast<CCDProxiesRecord*>(
+            CCDRecordBase::RecordFactoryL( KCDTIdProxiesRecord ) );
     NewWapRecordL();
     iWapIPBearerRecord->iWAPGatewayAddress.SetL( KDefWapGatewayIpAddress );
 
     iMetaDataRecord = NewMetadataRecordL( ETrue );
 
-    // call plugin to create its own records
+    // Call plugin to create its own records.
     CreateServiceRecordL();
 
-    // Update iaprecord servicetype name
+    // Update iaprecord servicetype name.
     HBufC* servicetypeName( NULL );
     ServiceRecordNameLC( servicetypeName );
     iIapRecord->iServiceType.SetL( *servicetypeName );
     CleanupStack::PopAndDestroy( servicetypeName );
 
-    // Update iaprecord bearertype name
+    // Update iaprecord bearertype name.
     HBufC* bearerTypeName( NULL );
     BearerRecordNameLC( bearerTypeName );
     iIapRecord->iBearerType.SetL( *bearerTypeName );
@@ -365,10 +372,10 @@ EXPORT_C void CCmPluginBaseEng::CreateNewL( TUint32 aCmId )
 
     EnableProxyL( EFalse );
 
-    _LIT(KDefaultConnNameTextId, "txt_occ_setlabel_connection_name_val_connection");
+    _LIT( KDefaultConnNameTextId, "txt_occ_setlabel_connection_name_val_connection" );
     HBufC* resolvedText( NULL );
     resolvedText = CCmPluginBaseEngTextResolver::ResolveTextL( KDefaultConnNameTextId );
-    if ( resolvedText != NULL )
+    if ( resolvedText )
         {
         SetDefaultNameL( *resolvedText );
         }
@@ -385,7 +392,7 @@ EXPORT_C void CCmPluginBaseEng::CreateNewL( TUint32 aCmId )
     if ( aCmId != 0 )
         {
         iIapRecord->SetRecordId( aCmId );
-        iIapId = 0;
+        iCmId = 0;
         }
     else
         {
@@ -400,23 +407,19 @@ EXPORT_C void CCmPluginBaseEng::CreateNewL( TUint32 aCmId )
 // ---------------------------------------------------------------------------
 //
 EXPORT_C CCmPluginBaseEng* CCmPluginBaseEng::CreateCopyL(
-    CCmClientPluginInstance* /*aClientPluginInstance*/ )
+        CCmClientPluginInstance* /*aClientPluginInstance*/ )
     {
     OstTraceFunctionEntry0( CCMPLUGINBASEENG_CREATECOPYL_ENTRY );
 
     TCmPluginInitParam params( iSession );
-
     CCmPluginBaseEng* copyInst = CreateInstanceL( params );
     CleanupStack::PushL( copyInst );
 
     PrepareToCopyDataL( copyInst );
-
     CopyDataL( copyInst );
-
     CleanupStack::Pop( copyInst );
 
     OstTraceFunctionExit0( CCMPLUGINBASEENG_CREATECOPYL_EXIT );
-
     return copyInst;
     }
 
@@ -427,7 +430,7 @@ EXPORT_C CCmPluginBaseEng* CCmPluginBaseEng::CreateCopyL(
 EXPORT_C void CCmPluginBaseEng::GetGenericTableIdsToBeObserved(
         RArray<TUint32>& aTableIdArray ) const
     {
-    // Service and bearer records should be added by plugins
+    // Service and bearer records should be added by plugins.
 
     aTableIdArray.Append( KCDTIdIAPRecord );
     aTableIdArray.Append( KCDTIdWAPAccessPointRecord );
@@ -460,17 +463,17 @@ void CCmPluginBaseEng::CopyRecordsL( CCmPluginBaseEng* aCopyInstance )
 
     CopyRecordDataL( KIapRecordIndex, aCopyInstance );
 
-    // Ensure that iap's name is set by the rules(Naming Method)
-    SetNameL( iIapRecord->iRecordName.GetL(),
-              aCopyInstance->iIapRecord,
-              aCopyInstance->iNamingMethod );
+    // Ensure that IAP's name is set by the rules (Naming Method).
+    SetNameL(
+            iIapRecord->iRecordName.GetL(),
+            aCopyInstance->iIapRecord,
+            aCopyInstance->iNamingMethod );
 
     CopyRecordDataL( KServiceRecordIndex, aCopyInstance );
     CopyRecordDataL( KNetworkRecordIndex, aCopyInstance );
     CopyRecordDataL( KWAPAPRecordIndex, aCopyInstance );
     CopyRecordDataL( KWAPBearerRecordIndex, aCopyInstance );
     CopyRecordDataL( KMetaDataRecordIndex, aCopyInstance );
-    CopyRecordDataL( KLocationRecordIndex, aCopyInstance );
     CopyRecordDataL( KProxyRecordIndex, aCopyInstance );
 
     CopyBearerRecordsL( aCopyInstance );
@@ -492,55 +495,63 @@ void CCmPluginBaseEng::CopyRecordDataL(
         {
         case KIapRecordIndex:
             {
-            aCopyInstance->iIapRecord = static_cast<CCDIAPRecord*>(
-                    CCDRecordBase::CreateCopyRecordL( *iIapRecord ) );
+            CCDIAPRecord* iapRecord = static_cast<CCDIAPRecord*>(
+                    CCDRecordBase::RecordFactoryL( KCDTIdIAPRecord ) );
+            CleanupStack::PushL( iapRecord );
+            CopyRecordFieldsL( *iIapRecord, *iapRecord );
+            CleanupStack::Pop( iapRecord );
+            aCopyInstance->iIapRecord = iapRecord;
             }
             break;
         case KServiceRecordIndex:
             {
             aCopyInstance->iServiceRecord = CopyServiceRecordL();
+            // The name of the service record copy is changed during update
+            // process, in PrepareToUpdateRecordsL()-method.
             }
             break;
         case KNetworkRecordIndex:
             {
-            aCopyInstance->iNetworkRecord = static_cast<CCDNetworkRecord*>(
-                    CCDRecordBase::CreateCopyRecordL( *iNetworkRecord ) );
+            CCDNetworkRecord* networkRecord = static_cast<CCDNetworkRecord*>(
+                    CCDRecordBase::RecordFactoryL( KCDTIdNetworkRecord ) );
+            CleanupStack::PushL( networkRecord );
+            CopyRecordFieldsL( *iNetworkRecord, *networkRecord );
+            CleanupStack::Pop( networkRecord );
+            aCopyInstance->iNetworkRecord = networkRecord;
             }
             break;
         case KWAPAPRecordIndex:
             {
             aCopyInstance->iWapAPRecord = static_cast<CCDWAPAccessPointRecord*>(
-                    CCDRecordBase::CreateCopyRecordL( *iWapAPRecord ) );
+                    CCDRecordBase::CreateCopyRecordL( *iWapAPRecord ) );//TODO, convert to generic copy
             }
             break;
         case KWAPBearerRecordIndex:
             {
             aCopyInstance->iWapIPBearerRecord = static_cast<CCDWAPIPBearerRecord*>(
-                    CCDRecordBase::CreateCopyRecordL( *iWapIPBearerRecord ) );
+                    CCDRecordBase::CreateCopyRecordL( *iWapIPBearerRecord ) );//TODO, convert to generic copy
             }
             break;
         case KMetaDataRecordIndex:
             {
-            aCopyInstance->iMetaDataRecord =
+            CCDIAPMetadataRecord* metadataRecord =
                     new( ELeave ) CCDIAPMetadataRecord( iMetadataTableId );
-            aCopyInstance->iMetaDataRecord->iIAP = IAPRecordElementId();
-            aCopyInstance->iMetaDataRecord->iMetadata.SetL( iMetaDataRecord->iMetadata );
-            aCopyInstance->iMetaDataRecord->iSeamlessness.SetL( iMetaDataRecord->iSeamlessness );
-            }
-            break;
-        case KLocationRecordIndex:
-            {
-            aCopyInstance->iWapIPBearerRecord =
-                    static_cast<CCDWAPIPBearerRecord*>
-                        ( CCDRecordBase::CreateCopyRecordL( *iWapIPBearerRecord ) );
+            CleanupStack::PushL( metadataRecord );
+            CopyRecordFieldsL( *iMetaDataRecord, *metadataRecord );
+            CleanupStack::Pop( metadataRecord );
+            aCopyInstance->iMetaDataRecord = metadataRecord;
             }
             break;
         case KProxyRecordIndex:
             {
             if ( iProxyRecord )
                 {
-                aCopyInstance->iProxyRecord = static_cast<CCDProxiesRecord*>(
-                        CCDRecordBase::CreateCopyRecordL( *iProxyRecord ) );
+                CCDProxiesRecord* proxyRecord = static_cast<CCDProxiesRecord*>(
+                        CCDRecordBase::RecordFactoryL( KCDTIdProxiesRecord ) );
+                CleanupStack::PushL( proxyRecord );
+                CopyRecordFieldsL( *iProxyRecord, *proxyRecord );
+                CleanupStack::Pop( proxyRecord );
+                aCopyInstance->iProxyRecord = proxyRecord;
                 }
             }
             break;
@@ -552,6 +563,89 @@ void CCmPluginBaseEng::CopyRecordDataL(
         }
 
     OstTraceFunctionExit0( CCMPLUGINBASEENG_COPYRECORDDATAL_EXIT );
+    }
+
+// ---------------------------------------------------------------------------
+// Copies the values and attributes of all fields from aSource-record into
+// aDestination record. Does not copy the record element ID. Also, does not
+// touch any field in aDestination-record that is NULL in aSource-record.
+// ---------------------------------------------------------------------------
+//
+EXPORT_C void CCmPluginBaseEng::CopyRecordFieldsL(
+        CommsDat::CMDBRecordBase& aSource,
+        CommsDat::CMDBRecordBase& aDestination )
+    {
+    OstTraceFunctionEntry0( CCMPLUGINBASEENG_COPYRECORDFIELDSL_ENTRY );
+
+    const SRecordTypeInfo* recordInfo = aSource.GetRecordInfo();
+    if ( !recordInfo )
+        {
+        User::Leave( KErrCorrupt );
+        }
+
+    CMDBElement* ptrSource( NULL );
+    CMDBElement* ptrDest( NULL );
+
+    while ( recordInfo && recordInfo->iTypeId != 0 )
+        {
+        ptrSource = aSource.GetFieldByIdL( recordInfo->iTypeId );
+        ptrDest = aDestination.GetFieldByIdL( recordInfo->iTypeId );
+
+        // Make sure we see only basic type info. Masks out any additional info
+        // on links (CommsDat internal stuff).
+        switch ( recordInfo->iValType & 0x000000ff )
+            {
+            case CommsDat::EInt:
+            case CommsDat::EBool:
+                {
+                if ( !( ptrSource->IsNull() ) )
+                    {
+                    static_cast<CMDBField<TInt>&>( *ptrDest ).SetL(
+                            static_cast<CMDBField<TInt>&>( *ptrSource ) );
+                    }
+                }
+                break;
+            case CommsDat::EUint32:
+            case CommsDat::ELink:
+                {
+                if ( !( ptrSource->IsNull() ) )
+                    {
+                    static_cast<CMDBField<TUint32>&>( *ptrDest ).SetL(
+                            static_cast<CMDBField<TUint32>&>( *ptrSource ) );
+                    }
+                }
+                break;
+            case CommsDat::EDesC8:
+                {
+                if ( !( ptrSource->IsNull() ) )
+                    {
+                    static_cast<CMDBField<TDesC8>&>( *ptrDest ).SetL(
+                            static_cast<CMDBField<TDesC8>&>( *ptrSource ) );
+                    }
+                }
+                break;
+            case CommsDat::EText:
+            case CommsDat::EMedText:
+            case CommsDat::ELongText:
+                {
+                if ( !( ptrSource->IsNull() ) )
+                    {
+                    static_cast<CMDBField<TDesC>&>( *ptrDest ).SetL(
+                            static_cast<CMDBField<TDesC>&>( *ptrSource ) );
+                    }
+                }
+                break;
+            default:
+                {
+                User::Leave( KErrCorrupt );
+                }
+                break;
+            }
+        ptrDest->SetAttributes( ptrSource->Attributes() );
+        recordInfo++;
+        }
+
+    OstTraceFunctionExit0( CCMPLUGINBASEENG_COPYRECORDFIELDSL_EXIT );
     }
 
 // ---------------------------------------------------------------------------
@@ -568,7 +662,6 @@ void CCmPluginBaseEng::DoLoadL( TUint32 aIapId )
     LoadWapRecordL();
     LoadMetadataRecordL();
     LoadNetworkRecordL();
-    LoadLocationRecordL();
 
     // This is a connectionmethodinfo instance, that has no
     // service and proxy setting.
@@ -605,15 +698,15 @@ void CCmPluginBaseEng::LoadIAPRecordL( TUint32 aIapId )
     {
     OstTraceFunctionEntry0( CCMPLUGINBASEENG_LOADIAPRECORDL_ENTRY );
 
-    iIapId = aIapId;
+    iCmId = aIapId;
 
-    // Load IAP record
-    CCDIAPRecord *iapRecord = static_cast<CCDIAPRecord *>(
+    // Load IAP record.
+    CCDIAPRecord *iapRecord = static_cast<CCDIAPRecord*>(
             CCDRecordBase::RecordFactoryL( KCDTIdIAPRecord ) );
 
     CleanupStack::PushL( iapRecord );
 
-    iapRecord->SetRecordId( iIapId );
+    iapRecord->SetRecordId( iCmId );
     iapRecord->LoadL( iSession );
 
     CleanupStack::Pop( iapRecord );
@@ -630,19 +723,18 @@ void CCmPluginBaseEng::LoadProxyRecordL()
     {
     OstTraceFunctionEntry0( CCMPLUGINBASEENG_LOADPROXYSETTINGL_ENTRY );
 
-    // Load Proxy record
+    // Load Proxy record.
     CMDBRecordSet<CCDProxiesRecord>* proxieRS =
             new( ELeave ) CMDBRecordSet<CCDProxiesRecord>( KCDTIdProxiesRecord );
     CleanupStack::PushL(proxieRS);
 
-    // Now try to find the linked proxy record
-    // create new record
-    CCDProxiesRecord* proxyRecord = static_cast<CCDProxiesRecord *>(
+    // Now try to find the linked proxy record.
+    // Create new record.
+    CCDProxiesRecord* proxyRecord = static_cast<CCDProxiesRecord*>(
             CCDRecordBase::RecordFactoryL( KCDTIdProxiesRecord ) );
-
     CleanupStack::PushL( proxyRecord );
 
-    // Prime record
+    // Prime record.
     TPtrC serviceType( iIapRecord->iServiceType );
     proxyRecord->iServiceType.SetL( serviceType );
     proxieRS->iRecords.AppendL( proxyRecord ); // Ownership transfered.
@@ -653,18 +745,18 @@ void CCmPluginBaseEng::LoadProxyRecordL()
     if ( proxieRS->FindL(iSession) )
         {
         TInt i( 0 );
-        while( i < proxieRS->iRecords.Count() )
+        while ( i < proxieRS->iRecords.Count() )
             // Now that we have a list of services with the proper service type
             // search for our proxy record and remove it from the array,
             // then destroy the array.
             {
             CCDProxiesRecord* proxyRecord = (*proxieRS)[i];
 
-            // Compare the record id of these 2 services
+            // Compare the record id of these 2 services.
             if ( TUint32( proxyRecord->iService ) == TUint32( iIapRecord->iService ) )
                 {
                 iProxyRecord = proxyRecord;
-                // Take ownership of this record
+                // Take ownership of this record.
                 proxieRS->iRecords.Remove( i );
                 break;
                 }
@@ -726,27 +818,6 @@ void CCmPluginBaseEng::LoadNetworkRecordL()
 void CCmPluginBaseEng::LoadLocationRecordL()
     {
     OstTraceFunctionEntry0( CCMPLUGINBASEENG_LOADLOCATIONSETTINGL_ENTRY );
-
-    CCDLocationRecord* locationRecord = static_cast<CCDLocationRecord*>
-                         (CCDRecordBase::RecordFactoryL(KCDTIdLocationRecord));
-
-    CleanupStack::PushL( locationRecord );
-
-    locationRecord->SetRecordId( iIapRecord->iLocation );
-    if ( locationRecord->FindL(iSession) )
-        {
-        iLocationEnabled = ETrue;
-
-        iLocationRecord = locationRecord;
-
-        CleanupStack::Pop( locationRecord );
-        }
-    else
-        {
-        iLocationEnabled = EFalse;
-
-        CleanupStack::PopAndDestroy( locationRecord );
-        }
     OstTraceFunctionExit0( CCMPLUGINBASEENG_LOADLOCATIONSETTINGL_EXIT );
     }
 
@@ -755,24 +826,28 @@ void CCmPluginBaseEng::LoadLocationRecordL()
 // ---------------------------------------------------------------------------
 //
 void CCmPluginBaseEng::PrepareToUpdateRecordsL(
-    CCmClientPluginInstance* aClientPluginInstance )
+        CCmClientPluginInstance* aClientPluginInstance )
     {
     OstTraceFunctionEntry0( CCMPLUGINBASEENG_PREPARETOUPDATERECORDSL_ENTRY );
 
-    // Set the record attributes to bearer specific records
-    CCDIAPRecord* iapRecord =
-       static_cast<CCDIAPRecord*>( aClientPluginInstance->iGenRecordArray[KIapRecordIndex] );
+    //TODO, Add null checks for mandatory generic record pointers.
+    //
+
+    // Set the record attributes to bearer specific records.
+    CCDIAPRecord* iapRecord = static_cast<CCDIAPRecord*>(
+            aClientPluginInstance->iGenRecordArray[KIapRecordIndex] );
 
     for ( TInt i = 0; i < aClientPluginInstance->iBearerSpecRecordArray.Count(); i++ )
         {
-        CCDRecordBase* record =
-                static_cast<CCDRecordBase*>( aClientPluginInstance->iBearerSpecRecordArray[i] );
+        CCDRecordBase* record = static_cast<CCDRecordBase*>(
+                aClientPluginInstance->iBearerSpecRecordArray[i] );
 
         CopyAttributes( iapRecord, record );
         }
 
-    PreparePluginToUpdateRecordsL( aClientPluginInstance->iGenRecordArray,
-                                   aClientPluginInstance->iBearerSpecRecordArray );
+    PreparePluginToUpdateRecordsL(
+            aClientPluginInstance->iGenRecordArray,
+            aClientPluginInstance->iBearerSpecRecordArray );
 
     OstTraceFunctionExit0( CCMPLUGINBASEENG_PREPARETOUPDATERECORDSL_EXIT );
     }
@@ -782,16 +857,16 @@ void CCmPluginBaseEng::PrepareToUpdateRecordsL(
 // ---------------------------------------------------------------------------
 //
 void CCmPluginBaseEng::UpdateIAPRecordL(
-    CCmClientPluginInstance* aClientPluginInstance )
+        CCmClientPluginInstance* aClientPluginInstance )
     {
     OstTraceFunctionEntry0( CCMPLUGINBASEENG_UPDATEIAPRECORDL_ENTRY );
 
-    CCDIAPRecord* iapRecord =
-       static_cast<CCDIAPRecord*>( aClientPluginInstance->iGenRecordArray[KIapRecordIndex] );
+    CCDIAPRecord* iapRecord = static_cast<CCDIAPRecord*>(
+            aClientPluginInstance->iGenRecordArray[KIapRecordIndex] );
 
-    if ( iIapId == 0 )
+    if ( iCmId == 0 )
         {
-        // Otherwise predefined iapid
+        // Otherwise predefined iapid.
         if ( !iIapRecord->RecordId() )
             {
             iIapRecord->SetRecordId( KCDNewRecordRequest );
@@ -814,50 +889,44 @@ void CCmPluginBaseEng::UpdateIAPRecordL(
 
         iIapRecord->iNetwork = iNetworkRecord->RecordId();
 
-        if ( iLocationRecord )
-            {
-            iIapRecord->iLocation = iLocationRecord->RecordId();
-            }
-        else
-            {
-            iIapRecord->iLocation = GetLocationIdL();
-            }
+        iIapRecord->iLocation = GetLocationIdL();
 
         CopyAttributes( iapRecord, iIapRecord );
         CheckIfNameModifiedL( iapRecord, iIapRecord );
 
         iIapRecord->StoreL( iSession );
 
-        iIapId = iIapRecord->RecordId();
-        aClientPluginInstance->iIapId = iIapId;
+        iCmId = iIapRecord->RecordId();
+        aClientPluginInstance->iIapId = iCmId;
 
         CCDIAPRecord* tempIapRecord = static_cast<CCDIAPRecord*>(
-                CCDRecordBase::CreateCopyRecordL( *iIapRecord ) );
+                CCDRecordBase::RecordFactoryL( KCDTIdIAPRecord ) );
         CleanupStack::PushL( tempIapRecord );
+        CopyRecordFieldsL( *iIapRecord, *tempIapRecord );
         tempIapRecord->SetElementId( iIapRecord->ElementId() );
 
         aClientPluginInstance->iGenRecordArray.Remove( KIapRecordIndex );
-        CleanupStack::PushL( iapRecord );
+        delete iapRecord;
+        iapRecord = NULL;
 
         aClientPluginInstance->iGenRecordArray.InsertL(
-                static_cast<CommsDat::CCDRecordBase*>( tempIapRecord ), KIapRecordIndex );
+                static_cast<CommsDat::CCDRecordBase*>( tempIapRecord ),
+                KIapRecordIndex );
 
-        CleanupStack::PopAndDestroy( iapRecord );
         CleanupStack::Pop( tempIapRecord );
-
         }
     else
         {
         delete iIapRecord;
         iIapRecord = NULL;
-
-        iIapRecord = static_cast<CCDIAPRecord*>
-                            ( CCDRecordBase::CreateCopyRecordL( *iapRecord ) );
+        iIapRecord = static_cast<CCDIAPRecord*>(
+                CCDRecordBase::RecordFactoryL( KCDTIdIAPRecord ) );
+        CopyRecordFieldsL( *iapRecord, *iIapRecord );
 
         iIapRecord->SetElementId( iapRecord->ElementId() );
-
         iIapRecord->ModifyL( iSession );
         }
+
     OstTraceFunctionExit0( CCMPLUGINBASEENG_UPDATEIAPRECORDL_EXIT );
     }
 
@@ -876,49 +945,44 @@ void CCmPluginBaseEng::UpdateProxyRecordL(
     CCDProxiesRecord* proxyRecord = static_cast<CCDProxiesRecord*>(
             aClientPluginInstance->iGenRecordArray[KProxyRecordIndex] );
 
+    if ( !iapRecord || !proxyRecord )
+        {
+        User::Leave( KErrCorrupt );
+        }
+
     CopyAttributes( iapRecord, proxyRecord );
     CheckIfNameModifiedL( iapRecord, proxyRecord );
 
-    if ( proxyRecord->iUseProxyServer )
+    delete iProxyRecord;
+    iProxyRecord = NULL;
+    iProxyRecord = static_cast<CCDProxiesRecord*>(
+            CCDRecordBase::RecordFactoryL( KCDTIdProxiesRecord ) );
+    CopyRecordFieldsL( *proxyRecord, *iProxyRecord );
+    iProxyRecord->SetElementId( proxyRecord->ElementId() );
+
+    if ( !iProxyRecord->RecordId() )
         {
-        delete iProxyRecord;
-        iProxyRecord = NULL;
+        // New proxy setting -> create new record.
+        iProxyRecord->iService = iServiceRecord->RecordId();
+        iProxyRecord->iServiceType.SetL( iIapRecord->iServiceType );
 
-        iProxyRecord = static_cast<CCDProxiesRecord*>
-                            ( CCDRecordBase::CreateCopyRecordL( *proxyRecord ) );
-        iProxyRecord->SetElementId( proxyRecord->ElementId() );
-
-        if ( !iProxyRecord->RecordId() )
-            // new proxy setting -> create new record
+        // By default protocol is set to "http".
+        if ( TPtrC( proxyRecord->iProtocolName ).Length() == 0 )
             {
-            iProxyRecord->iService = iServiceRecord->RecordId();
-            iProxyRecord->iServiceType.SetL( iIapRecord->iServiceType );
-
-            // By default protocol is set to "http"
-            if ( TPtrC( proxyRecord->iProtocolName ).Length() == 0 )
-                {
-                iProxyRecord->iProtocolName.SetL( KDefProxyProtocolName );
-                }
-
-            iProxyRecord->SetRecordId( KCDNewRecordRequest );
-            iProxyRecord->StoreL( iSession );
-            proxyRecord->SetElementId( iProxyRecord->ElementId() );
-            proxyRecord->iService = iServiceRecord->RecordId();
-            proxyRecord->iServiceType.SetL( iIapRecord->iServiceType );
+            iProxyRecord->iProtocolName.SetL( KDefProxyProtocolName );
             }
-        else
-            // already existing record -> update only
-            {
-            iProxyRecord->ModifyL( iSession );
-            }
+
+        iProxyRecord->SetRecordId( KCDNewRecordRequest );
+        iProxyRecord->StoreL( iSession );
+        CopyRecordFieldsL( *iProxyRecord, *proxyRecord );
+        proxyRecord->SetElementId( iProxyRecord->ElementId() );
         }
     else
+        // Already existing record -> update only.
         {
-        if ( iProxyRecord->RecordId() )
-            {
-            iProxyRecord->DeleteL( iSession );
-            }
+        iProxyRecord->ModifyL( iSession );
         }
+
     OstTraceFunctionExit0( CCMPLUGINBASEENG_UPDATEPROXYRECORDL_EXIT );
     }
 
@@ -931,32 +995,29 @@ void CCmPluginBaseEng::UpdateMetadataRecordL(
     {
     OstTraceFunctionEntry0( CCMPLUGINBASEENG_UPDATEMETADATARECORDL_ENTRY );
 
-    CCDIAPRecord* iapRecord = static_cast<CCDIAPRecord*>(
+    CCDIAPRecord* clientIapRecord = static_cast<CCDIAPRecord*>(
             aClientPluginInstance->iGenRecordArray[KIapRecordIndex] );
 
-    CCDIAPMetadataRecord* metadataRecord = static_cast<CCDIAPMetadataRecord*>(
+    CCDIAPMetadataRecord* clientMetadataRecord = static_cast<CCDIAPMetadataRecord*>(
             aClientPluginInstance->iGenRecordArray[KMetaDataRecordIndex] );
 
-    CopyAttributes( iapRecord, metadataRecord );
-    CheckIfNameModifiedL( iapRecord, metadataRecord );
+    // Adjust client side metadata record attributes and name if needed.
+    CopyAttributes( clientIapRecord, clientMetadataRecord );
+    CheckIfNameModifiedL( clientIapRecord, clientMetadataRecord );
 
+    // Make a copy of client's metadata record and save to database.
     delete iMetaDataRecord;
     iMetaDataRecord = NULL;
-
-    // Get a new blank IAP metadata record.
-    iMetaDataRecord = NewMetadataRecordL( EFalse );
-
-    iMetaDataRecord->SetElementId( metadataRecord->ElementId() );
-    iMetaDataRecord->iRecordName.SetL( metadataRecord->iRecordName );
-    iMetaDataRecord->iMetadata.SetL( metadataRecord->iMetadata );
-    iMetaDataRecord->iSeamlessness.SetL( metadataRecord->iSeamlessness );
+    iMetaDataRecord = new( ELeave ) CCDIAPMetadataRecord( iMetadataTableId );
+    CopyRecordFieldsL( *clientMetadataRecord, *iMetaDataRecord );
+    iMetaDataRecord->SetElementId( clientMetadataRecord->ElementId() );
 
     if ( !iMetaDataRecord->RecordId() )
         {
         iMetaDataRecord->iIAP = IAPRecordElementId();
         iMetaDataRecord->SetRecordId( KCDNewRecordRequest );
         iMetaDataRecord->StoreL( iSession );
-        metadataRecord->SetElementId( iMetaDataRecord->ElementId() );
+        clientMetadataRecord->SetElementId( iMetaDataRecord->ElementId() );
         }
     else
         {
@@ -975,16 +1036,17 @@ void CCmPluginBaseEng::UpdateServiceRecordL(
     {
     OstTraceFunctionEntry0( CCMPLUGINBASEENG_UPDATESERVICERECORDL_ENTRY );
 
-    CCDIAPRecord* iapRecord =
-                static_cast<CCDIAPRecord*>( aClientPluginInstance->iGenRecordArray[KIapRecordIndex] );
+    CCDIAPRecord* iapRecord = static_cast<CCDIAPRecord*>(
+            aClientPluginInstance->iGenRecordArray[KIapRecordIndex] );
 
-    CCDRecordBase* serviceRecord =
-                static_cast<CCDRecordBase*>( aClientPluginInstance->iGenRecordArray[KServiceRecordIndex] );
+    CCDRecordBase* serviceRecord = static_cast<CCDRecordBase*>(
+            aClientPluginInstance->iGenRecordArray[KServiceRecordIndex] );
 
     CopyAttributes( iapRecord, serviceRecord );
 
-    UpdateServiceRecordL( aClientPluginInstance->iGenRecordArray,
-                          aClientPluginInstance->iBearerSpecRecordArray );
+    UpdateServiceRecordL(
+            aClientPluginInstance->iGenRecordArray,
+            aClientPluginInstance->iBearerSpecRecordArray );
 
     OstTraceFunctionExit0( CCMPLUGINBASEENG_UPDATESERVICERECORDL_EXIT );
     }
@@ -994,15 +1056,15 @@ void CCmPluginBaseEng::UpdateServiceRecordL(
 // ---------------------------------------------------------------------------
 //
 void CCmPluginBaseEng::UpdateNetworkRecordL(
-    CCmClientPluginInstance* aClientPluginInstance )
+        CCmClientPluginInstance* aClientPluginInstance )
     {
     OstTraceFunctionEntry0( CCMPLUGINBASEENG_UPDATENETWORKRECORDL_ENTRY );
 
-    CCDIAPRecord* iapRecord =
-                static_cast<CCDIAPRecord*>( aClientPluginInstance->iGenRecordArray[KIapRecordIndex] );
+    CCDIAPRecord* iapRecord = static_cast<CCDIAPRecord*>(
+            aClientPluginInstance->iGenRecordArray[KIapRecordIndex] );
 
-    CCDNetworkRecord* networkRecord =
-                static_cast<CCDNetworkRecord*>( aClientPluginInstance->iGenRecordArray[KNetworkRecordIndex] );
+    CCDNetworkRecord* networkRecord = static_cast<CCDNetworkRecord*>(
+            aClientPluginInstance->iGenRecordArray[KNetworkRecordIndex] );
 
     CopyAttributes( iapRecord, networkRecord );
 
@@ -1011,8 +1073,9 @@ void CCmPluginBaseEng::UpdateNetworkRecordL(
 
     CheckIfNameModifiedL( iapRecord, networkRecord );
 
-    iNetworkRecord = static_cast<CCDNetworkRecord*>
-                        ( CCDRecordBase::CreateCopyRecordL( *networkRecord ) );
+    iNetworkRecord = static_cast<CCDNetworkRecord*>(
+            CCDRecordBase::RecordFactoryL( KCDTIdNetworkRecord ) );
+    CopyRecordFieldsL( *networkRecord, *iNetworkRecord );
 
     iNetworkRecord->SetElementId( networkRecord->ElementId() );
 
@@ -1026,6 +1089,7 @@ void CCmPluginBaseEng::UpdateNetworkRecordL(
         {
         iNetworkRecord->ModifyL( iSession );
         }
+
     OstTraceFunctionExit0( CCMPLUGINBASEENG_UPDATENETWORKRECORDL_EXIT );
     }
 
@@ -1034,49 +1098,9 @@ void CCmPluginBaseEng::UpdateNetworkRecordL(
 // ---------------------------------------------------------------------------
 //
 void CCmPluginBaseEng::UpdateLocationRecordL(
-    CCmClientPluginInstance* aClientPluginInstance )
+        CCmClientPluginInstance* /*aClientPluginInstance*/ )
     {
     OstTraceFunctionEntry0( CCMPLUGINBASEENG_UPDATELOCATIONRECORDL_ENTRY );
-
-    if ( iLocationEnabled )
-        {
-        CCDIAPRecord* iapRecord =
-                    static_cast<CCDIAPRecord*>( aClientPluginInstance->iGenRecordArray[KIapRecordIndex] );
-
-        CCDLocationRecord* locationRecord =
-                    static_cast<CCDLocationRecord*>( aClientPluginInstance->iGenRecordArray[KLocationRecordIndex] );
-
-        // location record is not set as hidden because it can be shared between iaps
-        CopyAttributes( iapRecord, locationRecord );
-        locationRecord->ClearAttributes( ECDHidden );
-
-        delete iLocationRecord;
-        iLocationRecord = NULL;
-
-        iLocationRecord = static_cast<CCDLocationRecord*>
-                            ( CCDRecordBase::CreateCopyRecordL( *locationRecord ) );
-
-        iLocationRecord->SetElementId( locationRecord->ElementId() );
-
-        CheckIfNameModifiedL( iapRecord, locationRecord );
-
-        if ( !iLocationRecord->RecordId() )
-            {
-            iLocationRecord->SetRecordId( KCDNewRecordRequest );
-            iLocationRecord->StoreL( iSession );
-            }
-        else
-            {
-            iLocationRecord->ModifyL( iSession );
-            }
-        }
-    else
-        {
-        if ( iLocationRecord )
-            {
-            iLocationRecord->DeleteL( iSession );
-            }
-        }
     OstTraceFunctionExit0( CCMPLUGINBASEENG_UPDATELOCATIONRECORDL_EXIT );
     }
 
@@ -1105,8 +1129,8 @@ void CCmPluginBaseEng::EnableProxyL( TBool aEnable )
 
     if ( !iProxyRecord )
         {
-        iProxyRecord = static_cast<CCDProxiesRecord *>
-                      (CCDRecordBase::RecordFactoryL(KCDTIdProxiesRecord));
+        iProxyRecord = static_cast<CCDProxiesRecord*>(
+                CCDRecordBase::RecordFactoryL( KCDTIdProxiesRecord ) );
         }
 
     iProxyRecord->iUseProxyServer = aEnable;
@@ -1122,15 +1146,7 @@ void CCmPluginBaseEng::EnableLocationL( TBool aEnable )
     {
     OstTraceFunctionEntry0( CCMPLUGINBASEENG_ENABLELOCATIONL_ENTRY );
 
-    if ( aEnable )
-        {
-        if ( !iLocationRecord )
-            {
-            iLocationRecord = static_cast<CCDLocationRecord *>
-                         (CCDRecordBase::RecordFactoryL(KCDTIdLocationRecord));
-            }
-        }
-
+    // Not supported anymore
     iLocationEnabled = aEnable;
 
     OstTraceFunctionExit0( CCMPLUGINBASEENG_ENABLELOCATIONL_EXIT );
@@ -1147,8 +1163,8 @@ void CCmPluginBaseEng::LoadWapRecordL()
     iWapIPBearerRecord = FindWAPRecordL();
     if ( iWapIPBearerRecord )
         {
-        CCDWAPAccessPointRecord *wapApRecord = static_cast<CCDWAPAccessPointRecord *>
-                   (CCDRecordBase::RecordFactoryL(KCDTIdWAPAccessPointRecord));
+        CCDWAPAccessPointRecord *wapApRecord = static_cast<CCDWAPAccessPointRecord*>(
+                CCDRecordBase::RecordFactoryL( KCDTIdWAPAccessPointRecord ) );
 
         CleanupStack::PushL( wapApRecord );
 
@@ -1158,8 +1174,8 @@ void CCmPluginBaseEng::LoadWapRecordL()
             {
             CleanupStack::PopAndDestroy( wapApRecord );
 
-            wapApRecord = static_cast<CCDWAPAccessPointRecord *>
-                   (CCDRecordBase::RecordFactoryL(KCDTIdWAPAccessPointRecord));
+            wapApRecord = static_cast<CCDWAPAccessPointRecord*>(
+                    CCDRecordBase::RecordFactoryL( KCDTIdWAPAccessPointRecord ) );
             }
         else
             {
@@ -1175,6 +1191,7 @@ void CCmPluginBaseEng::LoadWapRecordL()
         {
         NewWapRecordL();
         }
+
     OstTraceFunctionExit0( CCMPLUGINBASEENG_LOADWAPRECORDL_EXIT );
     }
 
@@ -1196,7 +1213,7 @@ void CCmPluginBaseEng::LoadMetadataRecordL()
 // ---------------------------------------------------------------------------
 //
 void CCmPluginBaseEng::UpdateWapRecordL(
-    CCmClientPluginInstance* aClientPluginInstance )
+        CCmClientPluginInstance* aClientPluginInstance )
     {
     OstTraceFunctionEntry0( CCMPLUGINBASEENG_UPDATEWAPRECORDL_ENTRY );
 
@@ -1206,14 +1223,14 @@ void CCmPluginBaseEng::UpdateWapRecordL(
     delete iWapIPBearerRecord;
     iWapIPBearerRecord = NULL;
 
-    CCDIAPRecord* iapRecord =
-        static_cast<CCDIAPRecord*>( aClientPluginInstance->iGenRecordArray[KIapRecordIndex] );
+    CCDIAPRecord* iapRecord = static_cast<CCDIAPRecord*>(
+            aClientPluginInstance->iGenRecordArray[KIapRecordIndex] );
 
-    CCDWAPAccessPointRecord* wapAPRecord =
-        static_cast<CCDWAPAccessPointRecord*>( aClientPluginInstance->iGenRecordArray[KWAPAPRecordIndex] );
+    CCDWAPAccessPointRecord* wapAPRecord = static_cast<CCDWAPAccessPointRecord*>(
+            aClientPluginInstance->iGenRecordArray[KWAPAPRecordIndex] );
 
-    CCDWAPIPBearerRecord* wapIPBearerRecord =
-        static_cast<CCDWAPIPBearerRecord*>( aClientPluginInstance->iGenRecordArray[KWAPBearerRecordIndex] );
+    CCDWAPIPBearerRecord* wapIPBearerRecord = static_cast<CCDWAPIPBearerRecord*>(
+            aClientPluginInstance->iGenRecordArray[KWAPBearerRecordIndex] );
 
     CopyAttributes( iapRecord, wapAPRecord );
     CopyAttributes( iapRecord, wapIPBearerRecord );
@@ -1221,12 +1238,12 @@ void CCmPluginBaseEng::UpdateWapRecordL(
     CheckIfNameModifiedL( iapRecord, wapAPRecord );
     CheckIfNameModifiedL( iapRecord, wapIPBearerRecord );
 
-    iWapAPRecord = static_cast<CCDWAPAccessPointRecord*>
-                            ( CCDRecordBase::CreateCopyRecordL( *wapAPRecord ) );
+    iWapAPRecord = static_cast<CCDWAPAccessPointRecord*>(
+            CCDRecordBase::CreateCopyRecordL( *wapAPRecord ) );//TODO, convert to generic copy
     iWapAPRecord->SetElementId( wapAPRecord->ElementId() );
 
-    iWapIPBearerRecord = static_cast<CCDWAPIPBearerRecord*>
-                        ( CCDRecordBase::CreateCopyRecordL( *wapIPBearerRecord ) );
+    iWapIPBearerRecord = static_cast<CCDWAPIPBearerRecord*>(
+            CCDRecordBase::CreateCopyRecordL( *wapIPBearerRecord ) );//TODO, convert to generic copy
     iWapIPBearerRecord->SetElementId( wapIPBearerRecord->ElementId() );
 
     if ( !iWapAPRecord->RecordId() )
@@ -1256,6 +1273,7 @@ void CCmPluginBaseEng::UpdateWapRecordL(
         {
         iWapIPBearerRecord->ModifyL( iSession );
         }
+
     OstTraceFunctionExit0( DUP1_CCMPLUGINBASEENG_UPDATEWAPRECORDL_EXIT );
     }
 
@@ -1269,8 +1287,8 @@ void CCmPluginBaseEng::NewWapRecordL()
 
     if ( !iWapIPBearerRecord )
         {
-        iWapIPBearerRecord = static_cast<CCDWAPIPBearerRecord *>
-                      ( CCDRecordBase::RecordFactoryL( KCDTIdWAPIPBearerRecord ) );
+        iWapIPBearerRecord = static_cast<CCDWAPIPBearerRecord*>(
+                CCDRecordBase::RecordFactoryL( KCDTIdWAPIPBearerRecord ) );
         iWapIPBearerRecord->iWAPProxyPort = 0;
         iWapIPBearerRecord->iWAPWSPOption = ECmWapWspOptionConnectionOriented;
         iWapIPBearerRecord->iWAPSecurity = EFalse;
@@ -1278,11 +1296,12 @@ void CCmPluginBaseEng::NewWapRecordL()
 
     if ( !iWapAPRecord )
         {
-        iWapAPRecord = static_cast<CCDWAPAccessPointRecord *>
-                   ( CCDRecordBase::RecordFactoryL( KCDTIdWAPAccessPointRecord ) );
-        // SMS bearer is not supported by this version
+        iWapAPRecord = static_cast<CCDWAPAccessPointRecord*>(
+                CCDRecordBase::RecordFactoryL( KCDTIdWAPAccessPointRecord ) );
+        // SMS bearer is not supported by this version.
         iWapAPRecord->iWAPCurrentBearer.SetL( TPtrC( KCDTypeNameWAPIPBearer ) );
         }
+
     OstTraceFunctionExit0( CCMPLUGINBASEENG_NEWWAPRECORDL_EXIT );
     }
 
@@ -1313,9 +1332,10 @@ CCDIAPMetadataRecord* CCmPluginBaseEng::NewMetadataRecordL( TBool aSetDef )
 // CCmPluginBaseEng::SetAttribute
 // ---------------------------------------------------------------------------
 //
-void CCmPluginBaseEng::SetAttribute( CCDRecordBase* aRecord,
-                                     TUint32 aAttribute,
-                                     TBool aSet )
+void CCmPluginBaseEng::SetAttribute(
+        CCDRecordBase* aRecord,
+        TUint32 aAttribute,
+        TBool aSet )
     {
     OstTraceFunctionEntry0( CCMPLUGINBASEENG_SETATTRIBUTE_ENTRY );
 
@@ -1335,22 +1355,23 @@ void CCmPluginBaseEng::SetAttribute( CCDRecordBase* aRecord,
 // CCmPluginBaseEng::CopyAttributes
 // ---------------------------------------------------------------------------
 //
-void CCmPluginBaseEng::CopyAttributes( CCDRecordBase* aSrcRecord,
-                                       CCDRecordBase* aDstRecord )
+void CCmPluginBaseEng::CopyAttributes(
+        CCDRecordBase* aSrcRecord,
+        CCDRecordBase* aDstRecord )
     {
     OstTraceFunctionEntry0( CCMPLUGINBASEENG_COPYATTRIBUTES_ENTRY );
 
-    if ( aSrcRecord == NULL || aDstRecord == NULL )
+    if ( !aSrcRecord || !aDstRecord )
         {
+        OstTraceFunctionExit0( CCMPLUGINBASEENG_COPYATTRIBUTES_EXIT );
         return;
         }
 
-    // clear the target record attributes first
+    // Clear the target record attributes first.
     aDstRecord->ClearAttributes( aDstRecord->Attributes() );
-
     aDstRecord->SetAttributes( aSrcRecord->Attributes() );
 
-    OstTraceFunctionExit0( CCMPLUGINBASEENG_COPYATTRIBUTES_EXIT );
+    OstTraceFunctionExit0( DUP1_CCMPLUGINBASEENG_COPYATTRIBUTES_EXIT );
     }
 
 // ---------------------------------------------------------------------------
@@ -1362,34 +1383,31 @@ CCDWAPIPBearerRecord* CCmPluginBaseEng::FindWAPRecordL()
     OstTraceFunctionEntry0( CCMPLUGINBASEENG_FINDWAPRECORDL_ENTRY );
 
     CMDBRecordSet<CCDWAPIPBearerRecord>* wapRS =
-            new(ELeave)
-                   CMDBRecordSet<CCDWAPIPBearerRecord>(KCDTIdWAPIPBearerRecord);
+            new( ELeave ) CMDBRecordSet<CCDWAPIPBearerRecord>( KCDTIdWAPIPBearerRecord );
     CleanupStack::PushL( wapRS );
 
-    CCDWAPIPBearerRecord* wapBearerRecord = static_cast<CCDWAPIPBearerRecord *>
-                      (CCDRecordBase::RecordFactoryL(KCDTIdWAPIPBearerRecord));
+    CCDWAPIPBearerRecord* wapBearerRecord = static_cast<CCDWAPIPBearerRecord*>(
+            CCDRecordBase::RecordFactoryL( KCDTIdWAPIPBearerRecord ) );
 
     CleanupStack::PushL( wapBearerRecord );
 
-    wapBearerRecord->iWAPIAP = iIapId;
+    wapBearerRecord->iWAPIAP = iCmId;
     wapRS->iRecords.AppendL( wapBearerRecord );
 
     CleanupStack::Pop( wapBearerRecord );
     wapBearerRecord = NULL;
 
-    if ( wapRS->FindL(iSession) )
+    if ( wapRS->FindL( iSession ) )
         {
-        wapBearerRecord =
-                        static_cast<CCDWAPIPBearerRecord *>(wapRS->iRecords[0]);
+        wapBearerRecord = static_cast<CCDWAPIPBearerRecord*>( wapRS->iRecords[0] );
 
-        // we take over the ownership of this record
+        // Take over the ownership of this record.
         wapRS->iRecords.Remove( 0 );
         }
 
     CleanupStack::PopAndDestroy( wapRS );
 
     OstTraceFunctionExit0( CCMPLUGINBASEENG_FINDWAPRECORDL_EXIT );
-
     return wapBearerRecord;
     }
 
@@ -1402,12 +1420,11 @@ CCDIAPMetadataRecord* CCmPluginBaseEng::FindMetadataRecordL()
     OstTraceFunctionEntry0( CCMPLUGINBASEENG_FINDSEAMLESSNESSRECORDL_ENTRY );
 
     CMDBRecordSet<CCDIAPMetadataRecord>* metadataRecordSet =
-          new(ELeave) CMDBRecordSet<CCDIAPMetadataRecord>( iMetadataTableId );
+            new( ELeave ) CMDBRecordSet<CCDIAPMetadataRecord>( iMetadataTableId );
     CleanupStack::PushL( metadataRecordSet );
 
     CCDIAPMetadataRecord* metadataRecord =
-            new (ELeave) CCDIAPMetadataRecord( iMetadataTableId );
-
+            new( ELeave ) CCDIAPMetadataRecord( iMetadataTableId );
     CleanupStack::PushL( metadataRecord );
 
     metadataRecord->iIAP = IAPRecordElementId();
@@ -1434,7 +1451,6 @@ CCDIAPMetadataRecord* CCmPluginBaseEng::FindMetadataRecordL()
     CleanupStack::PopAndDestroy( metadataRecordSet );
 
     OstTraceFunctionExit0( CCMPLUGINBASEENG_FINDSEAMLESSNESSRECORDL_EXIT );
-
     return metadataRecord;
     }
 
@@ -1442,11 +1458,13 @@ CCDIAPMetadataRecord* CCmPluginBaseEng::FindMetadataRecordL()
 // CCmPluginBaseEng::DoMakeValidNameL
 // ---------------------------------------------------------------------------
 //
-HBufC* CCmPluginBaseEng::DoMakeValidNameL( const TDesC& aName,
-                                           const TUint32& aIapId  )
+HBufC* CCmPluginBaseEng::DoMakeValidNameL(
+        const TDesC& aName,
+        const TUint32& aIapId )
     {
     OstTraceFunctionEntry0( CCMPLUGINBASEENG_DOMAKEVALIDNAMEL_ENTRY );
 
+    const TInt decimalBase = 10;
     TBool changed( EFalse );
     HBufC* temp = HBufC::NewLC( KApMaxConnNameLength );
     HBufC* temp2 = HBufC::NewLC( KApMaxConnNameLength );
@@ -1469,11 +1487,11 @@ HBufC* CCmPluginBaseEng::DoMakeValidNameL( const TDesC& aName,
             {
             changed = ETrue;
             postfix++;
-            // check the length of postfix, check text length accordingly
+            // Check the length of postfix, check text length accordingly.
             pf = postfix;
-            for (i=1; i<10; i++)
+            for ( i = 1; i < decimalBase; i++ )
                 {
-                pf /= 10;
+                pf /= decimalBase;
                 if ( !pf )
                     break;
                 }
@@ -1481,7 +1499,7 @@ HBufC* CCmPluginBaseEng::DoMakeValidNameL( const TDesC& aName,
             TPtr sgdptr2( temp2->Des() );
             if ( postfix )
                 {
-                if ( postfix < 10 )
+                if ( postfix < decimalBase )
                     {
                     sgdptr2 = prefix.Left( KApMaxConnNameLength - i - 3 );
                     }
@@ -1496,8 +1514,8 @@ HBufC* CCmPluginBaseEng::DoMakeValidNameL( const TDesC& aName,
                 }
             if ( postfix )
                 {
-                TBuf< KMaxPostfixLength > postfixString;
-                if ( postfix > 9 )
+                TBuf<KMaxPostfixLength> postfixString;
+                if ( postfix >= decimalBase )
                     {
                     postfixString.Format( KFormatLargePostfix, postfix );
 //     TODO:               AknTextUtils::LanguageSpecificNumberConversion( postfixString );
@@ -1507,8 +1525,7 @@ HBufC* CCmPluginBaseEng::DoMakeValidNameL( const TDesC& aName,
                     postfixString.Format( KFormatPostfix, postfix );
 //     TODO:               AknTextUtils::LanguageSpecificNumberConversion( postfixString );
                     }
-                sgdptr.Format( KFormatNameWithPostfix, &sgdptr2,
-                                   &postfixString );
+                sgdptr.Format( KFormatNameWithPostfix, &sgdptr2, &postfixString );
                 }
             else
                 {
@@ -1531,7 +1548,6 @@ HBufC* CCmPluginBaseEng::DoMakeValidNameL( const TDesC& aName,
         }
 
     OstTraceFunctionExit0( CCMPLUGINBASEENG_DOMAKEVALIDNAMEL_EXIT );
-
     return temp;
     }
 
@@ -1539,8 +1555,9 @@ HBufC* CCmPluginBaseEng::DoMakeValidNameL( const TDesC& aName,
 // CCmPluginBaseEng::EnsureMaxLengthLC
 // ---------------------------------------------------------------------------
 //
-HBufC* CCmPluginBaseEng::EnsureMaxLengthLC( const TDesC& aName,
-                                            TBool& aChanged )
+HBufC* CCmPluginBaseEng::EnsureMaxLengthLC(
+        const TDesC& aName,
+        TBool& aChanged )
     {
     OstTraceFunctionEntry0( CCMPLUGINBASEENG_ENSUREMAXLENGTHLC_ENTRY );
 
@@ -1556,7 +1573,8 @@ HBufC* CCmPluginBaseEng::EnsureMaxLengthLC( const TDesC& aName,
 
     HBufC* corrname;
     if ( KApMaxConnNameLength < length )
-        { // name too long, truncate.
+        {
+        // Name too long, truncate.
         corrname = aName.Left( KApMaxConnNameLength ).AllocLC();
         aChanged = ETrue;
         }
@@ -1568,7 +1586,7 @@ HBufC* CCmPluginBaseEng::EnsureMaxLengthLC( const TDesC& aName,
             {
             User::Leave( KErrArgument );
             }
-        // comes here only if name is valid
+        // Comes here only if name is valid.
         if ( corrname->Length() != aName.Length() )
             {
             aChanged = ETrue;
@@ -1576,7 +1594,6 @@ HBufC* CCmPluginBaseEng::EnsureMaxLengthLC( const TDesC& aName,
         }
 
     OstTraceFunctionExit0( CCMPLUGINBASEENG_ENSUREMAXLENGTHLC_EXIT );
-
     return corrname;
     }
 
@@ -1613,8 +1630,8 @@ TPtrC CCmPluginBaseEng::GetPrefix( const TDesC& aName )
             prefix.Set( aName.Left( lastBrace ) );
             }
         }
-    OstTraceFunctionExit0( CCMPLUGINBASEENG_GETPREFIX_EXIT );
 
+    OstTraceFunctionExit0( CCMPLUGINBASEENG_GETPREFIX_EXIT );
     return prefix;
     }
 
@@ -1682,8 +1699,8 @@ TInt CCmPluginBaseEng::GetPostfix( const TDesC& aName, const TDesC& aPrefix )
                 }
             }
         }
-    OstTraceFunctionExit0( CCMPLUGINBASEENG_GETPOSTFIX_EXIT );
 
+    OstTraceFunctionExit0( CCMPLUGINBASEENG_GETPOSTFIX_EXIT );
     return postfix;
     }
 
@@ -1691,49 +1708,46 @@ TInt CCmPluginBaseEng::GetPostfix( const TDesC& aName, const TDesC& aPrefix )
 // CCmPluginBaseEng::IsValidNameL
 // ---------------------------------------------------------------------------
 //
-TBool CCmPluginBaseEng::IsValidNameL( const TDesC& aNameText,
-                                      const TUint32& aIapId )
+TBool CCmPluginBaseEng::IsValidNameL(
+        const TDesC& aNameText,
+        const TUint32& aIapId )
     {
     OstTraceFunctionEntry0( CCMPLUGINBASEENG_ISVALIDNAMEL_ENTRY );
 
     TBool retVal( ETrue );
 
     CMDBRecordSet<CCDIAPRecord>* iapRS =
-                      new(ELeave) CMDBRecordSet<CCDIAPRecord>(KCDTIdIAPRecord);
+            new( ELeave ) CMDBRecordSet<CCDIAPRecord>(KCDTIdIAPRecord);
     CleanupStack::PushL(iapRS);
 
-    CCDIAPRecord* iapRecord = static_cast<CCDIAPRecord *>
-                            (CCDRecordBase::RecordFactoryL(KCDTIdIAPRecord));
-
+    CCDIAPRecord* iapRecord = static_cast<CCDIAPRecord*>(
+            CCDRecordBase::RecordFactoryL( KCDTIdIAPRecord ) );
     CleanupStack::PushL( iapRecord );
 
-    // Prime record
+    // Prime record.
     iapRecord->iRecordName.SetL( aNameText );
-
     iapRS->iRecords.AppendL( iapRecord );
-
     CleanupStack::Pop( iapRecord );
-
     iapRecord = NULL;
 
-    if ( iapRS->FindL(iSession) )
+    if ( iapRS->FindL( iSession ) )
         {
-        if ( iIapId )
-            // this is not a new CM
+        if ( iCmId )
             {
+            // This is not a new CM.
             for ( TInt i = 0; i < iapRS->iRecords.Count(); ++i )
                 {
                 if ( iapRS->iRecords[i]->RecordId() != aIapId )
-                    // duplication because it's not our name
                     {
+                    // Duplication because it's not our name.
                     retVal = EFalse;
                     break;
                     }
                 }
             }
         else
-            // new CM -> any occurence is a duplication
             {
+            // New CM -> any occurence is a duplication.
             retVal = EFalse;
             }
         }
@@ -1741,7 +1755,6 @@ TBool CCmPluginBaseEng::IsValidNameL( const TDesC& aNameText,
     CleanupStack::PopAndDestroy( iapRS );
 
     OstTraceFunctionExit0( CCMPLUGINBASEENG_ISVALIDNAMEL_EXIT );
-
     return retVal;
     }
 
@@ -1760,7 +1773,7 @@ HBufC* CCmPluginBaseEng::EscapeTextLC( const TDesC& aLiteral )
     TUint quote( '\'' );  // TChar gives warnings in THUMB & ARMI
     TInt i( 0 );
 
-    for ( i=0; i<l; i++ )
+    for ( i = 0; i < l; i++ )
         {
         ret.Append( aLiteral[i] );
         if ( aLiteral[i] == quote )
@@ -1769,8 +1782,8 @@ HBufC* CCmPluginBaseEng::EscapeTextLC( const TDesC& aLiteral )
             ret.Append( quote );
             }
         }
-    OstTraceFunctionExit0( CCMPLUGINBASEENG_ESCAPETEXTLC_EXIT );
 
+    OstTraceFunctionExit0( CCMPLUGINBASEENG_ESCAPETEXTLC_EXIT );
     return retbuf;
     }
 
@@ -1788,10 +1801,10 @@ void CCmPluginBaseEng::SetDefaultNameL( const TDesC& aName )
         }
     else if ( iNamingMethod == ENamingUnique )
         {
-        HBufC* newName = DoMakeValidNameL( aName, iIapId );
+        HBufC* newName = DoMakeValidNameL( aName, iCmId );
 
         if ( newName )
-            // name converted to unique
+            // Name converted to unique.
             {
             CleanupStack::PushL( newName );
             iIapRecord->iRecordName.SetL( *newName );
@@ -1804,7 +1817,7 @@ void CCmPluginBaseEng::SetDefaultNameL( const TDesC& aName )
         }
     else if ( iNamingMethod == ENamingNotAccept )
         {
-        if ( IsValidNameL( aName, iIapId ) )
+        if ( IsValidNameL( aName, iCmId ) )
             {
             iIapRecord->iRecordName.SetL( aName );
             }
@@ -1817,6 +1830,7 @@ void CCmPluginBaseEng::SetDefaultNameL( const TDesC& aName )
         {
         User::Leave( KErrCorrupt );
         }
+
     OstTraceFunctionExit0( CCMPLUGINBASEENG_SETDEFAULTNAMEL_EXIT );
     }
 
@@ -1841,7 +1855,7 @@ void CCmPluginBaseEng::SetNameL(
         HBufC* newName = DoMakeValidNameL( aName, iapid );
 
         if ( newName )
-            // name converted to unique
+            // Name converted to unique.
             {
             CleanupStack::PushL( newName );
             aIapRecord->iRecordName.SetL( *newName );
@@ -1880,9 +1894,14 @@ EXPORT_C void CCmPluginBaseEng::CheckIfNameModifiedL(
     {
     OstTraceFunctionEntry0( CCMPLUGINBASEENG_CHECKIFNAMEMODIFIEDL_ENTRY );
 
-    if ( !TPtrC( aSrcRecord->iRecordName ).CompareF( TPtrC( aDestRecord->iRecordName ) ) )
-        // names matche
+    if ( !aSrcRecord || !aDestRecord )
         {
+        User::Leave( KErrCorrupt );
+        }
+
+    if ( !TPtrC( aSrcRecord->iRecordName ).CompareF( TPtrC( aDestRecord->iRecordName ) ) )
+        {
+        // Names match.
         OstTraceFunctionExit0( CCMPLUGINBASEENG_CHECKIFNAMEMODIFIEDL_EXIT );
         return;
         }
@@ -1897,8 +1916,6 @@ EXPORT_C void CCmPluginBaseEng::CheckIfNameModifiedL(
 // ---------------------------------------------------------------------------
 TMDBElementId CCmPluginBaseEng::IAPRecordElementId() const
     {
-    OstTraceFunctionEntry0( CCMPLUGINBASEENG_IAPRECORDELEMENTID_ENTRY );
-
     return ( KCDMaskShowField & iIapRecord->ElementId() );
     }
 
@@ -1921,50 +1938,47 @@ TUint32 CCmPluginBaseEng::GetLocationIdL() const
 
     TUint32 locId( 0 );
     CMDBRecordSet<CCDLocationRecord>* locRS =
-            new(ELeave) CMDBRecordSet<CCDLocationRecord>(KCDTIdLocationRecord);
+            new( ELeave ) CMDBRecordSet<CCDLocationRecord>( KCDTIdLocationRecord );
     CleanupStack::PushL( locRS );
 
-    CCDLocationRecord* locRecord = static_cast<CCDLocationRecord *>
-                         (CCDRecordBase::RecordFactoryL(KCDTIdLocationRecord));
-
+    CCDLocationRecord* locRecord = static_cast<CCDLocationRecord*>(
+            CCDRecordBase::RecordFactoryL( KCDTIdLocationRecord ) );
     CleanupStack::PushL( locRecord );
+
     locRecord->iRecordName.SetL( KLocationName );
     locRS->iRecords.AppendL( locRecord );
     CleanupStack::Pop( locRecord );
 
     if ( locRS->FindL(iSession) )
         {
-        locRecord = static_cast<CCDLocationRecord *>(locRS->iRecords[0]);
-
+        locRecord = static_cast<CCDLocationRecord*>( locRS->iRecords[0] );
         locId = locRecord->RecordId();
         }
     else
         {
-        User::Leave( KErrNotFound );
+        User::Leave( KErrNotFound ); //TODO, what to do if not found. Can we create it? need study.
         }
 
     CleanupStack::PopAndDestroy( locRS );
 
     OstTraceFunctionExit0( CCMPLUGINBASEENG_GETLOCATIONIDL_EXIT );
-
     return locId;
     }
 
 // ---------------------------------------------------------------------------
 // CCmPluginBaseEng::SetProxyServerNameL
 // ---------------------------------------------------------------------------
- void CCmPluginBaseEng::SetProxyServerNameL( const TDesC& aProxyServer,
-                                             CCDRecordBase* aProxyRecord )
+ void CCmPluginBaseEng::SetProxyServerNameL(
+         const TDesC& aProxyServer,
+         CCDRecordBase* aProxyRecord )
     {
     OstTraceFunctionEntry0( CCMPLUGINBASEENG_SETPROXYSERVERNAMEL_ENTRY );
 
-    CCDProxiesRecord* proxyRecord =
-                    static_cast<CCDProxiesRecord*>( aProxyRecord );
+    CCDProxiesRecord* proxyRecord = static_cast<CCDProxiesRecord*>( aProxyRecord );
 
     proxyRecord->iServerName.SetL( aProxyServer );
     if ( !aProxyServer.Length() )
         {
-        proxyRecord->iPortNumber = 0;
         proxyRecord->iUseProxyServer = EFalse;
         }
     else
@@ -1979,10 +1993,11 @@ TUint32 CCmPluginBaseEng::GetLocationIdL() const
 // CCmPluginBaseEng::CheckDNSServerAddressL
 // ---------------------------------------------------------------------------
 //
-EXPORT_C void CCmPluginBaseEng::CheckDNSServerAddressL( TBool aIPv6,
-                                                        CMDBField<TDesC>& aDNS1,
-                                                        CMDBField<TDesC>& aDNS2,
-                                                        CMDBField<TBool>& aDNSFromServer )
+EXPORT_C void CCmPluginBaseEng::CheckDNSServerAddressL(
+        TBool aIPv6,
+        CMDBField<TDesC>& aDNS1,
+        CMDBField<TDesC>& aDNS2,
+        CMDBField<TBool>& aDNSFromServer )
     {
     OstTraceFunctionEntry0( CCMPLUGINBASEENG_CHECKDNSSERVERADDRESSL_ENTRY );
 
@@ -1999,7 +2014,7 @@ EXPORT_C void CCmPluginBaseEng::CheckDNSServerAddressL( TBool aIPv6,
                     }
                 else
                     {
-                    // Both are unspecified
+                    // Both are unspecified.
                     aDNSFromServer = ETrue;
                     }
                 }
@@ -2015,7 +2030,7 @@ EXPORT_C void CCmPluginBaseEng::CheckDNSServerAddressL( TBool aIPv6,
                     }
                 else
                     {
-                    // Both are unspecified
+                    // Both are unspecified.
                     aDNSFromServer = ETrue;
                     }
                 }
@@ -2046,11 +2061,13 @@ EXPORT_C void CCmPluginBaseEng::GetPluginDataL(
 
     if ( iIapRecord )
         {
-        CCDIAPRecord* iapRecord =
-                static_cast<CCDIAPRecord*>( CCDRecordBase::CreateCopyRecordL( *iIapRecord ) );
+        CCDIAPRecord* iapRecord = static_cast<CCDIAPRecord*>(
+                CCDRecordBase::RecordFactoryL( KCDTIdIAPRecord ) );
         CleanupStack::PushL( iapRecord );
+        CopyRecordFieldsL( *iIapRecord, *iapRecord );
         iapRecord->SetElementId( iIapRecord->ElementId() );
-        aClientPluginInstance->iGenRecordArray.AppendL( static_cast<CommsDat::CCDRecordBase*>( iapRecord ) );
+        aClientPluginInstance->iGenRecordArray.AppendL(
+                static_cast<CommsDat::CCDRecordBase*>( iapRecord ) );
         CleanupStack::Pop( iapRecord );
         }
     else
@@ -2073,11 +2090,13 @@ EXPORT_C void CCmPluginBaseEng::GetPluginDataL(
 
     if ( iNetworkRecord )
         {
-        CCDNetworkRecord* networkRecord =
-                static_cast<CCDNetworkRecord*>( CCDRecordBase::CreateCopyRecordL( *iNetworkRecord ) );
+        CCDNetworkRecord* networkRecord = static_cast<CCDNetworkRecord*>(
+                CCDRecordBase::RecordFactoryL( KCDTIdNetworkRecord ) );
         CleanupStack::PushL( networkRecord );
+        CopyRecordFieldsL( *iNetworkRecord, *networkRecord );
         networkRecord->SetElementId( iNetworkRecord->ElementId() );
-        aClientPluginInstance->iGenRecordArray.AppendL( static_cast<CommsDat::CCDRecordBase*>( networkRecord ) );
+        aClientPluginInstance->iGenRecordArray.AppendL(
+                static_cast<CommsDat::CCDRecordBase*>( networkRecord ) );
         CleanupStack::Pop( networkRecord );
         }
     else
@@ -2087,11 +2106,12 @@ EXPORT_C void CCmPluginBaseEng::GetPluginDataL(
 
     if ( iWapAPRecord )
         {
-        CCDWAPAccessPointRecord* wapAPRecord =
-                static_cast<CCDWAPAccessPointRecord*>( CCDRecordBase::CreateCopyRecordL( *iWapAPRecord ) );
-        CleanupStack::PushL( wapAPRecord );
+        CCDWAPAccessPointRecord* wapAPRecord = static_cast<CCDWAPAccessPointRecord*>(
+                CCDRecordBase::CreateCopyRecordL( *iWapAPRecord ) );//TODO, convert to generic copy
         wapAPRecord->SetElementId( iWapAPRecord->ElementId() );
-        aClientPluginInstance->iGenRecordArray.AppendL( static_cast<CommsDat::CCDRecordBase*>( wapAPRecord ) );
+        CleanupStack::PushL( wapAPRecord );
+        aClientPluginInstance->iGenRecordArray.AppendL(
+                static_cast<CommsDat::CCDRecordBase*>( wapAPRecord ) );
         CleanupStack::Pop( wapAPRecord );
         }
     else
@@ -2101,11 +2121,12 @@ EXPORT_C void CCmPluginBaseEng::GetPluginDataL(
 
     if ( iWapIPBearerRecord )
         {
-        CCDWAPIPBearerRecord* wapIPBearerRecord =
-                static_cast<CCDWAPIPBearerRecord*>( CCDRecordBase::CreateCopyRecordL( *iWapIPBearerRecord ) );
-        CleanupStack::PushL( wapIPBearerRecord );
+        CCDWAPIPBearerRecord* wapIPBearerRecord = static_cast<CCDWAPIPBearerRecord*>(
+                CCDRecordBase::CreateCopyRecordL( *iWapIPBearerRecord ) );//TODO, convert to generic copy
         wapIPBearerRecord->SetElementId( iWapIPBearerRecord->ElementId() );
-        aClientPluginInstance->iGenRecordArray.AppendL( static_cast<CommsDat::CCDRecordBase*>( wapIPBearerRecord ) );
+        CleanupStack::PushL( wapIPBearerRecord );
+        aClientPluginInstance->iGenRecordArray.AppendL(
+                static_cast<CommsDat::CCDRecordBase*>( wapIPBearerRecord ) );
         CleanupStack::Pop( wapIPBearerRecord );
         }
     else
@@ -2115,45 +2136,34 @@ EXPORT_C void CCmPluginBaseEng::GetPluginDataL(
 
     if ( iMetaDataRecord )
         {
-        CCDIAPMetadataRecord* metaDataRecord =
+        CCDIAPMetadataRecord* metadataRecord =
                 new( ELeave ) CCDIAPMetadataRecord( iMetadataTableId );
-        CleanupStack::PushL( metaDataRecord );
-        metaDataRecord->iIAP = IAPRecordElementId();
-        metaDataRecord->iMetadata.SetL( iMetaDataRecord->iMetadata );
-        metaDataRecord->iSeamlessness.SetL( iMetaDataRecord->iSeamlessness );
-        metaDataRecord->SetElementId( iMetaDataRecord->ElementId() );
-        // Record name is set during update.
+        CleanupStack::PushL( metadataRecord );
+        CopyRecordFieldsL( *iMetaDataRecord, *metadataRecord );
+        metadataRecord->SetElementId( iMetaDataRecord->ElementId() );
+        // Record name is set/changed during update.
 
         aClientPluginInstance->iGenRecordArray.AppendL(
-                static_cast<CommsDat::CCDRecordBase*>( metaDataRecord ) );
-        CleanupStack::Pop( metaDataRecord );
+                static_cast<CommsDat::CCDRecordBase*>( metadataRecord ) );
+        CleanupStack::Pop( metadataRecord );
         }
     else
         {
         aClientPluginInstance->iGenRecordArray.AppendL( NULL );
         }
 
-    if ( iLocationRecord )
-        {
-        CCDLocationRecord* locationRecord =
-                static_cast<CCDLocationRecord*>( CCDRecordBase::CreateCopyRecordL( *iLocationRecord ) );
-        CleanupStack::PushL( locationRecord );
-        locationRecord->SetElementId( iLocationRecord->ElementId() );
-        aClientPluginInstance->iGenRecordArray.AppendL( static_cast<CommsDat::CCDRecordBase*>( locationRecord ) );
-        CleanupStack::Pop( locationRecord );
-        }
-    else
-        {
-        aClientPluginInstance->iGenRecordArray.AppendL( NULL );
-        }
+    // Location record does not need to be loaded
+    aClientPluginInstance->iGenRecordArray.AppendL( NULL );
 
     if ( iProxyRecord )
         {
-        CCDProxiesRecord* proxyRecord =
-                static_cast<CCDProxiesRecord*>( CCDRecordBase::CreateCopyRecordL( *iProxyRecord ) );
+        CCDProxiesRecord* proxyRecord = static_cast<CCDProxiesRecord*>(
+                CCDRecordBase::RecordFactoryL( KCDTIdProxiesRecord ) );
         CleanupStack::PushL( proxyRecord );
+        CopyRecordFieldsL( *iProxyRecord, *proxyRecord );
         proxyRecord->SetElementId( iProxyRecord->ElementId() );
-        aClientPluginInstance->iGenRecordArray.AppendL( static_cast<CommsDat::CCDRecordBase*>( proxyRecord ) );
+        aClientPluginInstance->iGenRecordArray.AppendL(
+                static_cast<CommsDat::CCDRecordBase*>( proxyRecord ) );
         CleanupStack::Pop( proxyRecord );
         }
     else
@@ -2182,14 +2192,25 @@ EXPORT_C TUint32 CCmPluginBaseEng::GetIntAttributeL(
         case ECmIapId: // If the CM has an ECmIapId then the ECmIapId is the ECmId.
         case ECmId:
             {
-            retVal = static_cast<CCDIAPRecord*>(
-                    aClientPluginInstance->iGenRecordArray[KIapRecordIndex] )->RecordId();
+            if ( iBearerType == KUidEmbeddedDestination )
+                {
+                retVal = GetBearerIntAttributeL(
+                        aAttribute,
+                        aClientPluginInstance->iGenRecordArray,
+                        aClientPluginInstance->iBearerSpecRecordArray );
+                }
+            else
+                {
+                retVal = static_cast<CCDIAPRecord*>(
+                        aClientPluginInstance->iGenRecordArray[KIapRecordIndex] )->RecordId();
+                }
             }
             break;
         case ECmWapId:
             {
             retVal = static_cast<CCDWAPIPBearerRecord*>(
-                    aClientPluginInstance->iGenRecordArray[KWAPBearerRecordIndex] )->iWAPAccessPointId;
+                    aClientPluginInstance->iGenRecordArray[KWAPBearerRecordIndex] )
+                    ->iWAPAccessPointId;
             }
             break;
         case ECmIapServiceId:
@@ -2223,7 +2244,8 @@ EXPORT_C TUint32 CCmPluginBaseEng::GetIntAttributeL(
             if ( iMetaDataRecord )
                 {
                 retVal = static_cast<CCDIAPMetadataRecord*>(
-                        aClientPluginInstance->iGenRecordArray[KMetaDataRecordIndex] )->iSeamlessness;
+                        aClientPluginInstance->iGenRecordArray[KMetaDataRecordIndex] )
+                        ->iSeamlessness;
                 }
             else
                 {
@@ -2245,7 +2267,8 @@ EXPORT_C TUint32 CCmPluginBaseEng::GetIntAttributeL(
 
         case ECmLoadResult:
             {
-            retVal = KErrNone;
+            // This attribute has been deprecated since Symbian^4.
+            User::Leave( KErrNotSupported ); //TODO, update attribute definition comments.
             }
             break;
 
@@ -2307,14 +2330,34 @@ EXPORT_C TBool CCmPluginBaseEng::GetBoolAttributeL(
         {
         case ECmProtected:
             {
-            retVal = IsProtected();
+            if ( iBearerType == KUidEmbeddedDestination )
+                {
+                retVal = GetBearerBoolAttributeL(
+                        aAttribute,
+                        aClientPluginInstance->iGenRecordArray,
+                        aClientPluginInstance->iBearerSpecRecordArray );
+                }
+            else
+                {
+                retVal = IsProtected();
+                }
             }
             break;
         case ECmHidden:
             {
-            CCDIAPRecord* iapRecord = static_cast<CCDIAPRecord*>(
-                    aClientPluginInstance->iGenRecordArray[KIapRecordIndex] );
-            retVal = iapRecord->Attributes() & ECDHidden;
+            if ( iBearerType == KUidEmbeddedDestination )
+                {
+                retVal = GetBearerBoolAttributeL(
+                        aAttribute,
+                        aClientPluginInstance->iGenRecordArray,
+                        aClientPluginInstance->iBearerSpecRecordArray );
+                }
+            else
+                {
+                CCDIAPRecord* iapRecord = static_cast<CCDIAPRecord*>(
+                        aClientPluginInstance->iGenRecordArray[KIapRecordIndex] );
+                retVal = iapRecord->Attributes() & ECDHidden;
+                }
             }
             break;
         case ECmProxyUsageEnabled:
@@ -2323,26 +2366,23 @@ EXPORT_C TBool CCmPluginBaseEng::GetBoolAttributeL(
                 {
                 retVal = EFalse;
                 }
-
-            retVal = static_cast<CCDProxiesRecord*>(
-                    aClientPluginInstance->iGenRecordArray[KProxyRecordIndex] )->iUseProxyServer;
+            else
+                {
+                retVal = static_cast<CCDProxiesRecord*>(
+                        aClientPluginInstance->iGenRecordArray[KProxyRecordIndex] )
+                        ->iUseProxyServer;
+                }
             }
             break;
         case ECmDestination:
             {
-            TRAPD( err, retVal = GetBearerBoolAttributeL( aAttribute,
-                                                          aClientPluginInstance->iGenRecordArray,
-                                                          aClientPluginInstance->iBearerSpecRecordArray ) );
+            TRAPD( err, retVal = GetBearerBoolAttributeL(
+                    aAttribute,
+                    aClientPluginInstance->iGenRecordArray,
+                    aClientPluginInstance->iBearerSpecRecordArray ) );
             if ( err )
                 {
-                if ( err == KErrNotFound )
-                    {
-                    retVal = EFalse;
-                    }
-                else
-                    {
-                    User::Leave( err );
-                    }
+                retVal = EFalse;
                 }
             }
             break;
@@ -2351,12 +2391,18 @@ EXPORT_C TBool CCmPluginBaseEng::GetBoolAttributeL(
             retVal = EFalse;
             }
             break;
+        case ECmLocationUsageEnabled:
+            {
+            retVal = iLocationEnabled;
+            }
+            break;
         case ECmCoverage:
             // By default the plugin has no network coverage.
             {
-            TRAPD( err, retVal = GetBearerBoolAttributeL( aAttribute,
-                                                          aClientPluginInstance->iGenRecordArray,
-                                                          aClientPluginInstance->iBearerSpecRecordArray ) );
+            TRAPD( err, retVal = GetBearerBoolAttributeL(
+                    aAttribute,
+                    aClientPluginInstance->iGenRecordArray,
+                    aClientPluginInstance->iBearerSpecRecordArray ) );
             if ( err )
                 {
                 if ( err == KErrNotFound )
@@ -2372,23 +2418,33 @@ EXPORT_C TBool CCmPluginBaseEng::GetBoolAttributeL(
             break;
         case ECmMetaHighlight:
             {
-            CCDIAPMetadataRecord* metadataRecord =
-                static_cast<CCDIAPMetadataRecord*>(
+            CCDIAPMetadataRecord* metadataRecord = static_cast<CCDIAPMetadataRecord*>(
                     aClientPluginInstance->iGenRecordArray[KMetaDataRecordIndex] );
             retVal = metadataRecord->iMetadata & EMetaHighlight;
             }
             break;
         case ECmMetaHiddenAgent:
             {
-            CCDIAPMetadataRecord* metadataRecord =
-                static_cast<CCDIAPMetadataRecord*>(
+            CCDIAPMetadataRecord* metadataRecord = static_cast<CCDIAPMetadataRecord*>(
                     aClientPluginInstance->iGenRecordArray[KMetaDataRecordIndex] );
             retVal = metadataRecord->iMetadata & EMetaHiddenAgent;
             }
             break;
+        case ECmMetaHotSpot:
+            {
+            CCDIAPMetadataRecord* metadataRecord = static_cast<CCDIAPMetadataRecord*>(
+                    aClientPluginInstance->iGenRecordArray[KMetaDataRecordIndex] );
+            retVal = metadataRecord->iMetadata & EMetaHotSpot;
+            }
+            break;
         case ECmVirtual:
             {
-            retVal = EFalse;
+            // This is bearer specific attribute.
+            TRAPD( err, retVal = GetBearerInfoBoolL( aAttribute ) );
+            if ( err )
+                {
+                retVal = EFalse;
+                }
             }
             break;
         case ECmWapIPSecurity:
@@ -2420,15 +2476,37 @@ EXPORT_C HBufC* CCmPluginBaseEng::GetStringAttributeL(
     {
     OstTraceFunctionEntry0( CCMPLUGINBASEENG_GETSTRINGATTRIBUTEL_ENTRY );
 
+    if ( !aClientPluginInstance )
+        {
+        User::Leave( KErrCorrupt );
+        }
+
     HBufC* retVal = NULL;
 
     switch ( aAttribute )
         {
+        case ECmBearerIcon:
+            {
+            CCDIAPMetadataRecord* metadataRecord = static_cast<CCDIAPMetadataRecord*>(
+                    aClientPluginInstance->iGenRecordArray[KMetaDataRecordIndex] );
+
+            if ( !metadataRecord )
+                {
+                User::Leave( KErrCorrupt );
+                }
+
+            retVal = TPtrC( metadataRecord->iIconFileName ).AllocL();
+            }
+            break;
         case ECmStartPage:
             {
-            CCDWAPAccessPointRecord* wapAPRecord =
-                static_cast<CCDWAPAccessPointRecord*>(
+            CCDWAPAccessPointRecord* wapAPRecord = static_cast<CCDWAPAccessPointRecord*>(
                     aClientPluginInstance->iGenRecordArray[KWAPAPRecordIndex] );
+
+            if ( !wapAPRecord )
+                {
+                User::Leave( KErrCorrupt );
+                }
 
             retVal = TPtrC( wapAPRecord->iWAPStartPage ).AllocL();
             }
@@ -2438,83 +2516,88 @@ EXPORT_C HBufC* CCmPluginBaseEng::GetStringAttributeL(
             CCDIAPRecord* iapRecord = static_cast<CCDIAPRecord*>(
                     aClientPluginInstance->iGenRecordArray[KIapRecordIndex] );
 
+            if ( !iapRecord )
+                {
+                User::Leave( KErrCorrupt );
+                }
+
             retVal = TPtrC( iapRecord->iRecordName ).AllocL();
             }
             break;
         case ECmProxyServerName:
             {
-            if ( !aClientPluginInstance->iGenRecordArray[KProxyRecordIndex] )
-                {
-                User::Leave( KErrNotFound );
-                }
-
             CCDProxiesRecord* proxyRecord = static_cast<CCDProxiesRecord*>(
                     aClientPluginInstance->iGenRecordArray[KProxyRecordIndex] );
+
+            if ( !proxyRecord )
+                {
+                User::Leave( KErrCorrupt );
+                }
 
             retVal = TPtrC( proxyRecord->iServerName ).AllocL();
             }
             break;
         case ECmProxyProtocolName:
             {
-            if ( !aClientPluginInstance->iGenRecordArray[KProxyRecordIndex] )
-                {
-                User::Leave( KErrNotFound );
-                }
-
             CCDProxiesRecord* proxyRecord = static_cast<CCDProxiesRecord*>(
                     aClientPluginInstance->iGenRecordArray[KProxyRecordIndex] );
+
+            if ( !proxyRecord )
+                {
+                User::Leave( KErrCorrupt );
+                }
 
             retVal = TPtrC( proxyRecord->iExceptions ).AllocL();
             }
             break;
         case ECmProxyExceptions:
             {
-            if ( !aClientPluginInstance->iGenRecordArray[KProxyRecordIndex] )
-                {
-                User::Leave( KErrNotFound );
-                }
-
             CCDProxiesRecord* proxyRecord = static_cast<CCDProxiesRecord*>(
                     aClientPluginInstance->iGenRecordArray[KProxyRecordIndex] );
+
+            if ( !proxyRecord )
+                {
+                User::Leave( KErrCorrupt );
+                }
 
             retVal = TPtrC( proxyRecord->iProtocolName ).AllocL();
             }
             break;
         case ECmWapIPGatewayAddress:
             {
-            if ( !aClientPluginInstance->iGenRecordArray[KWAPBearerRecordIndex] )
-                {
-                User::Leave( KErrNotFound );
-                }
-
             CCDWAPIPBearerRecord* wapIPBearerRecord = static_cast<CCDWAPIPBearerRecord*>(
                     aClientPluginInstance->iGenRecordArray[KWAPBearerRecordIndex] );
+
+            if ( !wapIPBearerRecord )
+                {
+                User::Leave( KErrCorrupt );
+                }
 
             retVal = TPtrC( wapIPBearerRecord->iWAPGatewayAddress ).AllocL();
             }
             break;
         case ECmWapIPProxyLoginName:
             {
-            if ( !aClientPluginInstance->iGenRecordArray[KWAPBearerRecordIndex] )
-                {
-                User::Leave( KErrNotFound );
-                }
-
             CCDWAPIPBearerRecord* wapIPBearerRecord = static_cast<CCDWAPIPBearerRecord*>(
                     aClientPluginInstance->iGenRecordArray[KWAPBearerRecordIndex] );
+
+            if ( !wapIPBearerRecord )
+                {
+                User::Leave( KErrCorrupt );
+                }
 
             retVal = TPtrC( wapIPBearerRecord->iWAPProxyLoginName ).AllocL();
             }
             break;
         case ECmWapIPProxyLoginPass:
             {
-            if ( !aClientPluginInstance->iGenRecordArray[KWAPBearerRecordIndex] )
-                {
-                User::Leave( KErrNotFound );
-                }
-
             CCDWAPIPBearerRecord* wapIPBearerRecord = static_cast<CCDWAPIPBearerRecord*>(
                     aClientPluginInstance->iGenRecordArray[KWAPBearerRecordIndex] );
+
+            if ( !wapIPBearerRecord )
+                {
+                User::Leave( KErrCorrupt );
+                }
 
             retVal = TPtrC( wapIPBearerRecord->iWAPProxyLoginPass ).AllocL();
             }
@@ -2560,13 +2643,13 @@ EXPORT_C HBufC8* CCmPluginBaseEng::GetString8AttributeL(
     return retVal;
     }
 
-//-----------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
 // CCmPluginBaseEng::GetIntAttributeL
 // -----------------------------------------------------------------------------
 EXPORT_C void CCmPluginBaseEng::SetIntAttributeL(
-    TUint32 aAttribute,
-    TUint32 aValue,
-    CCmClientPluginInstance* aClientPluginInstance )
+        TUint32 aAttribute,
+        TUint32 aValue,
+        CCmClientPluginInstance* aClientPluginInstance )
     {
     OstTraceFunctionEntry0( CCMPLUGINBASEENG_SETINTATTRIBUTEL_ENTRY );
 
@@ -2593,7 +2676,7 @@ EXPORT_C void CCmPluginBaseEng::SetIntAttributeL(
                 {
                 static_cast<CCDIAPMetadataRecord*>(
                         aClientPluginInstance->iGenRecordArray[KMetaDataRecordIndex] )->
-                                iSeamlessness.SetL( aValue );
+                        iSeamlessness.SetL( aValue );
                 }
             else
                 {
@@ -2611,17 +2694,20 @@ EXPORT_C void CCmPluginBaseEng::SetIntAttributeL(
             {
             if ( !aClientPluginInstance->iGenRecordArray[KProxyRecordIndex] )
                 {
-                CCDProxiesRecord* proxyRecord =
-                        static_cast<CCDProxiesRecord*>( CCDRecordBase::CreateCopyRecordL( *iProxyRecord ) );
+                CCDProxiesRecord* proxyRecord = static_cast<CCDProxiesRecord*>(
+                        CCDRecordBase::RecordFactoryL( KCDTIdProxiesRecord ) );
                 CleanupStack::PushL( proxyRecord );
+                CopyRecordFieldsL( *iProxyRecord, *proxyRecord );
                 proxyRecord->SetElementId( iProxyRecord->ElementId() );
-                aClientPluginInstance->iGenRecordArray.AppendL( static_cast<CommsDat::CCDRecordBase*>( proxyRecord ) );
+                aClientPluginInstance->iGenRecordArray.InsertL(
+                        static_cast<CommsDat::CCDRecordBase*>( proxyRecord ),
+                        KProxyRecordIndex );
                 CleanupStack::Pop( proxyRecord );
                 }
 
             static_cast<CCDProxiesRecord*>(
-                    aClientPluginInstance->iGenRecordArray[KProxyRecordIndex] )
-                        ->iPortNumber = aValue;
+                    aClientPluginInstance->iGenRecordArray[KProxyRecordIndex] )->
+                    iPortNumber = aValue;
             }
             break;
         case ECmWapIPWSPOption:
@@ -2633,39 +2719,43 @@ EXPORT_C void CCmPluginBaseEng::SetIntAttributeL(
             else
                 {
                 static_cast<CCDWAPIPBearerRecord*>(
-                        aClientPluginInstance->iGenRecordArray[KWAPBearerRecordIndex] )->iWAPWSPOption.SetL( aValue );
+                        aClientPluginInstance->iGenRecordArray[KWAPBearerRecordIndex] )->
+                        iWAPWSPOption.SetL( aValue );
                 }
             }
             break;
         case ECmWapIPProxyPort:
             {
             static_cast<CCDWAPIPBearerRecord*>(
-                    aClientPluginInstance->iGenRecordArray[KWAPBearerRecordIndex] )->iWAPProxyPort.SetL( aValue );
+                    aClientPluginInstance->iGenRecordArray[KWAPBearerRecordIndex] )->
+                    iWAPProxyPort.SetL( aValue );
             }
             break;
         default:
             {
-            SetBearerIntAttributeL( aAttribute,
-                                    aValue,
-                                    aClientPluginInstance->iGenRecordArray,
-                                    aClientPluginInstance->iBearerSpecRecordArray );
+            SetBearerIntAttributeL(
+                    aAttribute,
+                    aValue,
+                    aClientPluginInstance->iGenRecordArray,
+                    aClientPluginInstance->iBearerSpecRecordArray );
             }
         }
+
     OstTraceFunctionExit0( CCMPLUGINBASEENG_SETINTATTRIBUTEL_EXIT );
     }
 
-//-----------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
 // CCmPluginBaseEng::SetBoolAttributeL
 // -----------------------------------------------------------------------------
 EXPORT_C void CCmPluginBaseEng::SetBoolAttributeL(
-    TUint32 aAttribute,
-    TBool aValue,
-    CCmClientPluginInstance* aClientPluginInstance )
+        TUint32 aAttribute,
+        TBool aValue,
+        CCmClientPluginInstance* aClientPluginInstance )
     {
     OstTraceFunctionEntry0( CCMPLUGINBASEENG_SETBOOLATTRIBUTEL_ENTRY );
 
     CCDIAPRecord* iapRecord = static_cast<CCDIAPRecord*>(
-                        aClientPluginInstance->iGenRecordArray[KIapRecordIndex] );
+            aClientPluginInstance->iGenRecordArray[KIapRecordIndex] );
 
     switch ( aAttribute )
         {
@@ -2707,17 +2797,20 @@ EXPORT_C void CCmPluginBaseEng::SetBoolAttributeL(
             {
             if ( !aClientPluginInstance->iGenRecordArray[KProxyRecordIndex] )
                 {
-                CCDProxiesRecord* proxyRecord =
-                        static_cast<CCDProxiesRecord*>( CCDRecordBase::CreateCopyRecordL( *iProxyRecord ) );
+                CCDProxiesRecord* proxyRecord = static_cast<CCDProxiesRecord*>(
+                        CCDRecordBase::RecordFactoryL( KCDTIdProxiesRecord ) );
                 CleanupStack::PushL( proxyRecord );
+                CopyRecordFieldsL( *iProxyRecord, *proxyRecord );
                 proxyRecord->SetElementId( iProxyRecord->ElementId() );
-                aClientPluginInstance->iGenRecordArray.AppendL( static_cast<CommsDat::CCDRecordBase*>( proxyRecord ) );
+                aClientPluginInstance->iGenRecordArray.InsertL(
+                        static_cast<CommsDat::CCDRecordBase*>( proxyRecord ),
+                        KProxyRecordIndex );
                 CleanupStack::Pop( proxyRecord );
                 }
 
             static_cast<CCDProxiesRecord*>(
-                    aClientPluginInstance->iGenRecordArray[KProxyRecordIndex] )
-                        ->iUseProxyServer = aValue;
+                    aClientPluginInstance->iGenRecordArray[KProxyRecordIndex] )->iUseProxyServer =
+                            aValue;
             }
             break;
         case ECmChargeCardUsageEnabled:
@@ -2732,9 +2825,8 @@ EXPORT_C void CCmPluginBaseEng::SetBoolAttributeL(
             break;
         case ECmMetaHighlight:
             {
-            CCDIAPMetadataRecord* metadataRecord =
-                static_cast<CCDIAPMetadataRecord*>(
-                        aClientPluginInstance->iGenRecordArray[KMetaDataRecordIndex] );
+            CCDIAPMetadataRecord* metadataRecord = static_cast<CCDIAPMetadataRecord*>(
+                    aClientPluginInstance->iGenRecordArray[KMetaDataRecordIndex] );
             if ( aValue )
                 {
                 metadataRecord->iMetadata = EMetaHighlight | metadataRecord->iMetadata;
@@ -2759,41 +2851,73 @@ EXPORT_C void CCmPluginBaseEng::SetBoolAttributeL(
                 }
             }
             break;
+        case ECmMetaHotSpot:
+            {
+            CCDIAPMetadataRecord* metadataRecord = static_cast<CCDIAPMetadataRecord*>(
+                    aClientPluginInstance->iGenRecordArray[KMetaDataRecordIndex] );
+            if ( aValue )
+                {
+                metadataRecord->iMetadata = EMetaHotSpot | metadataRecord->iMetadata;
+                }
+            else
+                {
+                metadataRecord->iMetadata = ~EMetaHotSpot & metadataRecord->iMetadata;
+                }
+            }
+            break;
         case ECmWapIPSecurity:
             {
             static_cast<CCDWAPIPBearerRecord*>(
-                    aClientPluginInstance->iGenRecordArray[KWAPBearerRecordIndex] )->iWAPSecurity.SetL( aValue );
+                    aClientPluginInstance->iGenRecordArray[KWAPBearerRecordIndex] )
+                    ->iWAPSecurity.SetL( aValue );
             }
             break;
         default:
             {
-            SetBearerBoolAttributeL( aAttribute,
-                                     aValue,
-                                     aClientPluginInstance->iGenRecordArray,
-                                     aClientPluginInstance->iBearerSpecRecordArray );
+            SetBearerBoolAttributeL(
+                    aAttribute,
+                    aValue,
+                    aClientPluginInstance->iGenRecordArray,
+                    aClientPluginInstance->iBearerSpecRecordArray );
             }
         }
+
     OstTraceFunctionExit0( CCMPLUGINBASEENG_SETBOOLATTRIBUTEL_EXIT );
     }
 
-//-----------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
 // CCmPluginBaseEng::SetStringAttributeL
 // -----------------------------------------------------------------------------
 EXPORT_C void CCmPluginBaseEng::SetStringAttributeL(
-    TUint32 aAttribute,
-    const TDesC16& aValue,
-    CCmClientPluginInstance* aClientPluginInstance )
+        TUint32 aAttribute,
+        const TDesC16& aValue,
+        CCmClientPluginInstance* aClientPluginInstance )
     {
     OstTraceFunctionEntry0( CCMPLUGINBASEENG_SETSTRINGATTRIBUTEL_ENTRY );
 
     switch ( aAttribute )
         {
+        case ECmBearerIcon:
+            {
+            CCDIAPMetadataRecord* metadataRecord = static_cast<CCDIAPMetadataRecord*>(
+                    aClientPluginInstance->iGenRecordArray[KMetaDataRecordIndex] );
+
+            if ( !metadataRecord )
+                {
+                User::Leave( KErrCorrupt );
+                }
+            metadataRecord->iIconFileName.SetL( aValue );
+            }
+            break;
         case ECmStartPage:
             {
-            CCDWAPAccessPointRecord* wapAPRecord =
-                static_cast<CCDWAPAccessPointRecord*>(
-                        aClientPluginInstance->iGenRecordArray[KWAPAPRecordIndex] );
+            CCDWAPAccessPointRecord* wapAPRecord = static_cast<CCDWAPAccessPointRecord*>(
+                    aClientPluginInstance->iGenRecordArray[KWAPAPRecordIndex] );
 
+            if ( !wapAPRecord )
+                {
+                User::Leave( KErrCorrupt );
+                }
             wapAPRecord->iWAPStartPage.SetL( aValue );
             }
             break;
@@ -2802,23 +2926,25 @@ EXPORT_C void CCmPluginBaseEng::SetStringAttributeL(
             CCDIAPRecord* iapRecord = static_cast<CCDIAPRecord*>(
                     aClientPluginInstance->iGenRecordArray[KIapRecordIndex] );
 
+            if ( !iapRecord )
+                {
+                User::Leave( KErrCorrupt );
+                }
             SetNameL( aValue, iapRecord, aClientPluginInstance->iNamingMethod );
             }
             break;
         case ECmProxyServerName:
             {
-            CCDProxiesRecord* proxyRecord =
-                    static_cast<CCDProxiesRecord*>(
-                            aClientPluginInstance->iGenRecordArray[KProxyRecordIndex] );
+            CCDProxiesRecord* proxyRecord = static_cast<CCDProxiesRecord*>(
+                    aClientPluginInstance->iGenRecordArray[KProxyRecordIndex] );
             if ( !proxyRecord )
                 {
-                proxyRecord = static_cast<CCDProxiesRecord *>
-                              ( CCDRecordBase::RecordFactoryL(KCDTIdProxiesRecord ) );
+                proxyRecord = static_cast<CCDProxiesRecord*>(
+                        CCDRecordBase::RecordFactoryL( KCDTIdProxiesRecord ) );
 
-                // map proxy record to this iap.
-                proxyRecord->iService =
-                        static_cast<CCDProxiesRecord*>(
-                                aClientPluginInstance->iGenRecordArray[KProxyRecordIndex] )->RecordId();
+                // Map proxy record to this iap.
+                proxyRecord->iService = static_cast<CCDProxiesRecord*>(
+                        aClientPluginInstance->iGenRecordArray[KProxyRecordIndex] )->RecordId();
 
                 aClientPluginInstance->iGenRecordArray.Insert( proxyRecord, KProxyRecordIndex );
                 }
@@ -2828,18 +2954,16 @@ EXPORT_C void CCmPluginBaseEng::SetStringAttributeL(
             break;
         case ECmProxyProtocolName:
             {
-            CCDProxiesRecord* proxyRecord =
-                    static_cast<CCDProxiesRecord*>(
-                            aClientPluginInstance->iGenRecordArray[KProxyRecordIndex] );
+            CCDProxiesRecord* proxyRecord = static_cast<CCDProxiesRecord*>(
+                    aClientPluginInstance->iGenRecordArray[KProxyRecordIndex] );
             if ( !proxyRecord )
                 {
-                proxyRecord = static_cast<CCDProxiesRecord *>
-                              ( CCDRecordBase::RecordFactoryL(KCDTIdProxiesRecord ) );
+                proxyRecord = static_cast<CCDProxiesRecord*>(
+                        CCDRecordBase::RecordFactoryL( KCDTIdProxiesRecord ) );
 
-                // map proxy record to this iap.
-                proxyRecord->iService =
-                        static_cast<CCDProxiesRecord*>(
-                                aClientPluginInstance->iGenRecordArray[KProxyRecordIndex] )->RecordId();
+                // Map proxy record to this iap.
+                proxyRecord->iService = static_cast<CCDProxiesRecord*>(
+                        aClientPluginInstance->iGenRecordArray[KProxyRecordIndex] )->RecordId();
 
                 aClientPluginInstance->iGenRecordArray.Insert( proxyRecord, KProxyRecordIndex );
                 }
@@ -2849,18 +2973,16 @@ EXPORT_C void CCmPluginBaseEng::SetStringAttributeL(
             break;
         case ECmProxyExceptions:
             {
-            CCDProxiesRecord* proxyRecord =
-                    static_cast<CCDProxiesRecord*>(
-                            aClientPluginInstance->iGenRecordArray[KProxyRecordIndex] );
+            CCDProxiesRecord* proxyRecord = static_cast<CCDProxiesRecord*>(
+                    aClientPluginInstance->iGenRecordArray[KProxyRecordIndex] );
             if ( !proxyRecord )
                 {
-                proxyRecord = static_cast<CCDProxiesRecord *>
-                              ( CCDRecordBase::RecordFactoryL(KCDTIdProxiesRecord ) );
+                proxyRecord = static_cast<CCDProxiesRecord*>(
+                        CCDRecordBase::RecordFactoryL( KCDTIdProxiesRecord ) );
 
-                // map proxy record to this iap.
-                proxyRecord->iService =
-                        static_cast<CCDProxiesRecord*>(
-                                aClientPluginInstance->iGenRecordArray[KProxyRecordIndex] )->RecordId();
+                // Map proxy record to this iap.
+                proxyRecord->iService = static_cast<CCDProxiesRecord*>(
+                        aClientPluginInstance->iGenRecordArray[KProxyRecordIndex] )->RecordId();
 
                 aClientPluginInstance->iGenRecordArray.Insert( proxyRecord, KProxyRecordIndex );
                 }
@@ -2873,6 +2995,10 @@ EXPORT_C void CCmPluginBaseEng::SetStringAttributeL(
             CCDWAPIPBearerRecord* wapIPBearerRecord = static_cast<CCDWAPIPBearerRecord*>(
                     aClientPluginInstance->iGenRecordArray[KWAPBearerRecordIndex] );
 
+            if ( !wapIPBearerRecord )
+                {
+                User::Leave( KErrCorrupt );
+                }
             wapIPBearerRecord->iWAPGatewayAddress.SetL( aValue );
             }
             break;
@@ -2881,6 +3007,10 @@ EXPORT_C void CCmPluginBaseEng::SetStringAttributeL(
             CCDWAPIPBearerRecord* wapIPBearerRecord = static_cast<CCDWAPIPBearerRecord*>(
                     aClientPluginInstance->iGenRecordArray[KWAPBearerRecordIndex] );
 
+            if ( !wapIPBearerRecord )
+                {
+                User::Leave( KErrCorrupt );
+                }
             wapIPBearerRecord->iWAPProxyLoginName.SetL( aValue );
             }
             break;
@@ -2889,27 +3019,33 @@ EXPORT_C void CCmPluginBaseEng::SetStringAttributeL(
             CCDWAPIPBearerRecord* wapIPBearerRecord = static_cast<CCDWAPIPBearerRecord*>(
                     aClientPluginInstance->iGenRecordArray[KWAPBearerRecordIndex] );
 
+            if ( !wapIPBearerRecord )
+                {
+                User::Leave( KErrCorrupt );
+                }
             wapIPBearerRecord->iWAPProxyLoginPass.SetL( aValue );
             }
             break;
         default:
             {
-            SetBearerStringAttributeL( aAttribute,
-                                       aValue,
-                                       aClientPluginInstance->iGenRecordArray,
-                                       aClientPluginInstance->iBearerSpecRecordArray );
+            SetBearerStringAttributeL(
+                    aAttribute,
+                    aValue,
+                    aClientPluginInstance->iGenRecordArray,
+                    aClientPluginInstance->iBearerSpecRecordArray );
             }
         }
+
     OstTraceFunctionExit0( CCMPLUGINBASEENG_SETSTRINGATTRIBUTEL_EXIT );
     }
 
-//-----------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
 // CCmPluginBaseEng::SetString8AttributeL
 // -----------------------------------------------------------------------------
 EXPORT_C void CCmPluginBaseEng::SetString8AttributeL(
-    TUint32 aAttribute,
-    const TDesC8& aValue,
-    CCmClientPluginInstance* aClientPluginInstance )
+        TUint32 aAttribute,
+        const TDesC8& aValue,
+        CCmClientPluginInstance* aClientPluginInstance )
     {
     OstTraceFunctionEntry0( CCMPLUGINBASEENG_SETSTRING8ATTRIBUTEL_ENTRY );
 
@@ -2917,12 +3053,14 @@ EXPORT_C void CCmPluginBaseEng::SetString8AttributeL(
         {
         default:
             {
-            SetBearerString8AttributeL( aAttribute,
-                                        aValue,
-                                        aClientPluginInstance->iGenRecordArray,
-                                        aClientPluginInstance->iBearerSpecRecordArray );
+            SetBearerString8AttributeL(
+                    aAttribute,
+                    aValue,
+                    aClientPluginInstance->iGenRecordArray,
+                    aClientPluginInstance->iBearerSpecRecordArray );
             }
         }
+
     OstTraceFunctionExit0( CCMPLUGINBASEENG_SETSTRING8ATTRIBUTEL_EXIT );
     }
 
@@ -2941,7 +3079,6 @@ TBool CCmPluginBaseEng::IsUnspecifiedIPv4Address( const TDesC& aIpv4Address )
         }
 
     OstTraceFunctionExit0( DUP1__ISUNSPECIFIEDIPV4ADDRESS_EXIT );
-
     return EFalse;
     }
 
@@ -2968,7 +3105,6 @@ TIPv6Types CCmPluginBaseEng::ClassifyIPv6Address( const TDesC& aIpv6Address )
         }
 
     OstTraceFunctionExit0( DUP2__CLASSIFYIPV6ADDRESS_EXIT );
-
     return EIPv6UserDefined;
     }
 

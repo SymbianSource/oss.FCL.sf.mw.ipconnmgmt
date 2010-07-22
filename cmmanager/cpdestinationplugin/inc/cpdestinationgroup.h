@@ -61,7 +61,9 @@ private:
     void createUncategorisedDestination();
     void fetchDestinations(QList<QSharedPointer<CmDestinationShim> > &destinationList);
     void loadBearerPlugins();
-	QString getDestinationAdditionalText(int iapCount);
+	QString getDestinationAdditionalText(QSharedPointer<CmDestinationShim> destination);
+	QString getDestinationAdditionalText(int destinationId);
+	QString resolveDestinationIcon(QSharedPointer<CmDestinationShim> destination) const; 
 	
 private slots:
 

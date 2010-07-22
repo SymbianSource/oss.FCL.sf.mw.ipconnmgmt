@@ -87,7 +87,10 @@ void CCmConnectionMethodWrapper::GetConnMethodWithIdL(
         }
 
     iCmManagerApi = aCmManagerApi;
-    iCmConnectionMethodApi.ConnectAndGetConnMethodWithIdL( *aCmManagerApi, aIapId, aExistingHandle );
+    iCmConnectionMethodApi.ConnectAndGetConnMethodWithIdL(
+            *aCmManagerApi,
+            aIapId,
+            aExistingHandle );
     if ( !aExistingHandle )
         {
         iCmManagerApi->StoreConnMethodWrapper( this );

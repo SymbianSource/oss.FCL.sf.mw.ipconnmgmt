@@ -1,25 +1,26 @@
 /*
- * Copyright (c) 2010 Nokia Corporation and/or its subsidiary(-ies).
- * All rights reserved.
- * This component and the accompanying materials are made available
- * under the terms of "Eclipse Public License v1.0""
- * which accompanies this distribution, and is available
- * at the URL "http://www.eclipse.org/legal/epl-v10.html".
- *
- * Initial Contributors:
- * Nokia Corporation - initial contribution.
- *
- * Contributors:
- *
- * Description:  
- * Defines for data types and attributes used in CmManagerShim interface.
- */
+* Copyright (c) 2010 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:  
+* Defines for data types and attributes used in CmManagerShim interface.
+*/
 
 #ifndef CMMANAGERDEFINES_SHIM_H
 #define CMMANAGERDEFINES_SHIM_H
 
 // System includes
 
+#include <QString>
 #include <cmmanagerdef.h>
 #include <cmconnectionmethoddef.h>
 #include <cmpluginwlandef.h>
@@ -64,7 +65,7 @@ namespace CMManagerShim
      *  Constants for maximum string lengths.
      */
     //! Connection name length
-    const uint CmNameLength                 = 30;
+    const uint CmNameLength                 = 50;
     //! Homepage address length
     const uint CmStartPageLength            = 1024;
     //! IPv4 IP address length
@@ -88,7 +89,9 @@ namespace CMManagerShim
      *  Enumerations for connection method attributes.
      */
     enum ConnectionMethodAttribute {
-        // Common attributes        
+        // Common attributes
+        //! From TConnectionMethodCommonAttributes in cmconnectionmethoddef.h
+        CmDestination                   = CMManager::ECmDestination,
         //! From TConnectionMethodCommonAttributes in cmconnectionmethoddef.h
         CmBearerType                    = CMManager::ECmBearerType,
         //! From TConnectionMethodCommonAttributes in cmconnectionmethoddef.h
@@ -137,6 +140,8 @@ namespace CMManagerShim
         CmProxyServerName               = CMManager::ECmProxyServerName,
         //! From TConnectionMethodCommonAttributes in cmconnectionmethoddef.h
         CmProxyPortNumber               = CMManager::ECmProxyPortNumber,
+        //! From TConnectionMethodCommonAttributes in cmconnectionmethoddef.h
+        CmMetaHotSpot                   = CMManager::ECmMetaHotSpot,
 
         // Packet data specific attributes
         /*!
@@ -219,6 +224,8 @@ namespace CMManagerShim
         WlanSecurityMode                = CMManager::EWlanSecurityMode,
         //!  From TConnectionMethodWlanSpecificAttributes in cmpluginwlandef.h
         WlanScanSSID                    = CMManager::EWlanScanSSID,
+        //!  From TConnectionMethodWlanSpecificAttributes in cmpluginwlandef.h
+        WlanChannelID                   = CMManager::EWlanChannelID,
         //!  From TConnectionMethodWlanSpecificAttributes in cmpluginwlandef.h
         WlanWepKey1InHex                = CMManager::EWlanWepKey1InHex,
         //!  From TConnectionMethodWlanSpecificAttributes in cmpluginwlandef.h

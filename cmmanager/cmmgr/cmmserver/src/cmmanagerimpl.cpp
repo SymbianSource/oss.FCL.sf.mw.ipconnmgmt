@@ -70,6 +70,8 @@ CCmManagerImpl::~CCmManagerImpl()
 
     if ( iIsFeatureManagerInitialised )
         {
+        // Feature manager must not be uninitialized earlier. Plugins must be
+        // able to use it.
         FeatureManager::UnInitializeLib();
         }
 
@@ -107,6 +109,8 @@ void CCmManagerImpl::ConstructL()
     {
     OstTraceFunctionEntry0( CCMMANAGERIMPL_CONSTRUCTL_ENTRY );
 
+    // Feature Manager is initialized here, and it can be used by plugins also.
+    // It is uninitialized in destructor.
     FeatureManager::InitializeLibL();
     iIsFeatureManagerInitialised = ETrue;
     iWLanSupport = FeatureManager::FeatureSupported( KFeatureIdProtocolWlan );
@@ -133,22 +137,22 @@ void CCmManagerImpl::CheckTablesL()
 
     TInt err( 0 );
 
-    TRAP( err, iSnapTableId = CCDDataMobilitySelectionPolicyRecord::TableIdL( iTrans->Session() ));
-    if ( err == KErrNotFound )
-        {
-        iSnapTableId = CCDDataMobilitySelectionPolicyRecord::CreateTableL( iTrans->Session() );
-        }
-    else
-        {
-        User::LeaveIfError( err );
-        }
-
     TRAP( err, iBearerPriorityTableId =
             CCDGlobalBearerTypePriorizationRecord::TableIdL( iTrans->Session() ) );
     if ( err == KErrNotFound )
         {
         iBearerPriorityTableId =
                CCDGlobalBearerTypePriorizationRecord::CreateTableL( iTrans->Session() );
+        }
+    else
+        {
+        User::LeaveIfError( err );
+        }
+
+    TRAP( err, iSnapTableId = CCDDataMobilitySelectionPolicyRecord::TableIdL( iTrans->Session() ));
+    if ( err == KErrNotFound )
+        {
+        iSnapTableId = CCDDataMobilitySelectionPolicyRecord::CreateTableL( iTrans->Session() );
         }
     else
         {
@@ -304,23 +308,25 @@ void CCmManagerImpl::BuildPluginArrayL()
             CleanupStack::PushL( plugin );
 
             TBool inserted( EFalse );
-            //TODO, Implement plugin sorting by priority later.
-            /*
-            TInt defaultPriority( KDataMobilitySelectionPolicyPriorityWildCard );
 
-            // No UI priority -> wildcard
-            TRAP_IGNORE( defaultPriority = plugin->GetIntAttributeL( ECmDefaultUiPriority ) );
+            TInt defaultPriority( CMManager::KDataMobilitySelectionPolicyPriorityWildCard );
 
-            for ( TInt j( 0 ); j < iPlugins->Count(); ++j )
+            // No priority -> wildcard
+            TRAP_IGNORE( defaultPriority = plugin->GetBearerInfoIntL(
+                    CMManager::ECmDefaultPriority ) );
+
+            for ( TInt j = 0; j < iPlugins->Count(); j++ )
                 {
-                if ( defaultPriority > (*iPlugins)[j]->GetIntAttributeL( ECmDefaultUiPriority ) )
+                TUint32 bearerToCompare = (*iPlugins)[j]->GetBearerInfoIntL(
+                        CMManager::ECmDefaultPriority );
+                if ( defaultPriority > bearerToCompare )
                     {
                     continue;
                     }
-                else if ( defaultPriority == (*iPlugins)[j]->GetIntAttributeL( ECmDefaultUiPriority ) )
+                else if ( defaultPriority == bearerToCompare )
                     {
-                    if ( plugin->GetIntAttributeL( ECmExtensionLevel ) >
-                        (*iPlugins)[j]->GetIntAttributeL( ECmExtensionLevel ) )
+                    if ( plugin->GetBearerInfoIntL( ECmExtensionLevel ) >
+                            (*iPlugins)[j]->GetBearerInfoIntL( ECmExtensionLevel ) )
                         {
                         iPlugins->InsertL( j, plugin );
                         inserted = ETrue;
@@ -333,7 +339,7 @@ void CCmManagerImpl::BuildPluginArrayL()
                     inserted = ETrue;
                     break;
                     }
-                }*/
+                }
 
             if ( !inserted )
                 {

@@ -135,9 +135,6 @@ class ConnectionView: public HbMainWindow
         /* The toolbar on the view */
         HbToolBar *mToolBar;
         
-        /* The toolbar action which can be used to disconnect all the connections */
-        HbAction *mDisconnectAction;
-        
         /* The id of the timer used to close the application */
         int mClosingTimer;
         

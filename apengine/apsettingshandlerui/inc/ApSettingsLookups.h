@@ -24,7 +24,7 @@
 
 // INCLUDE FILES
 #include <ApAccessPointItem.h>
-#include <ApSetUI.rsg>
+#include <apsetui.rsg>
 
 #include <ApSettingsHandlerCommons.h>
 

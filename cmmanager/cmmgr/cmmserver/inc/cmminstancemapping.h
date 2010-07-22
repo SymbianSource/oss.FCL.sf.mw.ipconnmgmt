@@ -47,7 +47,10 @@ public:
     RArray<TCmmConnMethodItem> iConnMethodItemArray;
 
     // IDs for unsupported connection methods inside this destination.
-    RArray<TUint32> iUnsupportedConnMethods;
+    RArray<TUint> iUnsupportedConnMethods;
+    
+    // The destination metadata.
+    TUint32 iMetadata;
     };
 
 
@@ -91,55 +94,77 @@ public: //TODO, sort methods, they are currently in mixed order in .cpp file.
     /**
      * Check if the given ID is a valid existing destination ID.
      */
-    TBool ValidDestinationId( const TUint32& aId ) const;
+    TBool ValidDestinationId( const TUint32 aId ) const;
 
     /**
      * Check if the given ID is a valid existing connection method ID.
      */
-    TBool ValidConnMethodId( const TUint32& aId ) const;
+    TBool ValidConnMethodId( const TUint32 aId ) const;
+
+    /**
+     * Check if the given ID is a valid existing unsupported connection method
+     * ID.
+     */
+    TBool UnsupportedConnMethodId( const TUint32 aId ) const;
 
     /**
      * Check from database if the given destination is an embedded destination
      * in any other destination.
      */
-    TBool DestinationIsEmbedded( const TUint32& aDestinationId ) const;
+    TBool DestinationIsEmbedded( const TUint32 aDestinationId ) const;
 
     /**
      * Check from database if the given destination has an embedded destination.
      */
-    TBool DestinationHasEmbedded( const TUint32& aDestinationId ) const;
+    TBool DestinationHasEmbedded( const TUint32 aDestinationId ) const;
 
     /**
      * Check from database if the given destination is pointed to by any
      * virtual IAP.
      */
-    TBool DestinationPointedToByVirtualIap( const TUint32& aDestinationId ) const;
+    TBool DestinationPointedToByVirtualIap( const TUint32 aDestinationId ) const;
 
     /**
      * Check from database if the given connection method is pointed to by any
      * virtual IAP.
      */
-    TBool ConnMethodPointedToByVirtualIap( const TUint32& aConnMethodId ) const;
+    TBool ConnMethodPointedToByVirtualIap( const TUint32 aConnMethodId ) const;
 
     /**
      * Check if the given connection method is the only connection method in
      * the given destination and if a virtual IAP points to that destination.
      */
     TBool ConnMethodInDestinationButLocked(
-            const TUint32& aConnMethodId,
-            const TUint32& aDestinationId ) const;
+            const TUint32 aConnMethodId,
+            const TUint32 aDestinationId ) const;
 
     /**
      * Get bearer type of connection method matching given ID.
      * Return KErrNone if ID is found, KErrNotFound if not.
      */
-    TInt GetConnMethodBearerType( const TUint32& aConnMethodId, TUint32& bearerType ) const;
+    TInt GetConnMethodBearerType( const TUint32 aConnMethodId, TUint32& bearerType ) const;
 
     /**
      * Returns the number of destinations the provided connection method
      * belongs to.
      */
-    TInt DestinationsContainingConnMethod( const TUint32& aConnMethodId ) const;
+    TInt DestinationsContainingConnMethod( const TUint32 aConnMethodId ) const;
+
+    /**
+     * Returns the destination ids containing the connection method given as
+     * parameter.
+     */
+    void DestinationsContainingConnMethodL(
+            const TUint32 aConnMethodId,
+            RArray<TUint32>& aDestinationIds ) const;
+
+    /**
+     * Find and return a copy of a connection method item matching the given ID.
+     * Returns KErrNotFound, if the connection method is not found.
+     */
+    TInt GetConnMethodItem(
+            const TUint32 aConnMethodId,
+            TCmmConnMethodItem& aConnMethodItem ) const;
 
     /**
      * Returns all conenction method IDs. Unsupported connection methods are
@@ -164,7 +189,7 @@ public: //TODO, sort methods, they are currently in mixed order in .cpp file.
      * into the provided connection method item array. The array is reset first.
      */
     void GetConnMethodsFromDestinationL(
-            const TUint32& aDestinationId,
+            const TUint32 aDestinationId,
             RArray<TCmmConnMethodItem>& aConnMethodArray ) const;
 
     /**
@@ -172,8 +197,8 @@ public: //TODO, sort methods, they are currently in mixed order in .cpp file.
      * destination than the one given.
      */
     TBool ConnMethodInOtherDestination(
-            const TUint32& aConnMethodId,
-            const TUint32& aDestinationId );
+            const TUint32 aConnMethodId,
+            const TUint32 aDestinationId );
 
     /**
      * Return the EasyWLAN IAP ID, zero if not found or WLAN not supported.
@@ -190,47 +215,48 @@ public: //TODO, sort methods, they are currently in mixed order in .cpp file.
      * removes the connection method from destination/connection method
      * structures so Refresh()-call is not needed.
      */
-    void AddConnMethodToDeletedListL( const TUint& aConnMethodId );
+    void AddConnMethodToDeletedListL( const TUint aConnMethodId );
 
     /**
      * Remove a connection method ID from deleted list. Nothing happens if ID
      * is not found from the list.
      */
-    void RemoveConnMethodFromDeletedList( const TUint& aConnMethodId );
+    void RemoveConnMethodFromDeletedList( const TUint aConnMethodId );
 
     /**
      * Add a destination ID to deleted list. Ignores any duplicates. Also
      * removes the destination from destination/connection method structures
      * so Refresh()-call is not needed.
      */
-    void AddDestinationToDeletedListL( const TUint& aDestinationId );
+    void AddDestinationToDeletedListL( const TUint aDestinationId );
 
     /**
      * Remove a destination ID from deleted list. Nothing happens if ID is not
      * found from the list.
      */
-    void RemoveDestinationFromDeletedList( const TUint& aDestinationId );
+    void RemoveDestinationFromDeletedList( const TUint aDestinationId );
 
     /**
      * Remove the connection method from current destination/connection method
      * structures. This is a lot faster than calling Refresh().
      */
-    void RemoveConnMethod( const TUint32& aConnMethodId );
+    void RemoveConnMethod( const TUint32 aConnMethodId );
 
     /**
      * Remove the connection method from current destination/connection method
      * structures. This is a lot faster than calling Refresh(). The ID of any
      * changed destination is added to the aChangedDestinations-array.
+     * Also adds the ID of any changed destinations to the provided array.
      */
     void RemoveConnMethod(
-            const TUint32& aConnMethodId,
+            const TUint32 aConnMethodId,
             RArray<TUint32>& aChangedDestinations );
 
     /**
      * Remove the destination from current destination/connection method
      * structures. This is a lot faster than calling Refresh().
      */
-    void RemoveDestination( const TUint32& aDestinationId );
+    void RemoveDestination( const TUint32 aDestinationId );
 
     /**
      * Remove the connection method from all destinations in the current
@@ -239,8 +265,13 @@ public: //TODO, sort methods, they are currently in mixed order in .cpp file.
      * aChangedDestinations-array.
      */
     void RemoveConnMethodFromDestinations(
-            const TUint32& aConnMethodId,
+            const TUint32 aConnMethodId,
             RArray<TUint32>& aChangedDestinations );
+    
+    /**
+     * Get the metadata of the destination identified with given id.
+     */
+    TUint32 DestinationMetadata( const TUint32 aDestinationId ) const;
 
 private:
     /**
@@ -252,6 +283,24 @@ private:
      * Reads all destinations and the connection methods inside them.
      */
     void ReadAndValidateDestinationsL();
+
+    /**
+     * Goes through the internal IAP table, checking all virtual IAPs that link
+     * to an IAP. If the linked IAP is not found, the virtual IAP is removed.
+     */
+    void ValidateVirtualIapsLinkingToIaps();
+
+    /**
+     * Goes through the internal IAP table, checking all virtual IAPs that link
+     * to a SNAP. If the linked SNAP is not found, the virtual IAP is removed.
+     */
+    void ValidateVirtualIapsLinkingToSnaps();
+
+    /**
+     * Find the destination item matching the provided destination ID.
+     * Returns a pointer to the internal destination item, NULL if not found.
+     */
+    CDestination* GetDestination( const TUint32 aDestinationId ) const;
 
     /**
      * Returns the reference to shared CommsDat session handle.
@@ -266,7 +315,7 @@ private:
     RArray<TCmmConnMethodItem> iConnMethodItemArray;
 
     // IDs for all unsupported connection methods.
-    RArray<TUint32> iUnsupportedConnMethods;
+    RArray<TUint> iUnsupportedConnMethods;
 
     // All destinations.
     RPointerArray<CDestination> iDestinations;

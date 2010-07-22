@@ -61,9 +61,6 @@ CpAddDestinationEntryItemData::CpAddDestinationEntryItemData(CpItemDataHelper &i
     mDialog(0)
 {
     OstTraceFunctionEntry0(CPADDDESTINATIONENTRYITEMDATA_CPADDDESTINATIONENTRYITEMDATA_ENTRY);
-    // Fix connections
-    itemDataHelper.removeConnection(this,SIGNAL(pressed()),this,SLOT(onLaunchView()));
-    itemDataHelper.addConnection(this,SIGNAL(clicked()),this,SLOT(onLaunchView()));
     OstTraceFunctionExit0(CPADDDESTINATIONENTRYITEMDATA_CPADDDESTINATIONENTRYITEMDATA_EXIT);
 }
 
@@ -85,17 +82,21 @@ void CpAddDestinationEntryItemData::onLaunchView()
     OstTraceFunctionEntry0(CPADDDESTINATIONENTRYITEMDATA_ONLAUNCHVIEW_ENTRY);
     mDialog = new HbInputDialog();
     mDialog->setAttribute(Qt::WA_DeleteOnClose);
-    mDialog->lineEdit()->setMaxLength(DestinationNameMaxLength);
+    mDialog->lineEdit()->setMaxLength(CMManagerShim::CmNameLength);
     mDialog->clearActions();
     mDialog->setPromptText(hbTrId("txt_occ_dialog_destination_name"));
     mDialog->setInputMode(HbInputDialog::TextInput);
-    mOkAction = new HbAction(hbTrId("txt_common_button_ok"));
+    mOkAction = new HbAction(
+        hbTrId("txt_common_button_ok"),
+        mDialog);
     bool connected = connect(mOkAction, 
                              SIGNAL(triggered()), 
                              this, 
                              SLOT(setNewDestinationName()));
     Q_ASSERT(connected);
-    HbAction *cancelAction = new HbAction(hbTrId("txt_common_button_cancel"));
+    HbAction *cancelAction = new HbAction(
+        hbTrId("txt_common_button_cancel"),
+        mDialog);
     mDialog->addAction(mOkAction);
     mDialog->addAction(cancelAction);
     mDialog->show();
@@ -175,6 +176,7 @@ bool CpAddDestinationEntryItemData::isDestinationNameValid(const QString dest, C
             CmDestinationShim *destination = cmm->destination(destinationList[i]);
             if (0 == dest.compare(destination->name())) {
                 retVal = false;
+                delete destination;
                 break;
             }
             delete destination;
@@ -200,7 +202,9 @@ void CpAddDestinationEntryItemData::showErrorNote()
     QString info = hbTrId("txt_occ_info_invalid_name");
     note->setText(info);
     note->setTimeout(HbPopup::NoTimeout);
-    HbAction *errorOk = new HbAction(hbTrId("txt_common_button_ok"));
+    HbAction *errorOk = new HbAction(
+        hbTrId("txt_common_button_ok"),
+        note);
     bool connected = connect(
         errorOk,
         SIGNAL(triggered()),

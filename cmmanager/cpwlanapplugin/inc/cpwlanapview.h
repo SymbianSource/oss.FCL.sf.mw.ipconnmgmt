@@ -24,6 +24,7 @@
 #include <QMap>
 #include <HbMessageBox>
 #include <cpbasesettingview.h>
+#include <cmconnectionmethod_shim.h>
 
 // User includes
 
@@ -60,21 +61,29 @@ protected:
 protected slots:
  
 private:
+    Q_DISABLE_COPY(CpWlanApView)
+
     void createAccessPointSettingsGroup();
     void updateAccessPointSettingsGroup();
-    void loadSecurityPlugins();
+    void loadSecurityPlugins(
+        CMManagerShim::WlanConnMode networkMode);
     void updateSecurityGroup(int index);
     void showMessageBox(
         HbMessageBox::MessageBoxType type,
         const QString &text);
     bool tryUpdate();
     void handleUpdateError();
-       
+    void updateAdHocChannelItem(
+        CMManagerShim::WlanConnMode networkMode);
+    void updateSecurityModeItem(
+        CMManagerShim::WlanConnMode networkMode);
+    
 private slots:
     void connectionNameChanged();
     void wlanNetworkNameChanged();
     void networkStatusChanged(int index);
     void networkModeChanged(int index);
+    void adHocChannelChanged(int index);
     void securityModeChanged(int index);
     void homepageChanged();
     void menuActionTriggered(HbAction *action);
@@ -82,6 +91,10 @@ private slots:
     void setEditorPreferences(const QModelIndex modelIndex);
     
 private: // data
+    // WLAN ad-hoc channel minimum and maximum values 
+    static const uint WlanAdHocChannelMinValue = 1;
+    static const uint WlanAdHocChannelMaxValue = 11;
+    
     //! Dataform
     HbDataForm *mForm;
     //! Dataform model
@@ -98,6 +111,8 @@ private: // data
     HbDataFormModelItem *mNetworkStatusItem;
     //! "Network mode" setting item
     HbDataFormModelItem *mNetworkModeItem;
+    //! "Ad-hoc channel" setting item
+    HbDataFormModelItem *mAdHocChannelItem;
     //! "Security mode" setting item
     HbDataFormModelItem *mSecurityModeItem;
     //! "Homepage" setting item

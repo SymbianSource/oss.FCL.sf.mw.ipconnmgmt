@@ -75,7 +75,7 @@ public:
     void CopyL( RPointerArray<CCmmBearerPriority>& aArray ) const;
 
     /**
-     * Get the priority value for a service type from the bearer priority
+     * Get the priority value for a service type name from the bearer priority
      * cache.
      */
     TUint GetPriority( const TDesC& aServiceType ) const;

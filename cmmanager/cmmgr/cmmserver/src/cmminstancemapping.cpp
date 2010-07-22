@@ -194,7 +194,7 @@ void CCmmInstanceMapping::RefreshL()
 // Check if the given ID is a valid existing destination ID.
 // ---------------------------------------------------------------------------
 //
-TBool CCmmInstanceMapping::ValidDestinationId( const TUint32& aId ) const
+TBool CCmmInstanceMapping::ValidDestinationId( const TUint32 aId ) const
     {
     OstTraceFunctionEntry0( CCMMINSTANCEMAPPING_VALIDDESTINATIONID_ENTRY );
 
@@ -220,7 +220,7 @@ TBool CCmmInstanceMapping::ValidDestinationId( const TUint32& aId ) const
 // Check if the given ID is a valid existing connection method ID.
 // ---------------------------------------------------------------------------
 //
-TBool CCmmInstanceMapping::ValidConnMethodId( const TUint32& aId ) const
+TBool CCmmInstanceMapping::ValidConnMethodId( const TUint32 aId ) const
     {
     OstTraceFunctionEntry0( CCMMINSTANCEMAPPING_VALIDCONNMETHODID_ENTRY );
 
@@ -243,11 +243,37 @@ TBool CCmmInstanceMapping::ValidConnMethodId( const TUint32& aId ) const
     }
 
 // ---------------------------------------------------------------------------
+// Check if the given ID is a valid existing unsupported connection method ID.
+// ---------------------------------------------------------------------------
+//
+TBool CCmmInstanceMapping::UnsupportedConnMethodId( const TUint32 aId ) const
+    {
+    OstTraceFunctionEntry0( CCMMINSTANCEMAPPING_UNSUPPORTEDCONNMETHODID_ENTRY );
+
+    TBool validity( EFalse );
+
+    if ( aId > 0 )
+        {
+        for ( TInt i = 0; i < iUnsupportedConnMethods.Count(); i++ )
+            {
+            if ( iUnsupportedConnMethods[i] == aId )
+                {
+                validity = ETrue;
+                break;
+                }
+            }
+        }
+
+    OstTraceFunctionExit0( CCMMINSTANCEMAPPING_UNSUPPORTEDCONNMETHODID_EXIT );
+    return validity;
+    }
+
+// ---------------------------------------------------------------------------
 // Check from database if the given destination is an embedded destination in
 // any other destination.
 // ---------------------------------------------------------------------------
 //
-TBool CCmmInstanceMapping::DestinationIsEmbedded( const TUint32& aDestinationId ) const
+TBool CCmmInstanceMapping::DestinationIsEmbedded( const TUint32 aDestinationId ) const
     {
     OstTraceFunctionEntry0( CCMMINSTANCEMAPPING_DESTINATIONISEMBEDDED_ENTRY );
 
@@ -280,7 +306,7 @@ TBool CCmmInstanceMapping::DestinationIsEmbedded( const TUint32& aDestinationId 
 // Check from database if the given destination has an embedded destination.
 // ---------------------------------------------------------------------------
 //
-TBool CCmmInstanceMapping::DestinationHasEmbedded( const TUint32& aDestinationId ) const
+TBool CCmmInstanceMapping::DestinationHasEmbedded( const TUint32 aDestinationId ) const
     {
     OstTraceFunctionEntry0( CCMMINSTANCEMAPPING_DESTINATIONHASEMBEDDED_ENTRY );
 
@@ -296,7 +322,7 @@ TBool CCmmInstanceMapping::DestinationHasEmbedded( const TUint32& aDestinationId
             TInt index = iDestinations[i]->iConnMethodItemArray.Count() - 1;
             if ( index >= 0 )
                 {
-                if ( iDestinations[i]->iConnMethodItemArray[index].iBearerType == KUidEmbeddedDestination )
+                if ( iDestinations[i]->iConnMethodItemArray[index].IsEmbedded() )
                     {
                     result = ETrue;
                     }
@@ -315,12 +341,25 @@ TBool CCmmInstanceMapping::DestinationHasEmbedded( const TUint32& aDestinationId
 // ---------------------------------------------------------------------------
 //
 TBool CCmmInstanceMapping::DestinationPointedToByVirtualIap(
-        const TUint32& /*aDestinationId*/ ) const
+        const TUint32 aDestinationId ) const
     {
     OstTraceFunctionEntry0( CCMMINSTANCEMAPPING_DESTINATIONPOINTEDTOBYVIRTUALIAP_ENTRY );
-    OstTraceFunctionExit0( CCMMINSTANCEMAPPING_DESTINATIONPOINTEDTOBYVIRTUALIAP_EXIT );
 
-    return EFalse; //TODO, virtual IAPs are not yet supported.
+    TBool result( EFalse );
+    if ( aDestinationId > 0 )
+        {
+        for ( TInt i = 0; i < iConnMethodItemArray.Count(); i++ )
+            {
+            if ( iConnMethodItemArray[i].LinkedSnapId() == aDestinationId )
+                {
+                result = ETrue;
+                break;
+                }
+            }
+        }
+
+    OstTraceFunctionExit0( CCMMINSTANCEMAPPING_DESTINATIONPOINTEDTOBYVIRTUALIAP_EXIT );
+    return result;
     }
 
 // ---------------------------------------------------------------------------
@@ -329,12 +368,25 @@ TBool CCmmInstanceMapping::DestinationPointedToByVirtualIap(
 // ---------------------------------------------------------------------------
 //
 TBool CCmmInstanceMapping::ConnMethodPointedToByVirtualIap(
-        const TUint32& /*aConnMethodId*/ ) const
+        const TUint32 aConnMethodId ) const
     {
     OstTraceFunctionEntry0( CCMMINSTANCEMAPPING_CONNMETHODPOINTEDTOBYVIRTUALIAP_ENTRY );
-    OstTraceFunctionExit0( CCMMINSTANCEMAPPING_CONNMETHODPOINTEDTOBYVIRTUALIAP_EXIT );
 
-    return EFalse; //TODO, virtual IAPs are not yet supported.
+    TBool result( EFalse );
+    if ( aConnMethodId > 0 )
+        {
+        for ( TInt i = 0; i < iConnMethodItemArray.Count(); i++ )
+            {
+            if ( iConnMethodItemArray[i].LinkedIapId() == aConnMethodId )
+                {
+                result = ETrue;
+                break;
+                }
+            }
+        }
+
+    OstTraceFunctionExit0( CCMMINSTANCEMAPPING_CONNMETHODPOINTEDTOBYVIRTUALIAP_EXIT );
+    return result;
     }
 
 // ---------------------------------------------------------------------------
@@ -343,19 +395,33 @@ TBool CCmmInstanceMapping::ConnMethodPointedToByVirtualIap(
 // ---------------------------------------------------------------------------
 //
 TBool CCmmInstanceMapping::ConnMethodInDestinationButLocked(
-        const TUint32& /*aConnMethodId*/,
-        const TUint32& /*aDestinationId*/ ) const
+        const TUint32 aConnMethodId,
+        const TUint32 aDestinationId ) const
     {
     OstTraceFunctionEntry0( CCMMINSTANCEMAPPING_CONNMETHODINDESTINATIONBUTLOCKED_ENTRY );
 
-    // - Find correct destination.
-    // - Check if it only has 1 CM.
-    // - Check if the CM is the one given.
-    // - Call DestinationPointedToByVirtualIap( aDestinationId ).
-    //
-    OstTraceFunctionExit0( CCMMINSTANCEMAPPING_CONNMETHODINDESTINATIONBUTLOCKED_EXIT );
+    TBool result( EFalse );
 
-    return EFalse; //TODO, virtual IAPs are not yet supported.
+    // Find destination.
+    CDestination* destination( NULL );
+    destination = GetDestination( aDestinationId );
+
+    if ( destination )
+        {
+        // Check if the destination has only 1 IAP.
+        if ( destination->iConnMethodItemArray.Count() == 1 )
+            {
+            // Check if the IAP has given ID.
+            if ( destination->iConnMethodItemArray[0].iId == aConnMethodId )
+                {
+                // Check if this destination is linked from a virtual IAP.
+                result = DestinationPointedToByVirtualIap( aDestinationId );
+                }
+            }
+        }
+
+    OstTraceFunctionExit0( CCMMINSTANCEMAPPING_CONNMETHODINDESTINATIONBUTLOCKED_EXIT );
+    return result;
     }
 
 // ---------------------------------------------------------------------------
@@ -364,7 +430,7 @@ TBool CCmmInstanceMapping::ConnMethodInDestinationButLocked(
 // ---------------------------------------------------------------------------
 //
 TInt CCmmInstanceMapping::GetConnMethodBearerType(
-        const TUint32& aConnMethodId,
+        const TUint32 aConnMethodId,
         TUint32& bearerType ) const
     {
     OstTraceFunctionEntry0( CCMMINSTANCEMAPPING_GETCONNMETHODBEARERTYPE_ENTRY );
@@ -382,11 +448,14 @@ TInt CCmmInstanceMapping::GetConnMethodBearerType(
         }
     if ( result == KErrNotFound )
         {
-        // Embedded destinations are not in connection method array, need check from ID range.
+        // Embedded destinations are not in connection method array.
         if ( aConnMethodId > KCmmDestIdIntervalMin && aConnMethodId < KCmmDestIdIntervalMax )
             {
-            bearerType = KUidEmbeddedDestination;
-            result = KErrNone;
+            if ( ValidDestinationId( aConnMethodId ) )
+                {
+                bearerType = KUidEmbeddedDestination;
+                result = KErrNone;
+                }
             }
         }
 
@@ -401,7 +470,7 @@ TInt CCmmInstanceMapping::GetConnMethodBearerType(
 // ---------------------------------------------------------------------------
 //
 TInt CCmmInstanceMapping::DestinationsContainingConnMethod(
-        const TUint32& aConnMethodId ) const
+        const TUint32 aConnMethodId ) const
     {
     OstTraceFunctionEntry0( CCMMINSTANCEMAPPING_CONNMETHODREFERENCECOUNT_ENTRY );
 
@@ -445,13 +514,61 @@ TInt CCmmInstanceMapping::DestinationsContainingConnMethod(
     }
 
 // ---------------------------------------------------------------------------
+// Returns the destination IDs containing the connection method given as
+// parameter.
+// ---------------------------------------------------------------------------
+//
+void CCmmInstanceMapping::DestinationsContainingConnMethodL(
+        const TUint32 aConnMethodId,
+        RArray<TUint32>& aDestinationIds ) const
+    {
+    OstTraceFunctionEntry0( CCMMINSTANCEMAPPING_DESTINATIONSCONTAININGCONNMETHODL_ENTRY );
+    
+    aDestinationIds.Reset();
+    TInt count( 0 );
+    
+    // Go through each destination.
+    for ( TInt i = 0; i < iDestinations.Count(); i++ )
+        {
+        TBool foundInThisDestination( EFalse );
+
+        // Loop through all connection methods in this destination.
+        count = iDestinations[i]->iConnMethodItemArray.Count();
+        for ( TInt j = 0; j < count; j++ )
+            {
+            if ( iDestinations[i]->iConnMethodItemArray[j].iId == aConnMethodId )
+                {
+                foundInThisDestination = ETrue;
+                aDestinationIds.AppendL( iDestinations[i]->iId );
+                break;
+                }
+            }
+
+        // Check unsupported connection methods also.
+        if ( !foundInThisDestination )
+            {
+            count = iDestinations[i]->iUnsupportedConnMethods.Count();
+            for ( TInt j = 0; j < count; j++ )
+                {
+                if ( iDestinations[i]->iUnsupportedConnMethods[j] == aConnMethodId )
+                    {
+                    aDestinationIds.AppendL( iDestinations[i]->iId );
+                    break;
+                    }
+                }
+            }
+        }
+    
+    OstTraceFunctionExit0( CCMMINSTANCEMAPPING_DESTINATIONSCONTAININGCONNMETHODL_EXIT );
+    }
+
+// ---------------------------------------------------------------------------
 // Get database session.
 // ---------------------------------------------------------------------------
 //
 CommsDat::CMDBSession& CCmmInstanceMapping::Session() const
     {
-    OstTraceFunctionEntry0( CCMMINSTANCEMAPPING_SESSION_ENTRY );
-
+    // No traces.
     return iCache.Session();
     }
 
@@ -468,14 +585,13 @@ void CCmmInstanceMapping::ReadAndValidateConnMethodsL()
             new( ELeave ) CMDBRecordSet<CCDIAPRecord>( KCDTIdIAPRecord );
     CleanupStack::PushL( iapRecordSet );
 
-    CCDIAPRecord* iapRecord = static_cast<CCDIAPRecord*>( CCDRecordBase::RecordFactoryL( KCDTIdIAPRecord ) );
+    CCDIAPRecord* iapRecord = static_cast<CCDIAPRecord*>(
+            CCDRecordBase::RecordFactoryL( KCDTIdIAPRecord ) );
     CleanupStack::PushL( iapRecord );
 
     TRAP_IGNORE( iapRecordSet->LoadL( Session() ) );
 
-    //TODO, check from commsdat dump if all high-range IDs are available, or was some records
-    //TODO  used up by something. will this possibly affect cm/destination creation with predef ID? (Keijo)
-
+    // Clear the old info about IAPs.
     iConnMethodItemArray.Reset();
     iUnsupportedConnMethods.Reset();
 
@@ -488,31 +604,86 @@ void CCmmInstanceMapping::ReadAndValidateConnMethodsL()
         {
         TUint32 connMethodId( iapRecordSet->iRecords[i]->RecordId() );
 
-        // Check the connection method is not on the deleted list waiting to be deleted from database.
+        // Check the connection method is not on the deleted list waiting to be
+        // deleted from database.
         TInt indexInDeletedList = iDeletedConnMethods.FindInOrder( ( TUint )connMethodId );
         if ( indexInDeletedList == KErrNotFound )
             {
             // Check the bearer type of the iap. Leaves if iap is unsupported.
             iapRecord->SetRecordId( connMethodId );
-            TRAP( err, iCache.BearerInfoFromIapRecordL( iapRecord, bearerType, bearerPriority ) ); //TODO
+            TRAP( err, iCache.BearerInfoFromIapRecordL( iapRecord, bearerType, bearerPriority ) );
             if ( !err )
                 {
-                TCmmConnMethodItem item( connMethodId, bearerType, bearerPriority, 0 );
-                iConnMethodItemArray.Append( item ); // Ignore errors.
+                TBool isVirtual( EFalse );
+                TUint32 linkedIap( 0 );
+                TUint32 linkedSnap( 0 );
+
+                // BearerInfoFromIapRecordL() has called LoadL() for iapRecord.
+                if( TPtrC( KCDTypeNameVPNService ) == iapRecord->iServiceType )
+                    {
+                    isVirtual = ETrue;
+                    CCDVPNServiceRecord* serviceRecord = static_cast<CCDVPNServiceRecord*>(
+                            CCDRecordBase::RecordFactoryL( KCDTIdVPNServiceRecord ) );
+                    CleanupStack::PushL( serviceRecord );
+                    serviceRecord->SetRecordId( iapRecord->iService );
+                    serviceRecord->LoadL( Session() );
+
+                    // If neither link is set, or both are set, it is an error
+                    // but we ignore it. If both links are set, we use only the
+                    // SNAP link.
+                    if ( !serviceRecord->iServiceSNAP.IsNull() )
+                        {
+                        TUint32 apRecordId = serviceRecord->iServiceSNAP;
+                        if ( apRecordId != 0 )
+                            {
+                            CCDAccessPointRecord* apRecord = static_cast<CCDAccessPointRecord*>(
+                                    CCDRecordBase::RecordFactoryL( KCDTIdAccessPointRecord ) );
+                            apRecord->SetRecordId( apRecordId );
+                            TRAP( err, apRecord->LoadL( Session() ) );
+                            if ( !err )
+                                {
+                                linkedSnap = apRecord->iRecordTag;
+                                }
+                            }
+                        }
+                    if ( !linkedSnap && !serviceRecord->iServiceIAP.IsNull() )
+                        {
+                        linkedIap = serviceRecord->iServiceIAP;
+                        if ( linkedIap >= KCmmConnMethodIdIntervalMax )
+                            {
+                            linkedIap = ( linkedIap & KCDMaskShowRecordId ) >> KBitsInOneByte;
+                            }
+                        }
+
+                    CleanupStack::PopAndDestroy( serviceRecord );
+                    }
+                    TCmmConnMethodItem item(
+                            connMethodId,
+                            bearerType,
+                            bearerPriority,
+                            0,
+                            isVirtual,
+                            linkedIap,
+                            linkedSnap );
+                    iConnMethodItemArray.Append( item ); // Ignore errors.
                 }
             else if ( err == KErrNotSupported )
                 {
-                iUnsupportedConnMethods.Append( connMethodId ); // Ignore errors.
+                iUnsupportedConnMethods.InsertInOrder( ( TUint )connMethodId ); // Ignore errors.
                 }
             else if ( err == KErrNoMemory )
                 {
-                User::Leave( err ); //TODO, check what this will cause.
+                User::Leave( err );
                 }
             }
         }
 
     CleanupStack::PopAndDestroy( iapRecord );
     CleanupStack::PopAndDestroy( iapRecordSet );
+
+    // Check all virtual IAPs that link to an IAP. If the link is invalid
+    // (linked IAP not found), the IAP is removed.
+    ValidateVirtualIapsLinkingToIaps();
 
     OstTraceFunctionExit0( CCMMINSTANCEMAPPING_READANDVALIDATECONNMETHODSL_EXIT );
     }
@@ -561,25 +732,35 @@ void CCmmInstanceMapping::ReadAndValidateDestinationsL()
             // If connMethodId and embeddedDestinationId are 0 this is a destination.
             if ( connMethodId == 0 && embeddedDestinationId == 0 )
                 {
-                TBool destAlreadyExists( EFalse );
-                for ( TInt j = 0; j < iDestinations.Count(); j++ )
-                    {
-                    if ( destinationId == iDestinations[j]->iId )
-                        {
-                        destAlreadyExists = ETrue;
-                        break;
-                        }
-                    }
-
+                TBool destAlreadyExists = ValidDestinationId( destinationId );
                 if ( !destAlreadyExists )
                     {
-                    CDestination* dest = CDestination::NewL();
-                    dest->iId = destinationId;
-                    iDestinations.Append( dest );
+                    CCDSNAPMetadataRecord* metadataRecord = new( ELeave ) CCDSNAPMetadataRecord(
+                            iCache.TableId( ECmmDestMetadataRecord ) );
+                    CleanupStack::PushL( metadataRecord );
+
+                    // Add destination metadata.
+                    metadataRecord->iSNAP.SetL( destinationId );
+                    if ( metadataRecord->FindL( Session() ) )
+                        {
+                        metadataRecord->LoadL( Session() );
+
+                        CDestination* dest = CDestination::NewLC();
+                        dest->iId = destinationId;
+                        dest->iMetadata = metadataRecord->iMetadata;
+                        iDestinations.AppendL( dest );
+                        CleanupStack::Pop( dest );
+                        }
+                    CleanupStack::PopAndDestroy( metadataRecord );
+                    metadataRecord = NULL;
                     }
                 }
             }
         }
+
+    // Check all virtual IAPs that link to a SNAP. If the link is invalid
+    // (linked SNAP not found), the IAP is removed.
+    ValidateVirtualIapsLinkingToSnaps();
 
     // Read snap ID, connection method ID and embedded destination ID.
     for ( TInt i = 0; i < snapRecordCount; i++ )
@@ -596,14 +777,7 @@ void CCmmInstanceMapping::ReadAndValidateDestinationsL()
             {
             // Find destination.
             CDestination* destination( NULL );
-            for ( TInt j = 0; j < iDestinations.Count(); j++ )
-                {
-                if ( destinationId == iDestinations[j]->iId )
-                    {
-                    destination = iDestinations[j];
-                    break;
-                    }
-                }
+            destination = GetDestination( destinationId );
 
             if ( destination )
                 {
@@ -633,7 +807,7 @@ void CCmmInstanceMapping::ReadAndValidateDestinationsL()
                         if ( index == KErrNotFound )
                             {
                             item.iPriority = snapRecord->iPriority;
-                            destination->iConnMethodItemArray.InsertInOrderAllowRepeats( //TODO, if prio is 256, bearer type used? embeded should always be last.
+                            destination->iConnMethodItemArray.InsertInOrderAllowRepeats(
                                     item,
                                     connMethodItemOrderingLogic ); // Ignore errors.
                             }
@@ -641,17 +815,11 @@ void CCmmInstanceMapping::ReadAndValidateDestinationsL()
                     else
                         {
                         // Check if the connection method is unsupported instead.
-                        for ( TInt j = 0; j < iUnsupportedConnMethods.Count(); j++ )
+                        TBool isUnsupported = UnsupportedConnMethodId( connMethodId );
+                        if ( isUnsupported )
                             {
-                            if ( iUnsupportedConnMethods[j] == connMethodId )
-                                {
-                                found = ETrue;
-                                break;
-                                }
-                            }
-                        if ( found )
-                            {
-                            destination->iUnsupportedConnMethods.Append( connMethodId ); // Ignore errors. //TODO, allow repeats?
+                            destination->iUnsupportedConnMethods.InsertInOrder(
+                                    ( TUint )connMethodId ); // Ignore errors.
                             }
                         }
                     }
@@ -663,16 +831,8 @@ void CCmmInstanceMapping::ReadAndValidateDestinationsL()
                     if ( embeddedDestinationId != destinationId )
                         {
                         // Check embedded destination ID is valid.
-                        TBool found( EFalse );
-                        for ( TInt j = 0; j < iDestinations.Count(); j++ )
-                            {
-                            if ( embeddedDestinationId == iDestinations[j]->iId )
-                                {
-                                found = ETrue;
-                                break;
-                                }
-                            }
-                        if ( found )
+                        TBool valid = ValidDestinationId( embeddedDestinationId );
+                        if ( valid )
                             {
                             TCmmConnMethodItem item(
                                     embeddedDestinationId,
@@ -692,6 +852,106 @@ void CCmmInstanceMapping::ReadAndValidateDestinationsL()
     CleanupStack::PopAndDestroy( snapRecordSet );
 
     OstTraceFunctionExit0( CCMMINSTANCEMAPPING_READANDVALIDATEDESTINATIONSL_EXIT );
+    }
+
+// ---------------------------------------------------------------------------
+// Goes through the internal IAP table, checking all virtual IAPs that link to
+// an IAP. If the linked IAP is not found, the virtual IAP is removed.
+// ---------------------------------------------------------------------------
+//
+void CCmmInstanceMapping::ValidateVirtualIapsLinkingToIaps()
+    {
+    OstTraceFunctionEntry0( CCMMINSTANCEMAPPING_VALIDATEVIRTUALIAPSLINKINGTOIAPS_ENTRY );
+
+    for ( TInt i = 0; i < iConnMethodItemArray.Count(); i++ )
+        {
+        if ( iConnMethodItemArray[i].LinkedIapId() != 0 )
+            {
+            if ( !ValidConnMethodId( iConnMethodItemArray[i].LinkedIapId() ) )
+                {
+                iConnMethodItemArray.Remove( i );
+                i--; // Adjust counter.
+                }
+            }
+        }
+
+    OstTraceFunctionExit0( CCMMINSTANCEMAPPING_VALIDATEVIRTUALIAPSLINKINGTOIAPS_EXIT );
+    }
+
+// ---------------------------------------------------------------------------
+// Goes through the internal IAP table, checking all virtual IAPs that link to
+// a SNAP. If the linked SNAP is not found, the virtual IAP is removed.
+// ---------------------------------------------------------------------------
+//
+void CCmmInstanceMapping::ValidateVirtualIapsLinkingToSnaps()
+    {
+    OstTraceFunctionEntry0( CCMMINSTANCEMAPPING_VALIDATEVIRTUALIAPSLINKINGTOSNAPS_ENTRY );
+
+    for ( TInt i = 0; i < iConnMethodItemArray.Count(); i++ )
+        {
+        if ( iConnMethodItemArray[i].LinkedSnapId() != 0 )
+            {
+            if ( !ValidDestinationId( iConnMethodItemArray[i].LinkedSnapId() ) )
+                {
+                iConnMethodItemArray.Remove( i );
+                i--; // Adjust counter.
+                }
+            }
+        }
+
+    OstTraceFunctionExit0( CCMMINSTANCEMAPPING_VALIDATEVIRTUALIAPSLINKINGTOSNAPS_EXIT );
+    }
+
+// ---------------------------------------------------------------------------
+// Find the destination item matching the provided destination ID.
+// Returns a pointer to the internal destination item, NULL if not found.
+// ---------------------------------------------------------------------------
+//
+CDestination* CCmmInstanceMapping::GetDestination( const TUint32 aDestinationId ) const
+    {
+    OstTraceFunctionEntry0( CCMMINSTANCEMAPPING_GETDESTINATION_ENTRY );
+
+    CDestination* destination( NULL );
+    if ( aDestinationId > 0 )
+        {
+        for ( TInt i = 0; i < iDestinations.Count(); i++ )
+            {
+            if ( iDestinations[i]->iId == aDestinationId )
+                {
+                destination = iDestinations[i];
+                break;
+                }
+            }
+        }
+
+    OstTraceFunctionExit0( CCMMINSTANCEMAPPING_GETDESTINATION_EXIT );
+    return destination;
+    }
+
+// ---------------------------------------------------------------------------
+// Find and return a copy of a connection method item matching the given ID.
+// Returns KErrNotFound, if the connection method is not found.
+// ---------------------------------------------------------------------------
+//
+TInt CCmmInstanceMapping::GetConnMethodItem(
+        const TUint32 aConnMethodId,
+        TCmmConnMethodItem& aConnMethodItem ) const
+    {
+    OstTraceFunctionEntry0( CCMMINSTANCEMAPPING_GETCONNMETHODITEM_ENTRY );
+
+    TInt result( KErrNotFound );
+    for ( TInt i = 0; i < iConnMethodItemArray.Count(); i++ )
+        {
+        if ( iConnMethodItemArray[i].iId == aConnMethodId )
+            {
+            aConnMethodItem = iConnMethodItemArray[i];
+            result = KErrNone;
+            break;
+            }
+        }
+
+    OstTraceFunctionExit0( CCMMINSTANCEMAPPING_GETCONNMETHODITEM_EXIT );
+    return result;
     }
 
 // ---------------------------------------------------------------------------
@@ -726,7 +986,7 @@ void CCmmInstanceMapping::GetAllConnMethodsL(
         // Include unsupported connection methods also.
         for ( TInt i = 0; i < iUnsupportedConnMethods.Count(); i++ )
             {
-            aConnMethodArray.AppendL( iUnsupportedConnMethods[i] );
+            aConnMethodArray.AppendL( ( TUint32 )iUnsupportedConnMethods[i] );
             }
         }
 
@@ -769,7 +1029,7 @@ void CCmmInstanceMapping::GetDestinationsL( RArray<TUint32>& aDestinationArray )
 // ---------------------------------------------------------------------------
 //
 void CCmmInstanceMapping::GetConnMethodsFromDestinationL(
-        const TUint32& aDestinationId,
+        const TUint32 aDestinationId,
         RArray<TCmmConnMethodItem>& aConnMethodArray ) const
     {
     OstTraceFunctionEntry0( CCMMINSTANCEMAPPING_GETCONNMETHODSFROMDESTINATIONL_ENTRY );
@@ -805,8 +1065,8 @@ void CCmmInstanceMapping::GetConnMethodsFromDestinationL(
 // ---------------------------------------------------------------------------
 //
 TBool CCmmInstanceMapping::ConnMethodInOtherDestination(
-        const TUint32& aConnMethodId,
-        const TUint32& aDestinationId )
+        const TUint32 aConnMethodId,
+        const TUint32 aDestinationId )
     {
     OstTraceFunctionEntry0( CCMMINSTANCEMAPPING_CONNMETHODINOTHERDESTINATION_ENTRY );
 
@@ -920,9 +1180,12 @@ void CCmmInstanceMapping::InternetDestinationIdL( TUint& aInternetDestinationId 
 
         TUint32 metadata = metadataRecord->iMetadata;
 
-        TUint32 internet = metadata & CMManager::ESnapMetadataInternet;
-        TUint32 localizationValue = ( metadata & CMManager::ESnapMetadataDestinationIsLocalised ) >> 4;
-        TUint32 purposeValue = ( metadata & CMManager::ESnapMetadataPurpose ) >> 8;
+        TUint32 internet = metadata &
+                CMManager::ESnapMetadataInternet;
+        TUint32 localizationValue = ( metadata &
+                CMManager::ESnapMetadataDestinationIsLocalised ) >> 4;
+        TUint32 purposeValue = ( metadata &
+                CMManager::ESnapMetadataPurpose ) >> 8;
 
         // The first record that has a matching value in any of the 3 metadata
         // fields will be taken as the internet snap.
@@ -951,7 +1214,7 @@ void CCmmInstanceMapping::InternetDestinationIdL( TUint& aInternetDestinationId 
 // has not been removed from database yet.
 // ---------------------------------------------------------------------------
 //
-void CCmmInstanceMapping::AddConnMethodToDeletedListL( const TUint& aConnMethodId )
+void CCmmInstanceMapping::AddConnMethodToDeletedListL( const TUint aConnMethodId )
     {
     OstTraceFunctionEntry0( CCMMINSTANCEMAPPING_ADDCONNMETHODTODELETEDLISTL_ENTRY );
 
@@ -968,7 +1231,7 @@ void CCmmInstanceMapping::AddConnMethodToDeletedListL( const TUint& aConnMethodI
 // not found from the list.
 // ---------------------------------------------------------------------------
 //
-void CCmmInstanceMapping::RemoveConnMethodFromDeletedList( const TUint& aConnMethodId )
+void CCmmInstanceMapping::RemoveConnMethodFromDeletedList( const TUint aConnMethodId )
     {
     OstTraceFunctionEntry0( CCMMINSTANCEMAPPING_REMOVECONNMETHODFROMDELETEDLIST_ENTRY );
 
@@ -988,7 +1251,7 @@ void CCmmInstanceMapping::RemoveConnMethodFromDeletedList( const TUint& aConnMet
 // not been removed from database yet.
 // ---------------------------------------------------------------------------
 //
-void CCmmInstanceMapping::AddDestinationToDeletedListL( const TUint& aDestinationId )
+void CCmmInstanceMapping::AddDestinationToDeletedListL( const TUint aDestinationId )
     {
     OstTraceFunctionEntry0( CCMMINSTANCEMAPPING_ADDDESTINATIONTODELETEDLISTL_ENTRY );
 
@@ -1005,7 +1268,7 @@ void CCmmInstanceMapping::AddDestinationToDeletedListL( const TUint& aDestinatio
 // found from the list.
 // ---------------------------------------------------------------------------
 //
-void CCmmInstanceMapping::RemoveDestinationFromDeletedList( const TUint& aDestinationId ) //TODO, check removal is called in all necessary places.
+void CCmmInstanceMapping::RemoveDestinationFromDeletedList( const TUint aDestinationId ) //TODO, check removal is called in all necessary places.
     {
     OstTraceFunctionEntry0( CCMMINSTANCEMAPPING_REMOVEDESTINATIONFROMDELETEDLIST_ENTRY );
 
@@ -1024,7 +1287,7 @@ void CCmmInstanceMapping::RemoveDestinationFromDeletedList( const TUint& aDestin
 // the connection method has been removed from database.
 // ---------------------------------------------------------------------------
 //
-void CCmmInstanceMapping::RemoveConnMethod( const TUint32& aConnMethodId ) //TODO, check where this is used and if it would be better to use version with array instead?
+void CCmmInstanceMapping::RemoveConnMethod( const TUint32 aConnMethodId )
     {
     OstTraceFunctionEntry0( CCMMINSTANCEMAPPING_REMOVECONNMETHOD_ENTRY );
 
@@ -1058,12 +1321,14 @@ void CCmmInstanceMapping::RemoveConnMethod( const TUint32& aConnMethodId ) //TOD
 // Remove the connection method from current destination/connection method
 // structures. This is a lot faster than calling Refresh(). Use this method if
 // the connection method has been removed from database.
+// Also adds the ID of any changed destinations to the provided array.
 // ---------------------------------------------------------------------------
 //
 void CCmmInstanceMapping::RemoveConnMethod(
-        const TUint32& aConnMethodId,
+        const TUint32 aConnMethodId,
         RArray<TUint32>& aChangedDestinations )
     {
+    OstTraceFunctionEntry0( DUP1_CCMMINSTANCEMAPPING_REMOVECONNMETHOD_ENTRY );
 
     // Remove from list of connection methods.
     for ( TInt i = 0; i < iConnMethodItemArray.Count(); i++ )
@@ -1089,7 +1354,8 @@ void CCmmInstanceMapping::RemoveConnMethod(
                 }
             }
         }
-
+    
+    OstTraceFunctionExit0( DUP1_CCMMINSTANCEMAPPING_REMOVECONNMETHOD_EXIT );
     }
 
 // ---------------------------------------------------------------------------
@@ -1098,7 +1364,7 @@ void CCmmInstanceMapping::RemoveConnMethod(
 // the connection method has been removed from database.
 // ---------------------------------------------------------------------------
 //
-void CCmmInstanceMapping::RemoveDestination( const TUint32& aDestinationId )
+void CCmmInstanceMapping::RemoveDestination( const TUint32 aDestinationId )
     {
     OstTraceFunctionEntry0( CCMMINSTANCEMAPPING_REMOVEDESTINATION_ENTRY );
 
@@ -1136,7 +1402,7 @@ void CCmmInstanceMapping::RemoveDestination( const TUint32& aDestinationId )
 // ---------------------------------------------------------------------------
 //
 void CCmmInstanceMapping::RemoveConnMethodFromDestinations(
-        const TUint32& aConnMethodId,
+        const TUint32 aConnMethodId,
         RArray<TUint32>& aChangedDestinations )
     {
     OstTraceFunctionEntry0( CCMMINSTANCEMAPPING_REMOVECONNMETHODFROMDESTINATIONS_ENTRY );
@@ -1157,6 +1423,30 @@ void CCmmInstanceMapping::RemoveConnMethodFromDestinations(
         }
 
     OstTraceFunctionExit0( CCMMINSTANCEMAPPING_REMOVECONNMETHODFROMDESTINATIONS_EXIT );
+    }
+
+// ---------------------------------------------------------------------------
+// Iterate through destinations to find the one identified with parameter
+// and returns its metadata mask.
+// ---------------------------------------------------------------------------
+//
+TUint32 CCmmInstanceMapping::DestinationMetadata( 
+        const TUint32 aDestinationId ) const
+    {
+    OstTraceFunctionEntry0( CCMMINSTANCEMAPPING_DESTINATIONMETADATA_ENTRY );
+
+    TUint32 metadata( 0 );
+    for ( TInt i = 0; i < iDestinations.Count(); i++ )
+        {
+        if ( iDestinations[i]->iId == aDestinationId )
+            {
+            metadata = iDestinations[i]->iMetadata;
+            break;
+            }
+        }
+
+    OstTraceFunctionExit0( CCMMINSTANCEMAPPING_DESTINATIONMETADATA_EXIT );
+    return metadata;
     }
 
 // End of file

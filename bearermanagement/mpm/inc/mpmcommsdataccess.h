@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2007-2009 Nokia Corporation and/or its subsidiary(-ies). 
+* Copyright (c) 2007-2010 Nokia Corporation and/or its subsidiary(-ies). 
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -264,7 +264,14 @@ class CMPMCommsDatAccess : public CBase
         */
         TBool IsInternetSnapL( TUint32 aIapId, TUint32 aSnapId );
 
-       /**
+        /**
+         * Returns true if destination is intranet.
+         * @param aSnapId Snap id
+         * @return True or false depending on destination type.
+         */
+         TBool IsIntranetSnapL( TUint32 aSnapId );
+
+        /**
         * Used to get bearer type of the iap.
         *
         * @since 5.0
@@ -358,6 +365,14 @@ class CMPMCommsDatAccess : public CBase
         * @return Snap id.
         */
         TUint32 DestinationIdL( CMManager::TSnapPurpose aSnapPurpose );
+        
+        /**
+        * Returns the default connection values
+        * @since symbian^4
+        * @param aType The type of the id
+        * @param aId The id of the snap or the iap
+        */
+        void GetDefaultConnectionL( TCmDefConnType& aType, TUint32& aId );
         	
         /**
         * Finds the real IAP behind the virtual IAP.

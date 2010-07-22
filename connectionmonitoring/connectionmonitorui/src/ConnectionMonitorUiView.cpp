@@ -20,7 +20,7 @@
 // INCLUDE FILES
 #include  <eikmenup.h>
 #include  <akntitle.h>   //for CAknTitlePane
-#include  <ConnectionMonitorUi.rsg>
+#include  <connectionmonitorui.rsg>
 #include  <StringLoader.h>
 
 #include  <hlplch.h>

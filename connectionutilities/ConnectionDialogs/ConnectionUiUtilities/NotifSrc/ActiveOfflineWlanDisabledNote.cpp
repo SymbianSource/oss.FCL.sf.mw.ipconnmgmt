@@ -19,7 +19,7 @@
 // INCLUDE FILES
 #include "ActiveOfflineWlanDisabledNote.h"
 
-#include <ConnUiUtilsNotif.rsg>
+#include <connuiutilsnotif.rsg>
 #include <AknGlobalNote.h>
 #include <StringLoader.h>
 

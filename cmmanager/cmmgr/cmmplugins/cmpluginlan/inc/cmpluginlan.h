@@ -324,12 +324,23 @@ NONSHARABLE_CLASS( CCmPluginLan ) : public CCmPluginBaseEng
         void GetDefaultLanBearerRecordL(
                 RPointerArray<CommsDat::CCDRecordBase>& aRecordArray );
 
+        /**
+         * Returns the default priority value identified with the parameter.
+         * @param aAttribute Indentifies the default priority value requested.
+         */
+        TUint32 GetDefPriorityL( const TUint32 aAttribute ) const;
+
     private: // Data
 
         /**
          * Pointer to LAN bearer record.
          */
         CommsDat::CCDLANBearerRecord* iBearerRecord;
+
+        /**
+         * Bearer priority table ID.
+         */
+        CommsDat::TMDBElementId iBearerPriorityTableId;
     };
 
 #endif // LAN_PLUGIN_H

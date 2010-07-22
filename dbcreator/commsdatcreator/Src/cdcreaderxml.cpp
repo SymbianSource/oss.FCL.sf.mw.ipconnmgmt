@@ -169,7 +169,7 @@ const TUint KAsciiUnicodeRatio = 2;
 //---------------
 //WPAPresharedKey         string    WPA/WPA2 pre-shared key in plain text. 
 //WPAKeyLength            integer   The length of the WPA/WPA2 pre-shared key.
-//WPAListOfEAPs           string    A list of EAPs in use
+//WPAEapMethod            string    A EAP method in use
 //WPAUseOfPresharedKey    string    WPA/WPA2 pre-shared key usage.
 //=============
 //VPN specific:
@@ -323,7 +323,7 @@ _LIT16( KWEPKey4Data,               "WEPKey4Data" );
 //WPA security
 _LIT16( KWPAPresharedKey,           "WPAPresharedKey" );
 _LIT16( KWPAKeyLength,              "WPAKeyLength" );
-_LIT16( KWPAListOfEAPs,             "WPAListOfEAPs" );
+_LIT16( KWPAEapMethod,              "WPAEapMethod");
 _LIT16( KWPAUseOfPresharedKey,      "WPAUseOfPresharedKey" );
 
 //EAP security
@@ -473,8 +473,6 @@ _LIT16( KUIPriorityDialOut,         "UIPriorityDialOut" );
 _LIT16( KUIPriorityDialIn,          "UIPriorityDialIn" );
 _LIT16( KUIPriorityVpn,             "UIPriorityVpn" );
 _LIT16( KUIPriorityMip,             "UIPriorityMip" );
-_LIT16( KDefaultConnectionType,     "DefaultConnectionType" );
-_LIT16( KDefaultConnectionName,     "DefaultConnectionName" );
 _LIT16( KUsageOfWlan,               "UsageOfWlan" );
 _LIT16( KCellularDataUsageHome,     "CellularDataUsageHome" );
 _LIT16( KCellularDataUsageVisitor,  "CellularDataUsageVisitor" );
@@ -492,15 +490,6 @@ _LIT16( KWlanRTS,                   "WlanRTS" );
 _LIT16( KWlanTxPowerLevel,          "WlanTxPowerLevel" );
 _LIT16( KWlanRadioMeasurements,     "WlanRadioMeasurements" );
 _LIT16( KWlanPowerMode,             "WlanPowerMode" );
-
-
-//maximum number of PacketData AP parameters
-const TInt KMaxPacketDataParam = 28;
-const TInt KMaxLANParam = 26;
-const TInt KMaxWLANParam = 125;
-const TInt KMaxGlobalParam = 42;
-const TInt KMaxVPNParam = 12;
-const TInt KMaxDNParam = 19;
 
 
 // ================= MEMBER FUNCTIONS =======================
@@ -912,26 +901,32 @@ TDbCreatorFeatures CReaderXML::DetectFeatureHead()
     
     if ( iLine->FindF( KFeatureHeadPacketData ) != KErrNotFound )
         {
+        CLOG_WRITE( "CReaderXML::DetectFeatureHead(): EFeaturePacketData" );
         feature = EFeaturePacketData;
         }
     else if ( iLine->FindF( KFeatureHeadWLAN ) != KErrNotFound )
         {
+        CLOG_WRITE( "CReaderXML::DetectFeatureHead(): EFeatureWLAN" );
         feature = EFeatureWLAN;
         }
     else if ( iLine->FindF( KFeatureHeadLAN ) != KErrNotFound )
         {
+        CLOG_WRITE( "CReaderXML::DetectFeatureHead(): EFeatureLAN" );
         feature = EFeatureLAN;
         }
     else if ( iLine->FindF( KFeatureHeadVPN ) != KErrNotFound )
         {
+        CLOG_WRITE( "CReaderXML::DetectFeatureHead(): EFeatureVPN" );
         feature = EFeatureVPN;
         }
     else if ( iLine->FindF( KFeatureHeadDN ) != KErrNotFound )
         {
+        CLOG_WRITE( "CReaderXML::DetectFeatureHead(): EFeatureDN" );
         feature = EFeatureDN;
         }
     else if ( iLine->FindF( KFeatureHeadGlobal ) != KErrNotFound )
         {
+        CLOG_WRITE( "CReaderXML::DetectFeatureHead(): EFeatureGlobal" );
         feature = EFeatureGlobal;
         iFoundGlobal = ETrue;        
         }
@@ -1020,7 +1015,6 @@ TBool CReaderXML::DetectTailAP()
 //
 TInt CReaderXML::DetectParam()
     {
-    TInt maxParam( 0 );           //maximum nunber of params in array
     TInt fieldId( KErrNotFound ); //field id of detected parameter 
     RArray<EInputParams> *params( NULL ); //pointer to the table used 
                                         //for or detection    
@@ -1028,27 +1022,21 @@ TInt CReaderXML::DetectParam()
     switch ( CurrentFeature() )        
         {
         case EFeaturePacketData:
-            maxParam = KMaxPacketDataParam;
             params   = &iPDParams;
             break;
         case EFeatureWLAN:
-            maxParam = KMaxWLANParam;
             params   = &iWLanParams;
             break;
         case EFeatureLAN:
-            maxParam = KMaxLANParam;
             params   = &iLanParams;
             break;
         case EFeatureVPN:
-            maxParam = KMaxVPNParam;
             params   = &iVpnParams;
             break;
         case EFeatureDN:
-            maxParam = KMaxDNParam;
             params =   &iDNParams;
             break;
         case EFeatureGlobal:
-            maxParam = KMaxGlobalParam;
             params   = &iGlobalParams;
             break;
         default:
@@ -1057,14 +1045,13 @@ TInt CReaderXML::DetectParam()
        
     //looks for parameter match
     HBufC16* paramName = ReadParam( EParamName );
-    TBool found ( EFalse );
-    
     if ( paramName == NULL )
             {
             return fieldId;
             }
 
-    for ( TInt idx = 0; idx < maxParam && !found; idx++ )
+    TBool found ( EFalse );
+    for ( TInt idx = 0; idx < params->Count() && !found; idx++ )
         {        
         if ( paramName->CompareF( (*params)[idx].iParam ) == 0 )
             {
@@ -1127,6 +1114,18 @@ HBufC16* CReaderXML::ReadParam( TParamSegment aSegment )
             CLOG_WRITE_FORMAT( "! Warning: tag could not be allocated %S:",
                                      &tag );
             }
+// Debugging help; commented out for clearer log.
+//        else 
+//            {
+//            if (aSegment == EParamValue)
+//                {
+//                CLOG_WRITE_FORMAT( "CReaderXML::ReadParam: value %S", &tag );
+//                }
+//            else if (aSegment == EParamName)
+//                {
+//                CLOG_WRITE_FORMAT( "CReaderXML::ReadParam: name %S", &tag );
+//                }
+//            }
         }
     return ret;
     }
@@ -1642,7 +1641,7 @@ void CReaderXML::FillWLanParams()
     iWLanParams.Append( EInputParams( EWEPKey4Data,                 KWEPKey4Data ) );
     iWLanParams.Append( EInputParams( EWPAPresharedKey,             KWPAPresharedKey ) );
     iWLanParams.Append( EInputParams( EWPAKeyLength,                KWPAKeyLength ) );
-    iWLanParams.Append( EInputParams( EWPAListOfEAPs,               KWPAListOfEAPs ) );
+    iWLanParams.Append( EInputParams( EWPAEapMethod,                KWPAEapMethod ) );
     iWLanParams.Append( EInputParams( EWPAUseOfPresharedKey,        KWPAUseOfPresharedKey ) );
     iWLanParams.Append( EInputParams( EEapGtcUsername,              KEapGtcUsername ) );
     iWLanParams.Append( EInputParams( EEapGtcSessionValidityTime,   KEapGtcSessionValidityTime ) );
@@ -1777,8 +1776,6 @@ void CReaderXML::FillGlobalParams()
     iGlobalParams.Append( EInputParams( EUIPriorityDialIn,      KUIPriorityDialIn ) );
     iGlobalParams.Append( EInputParams( EUIPriorityVpn,         KUIPriorityVpn ) );
     iGlobalParams.Append( EInputParams( EUIPriorityMip,         KUIPriorityMip ) );
-    iGlobalParams.Append( EInputParams( EDefaultConnectionType, KDefaultConnectionType ) );
-    iGlobalParams.Append( EInputParams( EDefaultConnectionName, KDefaultConnectionName ) );
     iGlobalParams.Append( EInputParams( EUsageOfWlan,           KUsageOfWlan ) );
     iGlobalParams.Append( EInputParams( ECellularDataUsageHome,         KCellularDataUsageHome ) );
     iGlobalParams.Append( EInputParams( ECellularDataUsageVisitor,      KCellularDataUsageVisitor ) );

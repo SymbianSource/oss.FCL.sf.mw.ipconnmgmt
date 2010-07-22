@@ -105,6 +105,17 @@ void CmConnectionMethodShim::update()
     d_ptr->Update();
 }
 
+QString CmConnectionMethodShim::getIcon() const
+{
+    return d_ptr->GetIcon();
+}
+
+void CmConnectionMethodShim::setIcon(
+    QString icon)    
+{
+    d_ptr->SetIcon(icon);
+}
+
 void CmConnectionMethodShim::refresh()
 {
     d_ptr->Refresh();

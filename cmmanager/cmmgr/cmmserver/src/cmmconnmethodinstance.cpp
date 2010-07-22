@@ -36,7 +36,9 @@
 // Two phased construction.
 // ---------------------------------------------------------------------------
 //
-CCmmConnMethodInstance* CCmmConnMethodInstance::NewL( CCmmSession* aCmmSession, CCmmCache* aCache )
+CCmmConnMethodInstance* CCmmConnMethodInstance::NewL(
+        CCmmSession* aCmmSession,
+        CCmmCache* aCache )
     {
     OstTraceFunctionEntry0( CCMMCONNMETHODINSTANCE_NEWL_ENTRY );
 
@@ -51,7 +53,9 @@ CCmmConnMethodInstance* CCmmConnMethodInstance::NewL( CCmmSession* aCmmSession, 
 // Two phased construction.
 // ---------------------------------------------------------------------------
 //
-CCmmConnMethodInstance* CCmmConnMethodInstance::NewLC( CCmmSession* aCmmSession, CCmmCache* aCache )
+CCmmConnMethodInstance* CCmmConnMethodInstance::NewLC(
+        CCmmSession* aCmmSession,
+        CCmmCache* aCache )
     {
     OstTraceFunctionEntry0( CCMMCONNMETHODINSTANCE_NEWLC_ENTRY );
 
@@ -86,7 +90,9 @@ CCmmConnMethodInstance::~CCmmConnMethodInstance()
 // Constructor.
 // ---------------------------------------------------------------------------
 //
-CCmmConnMethodInstance::CCmmConnMethodInstance( CCmmSession* aCmmSession, CCmmCache* aCache )
+CCmmConnMethodInstance::CCmmConnMethodInstance(
+        CCmmSession* aCmmSession,
+        CCmmCache* aCache )
         :
         iCmmSession( aCmmSession ),
         iCache( aCache )
@@ -117,37 +123,11 @@ void CCmmConnMethodInstance::ConstructL()
     }
 
 // ---------------------------------------------------------------------------
-// Set the plugin base pointer.
-// ---------------------------------------------------------------------------
-//
-void CCmmConnMethodInstance::SetPlugin( CCmPluginBaseEng* aPlugin )
-    {
-    OstTraceFunctionEntry0( CCMMCONNMETHODINSTANCE_SETPLUGIN_ENTRY );
-
-    iPlugin = aPlugin;
-
-    OstTraceFunctionExit0( CCMMCONNMETHODINSTANCE_SETPLUGIN_EXIT );
-    }
-
-// ---------------------------------------------------------------------------
-// Get the plugin base pointer.
-// ---------------------------------------------------------------------------
-//
-CCmPluginBaseEng* CCmmConnMethodInstance::GetPlugin() const
-    {
-    OstTraceFunctionEntry0( CCMMCONNMETHODINSTANCE_GETPLUGIN_ENTRY );
-    OstTraceFunctionExit0( CCMMCONNMETHODINSTANCE_GETPLUGIN_EXIT );
-    return iPlugin;
-    }
-
-// ---------------------------------------------------------------------------
 // Get pointer to the plugin data container.
 // ---------------------------------------------------------------------------
 //
 CCmClientPluginInstance* CCmmConnMethodInstance::GetPluginDataInstance() const
     {
-    OstTraceFunctionEntry0( CCMMCONNMETHODINSTANCE_GETPLUGINDATAINSTANCE_ENTRY );
-    OstTraceFunctionExit0( CCMMCONNMETHODINSTANCE_GETPLUGINDATAINSTANCE_EXIT );
     return iPluginDataInstance;
     }
 
@@ -157,9 +137,6 @@ CCmClientPluginInstance* CCmmConnMethodInstance::GetPluginDataInstance() const
 //
 TUint32 CCmmConnMethodInstance::GetId() const
     {
-    OstTraceFunctionEntry0( CCMMCONNMETHODINSTANCE_GETID_ENTRY );
-    OstTraceFunctionExit0( CCMMCONNMETHODINSTANCE_GETID_EXIT );
-
     return iConnMethodId;
     }
 
@@ -167,7 +144,7 @@ TUint32 CCmmConnMethodInstance::GetId() const
 // Set connection method ID.
 // ---------------------------------------------------------------------------
 //
-void CCmmConnMethodInstance::SetId( const TUint32& aConnMethodId )
+void CCmmConnMethodInstance::SetId( const TUint32 aConnMethodId )
     {
     OstTraceFunctionEntry0( CCMMCONNMETHODINSTANCE_SETID_ENTRY );
 
@@ -182,23 +159,7 @@ void CCmmConnMethodInstance::SetId( const TUint32& aConnMethodId )
 //
 TUint32 CCmmConnMethodInstance::GetBearerType() const
     {
-    OstTraceFunctionEntry0( CCMMCONNMETHODINSTANCE_GETBEARERTYPE_ENTRY );
-    OstTraceFunctionExit0( CCMMCONNMETHODINSTANCE_GETBEARERTYPE_EXIT );
-
     return iBearerType;
-    }
-
-// ---------------------------------------------------------------------------
-// Get bearer type.
-// ---------------------------------------------------------------------------
-//
-void CCmmConnMethodInstance::SetBearerType( const TUint32& aBearerType )
-    {
-    OstTraceFunctionEntry0( CCMMCONNMETHODINSTANCE_SETBEARERTYPE_ENTRY );
-
-    iBearerType = aBearerType;
-
-    OstTraceFunctionExit0( CCMMCONNMETHODINSTANCE_SETBEARERTYPE_EXIT );
     }
 
 // ---------------------------------------------------------------------------
@@ -214,7 +175,7 @@ TInt CCmmConnMethodInstance::GetHandle() const
 // Set handle ID.
 // ---------------------------------------------------------------------------
 //
-void CCmmConnMethodInstance::SetHandle( const TInt& aHandle )
+void CCmmConnMethodInstance::SetHandle( const TInt aHandle )
     {
     iHandle = aHandle;
     }
@@ -281,7 +242,12 @@ void CCmmConnMethodInstance::CopyDataL( CCmmConnMethodStruct* aConnMethodStruct 
         User::Leave( KErrCorrupt );
         }
 
-    iPlugin->GetPluginDataL( iPluginDataInstance ); //TODO, check deletes for iPluginDataInstance
+    // Embedded destination does not have any data.
+    if ( !IsEmbeddedDestination() )
+        {
+        iPlugin->GetPluginDataL( iPluginDataInstance );
+        }
+
     aConnMethodStruct->IncrementReferenceCounter();
 
     switch ( aConnMethodStruct->GetStatus() )
@@ -307,98 +273,126 @@ void CCmmConnMethodInstance::CopyDataL( CCmmConnMethodStruct* aConnMethodStruct 
     }
 
 // ---------------------------------------------------------------------------
-// Refresh the relevant connection method data in cache side object to be in
-// synch with database and copy that data back to this session side connection
-// method object.
+// CCmmConnMethodInstance::GetIntAttributeL
 // ---------------------------------------------------------------------------
 //
-//TODO, cleanup
-/*
-void CCmmConnMethodInstance::RefreshDataL( CCmmConnMethodStruct* aConnMethodStruct ) //TODO, remove
+TUint32 CCmmConnMethodInstance::GetIntAttributeL( const TUint32 aAttribute )
     {
+    OstTraceFunctionEntry0( CCMMCONNMETHODINSTANCE_GETINTATTRIBUTEL_ENTRY );
 
-    //TODO
-    //if ( !aConnMethodStruct )
-        //{
-        //User::Leave( KErrCorrupt );
-        //}
     if ( !iPlugin )
         {
         User::Leave( KErrCorrupt );
         }
 
-    switch ( aConnMethodStruct->GetStatus() )
+    // Embedded destination has only limited set of attributes.
+    if ( IsEmbeddedDestination() )
         {
-        case ECmmConnMethodStatusValid:
-        case ECmmConnMethodStatusToBeDeleted:
+        switch ( aAttribute )
             {
-            //TODO, add record status check later and only call Reload() if necessary. TCmmRecordStatus
-            //if ( !aConnMethodStruct->UpToDate() )
-            //    {
-                iPlugin->ReLoadL();
-            //    }
-            iPlugin->GetPluginDataL( iPluginDataInstance );
+            case CMManager::ECmId:
+            case CMManager::ECmBearerType:
+            case CMManager::ECmDefaultPriority:
+            case CMManager::ECmDefaultUiPriority:
+            case ECmExtensionLevel:
+                {
+                break;
+                }
+            default:
+                {
+                User::Leave( KErrNotSupported );
+                }
             }
-            break;
-        case ECmmConnMethodStatusNotSaved: // This is checked before.
-        case ECmmConnMethodStatusChanged:
-        default:
-            User::Leave( KErrCorrupt );  // Error, invalid status.
-            break;
         }
 
-    // Internal state need to be set to the same state as after a successfull update.
-    UpdateSuccessful();
+    TUint32 result = iPlugin->GetIntAttributeL( aAttribute, iPluginDataInstance );
 
-    }*/
-
-// ---------------------------------------------------------------------------
-// CCmmConnMethodInstance::GetIntAttributeL
-// ---------------------------------------------------------------------------
-//
-TUint32 CCmmConnMethodInstance::GetIntAttributeL( const TUint32& aAttribute )
-    {
-    OstTraceFunctionEntry0( CCMMCONNMETHODINSTANCE_GETINTATTRIBUTEL_ENTRY );
-
-    __ASSERT_DEBUG( iPlugin != NULL, User::Leave( KErrNotFound ) );
-
-    return iPlugin->GetIntAttributeL( aAttribute, iPluginDataInstance );
+    OstTraceFunctionExit0( CCMMCONNMETHODINSTANCE_GETINTATTRIBUTEL_EXIT );
+    return result;
     }
 
 // ---------------------------------------------------------------------------
 // CCmmConnMethodInstance::GetBoolAttributeL
 // ---------------------------------------------------------------------------
 //
-TBool CCmmConnMethodInstance::GetBoolAttributeL( const TUint32& aAttribute )
+TBool CCmmConnMethodInstance::GetBoolAttributeL( const TUint32 aAttribute )
     {
     OstTraceFunctionEntry0( CCMMCONNMETHODINSTANCE_GETBOOLATTRIBUTEL_ENTRY );
 
-    __ASSERT_DEBUG( iPlugin != NULL, User::Leave( KErrNotFound ) );
+    if ( !iPlugin )
+        {
+        User::Leave( KErrCorrupt );
+        }
+
+    // Embedded destination has only limited set of attributes.
+    if ( IsEmbeddedDestination() )
+        {
+        switch ( aAttribute )
+            {
+            case CMManager::ECmCoverage:
+            case CMManager::ECmDestination:
+            case CMManager::ECmProtected:
+            case CMManager::ECmHidden:
+            case CMManager::ECmBearerHasUi:
+            case CMManager::ECmVirtual:
+                {
+                break;
+                }
+            default:
+                {
+                User::Leave( KErrNotSupported );
+                }
+            }
+        }
 
     TBool retVal( EFalse );
-
     switch ( aAttribute )
         {
         case CMManager::ECmConnected:
             {
             if ( GetId() > 0 )
                 {
-                if ( iCache )
+                // Check first if this is embedded destination.
+                retVal = iPlugin->GetBoolAttributeL( CMManager::ECmDestination,
+                        iPluginDataInstance );
+                if ( retVal )
                     {
-                    retVal = iCache->CheckIfCmConnected( GetId() );
+                    retVal = iCache->DestinationConnectedL( GetId() );
+                    }
+                else
+                    {
+                    if ( iCache )
+                        {
+                        retVal = iCache->CheckIfCmConnected( GetId() );
+                        }
                     }
                 }
             }
             break;
         case CMManager::ECmIsLinked:
             {
-            //TODO
+            // Does any virtual iap point to this connection method.
+            // Check first if this connection method is an embedded destination.
+            if ( GetId() > 0 )
+                {
+                retVal = iPlugin->GetBoolAttributeL( CMManager::ECmDestination,
+                        iPluginDataInstance );
+                if ( retVal )
+                    {
+                    retVal = iCache->DestinationPointedToByVirtualIap( GetId() );
+                    }
+                else
+                    {
+                    retVal = iCache->ConnMethodPointedToByVirtualIap( GetId() );
+                    }
+                }
             }
             break;
         default:
             {
             retVal = iPlugin->GetBoolAttributeL( aAttribute, iPluginDataInstance );
             }
+            break;
         }
 
     OstTraceFunctionExit0( CCMMCONNMETHODINSTANCE_GETBOOLATTRIBUTEL_EXIT );
@@ -409,26 +403,50 @@ TBool CCmmConnMethodInstance::GetBoolAttributeL( const TUint32& aAttribute )
 // CCmmConnMethodInstance::GetStringAttributeL
 // ---------------------------------------------------------------------------
 //
-HBufC* CCmmConnMethodInstance::GetStringAttributeL( const TUint32& aAttribute )
+HBufC* CCmmConnMethodInstance::GetStringAttributeL( const TUint32 aAttribute )
     {
     OstTraceFunctionEntry0( CCMMCONNMETHODINSTANCE_GETSTRINGATTRIBUTEL_ENTRY );
 
-    __ASSERT_DEBUG( iPlugin != NULL, User::Leave( KErrNotFound ) );
+    if ( !iPlugin )
+        {
+        User::Leave( KErrCorrupt );
+        }
 
-    return iPlugin->GetStringAttributeL( aAttribute, iPluginDataInstance );
+    // Embedded destination has only limited set of attributes.
+    if ( IsEmbeddedDestination() )
+        {
+        User::Leave( KErrNotSupported );
+        }
+
+    HBufC* result = iPlugin->GetStringAttributeL( aAttribute, iPluginDataInstance );
+
+    OstTraceFunctionExit0( CCMMCONNMETHODINSTANCE_GETSTRINGATTRIBUTEL_EXIT );
+    return result;
     }
 
 // ---------------------------------------------------------------------------
 // CCmmConnMethodInstance::GetString8AttributeL
 // ---------------------------------------------------------------------------
 //
-HBufC8* CCmmConnMethodInstance::GetString8AttributeL( const TUint32& aAttribute )
+HBufC8* CCmmConnMethodInstance::GetString8AttributeL( const TUint32 aAttribute )
     {
     OstTraceFunctionEntry0( CCMMCONNMETHODINSTANCE_GETSTRING8ATTRIBUTEL_ENTRY );
 
-    __ASSERT_DEBUG( iPlugin != NULL, User::Leave( KErrNotFound ) );
+    if ( !iPlugin )
+        {
+        User::Leave( KErrCorrupt );
+        }
 
-    return iPlugin->GetString8AttributeL( aAttribute, iPluginDataInstance );
+    // Embedded destination has only limited set of attributes.
+    if ( IsEmbeddedDestination() )
+        {
+        User::Leave( KErrNotSupported );
+        }
+
+    HBufC8* result = iPlugin->GetString8AttributeL( aAttribute, iPluginDataInstance );
+
+    OstTraceFunctionExit0( CCMMCONNMETHODINSTANCE_GETSTRING8ATTRIBUTEL_EXIT );
+    return result;
     }
 
 // ---------------------------------------------------------------------------
@@ -436,12 +454,15 @@ HBufC8* CCmmConnMethodInstance::GetString8AttributeL( const TUint32& aAttribute 
 // ---------------------------------------------------------------------------
 //
 void CCmmConnMethodInstance::SetIntAttributeL(
-        const TUint32& aAttribute,
-        const TUint32& aValue )
+        const TUint32 aAttribute,
+        const TUint32 aValue )
     {
     OstTraceFunctionEntry0( CCMMCONNMETHODINSTANCE_SETINTATTRIBUTEL_ENTRY );
 
-    __ASSERT_DEBUG( iPlugin != NULL, User::Leave( KErrNotFound ) );
+    if ( !iPlugin )
+        {
+        User::Leave( KErrCorrupt );
+        }
 
     iPlugin->SetIntAttributeL( aAttribute, aValue, iPluginDataInstance );
 
@@ -453,12 +474,15 @@ void CCmmConnMethodInstance::SetIntAttributeL(
 // ---------------------------------------------------------------------------
 //
 void CCmmConnMethodInstance::SetBoolAttributeL(
-        const TUint32& aAttribute,
-        const TBool& aValue )
+        const TUint32 aAttribute,
+        const TBool aValue )
     {
     OstTraceFunctionEntry0( CCMMCONNMETHODINSTANCE_SETBOOLATTRIBUTEL_ENTRY );
 
-    __ASSERT_DEBUG( iPlugin != NULL, User::Leave( KErrNotFound ) );
+    if ( !iPlugin )
+        {
+        User::Leave( KErrCorrupt );
+        }
 
     iPlugin->SetBoolAttributeL( aAttribute, aValue, iPluginDataInstance );
 
@@ -470,12 +494,15 @@ void CCmmConnMethodInstance::SetBoolAttributeL(
 // ---------------------------------------------------------------------------
 //
 void CCmmConnMethodInstance::SetStringAttributeL(
-        const TUint32& aAttribute,
+        const TUint32 aAttribute,
         const TDesC16& aValue )
     {
     OstTraceFunctionEntry0( CCMMCONNMETHODINSTANCE_SETSTRINGATTRIBUTEL_ENTRY );
 
-    __ASSERT_DEBUG( iPlugin != NULL, User::Leave( KErrNotFound ) );
+    if ( !iPlugin )
+        {
+        User::Leave( KErrCorrupt );
+        }
 
     iPlugin->SetStringAttributeL( aAttribute, aValue, iPluginDataInstance );
 
@@ -487,27 +514,19 @@ void CCmmConnMethodInstance::SetStringAttributeL(
 // ---------------------------------------------------------------------------
 //
 void CCmmConnMethodInstance::SetString8AttributeL(
-        const TUint32& aAttribute,
+        const TUint32 aAttribute,
         const TDesC8& aValue )
     {
     OstTraceFunctionEntry0( CCMMCONNMETHODINSTANCE_SETSTRING8ATTRIBUTEL_ENTRY );
 
-    __ASSERT_DEBUG( iPlugin != NULL, User::Leave( KErrNotFound ) );
+    if ( !iPlugin )
+        {
+        User::Leave( KErrCorrupt );
+        }
 
     iPlugin->SetString8AttributeL( aAttribute, aValue, iPluginDataInstance );
 
     OstTraceFunctionExit0( CCMMCONNMETHODINSTANCE_SETSTRING8ATTRIBUTEL_EXIT );
-    }
-
-// ---------------------------------------------------------------------------
-// Gets the current status of this connection method instance.
-// ---------------------------------------------------------------------------
-//
-TCmmConnMethodStatus CCmmConnMethodInstance::GetStatus() const
-    {
-    OstTraceFunctionEntry0( CCMMCONNMETHODINSTANCE_GETSTATUS_ENTRY );
-    OstTraceFunctionExit0( CCMMCONNMETHODINSTANCE_GETSTATUS_EXIT );
-    return iStatus;
     }
 
 // ---------------------------------------------------------------------------
@@ -531,7 +550,11 @@ void CCmmConnMethodInstance::SetStatus( const TCmmConnMethodStatus& aStatus )
 //
 void CCmmConnMethodInstance::UpdateSuccessful()
     {
+    OstTraceFunctionEntry0( CCMMCONNMETHODINSTANCE_UPDATESUCCESSFUL_ENTRY );
+
     SetStatus( ECmmConnMethodStatusValid );
+
+    OstTraceFunctionExit0( CCMMCONNMETHODINSTANCE_UPDATESUCCESSFUL_EXIT );
     }
 
 // ---------------------------------------------------------------------------
@@ -540,10 +563,14 @@ void CCmmConnMethodInstance::UpdateSuccessful()
 // connection method structure to reflect the new deleted state.
 // ---------------------------------------------------------------------------
 //
-void CCmmConnMethodInstance::DeleteSuccessful( const TUint32& aNewSecondaryId )
+void CCmmConnMethodInstance::DeleteSuccessful( const TUint32 aNewSecondaryId )
     {
+    OstTraceFunctionEntry0( CCMMCONNMETHODINSTANCE_DELETESUCCESSFUL_ENTRY );
+
     SetStatus( ECmmConnMethodStatusChanged );
     SetId( aNewSecondaryId );
+
+    OstTraceFunctionExit0( CCMMCONNMETHODINSTANCE_DELETESUCCESSFUL_EXIT );
     }
 
 // ---------------------------------------------------------------------------
@@ -571,7 +598,7 @@ void CCmmConnMethodInstance::RefreshHandlesForAllSessions(
 // ---------------------------------------------------------------------------
 //
 void CCmmConnMethodInstance::RemoveConnMethodFromSessionDestinationHandles(
-        const TUint32& aConnMethodId )
+        const TUint32 aConnMethodId )
     {
     if ( iCmmSession )
         {

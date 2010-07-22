@@ -22,7 +22,7 @@
 #include <aknnavi.h>    //for CNaviPane
 #include <aknnavide.h>  //for CAknNavigationDecorator
 #include <StringLoader.h>
-#include <ConnectionMonitorUi.rsg>
+#include <connectionmonitorui.rsg>
 
 #include "ConnectionArray.h"
 #include "ConnectionMonitorUiLogger.h"

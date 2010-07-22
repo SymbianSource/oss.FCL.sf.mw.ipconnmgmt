@@ -88,7 +88,7 @@ private:
     * @param aResId resource id
     * @return -
     */
-    void CWepWpaQueryDlg::ShowInfoNoteL( TInt aResId );
+    void ShowInfoNoteL( TInt aResId );
     
     /**
     * PreLayoutDynInitL

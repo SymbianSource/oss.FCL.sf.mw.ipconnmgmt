@@ -368,10 +368,10 @@ TBool TAwaitingServiceIdRequest::Accept()
 
         // Only EIntSetting is supported 
         // 
-        if ( ( TMCprGetConnectionSetting::TConnectionSettingType)msg->iSettingType == 
-               TMCprGetConnectionSetting::EIntSetting
-               && node.PolicyPrefs().ServiceId() != 0 
-               && field.Compare( KIapProxyServiceSetting ) == 0  )
+        if ( msg
+             && msg->iSettingType == TMCprGetConnectionSetting::EIntSetting
+             && node.PolicyPrefs().ServiceId() != 0 
+             && field.Compare( KIapProxyServiceSetting ) == 0  )
             {
             S60MCPRLOGSTRING1("S60MCPR<%x>::TAwaitingServiceIdRequest::Accept() TMCprGetConnectionSetting EIntSetting", 
                 (TInt*)&iContext.Node())

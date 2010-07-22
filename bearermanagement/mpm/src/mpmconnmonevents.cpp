@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2005-2009 Nokia Corporation and/or its subsidiary(-ies). 
+* Copyright (c) 2005-2010 Nokia Corporation and/or its subsidiary(-ies). 
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -35,12 +35,11 @@ Get events from Connection Monitor.
 // CMPMConnMonEvents::NewL
 // -----------------------------------------------------------------------------
 //             
-CMPMConnMonEvents* CMPMConnMonEvents::NewL( CMPMServer& aServer, 
-                                            CMPMServerSession& aSession )
+CMPMConnMonEvents* CMPMConnMonEvents::NewL( CMPMServer& aServer )
     {
     CMPMConnMonEvents* self = new ( ELeave ) CMPMConnMonEvents( aServer );
     CleanupStack::PushL( self );
-    self->ConstructL( aSession );
+    self->ConstructL();
     CleanupStack::Pop( self );
     return self;
     }
@@ -74,7 +73,7 @@ CMPMConnMonEvents::~CMPMConnMonEvents()
 // CMPMConnMonEvents::ConstructL
 // -----------------------------------------------------------------------------
 // 
-void CMPMConnMonEvents::ConstructL( CMPMServerSession& aSession )
+void CMPMConnMonEvents::ConstructL()
     {
     MPMLOGSTRING( "CMPMConnMonEvents::ConstructL" )
     // Connect to Connection Monitor
@@ -93,7 +92,8 @@ void CMPMConnMonEvents::ConstructL( CMPMServerSession& aSession )
     CMPMConnMonReqs* req = CMPMConnMonReqs::NewL( 
                                 *const_cast<CMPMConnMonEvents*>( this ),
                                 iConnMon,
-                                aSession.ConnectionId(), aSession );
+                                0,
+                                NULL );
     CleanupStack::PushL( req );
     iReqPtrs.AppendL( req ); 
     req->AvailableIapsSync();
@@ -566,7 +566,7 @@ void CMPMConnMonEvents::ScanWLANNetworksL( CMPMServerSession* aSession,
                                 *const_cast<CMPMConnMonEvents*>( this ),
                                 iConnMon,
                                 aId, 
-                                *aSession );
+                                aSession );
     CleanupStack::PushL( req );
     iReqPtrs.AppendL( req ); 
     req->RefreshAvailableIAPs( aCallback, aForceRefreshIntervalSeconds );
@@ -578,7 +578,7 @@ void CMPMConnMonEvents::ScanWLANNetworksL( CMPMServerSession* aSession,
 // CMPMConnMonEvents::CancelScanL
 // -----------------------------------------------------------------------------
 // 
-void CMPMConnMonEvents::CancelScanL( CMPMServerSession& aSession )
+void CMPMConnMonEvents::CancelScanL( CMPMServerSession* aSession )
     {
     MPMLOGSTRING( "CMPMConnMonEvents::CancelScanL" )
 
@@ -589,7 +589,7 @@ void CMPMConnMonEvents::CancelScanL( CMPMServerSession& aSession )
     CMPMConnMonReqs* req = CMPMConnMonReqs::NewL( 
                                 *const_cast<CMPMConnMonEvents*>( this ),
                                 iConnMon,
-                                aSession.ConnectionId(), 
+                                aSession->ConnectionId(), 
                                 aSession );
     // Delete ongoing req, if found
     TInt index = iReqPtrs.Find(req, CMPMConnMonReqs::CompareConnIds);

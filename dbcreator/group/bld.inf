@@ -24,7 +24,7 @@ DEFAULT
 PRJ_EXPORTS
 ../conf/commsdatcreator.confml				MW_LAYER_CONFML(commsdatcreator.confml)
 ../conf/commsdatcreator_01.gcfml			MW_LAYER_GCFML(commsdatcreator_01.gcfml)
-../conf/commsdatcreator_10281BC8.crml	MW_LAYER_CRML(commsdatcreator_10281BC8.crml)
+../conf/commsdatcreator.implml          MW_LAYER_CRML(commsdatcreator.implml)
 ../rom/commsdatcreator.iby						CORE_MW_LAYER_IBY_EXPORT_PATH(commsdatcreator.iby)
 
 

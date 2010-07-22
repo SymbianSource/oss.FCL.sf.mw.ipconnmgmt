@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2007-2009 Nokia Corporation and/or its subsidiary(-ies). 
+* Copyright (c) 2007-2010 Nokia Corporation and/or its subsidiary(-ies). 
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -2153,6 +2153,31 @@ TBool CMPMCommsDatAccess::IsInternetSnapL(CMDBSession& db, TUint32 aSnapId)
     }
 
 // -----------------------------------------------------------------------------
+// CMPMCommsDatAccess::IsIntranetSnapL
+// -----------------------------------------------------------------------------
+//
+TBool CMPMCommsDatAccess::IsIntranetSnapL( TUint32 aSnapId )
+    {
+    MPMLOGSTRING( "CMPMCommsDatAccess::IsIntranetSnapL" )
+
+    RCmManager rCmManager;
+    rCmManager.OpenLC();
+
+    RCmDestination dest = rCmManager.DestinationL( aSnapId );
+    CleanupClosePushL(dest);
+    TInt snapMetadata = dest.MetadataL( CMManager::ESnapMetadataPurpose );
+    CleanupStack::PopAndDestroy( &dest );
+    CleanupStack::PopAndDestroy( &rCmManager );
+    
+    if ( snapMetadata == CMManager::ESnapPurposeIntranet )
+        {
+        return ETrue;
+        }
+    
+    return EFalse;            
+    }
+
+// -----------------------------------------------------------------------------
 // CMPMCommsDatAccess::GetBearerTypeL
 // -----------------------------------------------------------------------------
 //
@@ -2498,6 +2523,28 @@ TUint32 CMPMCommsDatAccess::DestinationIdL( CMManager::TSnapPurpose aSnapPurpose
         }
     
     return destinationId;
+    }
+
+// -----------------------------------------------------------------------------
+// CMPMCommsDatAccess::GetDefaultConnectionL
+// -----------------------------------------------------------------------------
+//
+void CMPMCommsDatAccess::GetDefaultConnectionL( TCmDefConnType& aType, TUint32& aId )
+    {
+    MPMLOGSTRING( "CMPMCommsDatAccess::GetDefaultConnectionL" )
+
+    RCmManager rCmManager;
+    CleanupClosePushL( rCmManager ); 
+    rCmManager.CreateTablesAndOpenL();
+    
+    TCmDefConnValue defConnValue;
+    rCmManager.ReadDefConnL( defConnValue );
+    
+    aType = defConnValue.iType;
+    aId = defConnValue.iId;
+    
+    CleanupStack::PopAndDestroy( &rCmManager );
+    
     }
 
 //  End of File

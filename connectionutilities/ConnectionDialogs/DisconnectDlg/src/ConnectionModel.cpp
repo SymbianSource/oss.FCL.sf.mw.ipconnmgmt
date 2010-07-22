@@ -34,7 +34,7 @@
 #include <commsdat_partner.h>
 #endif
 
-#include <DisconnectDlg.rsg>
+#include <disconnectdlg.rsg>
 
 
 // CONSTANTS

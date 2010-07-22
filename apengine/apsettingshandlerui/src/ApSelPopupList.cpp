@@ -21,11 +21,8 @@
 #include "APSettingsHandlerUIVariant.hrh"
 
 #include <ApListItem.h>
-#include <ApSetUI.rsg>
+#include <apsetui.rsg>
 #include <featmgr.h>
-
-#include <csxhelp/cp.hlp.hrh>
-
 
 #include "ApSelectorListBoxModel.h"
 #include "ApSettingsModel.h"
@@ -316,8 +313,6 @@ void CApSelPopupList::GetHelpContext(TCoeHelpContext& aContext) const
     APSETUILOGGER_ENTERFN( EListbox,"SelPopupList::GetHelpContext")
     
     aContext.iMajor = iHandler->iHelpMajor;
-    // help no longer available for user, use dummy ID
-    aContext.iContext = KSET_HLP_AP_SETTING_GPRS;
     
     APSETUILOGGER_LEAVEFN( EListbox,"SelPopupList::GetHelpContext")
     }

@@ -198,6 +198,22 @@ public:
      * not deleted.
      */
     void deleteDestination();
+    
+    /*!
+     * Gets the icon identifier(name) of the destination. It can
+     * contain path information.
+     * 
+     * @return Name of the Icon
+     */      
+    QString getIcon() const;
+    
+    /*!
+     * Sets the icon identifier(name) of the destination. It can
+     * contain path information.
+     * 
+     * @param icon New icon
+     */      
+    void setIcon(QString icon);
 
 protected:
 

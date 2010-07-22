@@ -85,14 +85,14 @@ public:
      * embedded.
      */
     TBool EmbeddedDestinationConflictsFromAllSessions(
-            const TUint32& aDestinationId,
-            const TUint32& aEmbeddedDestinationId );
+            const TUint32 aDestinationId,
+            const TUint32 aEmbeddedDestinationId );
 
     /**
      * Notify each session about a destination/connection method that has been
      * updated to, or deleted from, database.
      */
-    void RefreshHandlesForAllSessions( const TUint32& aId );
+    void RefreshHandlesForAllSessions( const TUint32 aId );
     
     /**
      * Custom security checking for IPCs marked with TSpecialCase::ECustomCheck.
@@ -104,6 +104,15 @@ public:
             TInt& aAction,
             TSecurityInfo& aMissing );
 
+    /**
+     * Checks the client's capabilities in the middle of request handling. Some
+     * checks cannot be done with CustomSecurityCheckL() at the start phase of
+     * the operation.
+     * @param aMsg The IPC message from the client.
+     * @return Returns ETrue if client has the needed capabilities. Otherwise
+     * returns EFalse.
+     */
+    CPolicyServer::TCustomResult CapabilityCheckWithProtection( const RMessage2& aMessage );
 
 protected: // From CActive
     /**

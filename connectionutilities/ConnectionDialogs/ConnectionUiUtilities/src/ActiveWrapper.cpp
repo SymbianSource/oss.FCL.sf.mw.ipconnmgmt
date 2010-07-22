@@ -71,7 +71,15 @@ void CActiveWrapper::ConstructL()
 //
 CActiveWrapper::CActiveWrapper( const TUint aIndexOfNote ) 
 : CActive( CActive::EPriorityStandard ),
-  iIndexOfNote( aIndexOfNote )
+  iSSID( NULL ),
+  iConnectionMode( NULL ),
+  iSecurityMode( NULL ),
+  iExtSecurityMode( NULL ),
+  iProtectedSetupSupported( NULL ),
+  iRS( NULL ),
+  iIndexOfNote( aIndexOfNote ),
+  iKey( NULL ),
+  iHex( NULL )
     {
     }
 

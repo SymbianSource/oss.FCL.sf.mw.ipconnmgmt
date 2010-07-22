@@ -164,6 +164,21 @@ public:
     void update();
     
     /*!
+     * Gets the icon identifier(name) of the connection method. It can
+     * contain path information.
+     * @return Contains string representing icon
+     */
+    QString getIcon() const;
+    
+    /*!
+     * Sets the icon identifier(name) of the destination. It can
+     * contain path information.
+     * 
+     * @param icon New icon
+     */      
+    void setIcon(QString icon);
+    
+    /*!
      * Reload the contents of the connection method from database.
      * Any current changes made to the connection method are lost.
      */

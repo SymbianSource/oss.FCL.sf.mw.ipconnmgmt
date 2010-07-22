@@ -21,7 +21,7 @@
 #include <stdlib.h>
 #include <nifvar.h>
 #include <StringLoader.h>
-#include <ConnectionMonitorUi.rsg>
+#include <connectionmonitorui.rsg>
 #include <avkon.rsg>
 #include <AknUtils.h>
 #include <apgcli.h>

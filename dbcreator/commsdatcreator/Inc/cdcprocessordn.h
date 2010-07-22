@@ -114,14 +114,7 @@ class CProcessorDN : public CProcessorBase
         * Writes the actual created access point to the log file.
         */
         void DoLogL();
-    
-    private:
-        /**
-        * Tells whether the current destination has the internet metadata set.
-        * @return ETrue if the destination is Internet, EFalse otherwise.
-        */
-//        TBool IsInternet();
-        
+            
     private:
     
         // @var The destiantion that is created

@@ -79,3 +79,8 @@ void CmManagerShim::allDestinations(QList<uint> &destArray) const
 {
     return d_ptr->AllDestinations(destArray);
 }
+
+QString CmManagerShim::getUncategorizedIcon() const
+{    
+    return d_ptr->GetUncategorizedIcon();
+}

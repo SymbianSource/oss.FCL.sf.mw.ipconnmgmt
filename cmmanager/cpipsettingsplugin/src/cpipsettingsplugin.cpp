@@ -12,13 +12,12 @@
 * Contributors:
 *
 * Description:  
+* Control Panel "Network Settings" plugin implementation.
 *
 */
 
 // System includes
-#include <QApplication>
-#include <QLocale>
-#include <QTranslator>
+#include <HbTranslator>
 #include <cpsettingformentryitemdataimpl.h>
 
 // User includes
@@ -42,14 +41,9 @@
 /*!
     Constructor.
 */
-CpIpSettingsPlugin::CpIpSettingsPlugin()
+CpIpSettingsPlugin::CpIpSettingsPlugin() :
+    mTranslator(new HbTranslator("cpipsettingsplugin"))
 {
-    // Install localization
-    QString lang = QLocale::system().name();
-    QString path = "z:/resource/qt/translations/";
-    mTranslator = new QTranslator(this);
-    mTranslator->load(path + "cpipsettingsplugin_" + lang);
-    qApp->installTranslator(mTranslator);
 }
 
 /*!

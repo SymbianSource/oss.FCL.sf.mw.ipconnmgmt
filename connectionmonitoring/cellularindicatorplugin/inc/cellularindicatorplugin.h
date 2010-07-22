@@ -69,10 +69,6 @@ public:
     // Used to get indicator data (icon or text)
     QVariant indicatorData(int role) const;
 
-private slots:
-    // handler for error codes
-    void processError(QProcess::ProcessError err);
-
 private: // data
 
     // Disable copy constructor

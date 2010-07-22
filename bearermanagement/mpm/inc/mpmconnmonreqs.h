@@ -46,7 +46,7 @@ class CMPMConnMonReqs : public CActive
         static CMPMConnMonReqs* NewL( CMPMConnMonEvents& aParent,
                                       RConnectionMonitor& aConnMon,
                                       TUint aConnId,
-                                      CMPMServerSession& aSession );
+                                      CMPMServerSession* aSession );
 
         /**
         * Destructor.
@@ -132,7 +132,7 @@ class CMPMConnMonReqs : public CActive
         CMPMConnMonReqs( CMPMConnMonEvents&  aParent,
                          RConnectionMonitor& aConnMon,
                          TUint aConnId, 
-                         CMPMServerSession&  aSession );
+                         CMPMServerSession* aSession );
 
         /**
         * 2nd phase constructor.
@@ -170,9 +170,8 @@ class CMPMConnMonReqs : public CActive
         TConnMonIapInfoBuf iIapBuf;
 
         // MPM server session which requested the service
-        // After service completes callback function is called through 
-        // the reference.
-        CMPMServerSession& iSession;
+        // After service completes callback function is called
+        CMPMServerSession* iSession;
 
         // Used for first session start to wait until necessary data available
         CActiveSchedulerWait iActiveSchedulerWait;        

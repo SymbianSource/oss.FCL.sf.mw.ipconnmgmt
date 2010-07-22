@@ -10,14 +10,13 @@
 # Contributors:
 #
 # Description:
-#
+# Control Panel Destinations & Access points plugin project file
 
 TEMPLATE = lib
 TARGET = cpdestinationplugin
 DEPENDPATH += .
 INCLUDEPATH += . 
 CONFIG += hb plugin
-CONFIG += debug
 MOC_DIR = moc
 OBJECTS_DIR = obj
 RCC_DIR = rcc
@@ -40,6 +39,14 @@ SOURCES += src/cpiapitem.cpp \
     src/cpdestinationgroup.cpp
 
 TRANSLATIONS = cpdestinationplugin.ts
+
+# Temporary solution to fix tracecompiler
+# When tracecompiler is fixed, this can be removed
+symbian: {
+
+    MMP_RULES += "USERINCLUDE traces"
+
+}
 
 symbian:
 { 

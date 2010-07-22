@@ -17,7 +17,6 @@
 */
 
 
-#include <data_caging_paths.hrh>
 #include <platform_paths.hrh>
 
 TARGET          cmmanager.dll
@@ -26,10 +25,10 @@ UID             0x1000008d 0x10207376
 CAPABILITY      CAP_GENERAL_DLL
 VENDORID VID_DEFAULT
 
-SOURCEPATH      ../../cmmcommon/Src
+SOURCEPATH      ../../cmmcommon/src
 SOURCE          cmmclistatic.cpp
 
-SOURCEPATH      ../Src
+SOURCEPATH      ../src
 SOURCE          cmmanager.cpp
 SOURCE          cmmanagerapi.cpp
 SOURCE          cmdestination.cpp
@@ -56,12 +55,10 @@ MW_LAYER_SYSTEMINCLUDE
 
 LIBRARY         euser.lib
 
-DEBUGLIBRARY    flogger.lib
-
 #if defined(EABI)
 DEFFILE ../EABI/CmManager_prot_setup.def
 #elif defined( WINSCW )
-DEFFILE ../BWinsCw/CmManager_prot_setup.def
+DEFFILE ../BWinsCw/CmManager_prot_setup.DEF
 #elif defined( WINS )
 DEFFILE ../BWins/CmManager_prot_setup.def
 #else

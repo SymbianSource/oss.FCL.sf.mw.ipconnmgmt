@@ -16,7 +16,7 @@
  */
 
 #include <QtPlugin>
-#include <QTranslator>
+#include <HbTranslator>
 #include <QLocale>
 #include <QList>
 #include <HbLabel>
@@ -94,12 +94,7 @@ HbIndicatorInterface* CellularIndicatorPlugin::createIndicator(
     Q_UNUSED(indicatorType)
     
     // Install localization
-    QTranslator *translator = new QTranslator(this);
-
-    QString lang = QLocale::system().name(); 
-    QString path = "Z:/resource/qt/translations/"; 
-    translator->load("cellularindicatorplugin_" + lang, path);
-    qApp->installTranslator(translator);
+    HbTranslator *translator(new HbTranslator("cellularindicatorplugin"));
     
     OstTraceFunctionExit0( CELLULARINDICATORPLUGIN_CREATEINDICATOR_EXIT );
     return this;
@@ -156,15 +151,13 @@ bool CellularIndicatorPlugin::handleInteraction(InteractionType type)
     
     Q_UNUSED(type)
     bool handled = false;
+    QVariantMap data;
     
     switch(type) {
     case InteractionActivated:
-        //connect error() to slot processError() to get error, 
-        QObject::connect( &process, SIGNAL(error(QProcess::ProcessError)),                       
-                          this, SLOT(processError(QProcess::ProcessError)));
+        // Emit a signal that will inform the client to start the connectionview client
+        emit userActivated(data);
 
-        // Show connection view
-        process.start("connview");
         handled = true;
         break;
     
@@ -209,17 +202,14 @@ QVariant CellularIndicatorPlugin::indicatorData(int role) const
             else if ( indicatorInfo[0].toInt() && (indicatorInfo.count() >= 2)) {
                 
                 // Only one connection -> show name of the iap
-                QString iapName;
-                iapName = indicatorInfo[1].toString();
-                QString str = QString(hbTrId("txt_occ_dblist_cellular_data_val_1_connected"));
-                ret = str.arg(iapName);
+                ret = indicatorInfo[1].toString();
             }
         }
         break;
 
     case DecorationNameRole:
         // Return the icon
-        ret = HbIcon("qtg_small_gprs");
+        ret = QString("qtg_small_gprs");
         break;
     
     default:
@@ -230,27 +220,4 @@ QVariant CellularIndicatorPlugin::indicatorData(int role) const
     OstTraceFunctionExit0( CELLULARINDICATORPLUGIN_INDICATORDATA_EXIT );
     return ret;
 }
-
-/*!
-    The processError is a handler for error codes.
-*/
-void CellularIndicatorPlugin::processError(QProcess::ProcessError err)
-    {
-    OstTraceFunctionEntry1(CELLULARINDICATORPLUGIN_PROCESSERROR_ENTRY, this);
-  
-    switch (err) {   
-        case QProcess::FailedToStart: 
-        case QProcess::Crashed: 
-        case QProcess::Timedout: 
-        case QProcess::ReadError: 
-        case QProcess::WriteError: 
-        case QProcess::UnknownError:
-            OstTrace1( CELLULARINDICATORPLUGIN_ERR,PROCESSERROR_KNOWN,"Process Error %u", err);
-            break;  
-        default:
-        OstTrace1( CELLULARINDICATORPLUGIN_ERR,PROCESSERROR_UNKNOWN,"Unknown Process Error %u", err);
-            break;
-        }
-    OstTraceFunctionExit1(CELLULARINDICATORPLUGIN_PROCESSERROR_EXIT, this);
-    }
 

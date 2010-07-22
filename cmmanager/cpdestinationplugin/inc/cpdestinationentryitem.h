@@ -63,16 +63,18 @@ signals:
 public slots:
     void updateDestinationView();
     void showItemMenu(QPointF position);
+    void openDestination();
     void renameDestination();
     void confirmDestinationDelete();
     void deleteDestination();
     void activateArrangeMode();
     void viewDone();
     void viewCancel();
-    void updateIndex(HbListWidgetItem *widgetItem);
+    void updateIndex();
     void saveNewDestinationName();
     
 protected:
+    bool eventFilter(QObject *obj, QEvent *event);
     
 protected slots:
     
@@ -89,6 +91,7 @@ private:
     void lauchNewDestinationNameQuery();
     void showRenameError(const QString &info);
     void showErrorNote(const QString &info);
+    QString resolveApIcon(QSharedPointer<CmConnectionMethodShim> cm) const; 
             
 private slots:
     
@@ -112,9 +115,6 @@ private: // data
     HbInputDialog      *mDialog;
     //! New Destination name query's OK action
     HbAction           *mOkAction;
-    
-    //! Maximun length for destination name
-    static const int DestinationNameMaxLength = 30;
 };
 
 #endif /* CPDESTINATIONENTRYITEM_H */

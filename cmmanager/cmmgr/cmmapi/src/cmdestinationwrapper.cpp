@@ -145,7 +145,10 @@ void CCmDestinationWrapper::GetConnMethodAsEmbeddedDestL(
         }
 
     iCmManagerApi = aCmManagerApi;
-    iCmDestinationApi.ConnectAndGetConnMethodAsEmbeddedDestL( *aCmManagerApi, aConnMethodHandle, aExistingHandle );
+    iCmDestinationApi.ConnectAndGetConnMethodAsEmbeddedDestL(
+            *aCmManagerApi,
+            aConnMethodHandle,
+            aExistingHandle );
     if ( !aExistingHandle )
         {
         iCmManagerApi->StoreDestinationWrapper( this );
@@ -383,6 +386,26 @@ TInt CCmDestinationWrapper::IsEqual( const TInt aHandle, TBool& aResult )
     TInt err = iCmDestinationApi.IsEqual( aHandle, aResult );
 
     OstTraceFunctionExit0( CCMDESTINATIONWRAPPER_ISEQUAL_EXIT );
+    return err;
+    }
+
+TInt CCmDestinationWrapper::GetIcon( HBufC* aBuffer )
+    {
+    OstTraceFunctionEntry0( CCMDESTINATIONWRAPPER_GETICON_ENTRY );
+
+    TInt err = iCmDestinationApi.GetIcon( aBuffer );
+
+    OstTraceFunctionExit0( CCMDESTINATIONWRAPPER_GETICON_EXIT );
+    return err;
+    }
+
+TInt CCmDestinationWrapper::SetIcon( const TDesC& aValue)
+    {
+    OstTraceFunctionEntry0( CCMDESTINATIONWRAPPER_SETICON_ENTRY );
+
+    TInt err = iCmDestinationApi.SetIcon( aValue );
+
+    OstTraceFunctionExit0( CCMDESTINATIONWRAPPER_SETICON_EXIT );
     return err;
     }
 

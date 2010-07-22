@@ -59,6 +59,8 @@ protected:
 protected slots:
  
 private:
+    Q_DISABLE_COPY(CpPacketDataApView)
+    
     void createAccessPointSettingsGroup();
     void updateAccessPointSettingsGroup();
     void showMessageBox(
@@ -71,7 +73,6 @@ private slots:
     void connectionNameChanged();
     void accessPointNameChanged();
     void userNameChanged();
-    void promptForAuthChanged(int state);
     void passwordChanged();
     void authenticationChanged(int index);
     void homepageChanged();
@@ -92,8 +93,6 @@ private: // data
     HbDataFormModelItem *mAccessPointNameItem;
     //! "User name" setting item
     HbDataFormModelItem *mUserNameItem;
-    //! "Prompt" setting item
-    HbDataFormModelItem *mPromptForAuthItem;
     //! "Password" setting item
     HbDataFormModelItem *mPasswordItem;
     //! "Authentication" setting item
@@ -106,8 +105,6 @@ private: // data
     CmConnectionMethodShim *mCmConnectionMethod;
     //! Message box for info notes
     QSharedPointer<HbMessageBox> mMessageBox;
-    //! Maps checkbox value to CMManagerShim::PacketDataIFPromptForAuth value
-    QMap<Qt::CheckState, bool> mPromptForAuthMap;
     //! Maps authentication combobox index to CMManagerShim::PacketDataDisablePlainTextAuth value
     QMap<int, bool> mAuthenticationMap;
     

@@ -201,11 +201,14 @@ void CCmmBearerPriorityCache::CopyL( RPointerArray<CCmmBearerPriority>& aArray )
     }
 
 // ---------------------------------------------------------------------------
-// Get the priority value for a service type from the bearer priority cache.
+// Get the priority value for a service type name from the bearer priority
+// cache.
 // ---------------------------------------------------------------------------
 //
 TUint CCmmBearerPriorityCache::GetPriority( const TDesC& aServiceType ) const
     {
+    OstTraceFunctionEntry0( CCMMBEARERPRIORITYCACHE_GETPRIORITY_ENTRY );
+
     TUint priority = CMManager::KDataMobilitySelectionPolicyPriorityWildCard;
 
     if ( aServiceType.Length() > 0 )
@@ -220,6 +223,7 @@ TUint CCmmBearerPriorityCache::GetPriority( const TDesC& aServiceType ) const
             }
         }
 
+    OstTraceFunctionExit0( CCMMBEARERPRIORITYCACHE_GETPRIORITY_EXIT );
     return priority;
     }
 

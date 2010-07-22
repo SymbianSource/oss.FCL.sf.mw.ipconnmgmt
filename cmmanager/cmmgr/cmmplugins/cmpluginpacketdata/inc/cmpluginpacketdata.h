@@ -396,8 +396,9 @@ NONSHARABLE_CLASS( CCmPluginPacketData ) : public CCmPluginBaseEng
         * @param aServiceRecord Pointer to the service record where to save the
         * pdp type.
         */
-        void SetPDPTypeL( RPacketContext::TProtocolType aPdpType,
-                          CommsDat::CCDWCDMAPacketServiceRecord* aServiceRecord );
+        void SetPDPTypeL(
+                RPacketContext::TProtocolType aPdpType,
+                CommsDat::CCDWCDMAPacketServiceRecord* aServiceRecord );
 
         /**
          * Sets the daemon name for the Connection Method.
@@ -407,8 +408,14 @@ NONSHARABLE_CLASS( CCmPluginPacketData ) : public CCmPluginBaseEng
          * specific records of the Connection Method.
          */
         void SetDaemonNameL(
-            RPointerArray<CommsDat::CCDRecordBase>& aGenRecordArray,
-            RPointerArray<CommsDat::CCDRecordBase>& aBearerSpecRecordArray );
+                RPointerArray<CommsDat::CCDRecordBase>& aGenRecordArray,
+                RPointerArray<CommsDat::CCDRecordBase>& aBearerSpecRecordArray );
+
+        /**
+         * Returns the default priority value identified with the parameter.
+         * @param aAttribute Indentifies the default priority value requested.
+         */
+        TUint32 GetDefPriorityL( const TUint32 aAttribute ) const;
 
     private:
         /**
@@ -422,22 +429,27 @@ NONSHARABLE_CLASS( CCmPluginPacketData ) : public CCmPluginBaseEng
         /**
          * Boolean to define if this is outgoing or incoming packetdata cm.
          */
-        TBool   iOutgoing;
+        TBool iOutgoing;
 
         /**
-         * Id of the bearer record of the iap.
+         * ID of the bearer record of the IAP.
          */
         TUint32 iBearerRecordId;
 
         /**
-         * Name of the bearer record of the iap.
+         * Name of the bearer record of the IAP.
          */
-        HBufC*  iBearerRecordName;
+        HBufC* iBearerRecordName;
 
         /**
-         * pointer to the QoS record of the iap.
+         * Pointer to the QoS record of the IAP.
          */
         CommsDat::CCDUmtsR99QoSAndOnTableRecord* iPacketDataQoSRecord;
+
+        /**
+         * Bearer priority table ID.
+         */
+        CommsDat::TMDBElementId iBearerPriorityTableId;
     };
 
 #endif // PACKETDATA_PLUGIN_H

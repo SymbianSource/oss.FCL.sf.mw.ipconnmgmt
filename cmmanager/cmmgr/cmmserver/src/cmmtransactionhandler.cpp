@@ -84,6 +84,7 @@ void CCmmTransactionHandler::ConstructL()
 //
 CommsDat::CMDBSession& CCmmTransactionHandler::Session() const
     {
+    // No traces.
     return iDb;
     }
 

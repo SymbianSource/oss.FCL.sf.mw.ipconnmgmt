@@ -25,11 +25,9 @@
 #include <eikmenup.h>
 
 #include <ApListItem.h>
-#include <ApSetUI.rsg>
+#include <apsetui.rsg>
 
 #include <featmgr.h>
-
-#include <csxhelp/cp.hlp.hrh>
 
 #include "ApSelectorDialog.h"
 #include "ApSelectorListBoxModel.h"
@@ -435,14 +433,12 @@ void CApSelectorDialog::GetHelpContext(TCoeHelpContext& aContext) const
     APSETUILOGGER_ENTERFN( EDialog,"SelDIalog::GetHelpContext<->")
     
     aContext.iMajor = iHandler->iHelpMajor;
-    // help no longer available for user, use dummy ID
-    aContext.iContext = KSET_HLP_AP_SETTING_GPRS;
     }
 
 
 
 // ---------------------------------------------------------
-// CApSelectorDialog::HandleApDbEventL
+// CApSelectorDialog::HandleApDbEventLw
 // called by the active access point framework
 // ---------------------------------------------------------
 //

@@ -288,6 +288,30 @@ void CmDestinationShimPrivate::DeleteDestination()
     OstTraceFunctionExit0(CMDESTINATIONSHIMPRIVATE_DELETEDESTINATION_EXIT);
 }
 
+QString CmDestinationShimPrivate::GetIcon() const
+{    
+    OstTraceFunctionEntry0(CMDESTINATIONSHIMPRIVATE_GETICON_ENTRY);
+    
+    QString icon;
+    TRAPD(error, GetIconL(icon));
+    TraceIfError(error);
+    qt_symbian_throwIfError(error);
+    
+    OstTraceFunctionExit0(CMDESTINATIONSHIMPRIVATE_GETICON_EXIT);
+    return icon;
+}
+
+void CmDestinationShimPrivate::SetIcon(QString icon)
+{
+    OstTraceFunctionEntry0(CMDESTINATIONSHIMPRIVATE_SETICON_ENTRY);
+    
+    TRAPD(error, SetIconL(icon));
+    TraceIfError(error);
+    qt_symbian_throwIfError(error);
+
+    OstTraceFunctionExit0(CMDESTINATIONSHIMPRIVATE_SETICON_EXIT);
+}
+
 void CmDestinationShimPrivate::PriorityL(
     CmConnectionMethodShim *cmShim,
     uint &priority) const
@@ -345,6 +369,19 @@ void CmDestinationShimPrivate::SetNameL(QString name)
 {
     TPtrC16 namePtr(reinterpret_cast<const TUint16*>(name.utf16()));
     iDestination.SetNameL(namePtr);
+}
+
+void CmDestinationShimPrivate::GetIconL(QString &icon) const
+{
+    HBufC* iapName = iDestination.GetIconL();
+    icon = QString::fromUtf16(iapName->Ptr(), iapName->Length());
+    delete iapName;
+}
+
+void CmDestinationShimPrivate::SetIconL(QString icon)
+{
+    TPtrC16 iconPtr(reinterpret_cast<const TUint16*>(icon.utf16()));
+    iDestination.SetIconL(iconPtr);
 }
 
 /*!

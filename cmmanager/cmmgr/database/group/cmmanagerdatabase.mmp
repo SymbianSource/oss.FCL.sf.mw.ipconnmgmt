@@ -17,7 +17,6 @@
 *
 */
 
-#include <data_caging_paths.hrh>
 #include <platform_paths.hrh>
 
 TARGET        	cmmanagerdatabase.dll
@@ -42,9 +41,7 @@ SYSTEMINCLUDE		../../../../inc
 MW_LAYER_SYSTEMINCLUDE
 
 LIBRARY       	euser.lib
-//LIBRARY         ECom.lib
 LIBRARY         COMMSDAT.lib
-//LIBRARY         flogger.lib
 
 
 #if defined(EABI)
