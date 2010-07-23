@@ -37,5 +37,4 @@ PRJ_EXPORTS
 ../inc/cmpluginvpndef.h             MW_LAYER_PUBLIC_EXPORT_PATH(cmpluginvpndef.h)
 ../inc/cmpluginhscsddef.h           MW_LAYER_PUBLIC_EXPORT_PATH(cmpluginhscsddef.h)
 ../inc/cmmanager.h                  MW_LAYER_PUBLIC_EXPORT_PATH(cmmanager.h)
-../inc/cmsettingsui.h               MW_LAYER_PUBLIC_EXPORT_PATH(cmsettingsui.h)
 ../inc/cmgenconnsettings.h          MW_LAYER_PUBLIC_EXPORT_PATH(cmgenconnsettings.h)

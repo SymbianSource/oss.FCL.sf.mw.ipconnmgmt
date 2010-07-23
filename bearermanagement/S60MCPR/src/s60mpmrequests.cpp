@@ -847,10 +847,15 @@ void CMPMPolicyRequests::CancelRequest( TMpmAsynchCodes aRequestCode )
     // Asynchronous cancellation adds message to MPMServer's IPC queue but since we
     // queue all requests we can safely always call the SendCancelRequest()
     
-    // If the cancelled request is the active one.
-    //
+    // Sanity check.
     S60MCPRLOGSTRING2( "S60MCPR::CMPMPolicyRequests<%x>::CancelRequest() %d", this, (TInt)aRequestCode )
-    if ( iPolicyRequests[0].iRequestType == aRequestCode )
+    if ( iPolicyRequests.Count() == 0 )
+        {
+        S60MCPRLOGSTRING1( "S60MCPR::CMPMPolicyRequests<%x>::CancelRequest(): Error: Nothing to cancel!", this )
+        return;
+        }
+    // If the cancelled request is the active one.
+    else if ( iPolicyRequests[0].iRequestType == aRequestCode )
         {
         // Cancel the query if active
         //
@@ -877,7 +882,6 @@ void CMPMPolicyRequests::CancelRequest( TMpmAsynchCodes aRequestCode )
             }
         }
     // Else we need to find it from the queue
-    //
     else 
         {
         S60MCPRLOGSTRING1( "S60MCPR::CMPMPolicyRequests<%x>::CancelRequest() Cancelling pending request", this )
