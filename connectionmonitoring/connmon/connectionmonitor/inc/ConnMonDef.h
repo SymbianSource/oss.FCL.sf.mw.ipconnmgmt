@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2002-2009 Nokia Corporation and/or its subsidiary(-ies).
+* Copyright (c) 2002-2010 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -105,6 +105,16 @@ enum TConnMonNotifierPriority
     EConnMonPriorityNormal = 0,
     EConnMonPriorityMedium = 5,
     EConnMonPriorityHigh   = 10
+    };
+
+/**
+ * Status values for dial-up PDP context override functionality.
+ */
+enum TConnMonDialUpOverrideStatus
+    {
+    EConnMonDialUpOverrideDisabled = 0,
+    EConnMonDialUpOverrideInactive,
+    EConnMonDialUpOverrideActive
     };
 
 /**

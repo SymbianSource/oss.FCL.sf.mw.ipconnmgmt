@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2002-2007 Nokia Corporation and/or its subsidiary(-ies).
+* Copyright (c) 2002-2010 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -673,7 +673,7 @@ NONSHARABLE_CLASS( CSubConnUpDownNotifier ) : public CActive
         * @return void.
         */
         void SetInterfaceClosed();
-        
+
         /**
         * Tells whether interface has been closed or not.
         * @since
@@ -687,14 +687,14 @@ NONSHARABLE_CLASS( CSubConnUpDownNotifier ) : public CActive
         * @return void.
         */
         void SetLinkLayerClosed();
-        
+
         /**
         * Sets link layer status to NOT closed.
         * @since
         * @return void.
         */
         void SetLinkLayerOpen();
-        
+
         /**
         * Return ETrue if KLinkLayerClosed has been received.
         * @since

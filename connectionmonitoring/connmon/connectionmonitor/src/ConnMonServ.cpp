@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2002-2009 Nokia Corporation and/or its subsidiary(-ies).
+* Copyright (c) 2002-2010 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -34,6 +34,7 @@
 #include "ConnMonBearerGroupManager.h"
 #include "connmoncommsdatnotifier.h"
 #include "cellulardatausagekeyupdater.h"
+#include "connmondialupoverridenotifier.h"
 
 // ============================ LOCAL FUNCTIONS ===============================
 
@@ -236,7 +237,21 @@ void CConnMonScheduler::Error( TInt aError ) const
 CConnMonServer::CConnMonServer()
         :
         CPolicyServer( CActive::EPriorityStandard, KConnMonPolicy ),
-        iAvailabilityManager( NULL )
+        iIap( NULL ),
+        iEventQueue( NULL ),
+        iSessionCount( 0 ),
+        iShutdown( NULL ),
+        iContainerIndex( NULL ),
+        iCommsDatCache( NULL ),
+        iAvailabilityManager( NULL ),
+        iIapTableNotifier( NULL ),
+        iSnapTableNotifier( NULL ),
+        iVirtualTableNotifier( NULL ),
+        iBearerGroupManager( NULL ),
+        iCellularDataUsageKeyUpdater( NULL ),
+        iDialUpOverrideNotifier( NULL ),
+        iDialUpOverrideTimer( NULL ),
+        iDialUpOverrideStatus( EConnMonDialUpOverrideDisabled )
     {
     }
 
@@ -322,7 +337,18 @@ void CConnMonServer::ConstructL()
     
     iCellularDataUsageKeyUpdater = CCellularDataUsageKeyUpdater::NewL( this );
     LOGIT("ConstructL: CCellularDataUsageKeyUpdater constructed")
-    
+
+    // Add P&S listener for dial-up PDP context override, if feature enabled.
+    if ( iCellularDataUsageKeyUpdater->DialUpOverrideEnabled() )
+        {
+        iDialUpOverrideNotifier = CConnMonDialUpOverrideNotifier::NewL( this );
+        iDialUpOverrideStatus = EConnMonDialUpOverrideInactive;
+        LOGIT("ConstructL: Dial-up override notifier constructed")
+
+        // Construct dial-up PDP context override timer.
+        iDialUpOverrideTimer = CConnMonDialUpOverrideTimer::NewL( this );
+        }
+
     // Identify ourselves and open for service
     StartL( KConnectionMonitorServerName );
 
@@ -380,8 +406,14 @@ CConnMonServer::~CConnMonServer()
 
     // Bearer Group Manager
     delete iBearerGroupManager;
-    
+
     delete iCellularDataUsageKeyUpdater;
+
+    // Dial-up PDP context override timer.
+    delete iDialUpOverrideTimer;
+
+    // P&S listener for dial-up PDP context override.
+    delete iDialUpOverrideNotifier;
 
     FeatureManager::UnInitializeLib();
     }
@@ -792,6 +824,78 @@ TInt CConnMonServer::GetAvailableSnaps( RArray<TConnMonId>& aSnapIds )
     }
 
 // -----------------------------------------------------------------------------
+// Set the dial-up PDP context override feature status. Either activates or
+// deactivates it. Does nothing if the feature itself has not been enabled.
+// -----------------------------------------------------------------------------
+//
+void CConnMonServer::SetDialUpOverrideStatus( TInt aStatus )
+    {
+    LOGENTRFN("CConnMonServer::SetDialUpOverrideStatus()")
+
+    // Do nothing if whole feature is disabled.
+    LOGIT2("iDialUpOverrideStatus = %d, aStatus = %d", iDialUpOverrideStatus, aStatus)
+    if ( iDialUpOverrideStatus == EConnMonDialUpOverrideInactive &&
+            aStatus == EConnMonDialUpOverrideActive )
+        {
+        LOGIT("Setting dial-up override status from inactive to active")
+        // Start the dial-up override timer to ensure packetdata connectivity
+        // is restored to original state eventually. Normally it is restored
+        // after the dial-up connection has been successfully established.
+        iDialUpOverrideTimer->Start();
+        // Status must be set before updating cellular data usage key.
+        iDialUpOverrideStatus = aStatus;
+
+        // Disable cellular data usage until the expected dial-up
+        // connection has been established (or timeout).
+        TRAP_IGNORE( iCellularDataUsageKeyUpdater->UpdateKeyL( 0 ) );
+
+        LOGIT("SetDialUpOverrideStatus() triggered HandleAvailabilityChange()")
+        AvailabilityManager()->HandleAvailabilityChange();
+        }
+    else if ( iDialUpOverrideStatus == EConnMonDialUpOverrideActive &&
+            aStatus == EConnMonDialUpOverrideInactive )
+        {
+        LOGIT("Setting dial-up override status from active to inactive")
+        // Stop the dial-up override timer.
+        iDialUpOverrideTimer->Cancel();
+        // Status must be set before updating cellular data usage key.
+        iDialUpOverrideStatus = aStatus;
+
+        TInt registration( ENetworkRegistrationExtUnknown );
+        TInt err = iIap->GetNetworkRegistration_v2( registration );
+        if ( err == KErrNone )
+            {
+            TRAP_IGNORE( iCellularDataUsageKeyUpdater->UpdateKeyL( registration ) );
+            }
+        else
+            {
+            LOGIT1("GetNetworkRegistration_v2 failed <%d>", err)
+            }
+        iDialUpOverrideNotifier->ResetStatus();
+
+        LOGIT("SetDialUpOverrideStatus() triggered HandleAvailabilityChange()")
+        AvailabilityManager()->HandleAvailabilityChange();
+        }
+
+    LOGEXITFN("CConnMonServer::SetDialUpOverrideStatus()")
+    }
+
+// -----------------------------------------------------------------------------
+// Signals that all internal PDP connections have closed through the
+// KDialUpConnection P&S-property.
+// -----------------------------------------------------------------------------
+//
+void CConnMonServer::ConnectionsClosedForDialUpOverride()
+    {
+    LOGENTRFN("CConnMonServer::ConnectionsClosedForDialUpOverride()")
+    if ( iDialUpOverrideStatus == EConnMonDialUpOverrideActive )
+        {
+        iDialUpOverrideNotifier->ResetStatus();
+        }
+    LOGEXITFN("CConnMonServer::ConnectionsClosedForDialUpOverride()")
+    }
+
+// -----------------------------------------------------------------------------
 // CConnMonServer::CustomSecurityCheckL
 // Implements custom security checking for IPCs marked with
 // TSpecialCase::ECustomCheck.
@@ -889,4 +993,95 @@ void CConnMonDelayedShutdown::RunL()
     CActiveScheduler::Stop();
     }
 
-// End-of-file
+// -----------------------------------------------------------------------------
+// CConnMonDialUpOverrideTimer::NewL
+// -----------------------------------------------------------------------------
+//
+CConnMonDialUpOverrideTimer* CConnMonDialUpOverrideTimer::NewL(
+        CConnMonServer* aServer )
+    {
+    CConnMonDialUpOverrideTimer* self = CConnMonDialUpOverrideTimer::NewLC( aServer );
+    CleanupStack::Pop( self );
+    return self;
+    }
+
+// -----------------------------------------------------------------------------
+// CConnMonDialUpOverrideTimer::NewLC
+// -----------------------------------------------------------------------------
+//
+CConnMonDialUpOverrideTimer* CConnMonDialUpOverrideTimer::NewLC(
+        CConnMonServer* aServer )
+    {
+    CConnMonDialUpOverrideTimer* self = new( ELeave ) CConnMonDialUpOverrideTimer( aServer );
+    CleanupStack::PushL( self );
+    self->ConstructL();
+    return self;
+    }
+
+// -----------------------------------------------------------------------------
+// CConnMonDialUpOverrideTimer::~CConnMonDialUpOverrideTimer
+// -----------------------------------------------------------------------------
+//
+CConnMonDialUpOverrideTimer::~CConnMonDialUpOverrideTimer()
+    {
+    Cancel();
+    iTimer.Close();
+    iServer = NULL;
+    }
+
+// -----------------------------------------------------------------------------
+// CConnMonDialUpOverrideTimer::CConnMonDialUpOverrideTimer
+// -----------------------------------------------------------------------------
+//
+CConnMonDialUpOverrideTimer::CConnMonDialUpOverrideTimer(
+        CConnMonServer* aServer )
+        :
+        CActive( EConnMonPriorityNormal ),
+        iServer( aServer )
+    {
+    }
+
+// -----------------------------------------------------------------------------
+// CConnMonDialUpOverrideTimer::ConstructL
+// -----------------------------------------------------------------------------
+//
+void CConnMonDialUpOverrideTimer::ConstructL()
+    {
+    CActiveScheduler::Add( this );
+    User::LeaveIfError( iTimer.CreateLocal() );
+    }
+
+// -----------------------------------------------------------------------------
+// CConnMonDialUpOverrideTimer::Start
+// -----------------------------------------------------------------------------
+//
+void CConnMonDialUpOverrideTimer::Start()
+    {
+    if ( !IsActive() )
+        {
+        iTimer.After( iStatus, KConnMonDialUpOverrideInterval );
+        SetActive();
+        }
+    }
+
+// -----------------------------------------------------------------------------
+// CConnMonDialUpOverrideTimer::DoCancel
+// -----------------------------------------------------------------------------
+//
+void CConnMonDialUpOverrideTimer::DoCancel()
+    {
+    iTimer.Cancel();
+    }
+
+// -----------------------------------------------------------------------------
+// CConnMonDialUpOverrideTimer::RunL
+// -----------------------------------------------------------------------------
+//
+void CConnMonDialUpOverrideTimer::RunL()
+    {
+    LOGIT(".")
+    LOGIT1("RunL: CConnMonDialUpOverrideTimer <%d>", iStatus.Int())
+    iServer->SetDialUpOverrideStatus( EConnMonDialUpOverrideInactive );
+    }
+
+// End of file

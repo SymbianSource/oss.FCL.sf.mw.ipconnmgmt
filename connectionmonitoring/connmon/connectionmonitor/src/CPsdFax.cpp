@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2002-2009 Nokia Corporation and/or its subsidiary(-ies).
+* Copyright (c) 2002-2010 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -737,7 +737,7 @@ TInt CPsdFaxConnectionData::OpenContext( const TDes& aName )
         iOpen = ETrue;
 
         // Start status notifier
-        if ( !iStatusNotifier->IsActive() )
+        if ( iStatusNotifier && !iStatusNotifier->IsActive() )
             {
             LOGIT("OpenContext: start status notifier")
             iStatusNotifier->Start( iContext );
@@ -850,7 +850,7 @@ TInt CPsdFaxConnectionData::Stop()
     err = status.Int();
 
     // Remove from server tables if status notifier is not active.
-    if ( !iStatusNotifier->IsActive() )
+    if ( !iStatusNotifier || !iStatusNotifier->IsActive() )
         {
         // Remove from server tables
         RemoveFromServer();
@@ -1284,6 +1284,11 @@ void CPsdFaxStatusNotifier::RunL()
             // Close the context
             iConnDataModule->CloseContext();
 
+            // Dial-up connection has gone down. Make sure the dial-up PDP
+            // context override is disabled.
+            LOGIT("External PSD connection status EStatusDeleted, disabling dial-up override")
+            iServer->SetDialUpOverrideStatus( EConnMonDialUpOverrideInactive );
+
             // Delete all old connection objects. This method should be used
             // carefully because it will delete ConnectionData and
             // statusnotifier objects. Get out fast from RunL().
@@ -1291,6 +1296,13 @@ void CPsdFaxStatusNotifier::RunL()
 
             // Stop listening
             return;
+            }
+        else if ( iContextStatus == RPacketContext::EStatusActive )
+            {
+            // Dial-up connection has been established. Make sure the dial-up
+            // PDP context override is disabled.
+            LOGIT("External PSD connection status EStatusActive, disabling dial-up override")
+            iServer->SetDialUpOverrideStatus( EConnMonDialUpOverrideInactive );
             }
 
         // New request

@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2002-2009 Nokia Corporation and/or its subsidiary(-ies).
+* Copyright (c) 2002-2010 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -421,7 +421,6 @@ CConnMonIAP::~CConnMonIAP()
 TInt CConnMonIAP::EnumerateConnections( TUint& aCount )
     {
     // Server must be 'blocked' while updating the connection table.
-    TConnectionInfoBuf connInfoBuf;
     TBearerInfo bearerInfo;
     TConnInfo connInfo( 0, 0, 0, 0, bearerInfo );
     TInt err( KErrNone );
@@ -2312,6 +2311,18 @@ TInt CConnMonIAP::RemoveConnection( TConnInfo& aConnection )
             }
 
         iConnInfos.Remove( index );
+
+        // If dial-up PDP context override feature is enabled and active (a dial-up
+        // connection is about to start), connection closures need to be reported
+        // in case dial-up connection is waiting for a free PDP context.
+        if ( iServer->GetDialUpOverrideStatus() == EConnMonDialUpOverrideActive )
+            {
+            if ( !ActivePacketdataConnectionsFound() )
+                {
+                iServer->ConnectionsClosedForDialUpOverride();
+                }
+            }
+
         err = KErrNone;
         }
 
@@ -3330,6 +3341,64 @@ void CConnMonIAP::GetActiveConnectionsIds( const TUint& aBearerId, RArray<TUint>
     //LOGEXITFN("CConnMonIAP::GetActiveConnectionsIds()")
     }
 
+// -----------------------------------------------------------------------------
+// CConnMonIAP::ActivePacketdataConnectionsFound
+// Return ETrue if one or more active packetdata connections are found,
+// EFalse otherwise.
+// -----------------------------------------------------------------------------
+//
+TBool CConnMonIAP::ActivePacketdataConnectionsFound()
+    {
+    LOGENTRFN("CConnMonIAP::ActivePacketdataConnectionsFound()")
+    TBool result( EFalse );
+    TInt unknownBearers( 0 );
+
+    const TInt count = iConnInfos.Count();
+    for ( TInt i = 0; i < count; i++ )
+        {
+        // Bearer might still be uninitialized
+        if ( iConnInfos[i].iBearer == EBearerUnknown )
+            {
+            unknownBearers++;
+            }
+        else if ( iConnInfos[i].iBearer == EBearerGPRS ||
+                iConnInfos[i].iBearer == EBearerEdgeGPRS ||
+                iConnInfos[i].iBearer == EBearerWCDMA )
+            {
+            result = ETrue;
+            break;
+            }
+        }
+    if ( !result && unknownBearers )
+        {
+        for ( TInt i = 0; i < count; i++ )
+            {
+            if ( iConnInfos[i].iBearer == EBearerUnknown )
+                {
+                LOGIT1("ActivePacketdataConnectionsFound: bearer unknown for conn.id %d",
+                        iConnInfos[i].iConnectionId)
+                TInt err = GetBearer(
+                        iConnInfos[i].iConnectionId,
+                        iConnInfos[i].iBearer,
+                        iConnInfos[i].iBearerInfo );
+
+                if ( err == KErrNone )
+                    {
+                    if ( iConnInfos[i].iBearer == EBearerGPRS ||
+                            iConnInfos[i].iBearer == EBearerEdgeGPRS ||
+                            iConnInfos[i].iBearer == EBearerWCDMA )
+                        {
+                        result = ETrue;
+                        break;
+                        }
+                    }
+                }
+            }
+        }
+
+    LOGEXITFN1("CConnMonIAP::ActivePacketdataConnectionsFound()", result)
+    return result;
+    }
 
 // -----------------------------------------------------------------------------
 // CConnMonIAP::GetBearerSupportInfo

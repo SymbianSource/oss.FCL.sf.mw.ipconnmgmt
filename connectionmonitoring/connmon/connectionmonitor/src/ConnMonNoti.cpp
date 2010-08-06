@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2002-2007 Nokia Corporation and/or its subsidiary(-ies).
+* Copyright (c) 2002-2010 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -201,7 +201,7 @@ void CConnUpDownNotifier::RunL()
                                 }
 
                             if ( subConnUpDownNotifier->LinkLayerClosed() )
-                                { 
+                                {
                                 // KLinkLayerClosed already received, finish with this connection
                                 subConnUpDownNotifier->SendDeletedEvent();
                                 }
@@ -634,7 +634,7 @@ void CProgressNotifier::RunL()
                         LOGIT("CProgressNotifier::RunL triggered HandleAvailabilityChange()")
                         iServer->AvailabilityManager()->HandleAvailabilityChange();	
                         }
-                        	    
+
                     }
                 else if ( iInfoBuf().iStage == KLinkLayerClosed )
                     {
@@ -647,16 +647,16 @@ void CProgressNotifier::RunL()
                     if ( KErrNone == err )
                         {
                         subConnUpDownNotifier->SetLinkLayerClosed();
-                        	
+
                         if ( subConnUpDownNotifier->InterfaceClosed() )
                             {
                             // EInterfaceDown has arrived before KLinkLayerClosed
-                            // Let's finish with this connection.	
+                            // Let's finish with this connection.
                             subConnUpDownNotifier->SendDeletedEvent();
                             return;
                             }
-                        }	
-                    }		    
+                        }
+                    }
 
                 iFilter = KNoFiltering;
                 }
@@ -2141,7 +2141,7 @@ void CSubConnUpDownNotifier::SendDeletedEvent()
     if ( !iDeleteSent )
         {
         LOGIT("CSubConnUpDownNotifier::SendDeletedEvent")
-        	
+
         iEventInfo.Reset();
 
         iEventInfo.iEventType       = EConnMonDeleteConnection;
@@ -2281,7 +2281,7 @@ void CSubConnUpDownNotifier::RunL()
                 if ( !progressNotifier->IsActive() )
                     {
                     iStatus = KErrDied;
-                    // might delete this object                     	
+                    // might delete this object
                     SendDeletedEvent();
                     return;
                     }
@@ -2305,7 +2305,7 @@ void CSubConnUpDownNotifier::RunL()
                     iConnectionId, iTotalUplinkDataVolume, iTotalDownlinkDataVolume)
 
             iStatus = KErrDisconnected;
- 
+
             CProgressNotifier* progressNotifier = 0;
             TInt err = iServer->Iap()->GetProgressNotifier( iConnectionId, &progressNotifier );
             if ( err == KErrNone )
@@ -2320,7 +2320,7 @@ void CSubConnUpDownNotifier::RunL()
                 }
             else
                 {
-                // might delete this object                	
+                // might delete this object
                 SendDeletedEvent();
                 return;
                 }
