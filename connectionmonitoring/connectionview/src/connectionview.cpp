@@ -41,11 +41,10 @@
 #endif
 
 
-
 QTM_USE_NAMESPACE
 
-
 const qreal typeLabelWidth = 18.0;
+const QString iapIdentifierPrefix = "I_";
 
 ConnectionView::ConnectionView():
     mNetConfigurationManager(new QNetworkConfigurationManager(this)),
@@ -55,8 +54,8 @@ ConnectionView::ConnectionView():
 {
     OstTraceFunctionEntry0( CONNECTIONVIEW_CONNECTIONVIEW_ENTRY );
     // Install localization
-    HbTranslator *translator(new HbTranslator("connectionview"));
-    
+    mTranslator = QSharedPointer<HbTranslator>(new HbTranslator("connectionview"));
+   
     // Register custom layout location
     bool registerStatus = HbStyleLoader::registerFilePath(":/layout/");
     Q_ASSERT(registerStatus);
@@ -190,7 +189,7 @@ void ConnectionView::createGroupBoxesForConnections()
         for (int i=0; i<mConnectionCount; i++) {
             // Get the iap id and the iap name for the UI construction
             bool ok = true;
-            int iapId = activeConfigurations[i].identifier().toInt(&ok);
+            int iapId = activeConfigurations[i].identifier().remove(iapIdentifierPrefix).toInt(&ok);
             QString iapName = activeConfigurations[i].name();
 
             if (ok) {
@@ -379,7 +378,7 @@ void ConnectionView::disconnectSelectedIap(int iapId)
             
     for (int i=0; i < count; i++) {
         bool ok = true;
-        int loopedIapId = activeConfigurations[i].identifier().toInt(&ok);
+        int loopedIapId = activeConfigurations[i].identifier().remove(iapIdentifierPrefix).toInt(&ok);
         
         // if the looped iap matches the iap, stop the connection
         if (loopedIapId == iapId) {

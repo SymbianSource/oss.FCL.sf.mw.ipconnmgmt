@@ -244,6 +244,12 @@ private:
      * @since 3.2
      */
     void ImplicitConnectionWlanNoteL();
+
+    /**
+     * Gets current cellular data usage setting
+     * @since 5.2
+     */
+    TInt CurrentCellularDataUsage() const;
     
 private:
 

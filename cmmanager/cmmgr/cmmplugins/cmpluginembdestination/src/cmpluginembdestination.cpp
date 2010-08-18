@@ -83,6 +83,7 @@ CCmPluginEmbDestination::CCmPluginEmbDestination(
         CCmPluginBaseEng( aInitParam )
 	{
 	iBearerType = KUidEmbeddedDestination;
+	iDestMetadataTableId = 0;
 	}
 
 // ---------------------------------------------------------------------------

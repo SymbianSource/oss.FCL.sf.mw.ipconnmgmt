@@ -75,17 +75,20 @@ public:
     TCmmConnMethodStatus GetStatus() const;
 
     /**
+     * Gets the current record status of this connection method struct.
+     */
+    TCmmRecordStatus GetRecordStatus() const;
+
+    /**
      * Sets a new status value.
      */
     void SetStatus( const TCmmConnMethodStatus& aStatus );
 
     /**
-     * Refresh the connection method data in this cache side object to be in
-     * synch with the database and copy that data back to the session side
-     * connection method instance given as parameter.
+     * Reload the connection method data in this cache side object to be in
+     * synch with the database(only if needed).
      */
-    void RefreshConnMethodInstanceL(
-            CCmmConnMethodInstance& aConnMethodInstance );
+    void ReloadPluginDataIfNeededL();
 
     /**
      * Decrease the reference counter by one. Return the remaining number of
@@ -120,6 +123,17 @@ public:
      */
     void DeleteSuccessful( const TUint32 aNewSecondaryId );
 
+    /**
+     * Notify about a possible change in database on specified record table.
+     */
+    void NotifyRecordChange( const TUint32 aRecordType );
+
+private:
+    /**
+     * Set the record status.
+     */
+    void SetRecordStatus( const TCmmRecordStatus aStatus );
+
 private:
     // The connection method plugin.
     CCmPluginBaseEng* iConnMethodPlugin; // Owned.
@@ -139,8 +153,8 @@ private:
     // Current status of this connection method.
     TCmmConnMethodStatus iStatus;
 
-    //TODO
-    //TCmmRecordStatus iRecordStatus;
+    // Current status of the loaded commsdat records of this connection method.
+    TCmmRecordStatus iRecordStatus;
     };
 
 #endif // CMMCONNMETHODSTRUCT_H_

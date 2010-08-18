@@ -167,7 +167,8 @@ void CpWlanApView::createAccessPointSettingsGroup()
         SIGNAL(editingFinished()),
         this,
         SLOT(connectionNameChanged()));
-    mApSettingsGroupItem->appendChild(mConnectionNameItem);
+    mConnectionNameItem->setContentWidgetData("objectName", "connectionNameEdit");
+    mApSettingsGroupItem->appendChild(mConnectionNameItem); 
     
     // WLAN network name
     mWlanNetworkNameItem = new CpSettingFormItemData(
@@ -179,6 +180,7 @@ void CpWlanApView::createAccessPointSettingsGroup()
         SIGNAL(editingFinished()),
         this,
         SLOT(wlanNetworkNameChanged()));
+    mWlanNetworkNameItem->setContentWidgetData("objectName", "wlanNetworkNameEdit");
     mApSettingsGroupItem->appendChild(mWlanNetworkNameItem);
     
     // Network status
@@ -200,6 +202,7 @@ void CpWlanApView::createAccessPointSettingsGroup()
         SIGNAL(currentIndexChanged(int)),
         this,
         SLOT(networkStatusChanged(int)));
+    mNetworkStatusItem->setContentWidgetData("objectName", "networkStatusCB");
     mApSettingsGroupItem->appendChild(mNetworkStatusItem);
     
     // Network mode
@@ -221,6 +224,7 @@ void CpWlanApView::createAccessPointSettingsGroup()
         SIGNAL(currentIndexChanged(int)),
         this,
         SLOT(networkModeChanged(int)));
+    mNetworkModeItem->setContentWidgetData("objectName", "networkModeCB");
     mApSettingsGroupItem->appendChild(mNetworkModeItem);
     
     // Ad-hoc channel
@@ -238,6 +242,7 @@ void CpWlanApView::createAccessPointSettingsGroup()
         SIGNAL(currentIndexChanged(int)),
         this,
         SLOT(securityModeChanged(int)));
+    mSecurityModeItem->setContentWidgetData("objectName", "securityModeCB");
     mApSettingsGroupItem->appendChild(mSecurityModeItem);
     
     // Homepage
@@ -250,6 +255,7 @@ void CpWlanApView::createAccessPointSettingsGroup()
         SIGNAL(editingFinished()),
         this,
         SLOT(homepageChanged()));
+    mHomepageItem->setContentWidgetData("objectName", "homepageEdit");
     mApSettingsGroupItem->appendChild(mHomepageItem);
     
     // Read settings from CommsDat and update widgets
@@ -616,7 +622,7 @@ void CpWlanApView::connectionNameChanged()
             CMManagerShim::CmName);
         mConnectionNameItem->setContentWidgetData("text", connectionName);
     }
-    
+
     OstTraceFunctionExit0(CPWLANAPVIEW_CONNECTIONNAMECHANGED_EXIT);
 }
 

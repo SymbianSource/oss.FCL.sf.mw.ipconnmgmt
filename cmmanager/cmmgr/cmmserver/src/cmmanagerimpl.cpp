@@ -209,6 +209,7 @@ void CCmManagerImpl::SupportedBearersL( RArray<TUint32>& aArray ) const
 //
 CommsDat::TMDBElementId CCmManagerImpl::TableId( TCmmDbRecords aRecord )
     {
+    // No traces.
     CommsDat::TMDBElementId tableId( 0 );
     switch ( aRecord )
         {
@@ -260,7 +261,6 @@ CCmmTransactionHandler* CCmManagerImpl::GetTransactionHandler()
 //
 CommsDat::CMDBSession& CCmManagerImpl::Session() const
     {
-    OstTraceFunctionEntry0( CCMMANAGERIMPL_SESSION_ENTRY );
     return iTrans->Session();
     }
 

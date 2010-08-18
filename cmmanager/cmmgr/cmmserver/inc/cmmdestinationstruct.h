@@ -97,10 +97,14 @@ public:
     void SetStatus( const TCmmDestinationStatus& aStatus );
 
     /**
+     * Notify about a possible change in database on specified record table.
+     */
+    void NotifyRecordChange( const TCmmDbRecords aRecordType );
+
+    /**
      * Set the record status for all records.
      */
-    void SetStatusForAllRecords( const TCmmRecordStatus& aStatus );
-
+    void SetStatusForAllRecords( const TCmmRecordStatus aStatus );
 
     /**
      * Copies the data for this destination to a session instance and
@@ -118,7 +122,7 @@ public:
             CCmmDestinationInstance& aDestinationInstance );
 
     /**
-     * Re-loads a destination record if needed and copies the latest version to
+     * Reloads a destination record if needed and copies the latest version to
      * the session instance given as parameter.
      */
     void LoadRecordL(

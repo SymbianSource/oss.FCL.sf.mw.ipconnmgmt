@@ -958,6 +958,9 @@ class CMPMServerSession : public CSession2
         //
         TBool iVpnUserConnectionUsed;        
 
+        // Set when error discreet popup shown for IAP so it is
+        // not shown again if the SNAP is empty
+        TBool iErrorDiscreetPopupShown;
     };
 
 #include "mpmserversession.inl"

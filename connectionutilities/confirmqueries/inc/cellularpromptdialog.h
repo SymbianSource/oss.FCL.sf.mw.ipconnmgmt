@@ -22,6 +22,10 @@
 #include <QObject>
 #include <HbDialog>
 #include <hbdevicedialoginterface.h>
+#include <QSharedPointer>
+
+// Forward declarations
+class HbTranslator;
 
 class CellularPromptDialog: public HbDialog, public HbDeviceDialogInterface
     {
@@ -79,6 +83,9 @@ class CellularPromptDialog: public HbDialog, public HbDeviceDialogInterface
         
         /* Tells whether close has already been called for the dialog */
         bool mClose;
+
+        /* Translator for the localisation Text Id's */
+        QSharedPointer<HbTranslator> mTranslator;
     };
 
 

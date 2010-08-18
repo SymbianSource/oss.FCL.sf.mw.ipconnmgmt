@@ -88,9 +88,6 @@ CCmmListenerManager::CCmmListenerManager( CCmmCache* aCache ) : iCache( aCache )
 void CCmmListenerManager::ConstructL()
     {
     OstTraceFunctionEntry0( CCMMLISTENERMANAGER_CONSTRUCTL_ENTRY );
-
-    // Create the basic set of listeners, start them if necessary and store them in iListeners-array.
-
     OstTraceFunctionExit0( CCMMLISTENERMANAGER_CONSTRUCTL_EXIT );
     }
 
@@ -156,11 +153,11 @@ TInt CCmmListenerManager::RemoveListener( TUint32 aIdentifier )
 // database table.
 // ---------------------------------------------------------------------------
 //
-void CCmmListenerManager::DbChangeDetected( TUint32 aIdentifier )
+void CCmmListenerManager::DbChangeDetectedL( TUint32 aIdentifier )
     {
     OstTraceFunctionEntry0( CCMMLISTENERMANAGER_DBCHANGEDETECTED_ENTRY );
 
-    iCache->DbChangeDetected( aIdentifier );
+    iCache->DbChangeDetectedL( aIdentifier );
 
     OstTraceFunctionExit0( CCMMLISTENERMANAGER_DBCHANGEDETECTED_EXIT );
     }

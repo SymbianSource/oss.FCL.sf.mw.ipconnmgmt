@@ -427,15 +427,19 @@ EXPORT_C CCmPluginBaseEng* CCmPluginBaseEng::CreateCopyL(
 // CCmPluginBaseEng::GetGenericTableIdsToBeObserved
 // ---------------------------------------------------------------------------
 //
-EXPORT_C void CCmPluginBaseEng::GetGenericTableIdsToBeObserved(
+EXPORT_C void CCmPluginBaseEng::GetGenericTableIdsToBeObservedL(
         RArray<TUint32>& aTableIdArray ) const
     {
-    // Service and bearer records should be added by plugins.
+    OstTraceFunctionEntry0( CCMPLUGINBASEENG_GETGENERICTABLEIDSTOBEOBSERVED_ENTRY );
 
-    aTableIdArray.Append( KCDTIdIAPRecord );
-    aTableIdArray.Append( KCDTIdWAPAccessPointRecord );
-    aTableIdArray.Append( KCDTIdProxiesRecord );
-    aTableIdArray.Append( iMetadataTableId );
+    // Service and bearer records should be added by plugins.
+    aTableIdArray.AppendL( KCDTIdIAPRecord );
+    aTableIdArray.AppendL( KCDTIdWAPAccessPointRecord );
+    aTableIdArray.AppendL( KCDTIdWAPIPBearerRecord );
+    aTableIdArray.AppendL( KCDTIdProxiesRecord );
+    aTableIdArray.AppendL( iMetadataTableId );
+
+    OstTraceFunctionExit0( CCMPLUGINBASEENG_GETGENERICTABLEIDSTOBEOBSERVED_EXIT );
     }
 
 // ---------------------------------------------------------------------------
@@ -495,12 +499,9 @@ void CCmPluginBaseEng::CopyRecordDataL(
         {
         case KIapRecordIndex:
             {
-            CCDIAPRecord* iapRecord = static_cast<CCDIAPRecord*>(
+            aCopyInstance->iIapRecord = static_cast<CCDIAPRecord*>(
                     CCDRecordBase::RecordFactoryL( KCDTIdIAPRecord ) );
-            CleanupStack::PushL( iapRecord );
-            CopyRecordFieldsL( *iIapRecord, *iapRecord );
-            CleanupStack::Pop( iapRecord );
-            aCopyInstance->iIapRecord = iapRecord;
+            CopyRecordFieldsL( *iIapRecord, *aCopyInstance->iIapRecord );
             }
             break;
         case KServiceRecordIndex:
@@ -512,46 +513,39 @@ void CCmPluginBaseEng::CopyRecordDataL(
             break;
         case KNetworkRecordIndex:
             {
-            CCDNetworkRecord* networkRecord = static_cast<CCDNetworkRecord*>(
+            aCopyInstance->iNetworkRecord = static_cast<CCDNetworkRecord*>(
                     CCDRecordBase::RecordFactoryL( KCDTIdNetworkRecord ) );
-            CleanupStack::PushL( networkRecord );
-            CopyRecordFieldsL( *iNetworkRecord, *networkRecord );
-            CleanupStack::Pop( networkRecord );
-            aCopyInstance->iNetworkRecord = networkRecord;
+            CopyRecordFieldsL( *iNetworkRecord, *aCopyInstance->iNetworkRecord );
             }
             break;
         case KWAPAPRecordIndex:
             {
             aCopyInstance->iWapAPRecord = static_cast<CCDWAPAccessPointRecord*>(
-                    CCDRecordBase::CreateCopyRecordL( *iWapAPRecord ) );//TODO, convert to generic copy
+                    CCDRecordBase::RecordFactoryL( KCDTIdWAPAccessPointRecord ) );
+            CopyRecordFieldsL( *iWapAPRecord, *aCopyInstance->iWapAPRecord );
             }
             break;
         case KWAPBearerRecordIndex:
             {
             aCopyInstance->iWapIPBearerRecord = static_cast<CCDWAPIPBearerRecord*>(
-                    CCDRecordBase::CreateCopyRecordL( *iWapIPBearerRecord ) );//TODO, convert to generic copy
+                    CCDRecordBase::RecordFactoryL( KCDTIdWAPIPBearerRecord ) );
+            CopyRecordFieldsL( *iWapIPBearerRecord, *aCopyInstance->iWapIPBearerRecord );
             }
             break;
         case KMetaDataRecordIndex:
             {
-            CCDIAPMetadataRecord* metadataRecord =
-                    new( ELeave ) CCDIAPMetadataRecord( iMetadataTableId );
-            CleanupStack::PushL( metadataRecord );
-            CopyRecordFieldsL( *iMetaDataRecord, *metadataRecord );
-            CleanupStack::Pop( metadataRecord );
-            aCopyInstance->iMetaDataRecord = metadataRecord;
+            aCopyInstance->iMetaDataRecord = new( ELeave ) CCDIAPMetadataRecord( 
+                    iMetadataTableId );
+            CopyRecordFieldsL( *iMetaDataRecord, *aCopyInstance->iMetaDataRecord );
             }
             break;
         case KProxyRecordIndex:
             {
             if ( iProxyRecord )
                 {
-                CCDProxiesRecord* proxyRecord = static_cast<CCDProxiesRecord*>(
+                aCopyInstance->iProxyRecord = static_cast<CCDProxiesRecord*>(
                         CCDRecordBase::RecordFactoryL( KCDTIdProxiesRecord ) );
-                CleanupStack::PushL( proxyRecord );
-                CopyRecordFieldsL( *iProxyRecord, *proxyRecord );
-                CleanupStack::Pop( proxyRecord );
-                aCopyInstance->iProxyRecord = proxyRecord;
+                CopyRecordFieldsL( *iProxyRecord, *aCopyInstance->iProxyRecord );
                 }
             }
             break;
@@ -591,57 +585,49 @@ EXPORT_C void CCmPluginBaseEng::CopyRecordFieldsL(
         ptrSource = aSource.GetFieldByIdL( recordInfo->iTypeId );
         ptrDest = aDestination.GetFieldByIdL( recordInfo->iTypeId );
 
-        // Make sure we see only basic type info. Masks out any additional info
-        // on links (CommsDat internal stuff).
-        switch ( recordInfo->iValType & 0x000000ff )
+        if ( !( ptrSource->IsNull() ) )
             {
-            case CommsDat::EInt:
-            case CommsDat::EBool:
+            // Make sure we see only basic type info. Masks out any additional info
+            // on links (CommsDat internal stuff).
+            switch ( recordInfo->iValType & 0x000000ff )
                 {
-                if ( !( ptrSource->IsNull() ) )
+                case CommsDat::EInt:
+                case CommsDat::EBool:
                     {
                     static_cast<CMDBField<TInt>&>( *ptrDest ).SetL(
                             static_cast<CMDBField<TInt>&>( *ptrSource ) );
                     }
-                }
-                break;
-            case CommsDat::EUint32:
-            case CommsDat::ELink:
-                {
-                if ( !( ptrSource->IsNull() ) )
+                    break;
+                case CommsDat::EUint32:
+                case CommsDat::ELink:
                     {
                     static_cast<CMDBField<TUint32>&>( *ptrDest ).SetL(
                             static_cast<CMDBField<TUint32>&>( *ptrSource ) );
                     }
-                }
-                break;
-            case CommsDat::EDesC8:
-                {
-                if ( !( ptrSource->IsNull() ) )
+                    break;
+                case CommsDat::EDesC8:
                     {
                     static_cast<CMDBField<TDesC8>&>( *ptrDest ).SetL(
                             static_cast<CMDBField<TDesC8>&>( *ptrSource ) );
                     }
-                }
-                break;
-            case CommsDat::EText:
-            case CommsDat::EMedText:
-            case CommsDat::ELongText:
-                {
-                if ( !( ptrSource->IsNull() ) )
+                    break;
+                case CommsDat::EText:
+                case CommsDat::EMedText:
+                case CommsDat::ELongText:
                     {
                     static_cast<CMDBField<TDesC>&>( *ptrDest ).SetL(
                             static_cast<CMDBField<TDesC>&>( *ptrSource ) );
                     }
+                    break;
+                default:
+                    {
+                    User::Leave( KErrCorrupt );
+                    }
+                    break;
                 }
-                break;
-            default:
-                {
-                User::Leave( KErrCorrupt );
-                }
-                break;
+            ptrDest->ClearAttributes( ptrDest->Attributes() );
+            ptrDest->SetAttributes( ptrSource->Attributes() );
             }
-        ptrDest->SetAttributes( ptrSource->Attributes() );
         recordInfo++;
         }
 
@@ -663,13 +649,8 @@ void CCmPluginBaseEng::DoLoadL( TUint32 aIapId )
     LoadMetadataRecordL();
     LoadNetworkRecordL();
 
-    // This is a connectionmethodinfo instance, that has no
-    // service and proxy setting.
-    if ( KDummyBearerType != iBearerType )
-        {
-        LoadServiceRecordL();
-        LoadProxyRecordL();
-        }
+    LoadServiceRecordL();
+    LoadProxyRecordL();
 
     LoadBearerRecordsL();
 
@@ -895,6 +876,9 @@ void CCmPluginBaseEng::UpdateIAPRecordL(
         CheckIfNameModifiedL( iapRecord, iIapRecord );
 
         iIapRecord->StoreL( iSession );
+        // Have to be "reloaded" to get possible default values 
+        // from template records.
+        iIapRecord->LoadL( iSession );
 
         iCmId = iIapRecord->RecordId();
         aClientPluginInstance->iIapId = iCmId;
@@ -974,7 +958,9 @@ void CCmPluginBaseEng::UpdateProxyRecordL(
 
         iProxyRecord->SetRecordId( KCDNewRecordRequest );
         iProxyRecord->StoreL( iSession );
-        CopyRecordFieldsL( *iProxyRecord, *proxyRecord );
+        // Have to be "reloaded" to get possible default values from template records.
+        iProxyRecord->LoadL( iSession );
+
         proxyRecord->SetElementId( iProxyRecord->ElementId() );
         }
     else
@@ -982,6 +968,7 @@ void CCmPluginBaseEng::UpdateProxyRecordL(
         {
         iProxyRecord->ModifyL( iSession );
         }
+    CopyRecordFieldsL( *iProxyRecord, *proxyRecord );
 
     OstTraceFunctionExit0( CCMPLUGINBASEENG_UPDATEPROXYRECORDL_EXIT );
     }
@@ -1009,7 +996,9 @@ void CCmPluginBaseEng::UpdateMetadataRecordL(
     delete iMetaDataRecord;
     iMetaDataRecord = NULL;
     iMetaDataRecord = new( ELeave ) CCDIAPMetadataRecord( iMetadataTableId );
+
     CopyRecordFieldsL( *clientMetadataRecord, *iMetaDataRecord );
+
     iMetaDataRecord->SetElementId( clientMetadataRecord->ElementId() );
 
     if ( !iMetaDataRecord->RecordId() )
@@ -1017,12 +1006,16 @@ void CCmPluginBaseEng::UpdateMetadataRecordL(
         iMetaDataRecord->iIAP = IAPRecordElementId();
         iMetaDataRecord->SetRecordId( KCDNewRecordRequest );
         iMetaDataRecord->StoreL( iSession );
+        // Have to be "reloaded" to get possible default values from template records.
+        iMetaDataRecord->LoadL( iSession );
+
         clientMetadataRecord->SetElementId( iMetaDataRecord->ElementId() );
         }
     else
         {
         iMetaDataRecord->ModifyL( iSession );
         }
+    CopyRecordFieldsL( *iMetaDataRecord, *clientMetadataRecord );
 
     OstTraceFunctionExit0( CCMPLUGINBASEENG_UPDATEMETADATARECORDL_EXIT );
     }
@@ -1083,12 +1076,16 @@ void CCmPluginBaseEng::UpdateNetworkRecordL(
         {
         iNetworkRecord->SetRecordId( KCDNewRecordRequest );
         iNetworkRecord->StoreL( iSession );
+        // Have to be "reloaded" to get possible default values from template records.
+        iNetworkRecord->LoadL( iSession );
+
         networkRecord->SetElementId( iNetworkRecord->ElementId() );
         }
     else
         {
         iNetworkRecord->ModifyL( iSession );
         }
+    CopyRecordFieldsL( *iNetworkRecord, *networkRecord );
 
     OstTraceFunctionExit0( CCMPLUGINBASEENG_UPDATENETWORKRECORDL_EXIT );
     }
@@ -1238,24 +1235,32 @@ void CCmPluginBaseEng::UpdateWapRecordL(
     CheckIfNameModifiedL( iapRecord, wapAPRecord );
     CheckIfNameModifiedL( iapRecord, wapIPBearerRecord );
 
+    // WAP AP record
     iWapAPRecord = static_cast<CCDWAPAccessPointRecord*>(
-            CCDRecordBase::CreateCopyRecordL( *wapAPRecord ) );//TODO, convert to generic copy
+            CCDRecordBase::RecordFactoryL( KCDTIdWAPAccessPointRecord ) );
+    CopyRecordFieldsL( *wapAPRecord, *iWapAPRecord );
     iWapAPRecord->SetElementId( wapAPRecord->ElementId() );
 
-    iWapIPBearerRecord = static_cast<CCDWAPIPBearerRecord*>(
-            CCDRecordBase::CreateCopyRecordL( *wapIPBearerRecord ) );//TODO, convert to generic copy
+    // WAP IP Bearer record
+    iWapIPBearerRecord =static_cast<CCDWAPIPBearerRecord*>(
+            CCDRecordBase::RecordFactoryL( KCDTIdWAPIPBearerRecord ) );
+    CopyRecordFieldsL( *wapIPBearerRecord, *iWapIPBearerRecord );
     iWapIPBearerRecord->SetElementId( wapIPBearerRecord->ElementId() );
 
     if ( !iWapAPRecord->RecordId() )
         {
         iWapAPRecord->SetRecordId( KCDNewRecordRequest );
         iWapAPRecord->StoreL(iSession );
+        // Have to be "reloaded" to get possible default values from template records.
+        iWapAPRecord->LoadL(iSession );
+
         wapAPRecord->SetElementId( iWapAPRecord->ElementId() );
         }
     else
         {
         iWapAPRecord->ModifyL( iSession );
         }
+    CopyRecordFieldsL( *iWapAPRecord, *wapAPRecord );
 
     if ( !iWapIPBearerRecord->RecordId() )
         {
@@ -1264,15 +1269,16 @@ void CCmPluginBaseEng::UpdateWapRecordL(
 
         iWapIPBearerRecord->SetRecordId( KCDNewRecordRequest );
         iWapIPBearerRecord->StoreL( iSession );
-        wapIPBearerRecord->SetElementId( iWapIPBearerRecord->ElementId() );
+        // Have to be "reloaded" to get possible default values from template records.
+        iWapIPBearerRecord->LoadL( iSession );
 
-        wapIPBearerRecord->iWAPAccessPointId = iWapAPRecord->RecordId();
-        wapIPBearerRecord->iWAPIAP = iapRecord->RecordId();
+        wapIPBearerRecord->SetElementId( iWapIPBearerRecord->ElementId() );
         }
     else
         {
         iWapIPBearerRecord->ModifyL( iSession );
         }
+    CopyRecordFieldsL( *iWapIPBearerRecord, *wapIPBearerRecord );
 
     OstTraceFunctionExit0( DUP1_CCMPLUGINBASEENG_UPDATEWAPRECORDL_EXIT );
     }
@@ -2107,9 +2113,10 @@ EXPORT_C void CCmPluginBaseEng::GetPluginDataL(
     if ( iWapAPRecord )
         {
         CCDWAPAccessPointRecord* wapAPRecord = static_cast<CCDWAPAccessPointRecord*>(
-                CCDRecordBase::CreateCopyRecordL( *iWapAPRecord ) );//TODO, convert to generic copy
-        wapAPRecord->SetElementId( iWapAPRecord->ElementId() );
+                CCDRecordBase::RecordFactoryL( KCDTIdWAPAccessPointRecord ) );
         CleanupStack::PushL( wapAPRecord );
+        CopyRecordFieldsL( *iWapAPRecord, *wapAPRecord );
+        wapAPRecord->SetElementId( iWapAPRecord->ElementId() );
         aClientPluginInstance->iGenRecordArray.AppendL(
                 static_cast<CommsDat::CCDRecordBase*>( wapAPRecord ) );
         CleanupStack::Pop( wapAPRecord );
@@ -2122,9 +2129,10 @@ EXPORT_C void CCmPluginBaseEng::GetPluginDataL(
     if ( iWapIPBearerRecord )
         {
         CCDWAPIPBearerRecord* wapIPBearerRecord = static_cast<CCDWAPIPBearerRecord*>(
-                CCDRecordBase::CreateCopyRecordL( *iWapIPBearerRecord ) );//TODO, convert to generic copy
-        wapIPBearerRecord->SetElementId( iWapIPBearerRecord->ElementId() );
+                CCDRecordBase::RecordFactoryL( KCDTIdWAPIPBearerRecord ) );
         CleanupStack::PushL( wapIPBearerRecord );
+        CopyRecordFieldsL( *iWapIPBearerRecord, *wapIPBearerRecord );
+        wapIPBearerRecord->SetElementId( iWapIPBearerRecord->ElementId() );
         aClientPluginInstance->iGenRecordArray.AppendL(
                 static_cast<CommsDat::CCDRecordBase*>( wapIPBearerRecord ) );
         CleanupStack::Pop( wapIPBearerRecord );
@@ -2339,7 +2347,9 @@ EXPORT_C TBool CCmPluginBaseEng::GetBoolAttributeL(
                 }
             else
                 {
-                retVal = IsProtected();
+                CCDIAPRecord* iapRecord = static_cast<CCDIAPRecord*>(
+                        aClientPluginInstance->iGenRecordArray[KIapRecordIndex] );
+                retVal = iapRecord->Attributes() & ECDProtectedWrite;
                 }
             }
             break;

@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2002-2009 Nokia Corporation and/or its subsidiary(-ies).
+* Copyright (c) 2002-2010 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -401,10 +401,9 @@ NONSHARABLE_CLASS( CConnMonIAP )
          * closed event.
          * @since
          * @param aConnection The connection info. On return, will contain connection id.
-         * @param aSent On return, value is ETrue if event has been sent, EFalse otherwise.
          * @return KErrNone if successfull, otherwise a system wide error code.
          */
-        TBool GetDeleteNotifyStatus( TConnInfo& aConnection, TBool& aSent );
+        TBool GetDeleteNotifyStatus( TConnInfo& aConnection );
 
         /**
          * Gets a pointer to the activity notifier object for the given connection id.
@@ -490,6 +489,12 @@ NONSHARABLE_CLASS( CConnMonIAP )
          * @return KErrNone if successfull, otherwise a system wide error code.
          */
         void GetActiveConnectionsIds( const TUint& aBearerId, RArray<TUint>& aIdArray );
+
+        /**
+         * Return ETrue if one or more active packetdata connections are found,
+         * EFalse otherwise.
+         */
+        TBool ActivePacketdataConnectionsFound();
 
         /**
          * Tells whether bearer is supported or not.

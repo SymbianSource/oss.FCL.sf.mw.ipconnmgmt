@@ -38,7 +38,7 @@ namespace S60MCprSelectActivity
 	DECLARE_DEFINE_CUSTOM_NODEACTIVITY( ECFActivitySelect, 
 	                                    S60MCprSelect,
 	                                    TCFSelector::TSelect,
-	                                    CSelectNextLayerActivity::NewL )
+	                                    CS60SelectActivity::NewL )
     
     // Reply from TAwaitingSelectNextLayer if no choices, otherwise accept
     FIRST_NODEACTIVITY_ENTRY( TAwaitingSelectNextLayer,
@@ -117,7 +117,7 @@ namespace S60MCprSimpleSelectActivity
     DECLARE_DEFINE_CUSTOM_NODEACTIVITY( ECFActivitySelect, 
                                         MCprSimpleSelect, 
 		                                TCFSelector::TSimpleSelect,
-                                        CSelectNextLayerActivity::NewL )
+		                                S60MCprSelectActivity::CS60SelectActivity::NewL )
     // Reply from TAwaitingSelectNextLayer if no choices, otherwise accept
     FIRST_NODEACTIVITY_ENTRY( S60MCprSimpleSelectActivity::TAwaitingSelectNextLayer,
                               S60MCprSimpleSelectActivity::TChooseBestIAPRequiredOrNoTagOrSetChosenApActive )

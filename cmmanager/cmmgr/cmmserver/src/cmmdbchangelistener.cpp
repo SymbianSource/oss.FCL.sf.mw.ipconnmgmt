@@ -122,9 +122,7 @@ void CCmmDbChangeListener::ConstructL()
 //
 TUint32 CCmmDbChangeListener::GetTableId()
     {
-    OstTraceFunctionEntry0( CCMMDBCHANGELISTENER_GETTABLEID_ENTRY );
-    OstTraceFunctionExit0( CCMMDBCHANGELISTENER_GETTABLEID_EXIT );
-
+    // No traces.
     return iTableId;
     }
 
@@ -188,7 +186,7 @@ void CCmmDbChangeListener::RunL()
     TInt err = RequestNotification(); // Start to listen for next change.
 
     // React to current change notification
-    iListenerManager->DbChangeDetected( iTableId );
+    iListenerManager->DbChangeDetectedL( iTableId );
 
     if ( err )
         {
@@ -215,6 +213,17 @@ TInt CCmmDbChangeListener::RequestNotification()
     OstTraceFunctionExit0( CCMMDBCHANGELISTENER_REQUESTNOTIFICATION_EXIT );
 
     return err;
+    }
+
+// -----------------------------------------------------------------------------
+// Handles the leave from the RunL()
+// -----------------------------------------------------------------------------
+//
+TInt CCmmDbChangeListener::RunError( TInt /*aLeaveCode*/ )
+    {
+    OstTrace0( TRACE_ERROR, CCMMDBCHANGELISTENER_RUNERROR, "CCmmDbChangeListener::RunError" );
+
+    return KErrNone;
     }
 
 // End of file

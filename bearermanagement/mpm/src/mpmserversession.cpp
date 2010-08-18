@@ -81,7 +81,8 @@ CMPMServerSession::CMPMServerSession(CMPMServer& aServer)
       iLastNotifiedIap( 0 ),
       iMigrateIap( 0 ),
       iUserConnection( 0 ),
-      iVpnUserConnectionUsed( EFalse )
+      iVpnUserConnectionUsed( EFalse ),
+      iErrorDiscreetPopupShown( EFalse )
     {
     }
 
@@ -1429,6 +1430,10 @@ Warning: ChooseBestIap has not been called yet" )
         // belongs to the set of errors that are shown to the user.
         // Otherwise the popup is not shown.
         iMyServer.ConnUiUtils()->ConnectionErrorDiscreetPopup( error );
+        
+        // Error discreet popup has been shown. This is needed so that we
+        // dont show it again for SNAP.
+        iErrorDiscreetPopupShown = ETrue;
         }  
 
     TConnMonIapInfo availableIAPs;
@@ -3291,10 +3296,11 @@ Inconsistent state %d", KErrGeneral )
         }
 
     // Show error popup if it's allowed per client request
+    // Error popup shown to SNAP only if error discreet has not been shown for IAP.
     if ( ChooseBestIapCalled() && (!( iIapSelection->MpmConnPref().NoteBehaviour() &
             TExtendedConnPref::ENoteBehaviourConnDisableNotes ))
             && ( aError != KErrNone ) 
-			&& ( iIapSelection->MpmConnPref().SnapId() == 0 ) )
+            && ( iErrorDiscreetPopupShown == EFalse ) )
         {
         // Note: Below function shows the discreet popup only if the error code
         // belongs to the set of errors that are shown to the user.
@@ -3314,6 +3320,9 @@ Inconsistent state %d", KErrGeneral )
                                                       connectionAlreadyActive );
             }            
         }
+    
+    // Enable showing error discreet popup for SNAP again
+    iErrorDiscreetPopupShown = EFalse;
     }
 
 

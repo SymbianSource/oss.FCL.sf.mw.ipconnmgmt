@@ -1100,7 +1100,7 @@ void CMPMServer::HandleServerUnblackListIap(
 aCategory = %i blacklisted Id count = %d", 
                    aCategory, iBlackListIdList.Count() )
 
-    for( TInt i( 0 ); i < iBlackListIdList.Count(); i++ )
+    for (TInt i = iBlackListIdList.Count()-1; i >= 0; i--)
         {
         // found blacklisted Connection Id
         TMPMBlackListConnId connIdInfo = iBlackListIdList[i];
@@ -1110,7 +1110,7 @@ aCategory = %i blacklisted Id count = %d",
 aConnId = 0x%x, blacklisted IapId count = %d", connIdInfo.iConnId, 
         connIdInfo.Count() )
         
-        for (TInt j = 0; j < connIdInfo.Count(); j++)
+        for (TInt j = connIdInfo.Count()-1; j >= 0; j--)
             {
             if ( connIdInfo.Category( j ) == aCategory ) 
                 {

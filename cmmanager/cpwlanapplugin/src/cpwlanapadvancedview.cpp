@@ -168,6 +168,7 @@ void CpWlanApAdvancedView::createIpv4Group()
         SIGNAL(stateChanged(int)),
         this,
         SLOT(changeIpv4AddressMode(int)));
+    mIpv4Automatic->setContentWidgetData("objectName", "ipv4AutomaticCB");
     mIpv4Group->appendChild(mIpv4Automatic);
     
     // Phone IP address
@@ -179,6 +180,7 @@ void CpWlanApAdvancedView::createIpv4Group()
         SIGNAL(editingFinished()),
         this,
         SLOT(changeIpv4Address()));
+    mIpv4Address->setContentWidgetData("objectName", "ipv4AddressEdit");
     mIpv4Group->appendChild(mIpv4Address);
     
     // Subnet mask
@@ -190,6 +192,7 @@ void CpWlanApAdvancedView::createIpv4Group()
         SIGNAL(editingFinished()),
         this,
         SLOT(changeIpv4SubnetMask()));
+    mIpv4SubnetMask->setContentWidgetData("objectName", "ipv4SubnetmaskEdit");
     mIpv4Group->appendChild(mIpv4SubnetMask);
     
     // Gateway
@@ -201,6 +204,7 @@ void CpWlanApAdvancedView::createIpv4Group()
         SIGNAL(editingFinished()),
         this,
         SLOT(changeIpv4Gateway()));
+    mIpv4Gateway->setContentWidgetData("objectName", "ipv4GatewayEdit");
     mIpv4Group->appendChild(mIpv4Gateway);
     
     // DNS addresses
@@ -216,6 +220,7 @@ void CpWlanApAdvancedView::createIpv4Group()
         SIGNAL(stateChanged(int)), 
         this,
         SLOT(changeIpv4DnsMode(int)));
+    mIpv4DnsAutomatic->setContentWidgetData("objectName", "ipv4DnsAutomaticCB");
     mIpv4Group->appendChild(mIpv4DnsAutomatic);
     
     // Primary DNS address
@@ -227,6 +232,7 @@ void CpWlanApAdvancedView::createIpv4Group()
         SIGNAL(editingFinished()), 
         this,
         SLOT(changeIpv4PrimaryDnsAddress()));
+    mIpv4DnsAddress1->setContentWidgetData("objectName", "ipv4DnsAddress1Edit");
     mIpv4Group->appendChild(mIpv4DnsAddress1);
     
     // Secondary DNS address
@@ -238,6 +244,7 @@ void CpWlanApAdvancedView::createIpv4Group()
         SIGNAL(editingFinished()), 
         this,
         SLOT(changeIpv4SecondaryDnsAddress()));
+    mIpv4DnsAddress2->setContentWidgetData("objectName", "ipv4DnsAddress2Edit");
     mIpv4Group->appendChild(mIpv4DnsAddress2);
     
     OstTraceFunctionExit0(CPWLANAPADVANCEDVIEW_CREATEIPV4GROUP_EXIT);
@@ -328,6 +335,7 @@ void CpWlanApAdvancedView::createIpv6Group()
         SIGNAL(currentIndexChanged(int)),
         this,
         SLOT(changeIpv6DnsMode(int)));
+    mIpv6DnsAutomatic->setContentWidgetData("objectName", "ipv6DnsAutomaticCB");
     mIpv6Group->appendChild(mIpv6DnsAutomatic);
     
     // Primary DNS address
@@ -339,6 +347,7 @@ void CpWlanApAdvancedView::createIpv6Group()
         SIGNAL(editingFinished()),
         this,
         SLOT(changeIpv6PrimaryDnsAddress()));
+    mIpv6DnsAddress1->setContentWidgetData("objectName", "ipv6DnsAddress1Edit");
     mIpv6Group->appendChild(mIpv6DnsAddress1);
     
     // Secondary DNS address
@@ -349,7 +358,8 @@ void CpWlanApAdvancedView::createIpv6Group()
         mIpv6DnsAddress2,
         SIGNAL(editingFinished()),
         this,
-        SLOT(changeIpv6SecondaryDnsAddress()));  
+        SLOT(changeIpv6SecondaryDnsAddress()));
+    mIpv6DnsAddress2->setContentWidgetData("objectName", "ipv6DnsAddress2Edit");
     mIpv6Group->appendChild(mIpv6DnsAddress2);
     
     OstTraceFunctionExit0(CPWLANAPADVANCEDVIEW_CREATEIPV6GROUP_EXIT);
@@ -403,6 +413,7 @@ void CpWlanApAdvancedView::createProxyGroup()
         SIGNAL(editingFinished()),
         this,
         SLOT(changeProxyServer()));
+    mProxyServer->setContentWidgetData("objectName", "proxyServerEdit");
     mProxyGroup->appendChild(mProxyServer);
     
     // Proxy port number
@@ -414,6 +425,7 @@ void CpWlanApAdvancedView::createProxyGroup()
         SIGNAL(editingFinished()),
         this,
         SLOT(changeProxyPort()));
+    mProxyPort->setContentWidgetData("objectName", "proxyPortEdit");
     mProxyGroup->appendChild(mProxyPort);
     
     OstTraceFunctionExit0(CPWLANAPADVANCEDVIEW_CREATEPROXYGROUP_EXIT);

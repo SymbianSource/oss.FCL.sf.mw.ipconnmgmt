@@ -182,3 +182,12 @@ TInt CMpmDataUsageWatcher::GetCurrentDataUsageValue()
         }
     return err;
     }
+
+// -----------------------------------------------------------------------------
+// CMpmDataUsageWatcher::CellularDataUsage
+// -----------------------------------------------------------------------------
+//
+TInt CMpmDataUsageWatcher::CellularDataUsage() const
+    {
+    return iCellularDataUsage;
+    }

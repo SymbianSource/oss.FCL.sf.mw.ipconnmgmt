@@ -117,6 +117,7 @@ CCmPluginLan::CCmPluginLan( TCmPluginInitParam* aInitParam )
 
     iBearerType = KUidLanBearerType;
     iBearerRecord = NULL;
+    iBearerPriorityTableId = 0;
 
     OstTraceFunctionExit0( DUP1_CCMPLUGINLAN_CCMPLUGINLAN_EXIT );
     }
@@ -477,108 +478,7 @@ void CCmPluginLan::UpdateServiceRecordL(
     CCDLANServiceRecord* clientServiceRecordCopy =
             static_cast<CCDLANServiceRecord*>( aGenRecordArray[KServiceRecordIndex] );
 
-    // LAN Service copy does not work so we have to copy it manually.
-
-    if ( !clientServiceRecordCopy->iRecordTag.IsNull() )
-        {
-        origServiceRecord->iRecordTag.SetL(
-                clientServiceRecordCopy->iRecordTag );
-        }
-    if ( !clientServiceRecordCopy->iRecordName.IsNull() )
-        {
-        origServiceRecord->iRecordName.SetL(
-                clientServiceRecordCopy->iRecordName );
-        }
-    if ( !clientServiceRecordCopy->iServiceEnableLlmnr.IsNull() )
-        {
-        origServiceRecord->iServiceEnableLlmnr.SetL(
-                clientServiceRecordCopy->iServiceEnableLlmnr );
-        }
-    if ( !clientServiceRecordCopy->iIfNetworks.IsNull() )
-        {
-        origServiceRecord->iIfNetworks.SetL(
-                clientServiceRecordCopy->iIfNetworks );
-        }
-    if ( !clientServiceRecordCopy->iIpNetmask.IsNull() )
-        {
-        origServiceRecord->iIpNetmask.SetL(
-                clientServiceRecordCopy->iIpNetmask );
-        }
-    if ( !clientServiceRecordCopy->iIpGateway.IsNull() )
-        {
-        origServiceRecord->iIpGateway.SetL(
-                clientServiceRecordCopy->iIpGateway );
-        }
-    if ( !clientServiceRecordCopy->iIpAddrFromServer.IsNull() )
-        {
-        origServiceRecord->iIpAddrFromServer.SetL(
-                clientServiceRecordCopy->iIpAddrFromServer );
-        }
-    if ( !clientServiceRecordCopy->iIpAddr.IsNull() )
-        {
-        origServiceRecord->iIpAddr.SetL(
-                clientServiceRecordCopy->iIpAddr );
-        }
-    if ( !clientServiceRecordCopy->iIpDnsAddrFromServer.IsNull() )
-        {
-        origServiceRecord->iIpDnsAddrFromServer.SetL(
-                clientServiceRecordCopy->iIpDnsAddrFromServer );
-        }
-    if ( !clientServiceRecordCopy->iIpNameServer1.IsNull() )
-        {
-        origServiceRecord->iIpNameServer1.SetL(
-                clientServiceRecordCopy->iIpNameServer1 );
-        }
-    if ( !clientServiceRecordCopy->iIpNameServer2.IsNull() )
-        {
-        origServiceRecord->iIpNameServer2.SetL(
-                clientServiceRecordCopy->iIpNameServer2 );
-        }
-    if ( !clientServiceRecordCopy->iIp6DnsAddrFromServer.IsNull() )
-        {
-        origServiceRecord->iIp6DnsAddrFromServer.SetL(
-                clientServiceRecordCopy->iIp6DnsAddrFromServer );
-        }
-    if ( !clientServiceRecordCopy->iIp6NameServer1.IsNull() )
-        {
-        origServiceRecord->iIp6NameServer1.SetL(
-                clientServiceRecordCopy->iIp6NameServer1 );
-        }
-    if ( !clientServiceRecordCopy->iIp6NameServer2.IsNull() )
-        {
-        origServiceRecord->iIp6NameServer2.SetL(
-                clientServiceRecordCopy->iIp6NameServer2 );
-        }
-    if ( !clientServiceRecordCopy->iIpAddrLeaseValidFrom.IsNull() )
-        {
-        origServiceRecord->iIpAddrLeaseValidFrom.SetL(
-                clientServiceRecordCopy->iIpAddrLeaseValidFrom );
-        }
-    if ( !clientServiceRecordCopy->iIpAddrLeaseValidTo.IsNull() )
-        {
-        origServiceRecord->iIpAddrLeaseValidTo.SetL(
-                clientServiceRecordCopy->iIpAddrLeaseValidTo );
-        }
-    if ( !clientServiceRecordCopy->iConfigDaemonManagerName.IsNull() )
-        {
-        origServiceRecord->iConfigDaemonManagerName.SetL(
-                clientServiceRecordCopy->iConfigDaemonManagerName );
-        }
-    if ( !clientServiceRecordCopy->iConfigDaemonName.IsNull() )
-        {
-        origServiceRecord->iConfigDaemonName.SetL(
-                clientServiceRecordCopy->iConfigDaemonName );
-        }
-    if ( !clientServiceRecordCopy->iServiceExtensionTableName.IsNull() )
-        {
-        origServiceRecord->iServiceExtensionTableName.SetL(
-                clientServiceRecordCopy->iServiceExtensionTableName );
-        }
-    if ( !clientServiceRecordCopy->iServiceExtensionTableRecordId.IsNull() )
-        {
-        origServiceRecord->iServiceExtensionTableRecordId.SetL(
-                clientServiceRecordCopy->iServiceExtensionTableRecordId ); //TODO, check this works ok.
-        }
+    CopyRecordFieldsL( *clientServiceRecordCopy, *origServiceRecord );
 
     origServiceRecord->SetElementId( clientServiceRecordCopy->ElementId() );
 
@@ -587,6 +487,9 @@ void CCmPluginLan::UpdateServiceRecordL(
         origServiceRecord->SetRecordId( KCDNewRecordRequest );
         origServiceRecord->StoreL( iSession );
 
+        // Have to be "reloaded" to get possible default values from template records.
+        origServiceRecord->LoadL( iSession );
+
         // Update received element ID to client's copy too.
         clientServiceRecordCopy->SetElementId( origServiceRecord->ElementId() );
         }
@@ -594,6 +497,9 @@ void CCmPluginLan::UpdateServiceRecordL(
         {
         origServiceRecord->ModifyL( iSession );
         }
+
+    CCmPluginBaseEng::CopyRecordFieldsL( *origServiceRecord,
+            *clientServiceRecordCopy );
 
     OstTraceFunctionExit0( CCMPLUGINLAN_UPDATESERVICERECORDL_EXIT );
     }

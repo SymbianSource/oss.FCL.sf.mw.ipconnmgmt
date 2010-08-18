@@ -62,7 +62,7 @@ private:
 public:
     void AddListenerL( TUint32 aIdentifier );
     TInt RemoveListener( TUint32 aIdentifier );
-    void DbChangeDetected( TUint32 aIdentifier );
+    void DbChangeDetectedL( TUint32 aIdentifier );
     void DbChangeError( TUint32 aIdentifier );
 
 private:

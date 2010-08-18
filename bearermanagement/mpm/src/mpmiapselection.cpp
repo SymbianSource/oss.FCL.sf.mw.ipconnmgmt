@@ -151,10 +151,13 @@ void CMPMIapSelection::ChooseIapL( const TMpmConnPref& aChooseIapPref )
         MPMLOGSTRING2( "CMPMIapSelection::ChooseIapL: bearerType: %i", bearerType )
 
         // Complete selection with error code if wlan only was set and cellular IAP other 
-        // than MMS IAP was tried to access  
-        if ( wlanOnly && 
-                ( bearerType == EMPMBearerTypePacketData ) && 
-                ( iSession->IsMMSIap( iChooseIapPref.IapId() ) == EFalse ) ) 
+        // than MMS IAP was tried to access
+        // Note that CurrentCellularDataUsage()tells if internal cellular connections are 
+        // temporarily disabled because dial-up connection is prioritized over internal connections.
+        // 
+        if ( ( wlanOnly || CurrentCellularDataUsage() == ECmCellularDataUsageDisabled ) && 
+             ( bearerType == EMPMBearerTypePacketData ) && 
+             ( iSession->IsMMSIap( iChooseIapPref.IapId() ) == EFalse ) ) 
             {            
             ChooseIapComplete( KErrPermissionDenied, NULL );
             return;
@@ -1142,3 +1145,11 @@ TMpmConnPref CMPMIapSelection::MpmConnPref()
     return iChooseIapPref;
     }
 
+// ---------------------------------------------------------------------------
+// Get current cellular data usage setting
+// ---------------------------------------------------------------------------
+//
+TInt CMPMIapSelection::CurrentCellularDataUsage() const
+    {
+    return iSession->MyServer().DataUsageWatcher()->CellularDataUsage();
+    }

@@ -230,4 +230,13 @@ inline CConnectionUiUtilities* CMPMServer::ConnUiUtils() const
     return iConnUiUtils;
     }
 
+// -----------------------------------------------------------------------------
+// CMPMServer::DataUsageWatcher()
+// -----------------------------------------------------------------------------
+//
+CMpmDataUsageWatcher* CMPMServer::DataUsageWatcher() const
+    {
+    return iMpmDataUsageWatcher;
+    }
+
 // End of File

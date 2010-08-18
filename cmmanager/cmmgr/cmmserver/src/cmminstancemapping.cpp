@@ -87,6 +87,7 @@ CDestination::CDestination()
     OstTraceFunctionEntry0( DUP1_CDESTINATION_CDESTINATION_ENTRY );
 
     iId = 0;
+    iMetadata = 0;
 
     OstTraceFunctionExit0( DUP1_CDESTINATION_CDESTINATION_EXIT );
     }
@@ -523,10 +524,10 @@ void CCmmInstanceMapping::DestinationsContainingConnMethodL(
         RArray<TUint32>& aDestinationIds ) const
     {
     OstTraceFunctionEntry0( CCMMINSTANCEMAPPING_DESTINATIONSCONTAININGCONNMETHODL_ENTRY );
-    
+
     aDestinationIds.Reset();
     TInt count( 0 );
-    
+
     // Go through each destination.
     for ( TInt i = 0; i < iDestinations.Count(); i++ )
         {
@@ -558,7 +559,7 @@ void CCmmInstanceMapping::DestinationsContainingConnMethodL(
                 }
             }
         }
-    
+
     OstTraceFunctionExit0( CCMMINSTANCEMAPPING_DESTINATIONSCONTAININGCONNMETHODL_EXIT );
     }
 
@@ -1354,7 +1355,7 @@ void CCmmInstanceMapping::RemoveConnMethod(
                 }
             }
         }
-    
+
     OstTraceFunctionExit0( DUP1_CCMMINSTANCEMAPPING_REMOVECONNMETHOD_EXIT );
     }
 
@@ -1426,11 +1427,11 @@ void CCmmInstanceMapping::RemoveConnMethodFromDestinations(
     }
 
 // ---------------------------------------------------------------------------
-// Iterate through destinations to find the one identified with parameter
-// and returns its metadata mask.
+// Iterate through destinations to find the one identified with provided ID
+// and return its metadata.
 // ---------------------------------------------------------------------------
 //
-TUint32 CCmmInstanceMapping::DestinationMetadata( 
+TUint32 CCmmInstanceMapping::DestinationMetadata(
         const TUint32 aDestinationId ) const
     {
     OstTraceFunctionEntry0( CCMMINSTANCEMAPPING_DESTINATIONMETADATA_ENTRY );

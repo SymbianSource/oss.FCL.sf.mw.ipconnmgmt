@@ -27,7 +27,6 @@ PRJ_EXPORTS
 ../inc/cmdestinationext.h       MW_LAYER_PLATFORM_EXPORT_PATH(cmdestinationext.h)
 ../inc/cmconnectionmethodext.h  MW_LAYER_PLATFORM_EXPORT_PATH(cmconnectionmethodext.h)
 ../inc/cmpsettingsconsts.h      MW_LAYER_PLATFORM_EXPORT_PATH(cmpsettingsconsts.h)
-../inc/cmsettingsui.h           MW_LAYER_PLATFORM_EXPORT_PATH(cmsettingsui.h)
 ../inc/cmcommonui.h             MW_LAYER_PLATFORM_EXPORT_PATH(cmcommonui.h)
 ../inc/cmmanagerext.h           MW_LAYER_PLATFORM_EXPORT_PATH(cmmanagerext.h)
 ../inc/cmmanagerkeys.h          MW_LAYER_PLATFORM_EXPORT_PATH(cmmanagerkeys.h)
