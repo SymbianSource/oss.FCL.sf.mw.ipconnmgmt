@@ -710,24 +710,18 @@ EXPORT_C HBufC8*
 
     HBufC8* retVal = NULL;
     
-    switch ( aAttribute )
-        {
-        default:
-            {
-            TUint32 attribute = CheckForCommonAttribute( aAttribute );
-            CMDBField<TDesC8>* field;
-                        
-            FindFieldL( attribute, ECmText8, (CMDBElement*&)field );
+    TUint32 attribute = CheckForCommonAttribute( aAttribute );
+    CMDBField<TDesC8>* field;
+                
+    FindFieldL( attribute, ECmText8, (CMDBElement*&)field );
 
-            if ( !field->IsNull() )
-                {
-                retVal = field->GetL().AllocL();
-                }
-            else
-                {
-                retVal = KNullDesC8().AllocL();
-                }
-            }
+    if ( !field->IsNull() )
+        {
+        retVal = field->GetL().AllocL();
+        }
+    else
+        {
+        retVal = KNullDesC8().AllocL();
         }
         
     return retVal;
@@ -950,24 +944,17 @@ EXPORT_C void CCmPluginBaseEng::SetString8AttributeL( const TUint32 aAttribute,
     {
     LOGGER_ENTERFN( "CCmPluginBaseEng::SetString8AttributeL" );
 
-    switch ( aAttribute )
-        {
-        default:
-            {
-            TUint32 attribute = CheckForCommonAttribute( aAttribute );
-            CMDBField<TDesC8>* field;
-            
-            TValidationFunctionL func = 
-                        FindFieldL( attribute, ECmText8, (CMDBElement*&)field );
-            
-            if( func )
-                {
-                func( this, attribute, (const TAny*)&aValue );
-                }
+    TUint32 attribute = CheckForCommonAttribute( aAttribute );
+    CMDBField<TDesC8>* field;
 
-            field->SetL( aValue );
-            }
+    TValidationFunctionL func = FindFieldL( attribute, ECmText8, (CMDBElement*&)field );
+
+    if( func )
+        {
+        func( this, attribute, (const TAny*)&aValue );
         }
+
+    field->SetL( aValue );
     }
     
 // ---------------------------------------------------------------------------
@@ -2427,7 +2414,9 @@ HBufC* CCmPluginBaseEng::DoMakeValidNameL( const TDesC& aName )
                 {
                 pf /= 10;
                 if ( !pf )
+                    {
                     break;
+                    }
                 }
             TPtr sgdptr( temp->Des() );
             TPtr sgdptr2( temp2->Des() );
@@ -2783,7 +2772,7 @@ EXPORT_C void CCmPluginBaseEng::AddConverstionTableL( CCDRecordBase* *aRecord,
     }
     
 // ---------------------------------------------------------------------------
-// CCmPluginBaseEng::AddConverstionTableL
+// CCmPluginBaseEng::AddCommonConversionTableL
 // ---------------------------------------------------------------------------
 //
 EXPORT_C void CCmPluginBaseEng::AddCommonConversionTableL( 
@@ -2822,7 +2811,8 @@ EXPORT_C void CCmPluginBaseEng::RemoveCommonConversionTable(
     {
     LOGGER_ENTERFN( "CCmPluginBaseEng::RemoveCommonConversionTable" );
 
-    for ( TInt i = 0; i < iPriv->iCommonConvTblArray.Count(); ++i )
+    // When calling Remove(), it's safer to loop starting from end.
+    for ( TInt i = iPriv->iCommonConvTblArray.Count()-1; i >= 0; i-- )
         {
         if ( iPriv->iCommonConvTblArray[i] == aConvTable )
             {
@@ -2876,10 +2866,6 @@ TValidationFunctionL CCmPluginBaseEng::FindFieldL( TUint32 aAttribute,
                 {
                 aElement = &field;
                 }
-            else
-                {
-                User::Leave( KErrNotSupported );
-                }
             }
             break;
 
@@ -2888,10 +2874,6 @@ TValidationFunctionL CCmPluginBaseEng::FindFieldL( TUint32 aAttribute,
             if ( aType == ECmText8 )
                 {
                 aElement = &field;
-                }
-            else
-                {
-                User::Leave( KErrNotSupported );
                 }
             }
             break;
@@ -2904,10 +2886,6 @@ TValidationFunctionL CCmPluginBaseEng::FindFieldL( TUint32 aAttribute,
                  aType == ECmBool )
                 {
                 aElement = &field;
-                }
-            else
-                {
-                User::Leave( KErrNotSupported );
                 }
             }
             break;

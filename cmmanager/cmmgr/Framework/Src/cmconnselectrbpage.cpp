@@ -49,6 +49,7 @@ CCMConnSelectRBPage::CCMConnSelectRBPage( TInt aDialogResourceId,
     , iAreDestinations( areDestinations )
     , iOpenDestination( aOpenDestination )
     , iHelpContext ( aContext )
+    , iFirstEnter( ETrue )
     {
     CLOG_CREATE;
     iPrevItem = iDestinations[aCurrentSelectionIndex];
@@ -256,7 +257,28 @@ TKeyResponse CCMConnSelectRBPage::OfferKeyEventL( const TKeyEvent& aKeyEvent,
     // save for the future use
     iPrevItem = iDestinations[ListBoxControl()->CurrentItemIndex()];
     
-    switch ( aKeyEvent.iScanCode )
+    TKeyEvent aKeyEventmy = aKeyEvent;
+    if ( aKeyEventmy.iCode == EKeyEnter )
+        {
+        if ( iFirstEnter )
+            {//pressing the enter key at the first time will be changed
+             //to an up arrow key so the first item in the list will be highlighted
+            iFirstEnter = EFalse;
+            aKeyEventmy.iScanCode = EStdKeyUpArrow;
+            aKeyEventmy.iCode = EKeyUpArrow;
+            }
+        else
+            {//change back to true for the next session
+            iFirstEnter=ETrue;
+            }
+        }
+    else if ( aKeyEventmy.iScanCode == EStdKeyDownArrow || aKeyEventmy.iScanCode == EStdKeyUpArrow )
+             {
+             //we will have highligt so the following enter key should select the item
+             iFirstEnter = EFalse;
+             }
+    
+    switch ( aKeyEventmy.iScanCode )
         {
         case EStdKeyDownArrow:
         case EStdKeyUpArrow:
@@ -289,7 +311,7 @@ TKeyResponse CCMConnSelectRBPage::OfferKeyEventL( const TKeyEvent& aKeyEvent,
             break;
             }
         }
-    retVal = CAknRadioButtonSettingPage::OfferKeyEventL( aKeyEvent, aType );
+    retVal = CAknRadioButtonSettingPage::OfferKeyEventL( aKeyEventmy, aType );
     
     return retVal;
     }
@@ -363,27 +385,27 @@ void CCMConnSelectRBPage::HandleListBoxEventL(CEikListBox* aListBox,
 					    
 		            if ( iOpenDestination ) //only if we are on 'destination level' and we are able to
         		        //open destinations
-                		{            
-                		// If focus is on the 'uncategorised' destination, 
-                		// change the soft key to 'Open'
-                		if ( iDestinations[ ListBoxControl()->CurrentItemIndex() ] == 
+                	    {            
+                	    // If focus is on the 'uncategorised' destination, 
+                	    // change the soft key to 'Open'
+                	    if ( iDestinations[ ListBoxControl()->CurrentItemIndex() ] == 
 		                                                        KDestItemUncategorized )
         		            {
-                		    HBufC* text = StringLoader::LoadLC( R_QTN_MSK_OPEN );
-                    		Cba()->SetCommandL( EAknSoftkeySelect, *text );
-                    		Cba()->DrawNow();
-                    		CleanupStack::PopAndDestroy( text );                
-                    		}
-                		else
-                    		{
-                    		HBufC* text = StringLoader::LoadLC( R_QTN_MSK_SELECT );
-                    		Cba()->SetCommandL( EAknSoftkeySelect, *text );
-                    		Cba()->DrawNow();
-                    		CleanupStack::PopAndDestroy( text );
-                    		}
-                		CAknRadioButtonSettingPage::SelectCurrentItemL();
-                		}
-                	}
+                	        HBufC* text = StringLoader::LoadLC( R_QTN_MSK_OPEN );
+                   		    Cba()->SetCommandL( EAknSoftkeySelect, *text );
+                   		    Cba()->DrawNow();
+                   		    CleanupStack::PopAndDestroy( text );                
+                   		    }
+                	    else
+                   		    {
+                   		    HBufC* text = StringLoader::LoadLC( R_QTN_MSK_SELECT );
+                   		    Cba()->SetCommandL( EAknSoftkeySelect, *text );
+                   		    Cba()->DrawNow();
+                   		    CleanupStack::PopAndDestroy( text );
+                   		    }
+                         CAknRadioButtonSettingPage::SelectCurrentItemL();
+                	     }
+                    }
                 break;
                 
             case MEikListBoxObserver::EEventItemDoubleClicked:

@@ -133,6 +133,10 @@ class CAPControlListAPIWrapper : public CActive
         * Handles asynchronous function completion 
         */
 		void RunL(); 
+		/** 
+		* Shows SIM card error note in error cases
+		*/
+		void ShowSimCardErrorNoteL();
 		
 	private:
         // New functions
@@ -196,6 +200,12 @@ class CAPControlListAPIWrapper : public CActive
         */
 		void FinishReadDataL();
 		
+	    /**
+	     * From CActive, handles leaves from RunL.
+	     * @param aLeaveCode The leave code.
+	     */
+	    TInt RunError( TInt aLeaveCode );
+		
 	private: // Data
 		
         //@var reference to the view
@@ -233,6 +243,8 @@ class CAPControlListAPIWrapper : public CActive
 		TUint32 						iSize;
         //@var index of item currently read from the ACL list 
 		TUint32 						iIndex;
+		
+		TBool                           iSimCardError;
 	} ;
 
 #endif

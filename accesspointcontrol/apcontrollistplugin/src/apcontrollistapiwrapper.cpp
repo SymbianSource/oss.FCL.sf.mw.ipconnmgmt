@@ -43,7 +43,8 @@ CAPControlListAPIWrapper::CAPControlListAPIWrapper(
 							CAPControlListPlugin& aPlugin, TInt aPriority ) : 
 											CActive( aPriority ), 
 											iPlugin(aPlugin),
-											iApnPKG(iApn)
+											iApnPKG(iApn),
+											iSimCardError( EFalse )
 	{
 	CActiveScheduler::Add( this ); 
 	}
@@ -200,28 +201,23 @@ void CAPControlListAPIWrapper::FinishReadDataL()
 //
 void CAPControlListAPIWrapper::RunL()
 	{
-	if ( iStatus != KErrNone )
+    CLOG( ( ESelector, 0, _L( "RequestStatus: %d for request: %d" ), 
+                                                iStatus.Int(), iRequest) );     
+
+    // If there happens an error show error note and set this sw to error
+    // state --> does not accept any operations but closing.
+	if ( iStatus.Int() != KErrNone )
 		{
-		CLOG( ( ESelector, 0, _L( "Bad RequestStatus: %d for request: %d" ), 
-													iStatus.Int(), iRequest) );	    
+        ShowSimCardErrorNoteL();
 
-		// KErrOverflow can occur during APN adding process, if the APN list is full
-		// or there is no space for an additional entry in SIM card.
-	    if( iStatus.Int() == KErrOverflow && iRequest == EAddAPN)
-	        {
-            HBufC* text = StringLoader::LoadLC ( 
-                R_QTN_ACL_ERR_SIM_CARD );
-            CAknErrorNote* note = new ( ELeave ) CAknErrorNote(
-                 ETrue );
-            note->ExecuteLD( *text );
-
-            CleanupStack::PopAndDestroy( text );
-	        }
-	    
+        iSimCardError = ETrue;
 	    iRequest = ENoRequest;  
 
 		return;
 		}
+	
+	iSimCardError = EFalse;
+	
 	switch(iRequest)
 	{
 	case EGetACLStatus:
@@ -367,7 +363,7 @@ void CAPControlListAPIWrapper::ReadData()
 // ---------------------------------------------------------
 void CAPControlListAPIWrapper::EnumerateAPN() 
     {
-    CLOG( ( ESelector, 0, _L( "-> CAPControlListAPIWrapper::ReadData" ) ) );
+    CLOG( ( ESelector, 0, _L( "-> CAPControlListAPIWrapper::EnumerateAPN" ) ) );
 	if( !IsActive() )
 		{
 		iRequest = EEnumerateAPN;			
@@ -375,7 +371,7 @@ void CAPControlListAPIWrapper::EnumerateAPN()
 		iPhone.EnumerateAPNEntries(iStatus, iSize);
 		SetActive();
 		}    
-    CLOG( ( ESelector, 0, _L( "<- CAPControlListAPIWrapper::ReadData" ) ) );
+    CLOG( ( ESelector, 0, _L( "<- CAPControlListAPIWrapper::EnumerateAPN" ) ) );
     }
     
 // ---------------------------------------------------------
@@ -386,6 +382,13 @@ void CAPControlListAPIWrapper::DeActivateACL()
     {   	
     CLOG( ( ESelector, 0, _L( 
     			"-> CAPControlListAPIWrapper::DeActivateACLL" ) ) );
+    
+    // Check if in error state
+    if ( iSimCardError )
+        {
+        ShowSimCardErrorNoteL();
+        return;
+        }
 	if (iSecurityChecked)
 		{
 		SetACLStatus( RMobilePhone::EAPNControlListServiceDisabled );
@@ -407,6 +410,13 @@ void CAPControlListAPIWrapper::ActivateACL()
     {   	
     CLOG( ( ESelector, 0, _L( 
     			"-> CAPControlListAPIWrapper::ActivateACLL" ) ) );
+
+    // Check if in error state
+    if ( iSimCardError )
+        {
+        ShowSimCardErrorNoteL();
+        return;
+        }
 	if (iSecurityChecked)
 		{
 		SetACLStatus( RMobilePhone::EAPNControlListServiceEnabled );
@@ -429,6 +439,14 @@ void CAPControlListAPIWrapper::SetACLStatus( const
     {   	
     CLOG( ( ESelector, 0, 
     				_L( "-> CAPControlListAPIWrapper::SetACLStatus" ) ) );
+    
+    // Check if in error state
+    if ( iSimCardError )
+        {
+        ShowSimCardErrorNoteL();
+        return;
+        }
+
 	if( !IsActive() )
 		{
    		iPhone.SetAPNControlListServiceStatus( iStatus, 
@@ -456,6 +474,14 @@ void CAPControlListAPIWrapper::SetACLStatus( const
 void CAPControlListAPIWrapper::RemoveAPN()
     {   	
     CLOG( ( ESelector, 0, _L( "-> CAPControlListAPIWrapper::RemoveAPNL" ) ) );
+    
+    // Check if in error state
+    if ( iSimCardError )
+        {
+        ShowSimCardErrorNoteL();
+        return;
+        }
+
     if( iPlugin.Container()->NumberOfItems() > 0)
         {
     	if (iSecurityChecked)
@@ -477,6 +503,14 @@ void CAPControlListAPIWrapper::RemoveAPN()
 void CAPControlListAPIWrapper::DoRemoveAPN()
     {   	
     CLOG( ( ESelector, 0, _L( "-> CAPControlListAPIWrapper::RemoveAPN2L" ) ) );
+    
+    // Check if in error state
+    if ( iSimCardError )
+        {
+        ShowSimCardErrorNoteL();
+        return;
+        }
+
 	if( !IsActive() )
 		{
 		TInt index = iPlugin.Container()->CurrentItemIndex();
@@ -494,6 +528,13 @@ void CAPControlListAPIWrapper::DoRemoveAPN()
 void CAPControlListAPIWrapper::AddAPNL()
     {   	
     CLOG( ( ESelector, 0, _L( "-> CAPControlListAPIWrapper::AddAPNL" ) ) );
+    
+    // Check if in error state
+    if ( iSimCardError )
+        {
+        ShowSimCardErrorNoteL();
+        return;
+        }
 	if (iSecurityChecked)
 		{
 		DoAddAPNL();
@@ -704,3 +745,30 @@ void CAPControlListAPIWrapper::CancelNotify()
     CLOG( ( ESelector, 0, 
         _L( "<- CAPControlListAPIWrapper::CancelNotify" ) ) );
     }
+// ----------------------------------------------------------
+// CAPControlListPlugin::ShowSimCardErrorNoteL()
+// ----------------------------------------------------------
+//
+void CAPControlListAPIWrapper::ShowSimCardErrorNoteL()
+    {
+    HBufC* text = StringLoader::LoadLC ( 
+        R_QTN_ACL_ERR_SIM_CARD );
+    CAknErrorNote* note = new ( ELeave ) CAknErrorNote(
+         ETrue );
+    note->ExecuteLD( *text );
+
+    CleanupStack::PopAndDestroy( text );
+    }
+// -----------------------------------------------------------------------------
+// Handles the leave from the RunL()
+// -----------------------------------------------------------------------------
+//
+TInt CAPControlListAPIWrapper::RunError( TInt /*aLeaveCode*/ )
+    {
+    iSimCardError = ETrue;
+    iRequest = ENoRequest;  
+
+    return KErrNone;
+    }
+
+

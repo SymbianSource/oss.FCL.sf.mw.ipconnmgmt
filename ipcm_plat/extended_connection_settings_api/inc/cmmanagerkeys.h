@@ -21,7 +21,7 @@
 /**
  * UID of CmManager repository
  *
- * @since S60 5.1
+ * @since S60 5.2
  */
 const TUid KCRUidCmManager = {0x10207376}; 
 
@@ -33,8 +33,19 @@ const TUid KCRUidCmManager = {0x10207376};
  * but the value is provided for the country the device is at the moment.
  * See TCmCellularDataUsage in cmgenconnsettings.h for more info.
  *
- * @since S60 5.1
+ * @since S60 5.2
  */
 const TUint32 KCurrentCellularDataUsage  = 0x00000001;
+
+/**
+ * Dial-up override setting.
+ *
+ * When this key is enabled dial-up connection overrides all
+ * internal cellular connections. Internal cellular connections 
+ * are automatically disconnected when dial-up connection starts.
+ *
+ * @since S60 5.2
+ */
+const TUint32 KDialUpOverride  = 0x00000002;
     
 #endif // CMMANAGERKEYS_H

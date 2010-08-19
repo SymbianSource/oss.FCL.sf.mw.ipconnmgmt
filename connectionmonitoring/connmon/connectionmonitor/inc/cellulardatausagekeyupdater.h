@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2008-2009 Nokia Corporation and/or its subsidiary(-ies).
+* Copyright (c) 2008-2010 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -38,6 +38,11 @@ public:
     
     void UpdateKeyL( const TInt aRegistration ) const;
 
+    /**
+     * Return ETrue if dial-up PDP context override feature is enabled.
+     */
+    TBool DialUpOverrideEnabled() const;
+
 private:
     CCellularDataUsageKeyUpdater(
             CConnMonServer* aServer );
@@ -56,7 +61,13 @@ private: // Methods from base class
 private:
     CConnMonServer* iServer;
     TUint32         iTableId;
-    CRepository*    iRepository;
+
+    // CommsDat central repository.
+    CRepository*    iCommsRepository;
+
+    // CmManager central repository.
+    CRepository*    iCmmRepository;
+
     TInt            iErrorCounter;
     // used for complete runl. Not owned.
     TRequestStatus* iInitStatus;

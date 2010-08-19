@@ -1850,8 +1850,9 @@ void CCmDlg::HandleResourceChange( TInt aType )
 //
 TInt CCmDlg::GetInsertIndexL( TInt aCount, TUint32 aPriority )
     {
-    TInt ret = -1;
+    TInt ret = aCount;
     TUint32 priority;
+    
     
     for ( TInt index = 0; index < aCount; index++ )
         {
@@ -1979,15 +1980,11 @@ void CCmDlg::ReOrderCMsL()
                 TInt insertAt = GetInsertIndexL( index, underlyingPrio );
                 
                 // Modify the priority of this VPN Iap
-                if (insertAt != -1)
-                    {
-                    iCmDestinationImpl->ModifyPriorityL( *cm, insertAt );
-                    iCmDestinationImpl->UpdateL();
-                    break;
-                    }
+                iCmDestinationImpl->ModifyPriorityL( *cm, insertAt );
                 }
             }
         }
+        iCmDestinationImpl->UpdateL();
     }
 
 // --------------------------------------------------------------------------

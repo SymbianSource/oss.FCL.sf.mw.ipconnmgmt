@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2006 Nokia Corporation and/or its subsidiary(-ies). 
+* Copyright (c) 2006-2010 Nokia Corporation and/or its subsidiary(-ies). 
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -59,6 +59,24 @@ NONSHARABLE_CLASS(CCmSettingsUiImpl) : public CBase
         * @return TBool
         */
         TBool SelectDestinationDlgL( TUint32& aDestinationId );
+        
+        /**
+        * Launches the dialog for adding connection methods
+        * @since 3.2.3
+        * @param  aDestUid destination id for the new cm
+        * @param  aBearerType bearer type for the new cm
+        * @return TUint32 id of the new cm
+        */
+        TUint32 AddCmL( TUint32& aDestUid, TUint32 aBearerType );
+
+        /**
+        * Launches the dialog for editing connection methods
+        * @since 3.2.3
+        * @param  aCmId id of the cm to edit
+        * @return TInt - KDialogUserExit or KDialogUserBack
+        */
+        TInt EditCmL( TUint32 aCmId );
+
 
     private:
 

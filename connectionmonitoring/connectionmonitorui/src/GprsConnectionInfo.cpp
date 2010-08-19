@@ -302,7 +302,7 @@ void CGprsConnectionInfo::RefreshDetailsArrayL()
             {
             TInt sharing = RefreshAppNamesL();
                 
-            if ( sharing > 1 )
+            if ( sharing >= 1 )
                 {
                 if ( iDetailsArray->Count() > 10 )
                     {                
@@ -399,7 +399,7 @@ void CGprsConnectionInfo::ToArrayDetailsL()
         {
         TInt sharing = RefreshAppNamesL();
 
-        if ( sharing > 1 )
+        if ( sharing >= 1 )
             {
             for ( TInt i = 0; i < sharing; i++ )
                 {

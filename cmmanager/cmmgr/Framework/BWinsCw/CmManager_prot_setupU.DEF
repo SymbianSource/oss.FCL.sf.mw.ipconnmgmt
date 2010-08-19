@@ -388,5 +388,6 @@ EXPORTS
 	?WatcherUnRegister@CCmManagerImpl@@QAEXXZ @ 387 NONAME ; void CCmManagerImpl::WatcherUnRegister(void)
 	?RemoveDestFromPool@CCmManagerImpl@@QAEXPAVCCmDestinationImpl@@@Z @ 388 NONAME ; void CCmManagerImpl::RemoveDestFromPool(class CCmDestinationImpl *)
 	?OfferKeyEventL@CmPluginBaseSettingsDlg@@MAE?AW4TKeyResponse@@ABUTKeyEvent@@W4TEventCode@@@Z @ 389 NONAME ; enum TKeyResponse CmPluginBaseSettingsDlg::OfferKeyEventL(struct TKeyEvent const &, enum TEventCode)
-
+	?AddCmL@CCmSettingsUi@@QAEKAAKK@Z @ 390 NONAME ; unsigned long CCmSettingsUi::AddCmL(unsigned long &, unsigned long)
+	?EditCmL@CCmSettingsUi@@QAE?AW4TResult@1@K@Z @ 391 NONAME ; enum CCmSettingsUi::TResult CCmSettingsUi::EditCmL(unsigned long)
 

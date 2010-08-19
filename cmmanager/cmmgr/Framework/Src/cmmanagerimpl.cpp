@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2006 Nokia Corporation and/or its subsidiary(-ies). 
+* Copyright (c) 2006-2010 Nokia Corporation and/or its subsidiary(-ies). 
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -155,7 +155,7 @@ CCmManagerImpl::CCmManagerImpl()
     }
 
 //-----------------------------------------------------------------------------
-//  CCmManagerImpl::CCmManagerImpl()
+//  CCmManagerImpl::~CCmManagerImpl()
 //-----------------------------------------------------------------------------
 //
 CCmManagerImpl::~CCmManagerImpl()
@@ -196,8 +196,11 @@ CCmManagerImpl::~CCmManagerImpl()
     
     delete iPluginImpl;
 
-    delete &Session();
-    delete iTrans;
+    if (iTrans)
+        {
+        delete &Session();
+        delete iTrans;
+        }
 
     if( iIsFeatureManagerInitialised )
         {
@@ -709,10 +712,17 @@ void CCmManagerImpl::StartCommsDatNotifierL()
     // Two instances of class CCmCommsDatNotifier are created here and
     // referred by all watchers in CmManager. One is to watch change in Iap Table
     // and the other is to watch change in Snap Table.
-    iCommsDatIapNotifier = CCmCommsDatNotifier::NewL( KCDTIdIAPRecord );
     
-    TUint32 snapTableId = GetSnapTableIdL();
-    iCommsDatSnapNotifier = CCmCommsDatNotifier::NewL( snapTableId );
+    if ( iCommsDatIapNotifier == NULL )
+        {
+        iCommsDatIapNotifier = CCmCommsDatNotifier::NewL( KCDTIdIAPRecord );
+        }
+    
+    if ( iCommsDatSnapNotifier == NULL )
+        {
+        TUint32 snapTableId = GetSnapTableIdL();
+        iCommsDatSnapNotifier = CCmCommsDatNotifier::NewL( snapTableId );
+        }
     }
 
 //=============================================================================
@@ -2586,8 +2596,6 @@ EXPORT_C void CCmManagerImpl::FilterOutVirtualsL( RPointerArray<CCmPluginBase>& 
     {
     LOGGER_ENTERFN( "CCmManagerImpl::FilterOutVirtualsL" );
 
-    TInt count = aCmDataArray.Count();
-    
     for ( TInt i = 0; i < aCmDataArray.Count(); i++ )
         {
         if ( aCmDataArray[i]->GetBoolAttributeL( ECmVirtual ) )
@@ -2634,10 +2642,9 @@ EXPORT_C void CCmManagerImpl::CreateFlatCMListL( TUint32 aDestinationId ,
     // get the possible embedded destinations to be able to list their content, too
     // we only have to check in cmArray
     // put them in a sep. array and get their data into another.    
-    TInt cmCount = aCmArray.Count();
     RArray<TUint32> cmEmbDestArray ( KCmArrayMediumGranularity );
     CleanupClosePushL( cmEmbDestArray );
-    for ( TInt i = 0; i < cmCount; i++ )
+    for ( TInt i = 0; i < aCmArray.Count(); i++ )
         {
         if ( aCmArray[i]->GetBoolAttributeL( ECmDestination ) )
             {
@@ -2645,7 +2652,7 @@ EXPORT_C void CCmManagerImpl::CreateFlatCMListL( TUint32 aDestinationId ,
             //remove embedded destination right now
             delete aCmArray[i];
             aCmArray.Remove(i);
-           // i--;
+            i--; // Array gets re-indexed after calling Remove().
             }
         }
     // now we stored the needed emb.dest, 
@@ -2761,16 +2768,16 @@ EXPORT_C void CCmManagerImpl::CombineArraysForPriorityOrderL(
                 // now we either found a correct place or 
                 // we are at the end of the list
                 // ( we break-ed for cycle when found the correct place )
-                if ( ii == cc )
-                    {
-                    // end of the list, append
-                    aCmArray.AppendL( aCmLinkedArray[i]);
-                    }
-                else
-                    {
-                    // we found the place to be inserted
-                    aCmArray.InsertL( aCmLinkedArray[i], ii );
-                    }   
+            if ( ii == cc )
+                {
+                // end of the list, append
+                aCmArray.AppendL( aCmLinkedArray[i]);
+                }
+            else
+                {
+                // we found the place to be inserted
+                aCmArray.InsertL( aCmLinkedArray[i], ii );
+                }   
             }
         else
             {

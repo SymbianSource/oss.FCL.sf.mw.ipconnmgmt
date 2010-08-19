@@ -159,6 +159,10 @@ NONSHARABLE_CLASS(CCMConnSelectRBPage) : public CAknRadioButtonSettingPage
          * Previously selected item
          */
         TInt iPrevItem;
+        /*
+         * pressing the enter key first time will be handled as an uparrow key        
+         */
+        TBool iFirstEnter;
     };
     
 #endif // C_CMAPPSETTRBPAGE_H

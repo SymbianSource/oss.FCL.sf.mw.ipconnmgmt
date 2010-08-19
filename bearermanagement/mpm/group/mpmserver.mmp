@@ -56,6 +56,8 @@ SOURCE            mpmcsidwatcher.cpp
 SOURCE            mpmdialogbase.cpp
 SOURCE            mpmdatausagewatcher.cpp
 SOURCE            mpmofflinewatcher.cpp
+SOURCE            mpmexpirytimer.cpp
+SOURCE            mpmconnpermquerytimer.cpp
 
 USERINCLUDE       ../inc
 

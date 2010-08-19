@@ -685,7 +685,7 @@ void CWlanConnectionInfo::ToArrayDetailsL()
                                  
     TInt sharing = RefreshAppNamesL();
 
-    if ( sharing > 1 )
+    if ( sharing >= 1 )
         {
         for ( TInt i = 0; i < sharing; i++ )
             {
@@ -776,7 +776,7 @@ void CWlanConnectionInfo::RefreshDetailsArrayL()
     
     TInt sharing = RefreshAppNamesL();
 
-    if ( sharing > 1 )
+    if ( sharing >= 1 )
         {
         if ( count >= realElementsMaxCount ) // 15
             {  

@@ -61,6 +61,12 @@ public:
     * Active object's DoCancel.
     */
     void DoCancel();
+    
+    /**
+    * Current cellular data usage.
+    * See TCmCellularDataUsage
+    */
+    TInt CellularDataUsage() const;
 
 private:
 

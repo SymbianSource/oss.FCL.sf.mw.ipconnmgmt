@@ -200,7 +200,7 @@ void CUncatDlg::ProcessCommandL( TInt aCommandId )
                 TInt selected = iListbox->CurrentItemIndex();
                 TInt noi = iListbox->Model()->NumberOfItems();
                 // If it is the last then the previous will be selected.
-                if( selected == noi-1 )
+                if( ( selected == noi-1 ) && ( selected > 0 ))
                     {
                     selected--;
                     }

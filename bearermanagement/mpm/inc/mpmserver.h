@@ -33,6 +33,7 @@ Mobility Policy Manager server class definitions.
 #include "mpmcommon.h"
 #include "rmpm.h"
 #include "mpmroamingwatcher.h"
+#include "mpmdatausagewatcher.h"
 
 
 class CMPMCommsDatAccess;
@@ -48,6 +49,9 @@ const TInt    KPhoneRetryCount   = 7;
 //
 const TInt    KPhoneRetryTimeout = 100000;
 
+const TUint32 KMaxOpenTransAttempts = 5;
+const TUint32 KRetryAfter = 200000;
+
 // The granularity with which iDisconnectQueue will allocate memory chunks. 
 // If set to two there will be space for two instances of CMPMDisconnectDlg
 // before new memory will be allocated.
@@ -61,6 +65,10 @@ const TUint KMPMPolicyRangeCount = 2;
 // roaming to connected wlan wait interval
 // in micro seconds (10 sec)
 const TInt KRoamingToWlanUpdateInterval = 10000000; 
+
+// roaming to connected hotspot wlan wait interval
+// in micro seconds (120 sec)                    
+const TInt KRoamingToHotspotWlanUpdateInterval = 120000000; 
  
 //Definition of the ranges of IPC numbers
 const TInt KMPMPolicyRanges[KMPMPolicyRangeCount] = 
@@ -192,6 +200,7 @@ class CMPMConfirmDlgStarting;
 class CMPMDefaultConnection;
 class CMPMWlanQueryDialog;
 class CMPMDialog;
+class CMPMConnPermQueryTimer;
 
 // CLASS DECLARATION
 /**
@@ -469,6 +478,21 @@ class CMPMServer : public CPolicyServer
         void UpdateSessionConnectionDlgL();
 
         /**
+        * Completes pending messages
+        * @since 5.2
+        * @param aIapId IAP Id of the connection.
+        * @param aError Message status
+        * @param aErrorReturned Error value to be returned, NULL if no 
+        * value should be passed
+        * @param aNeededAction Needed action to be returned, NULL if no 
+        * value should be passed
+        */
+        void HandlePendingMsgs( TUint aIapId,
+                                TInt aError,
+                                TInt* aErrorReturned,
+                                TBMNeededAction* aNeededAction );
+
+        /**
         * Handling of blacklisting certain IAP and the presumed IAP for 
         * the certain connection.
         * @since 3.1
@@ -731,6 +755,15 @@ class CMPMServer : public CPolicyServer
         static TInt StartForcedRoamingToConnectedWlanL( TAny* aUpdater );
         
         /**
+        * Starts forced roaming sequence to connected hotspot wlan
+        *
+        * @param aIapInfo Info about available IAPs
+        * @return Always zero...
+        * @since 5.2
+        */
+        static TInt StartForcedRoamingToConnectedHotspotWlanL( TAny* aUpdater );
+
+        /**
         * Starts forced roaming sequence from WLAN if necessary
         *
         * @param aIapInfo Info about available IAPs
@@ -753,7 +786,14 @@ class CMPMServer : public CPolicyServer
 		* @return RoamingWatcher pointer
         */
         inline CMPMRoamingWatcher* RoamingWatcher() const;
-        
+
+         /**
+        * Returns the DataUsageWatcher pointer
+        *
+        * @since 5.2
+        * @return DataUsageWatcher pointer
+        */
+        inline CMpmDataUsageWatcher* DataUsageWatcher() const;        
         
         
     public: // Functions from base classes
@@ -873,9 +913,10 @@ class CMPMServer : public CPolicyServer
         
         /**
         * Stops cellular connections, except MMS
+        * @param aSilentOnly stop only silent cellular connections
         * @since 5.2
         */
-        void StopCellularConns();
+        void StopCellularConns( TBool aSilentOnly = EFalse );
 
         /**
         * Offline mode watcher updates the mode variable stored by MPM server.
@@ -905,6 +946,27 @@ class CMPMServer : public CPolicyServer
         */
         void SetOfflineWlanQueryResponse( TOfflineWlanQueryResponse aResponse);
 
+        /**
+        * Starts the connection permission query timer.
+        * During the timer, no connection permission query can be initiated.
+        * @since 5.2
+        */
+        void StartConnPermQueryTimer();
+
+        /**
+        * Resets the connection permission query timer.
+        * @since 5.2
+        */
+        void ResetConnPermQueryTimer();
+
+        /**
+        * Returns true if the connection permission query timer is running.
+        * During the timer, no connection permission query can be initiated.
+        * @since 5.2
+        * @return ETrue if timer is running, EFalse otherwise.
+        */
+        TBool IsConnPermQueryTimerOn();
+
     private:
 
         /**
@@ -933,6 +995,12 @@ class CMPMServer : public CPolicyServer
                                 TBool aCheckForBestIap,
                                 TMPMBearerType aDestinationBearerType );
         
+        /**
+         * Check if iap can be disconnected, and disconnect it
+         * @since 5.2
+         * @param aIapId Iap id for checking
+         */
+        void CheckIapForDisconnect( TInt aIapId );
 
     private: // Data
         // Pointer to the ConnMonEvents object
@@ -1042,9 +1110,15 @@ class CMPMServer : public CPolicyServer
         
         // Timer to start roaming to connected WLAN network 
         CPeriodic* iRoamingToWlanPeriodic;
-
+        
+        // Timer to start roaming to connected WLAN network 
+        CPeriodic* iRoamingToHotspotWlanPeriodic;
+        
         // TConnMonIapInfo Info about available IAPs
         TConnMonIapInfo iConnMonIapInfo;
+        
+        // Connection permission query cancellation delay timer
+        CMPMConnPermQueryTimer* iConnPermQueryTimer;
     };
 
 #include "mpmserver.inl"

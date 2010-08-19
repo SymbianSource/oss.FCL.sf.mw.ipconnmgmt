@@ -391,6 +391,19 @@ class CConnectionInfoBase : public CBase
         */
         void InitializeConnectionInfoL();
 
+        /**
+         * Compare the provided UID array with the current cached UID array
+         * iClientBuf.
+         * @param aClients New array of UIDs.
+         * @return ETrue if the contents are the same, EFalse otherwise.
+         */
+        TBool IsTheSameUids( TConnMonClientEnumBuf& aClients );
+
+        /**
+         * Copy the provided UIDs into the cached UID array.
+         * @param aClients New array of UIDs.
+         */
+        void CopyUidsToBuf( TConnMonClientEnumBuf& aClients );
 
     protected:
         
@@ -478,6 +491,13 @@ class CConnectionInfoBase : public CBase
         * The active object for info. refreshing. NOT Owned.
         */
         CActiveWrapper*                     iActiveWrapper;
+
+        /**
+         * Buffer to cache a connection's client application UIDs.
+         * These are kept in cache so application names are resolved only when
+         * the client list has changed.
+         */
+        TConnMonClientEnumBuf               iClientBuf;
     };
 
 

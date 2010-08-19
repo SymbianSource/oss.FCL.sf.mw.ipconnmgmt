@@ -154,10 +154,13 @@ void CMPMIapSelection::ChooseIapL( const TMpmConnPref& aChooseIapPref )
         MPMLOGSTRING2( "CMPMIapSelection::ChooseIapL: bearerType: %i", bearerType )
 
         // Complete selection with error code if wlan only was set and cellular IAP other 
-        // than MMS IAP was tried to access  
-        if ( wlanOnly && 
-                ( bearerType == EMPMBearerTypePacketData ) && 
-                ( iSession->IsMMSIap( iChooseIapPref.IapId() ) == EFalse ) ) 
+        // than MMS IAP was tried to access
+        // Note that CurrentCellularDataUsage()tells if internal cellular connections are 
+        // temporarily disabled because dial-up connection is prioritized over internal connections.
+        // 
+        if ( ( wlanOnly || CurrentCellularDataUsage() == ECmCellularDataUsageDisabled ) && 
+             ( bearerType == EMPMBearerTypePacketData ) && 
+             ( iSession->IsMMSIap( iChooseIapPref.IapId() ) == EFalse ) ) 
             {            
             ChooseIapComplete( KErrPermissionDenied, NULL );
             return;
@@ -379,8 +382,10 @@ void CMPMIapSelection::ExplicitConnectionL()
                 // to the user in this country
                 if ( iSession->MyServer().RoamingWatcher()->RoamingStatus() == EMPMInternationalRoaming )
                     {
-                    // Check whether queries are enabled
-                    if ( !( iChooseIapPref.NoteBehaviour() & TExtendedConnPref::ENoteBehaviourConnDisableQueries ) )
+                    // Check that queries aren't disabled and
+                    // enough time has elapsed from the last query cancelled by the user.
+                    if ( !( iChooseIapPref.NoteBehaviour() & TExtendedConnPref::ENoteBehaviourConnDisableQueries ) &&
+                            !iSession->MyServer().IsConnPermQueryTimerOn() )
                         {
                         TConnectionId connId = iSession->ConnectionId();
                                                             
@@ -532,8 +537,10 @@ void CMPMIapSelection::CompleteExplicitSnapConnectionL()
              ( iSession->MyServer().CommsDatAccess()->CheckWlanL( validateIapId ) == ENotWlanIap ) &&
              !( iSession->MyServer().CommsDatAccess()->IsVirtualIapL( validateIapId ) ) )
             {
-            // Check whether queries are disabled
-            if ( !( iChooseIapPref.NoteBehaviour() & TExtendedConnPref::ENoteBehaviourConnDisableQueries ) )
+            // Check that queries aren't disabled and
+            // enough time has elapsed from the last query cancelled by the user.
+            if ( !( iChooseIapPref.NoteBehaviour() & TExtendedConnPref::ENoteBehaviourConnDisableQueries ) &&
+                    !iSession->MyServer().IsConnPermQueryTimerOn() )
                 {
                 if ( iSession->MyServer().RoamingWatcher()->RoamingStatus() == EMPMInternationalRoaming )
                     {
@@ -922,8 +929,10 @@ void CMPMIapSelection::ImplicitConnectionWlanNoteL()
             // to the user in this country
             if ( iSession->MyServer().RoamingWatcher()->RoamingStatus() == EMPMInternationalRoaming )
                 {
-                // Check whether queries are enabled
-                if ( !( iChooseIapPref.NoteBehaviour() & TExtendedConnPref::ENoteBehaviourConnDisableQueries ) )
+                // Check that queries aren't disabled and
+                // enough time has elapsed from the last query cancelled by the user.
+                if ( !( iChooseIapPref.NoteBehaviour() & TExtendedConnPref::ENoteBehaviourConnDisableQueries ) &&
+                        !iSession->MyServer().IsConnPermQueryTimerOn() )
                     {
                     TConnectionId connId = iSession->ConnectionId();
                                                                     
@@ -1283,3 +1292,11 @@ TMpmConnPref CMPMIapSelection::MpmConnPref()
     return iChooseIapPref;
     }
 
+// ---------------------------------------------------------------------------
+// Get current cellular data usage setting
+// ---------------------------------------------------------------------------
+//
+TInt CMPMIapSelection::CurrentCellularDataUsage() const
+    {
+    return iSession->MyServer().DataUsageWatcher()->CellularDataUsage();
+    }

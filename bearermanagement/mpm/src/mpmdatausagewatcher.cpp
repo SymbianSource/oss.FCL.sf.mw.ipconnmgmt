@@ -118,15 +118,24 @@ void CMpmDataUsageWatcher::RunL()
         // Get the new Cellular data usage setting value from central repository.
         TInt oldCellularDataUsage = iCellularDataUsage;
 
-        if ( GetCurrentDataUsageValue() == KErrNone )
+        if ( GetCurrentDataUsageValue() == KErrNone // Updates iCellularDataUsage
+             && oldCellularDataUsage != iCellularDataUsage
+             && iServer->RoamingWatcher()->RoamingStatus() != EMPMRoamingStatusUnknown )
             {
-            // Stop cellular connections if the setting changes into Disabled.
-            if ( oldCellularDataUsage != ECmCellularDataUsageDisabled &&
-                    iCellularDataUsage == ECmCellularDataUsageDisabled &&
-                    iServer->RoamingWatcher()->RoamingStatus() != EMPMRoamingStatusUnknown )
+            // Setting changed while cellular is in use
+
+            if ( iCellularDataUsage == ECmCellularDataUsageDisabled )
                 {
+                // Cellular data usage disabled -> disconnect cellular
                 iServer->StopCellularConns();
                 }
+            else if ( iCellularDataUsage == ECmCellularDataUsageConfirm )
+                {
+                // Cellular data usage needs to be confirmed -> disconnect if 
+                // there are only silent cellular connections left.
+                iServer->StopCellularConns( ETrue );
+                }
+
             }
         }
     
@@ -181,4 +190,13 @@ TInt CMpmDataUsageWatcher::GetCurrentDataUsageValue()
         MPMLOGSTRING2( "CMpmDataUsageWatcher::GetCurrentDataUsageValue, ERROR: %d", err )
         }
     return err;
+    }
+
+// -----------------------------------------------------------------------------
+// CMpmDataUsageWatcher::CellularDataUsage
+// -----------------------------------------------------------------------------
+//
+TInt CMpmDataUsageWatcher::CellularDataUsage() const
+    {
+    return iCellularDataUsage;
     }

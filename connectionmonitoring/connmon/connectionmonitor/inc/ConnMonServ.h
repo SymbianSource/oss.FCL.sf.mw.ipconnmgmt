@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2002-2009 Nokia Corporation and/or its subsidiary(-ies).
+* Copyright (c) 2002-2010 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -134,6 +134,8 @@ class TConnMonIapInfo;
 class TConnMonSNAPInfo;
 class TConnMonId;
 class CCellularDataUsageKeyUpdater;
+class CConnMonDialUpOverrideNotifier;
+class CConnMonDialUpOverrideTimer;
 
 /**
 * CConnMonServer
@@ -335,6 +337,23 @@ public:
     inline CCellularDataUsageKeyUpdater* CellularDataUsageKeyUpdater() 
                      { return iCellularDataUsageKeyUpdater; }
 
+    /**
+     * Return the current dial-up PDP context override status.
+     */
+    inline TInt GetDialUpOverrideStatus() { return iDialUpOverrideStatus; }
+
+    /**
+     * Set the dial-up PDP context override feature status. Either activates or
+     * deactivates it. Does nothing if the feature itself has not been enabled.
+     */
+    void SetDialUpOverrideStatus( TInt aStatus );
+
+    /**
+     * Signals that all internal PDP connections have closed through the
+     * KDialUpConnection P&S-property.
+     */
+    void ConnectionsClosedForDialUpOverride();
+
 public:
     /**
      * From CServer Creates a new session for a client.
@@ -377,6 +396,15 @@ private: // Data
 
     CConnMonBearerGroupManager*   iBearerGroupManager;
     CCellularDataUsageKeyUpdater* iCellularDataUsageKeyUpdater;
+
+    // Notifier to listen for changes in the the KDialUpConnection P&S-property.
+    CConnMonDialUpOverrideNotifier* iDialUpOverrideNotifier;
+
+    // Timeout timer for the dial-up PDP context override feature.
+    CConnMonDialUpOverrideTimer* iDialUpOverrideTimer;
+
+    // Current status of the dial-up PDP context override feature.
+    TInt iDialUpOverrideStatus;
     };
 
 /**
@@ -455,6 +483,34 @@ private:
     /**
      * From CActive Shuts the server down.
      */
+    void RunL();
+
+private: // Data
+    RTimer iTimer;
+    CConnMonServer* iServer;
+    };
+
+/**
+* CConnMonDialUpOverrideTimer
+* A simple timer to ensure dial-up PDP context override feature can not stay
+* active longer than the specied timeout value.
+*/
+NONSHARABLE_CLASS( CConnMonDialUpOverrideTimer ) : public CActive
+    {
+public:
+    static CConnMonDialUpOverrideTimer* NewL( CConnMonServer* aServer );
+    static CConnMonDialUpOverrideTimer* NewLC( CConnMonServer* aServer );
+    virtual ~CConnMonDialUpOverrideTimer();
+
+private:
+    CConnMonDialUpOverrideTimer( CConnMonServer* aServer );
+    void ConstructL();
+
+public:
+    void Start();
+
+private:
+    void DoCancel();
     void RunL();
 
 private: // Data

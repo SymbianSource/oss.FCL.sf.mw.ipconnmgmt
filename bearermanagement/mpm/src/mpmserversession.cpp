@@ -76,7 +76,8 @@ CMPMServerSession::CMPMServerSession(CMPMServer& aServer)
       iStoredIapInfo(),
       iIapSelection( NULL ),
       iMigrateState( EMigrateNone ),
-      iDisconnectDialogShown( EFalse )
+      iDisconnectDialogShown( EFalse ),
+      iErrorDiscreetPopupShown( EFalse )
     {
     }
 
@@ -106,9 +107,7 @@ void CMPMServerSession::ConstructL()
 //
 CMPMServerSession::~CMPMServerSession()
     {
-    delete iDisconnectDlg;
-    delete iConfirmDlgRoaming;
-    delete iIapSelection;
+
 
     // Remove serverside objects for notification session.
     // 
@@ -137,6 +136,11 @@ User connection deactivated" )
     
     // Make sure the connection is removed from server's information array.
     iMyServer.RemoveBMConnection( iConnId, *this );
+
+    delete iDisconnectDlg;
+    delete iConfirmDlgRoaming;
+    delete iIapSelection;
+
     }
 
 
@@ -936,7 +940,10 @@ void CMPMServerSession::HandleServerApplicationMigratesToCarrierL(
         //Display confirm dialog only if we are moving to cellular IAP
         if ( MyServer().CommsDatAccess()->CheckWlanL( iMigrateIap ) == ENotWlanIap )
             {
-            if ( !( iIapSelection->MpmConnPref().NoteBehaviour() & TExtendedConnPref::ENoteBehaviourConnDisableQueries ) )
+            // Check that connection preferences don't deny queries, and
+            // enough time has elapsed from the last query cancelled by the user.
+            if ( !( iIapSelection->MpmConnPref().NoteBehaviour() & TExtendedConnPref::ENoteBehaviourConnDisableQueries ) &&
+                    !MyServer().IsConnPermQueryTimerOn() )
                 {
                 if ( MyServer().RoamingWatcher()->RoamingStatus() == EMPMInternationalRoaming )
                     {
@@ -1042,6 +1049,10 @@ aError %d, aResponse %d, aReconnect %d",
         {
         if( aResponse == EMsgQueryCancelled )
             {
+            // User cancelled the connection permission query,
+            // don't try again until the timer expires.
+            MyServer().StartConnPermQueryTimer();
+            
             if( !aReconnect )
                 {
                 // Send a preferred IAP notification
@@ -1416,12 +1427,30 @@ void CMPMServerSession::HandleServerProcessErrorL(
         return;
         }
 
+    // Read the Connection Id of the application
+    // 
+    TConnectionId connId = iProcessErrorMessage.Int1();
+    
+    MPMLOGSTRING3( "CMPMServerSession::HandleServerProcessErrorL \
+- error code = %i, Connection Id = 0x%x", error, connId )
+
     if ( !ChooseBestIapCalled() )
         {
         MPMLOGSTRING( "CMPMServerSession::HandleServerProcessErrorL - \
-Warning: ChooseBestIap has not been called yet" )
-        TBMNeededAction neededAction( EPropagateError );
-        ProcessErrorComplete( KErrNone, &error, &neededAction );
+ChooseBestIap has not been called yet" )
+
+        // If it is not disconnect dialog error then complete message. 
+        // If it is then leave message pending and it will be completed when 
+        // disconnect dialog completes in other session.
+        if ( !DisconnectDlgErrorCode( error ) )
+            {
+            TBMNeededAction neededAction( EPropagateError );
+            ProcessErrorComplete( KErrNone, &error, &neededAction );
+            }
+        else
+            {
+            MPMLOGSTRING( "Disconnect dlg error - leave msg pending" );
+            }
         return;
         }
 
@@ -1442,15 +1471,12 @@ Warning: ChooseBestIap has not been called yet" )
             connUiUtils->ConnectionErrorDiscreetPopup( error );
             delete connUiUtils;
             connUiUtils = NULL;
+            
+            // Error discreet popup has been shown. This is needed so that we
+            // dont show it again for SNAP.
+            iErrorDiscreetPopupShown = ETrue;
             }
         }
-
-    // Read the Connection Id of the application
-    // 
-    TConnectionId connId = iProcessErrorMessage.Int1();
-
-    MPMLOGSTRING3( "CMPMServerSession::HandleServerProcessErrorL\
- - error code = %i, Connection Id = 0x%x", error, connId )
 
     // Get the current connection IapId for this connId 
     //
@@ -1605,6 +1631,11 @@ Unknown state %d", state )
             ProcessErrorComplete( KErrNone,
                                   returnError,
                                   &neededAction );
+            
+            iMyServer.HandlePendingMsgs( currentIap,
+                                         KErrNone,
+                                         returnError,
+                                         &neededAction );
             return;
             }
         }
@@ -1615,7 +1646,8 @@ Unknown state %d", state )
         // KErrConnectionTerminated is received when user disconnects
         // connection from Settings/Connection mgr.
         //       
-        if ( ( error == KErrCancel ) || ( error == KErrTimedOut ) || ( error == KErrConnectionTerminated ) )
+        if ( ( error == KErrCancel ) || ( error == KErrTimedOut ) || ( error == KErrConnectionTerminated )
+                || ( error == KErrDisconnected && iMyServer.IsPhoneOffline() ) )
             {
             neededAction = EPropagateError;
 
@@ -3325,11 +3357,11 @@ void CMPMServerSession::ChooseIapComplete(
     MPMLOGSTRING2( "CMPMServerSession::ChooseIapComplete aError = %d", aError )
 
     // Show error popup if it's allowed per client request.
-	// No error popup shown to SNAP.
+	// Error popup shown to SNAP only if error discreet has not been shown for IAP.
     if ( ChooseBestIapCalled() && (!( iIapSelection->MpmConnPref().NoteBehaviour() &
             TExtendedConnPref::ENoteBehaviourConnDisableNotes ))
-            && ( aError != KErrNone ) 
-            && ( iIapSelection->MpmConnPref().SnapId() == 0 ) )
+              && ( aError != KErrNone )
+              && ( iErrorDiscreetPopupShown == EFalse ) )
         {
         CConnectionUiUtilities* connUiUtils = NULL;
         TRAPD( error, connUiUtils = CConnectionUiUtilities::NewL() );
@@ -3398,6 +3430,9 @@ Inconsistent state %d", KErrGeneral )
         MPMLOGSTRING( "CMPMServerSession::ChooseIapComplete Message completed" )
         iChooseIapMessage.Complete( aError );
         }
+    
+    // Enable showing error discreet popup for SNAP again
+    iErrorDiscreetPopupShown = EFalse;
     }
 
 

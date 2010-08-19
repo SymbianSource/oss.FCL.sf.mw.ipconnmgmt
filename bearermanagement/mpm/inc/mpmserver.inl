@@ -267,4 +267,13 @@ CMPMRoamingWatcher* CMPMServer::RoamingWatcher() const
     return iRoamingWatcher;
     }
 
+// -----------------------------------------------------------------------------
+// CMPMServer::DataUsageWatcher()
+// -----------------------------------------------------------------------------
+//
+CMpmDataUsageWatcher* CMPMServer::DataUsageWatcher() const
+    {
+    return iMpmDataUsageWatcher;
+    }
+
 // End of File

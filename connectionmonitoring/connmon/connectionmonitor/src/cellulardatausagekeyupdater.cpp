@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
+* Copyright (c) 2009-2010 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -71,7 +71,8 @@ CCellularDataUsageKeyUpdater::~CCellularDataUsageKeyUpdater()
     {
     // Cancel outstanding request, if exists
     Cancel();
-    delete iRepository;
+    delete iCommsRepository;
+    delete iCmmRepository;
     }
 
 // -----------------------------------------------------------------------------
@@ -81,50 +82,75 @@ CCellularDataUsageKeyUpdater::~CCellularDataUsageKeyUpdater()
 void CCellularDataUsageKeyUpdater::UpdateKeyL( const TInt aRegistration ) const
     {
     LOGENTRFN("CCellularDataUsageKeyUpdater::UpdateKeyL()")
-    LOGIT1("CCellularDataUsageKeyUpdater::UpdateKeyL: aRegistration <%d>", 
+    LOGIT1("CCellularDataUsageKeyUpdater::UpdateKeyL: aRegistration <%d>",
             aRegistration)
-                
-    TCmGenConnSettings occSettings = ReadGenConnSettingsL();
-  
+
     TInt value( ECmCellularDataUsageDisabled );
-        
-    if ( aRegistration == ENetworkRegistrationExtRoamingInternational )
-        {           
-        value = occSettings.iCellularDataUsageVisitor;
-        }
-    else if ( aRegistration == ENetworkRegistrationExtHomeNetwork || 
-              aRegistration == ENetworkRegistrationExtRoamingNational )
-        {           
-        value = occSettings.iCellularDataUsageHome;
+
+    // If dial-up PDP context override is active, disable cellular data usage (temporarily).
+    if ( iServer->GetDialUpOverrideStatus() != EConnMonDialUpOverrideActive )
+        {
+        TCmGenConnSettings occSettings = ReadGenConnSettingsL();
+
+        if ( aRegistration == ENetworkRegistrationExtRoamingInternational )
+            {
+            value = occSettings.iCellularDataUsageVisitor;
+            }
+        else if ( aRegistration == ENetworkRegistrationExtHomeNetwork ||
+                  aRegistration == ENetworkRegistrationExtRoamingNational )
+            {
+            value = occSettings.iCellularDataUsageHome;
+            }
         }
 
-    CRepository* cmRepository = NULL;
-    
-    TRAPD( err, cmRepository = CRepository::NewL( KCRUidCmManager ) )
-    
-    if ( err == KErrNone )
+    TInt previous( 0 );
+    TInt err = iCmmRepository->Get( KCurrentCellularDataUsage, previous );
+    if ( err == KErrNone && ( value != previous ) )
         {
-        TInt previous( 0 );
-        err = cmRepository->Get( KCurrentCellularDataUsage, previous );
-           
-        if ( err == KErrNone && ( value != previous ) )
-            {
-            cmRepository->Set( KCurrentCellularDataUsage, value );
-            LOGIT1("KCurrentCellularDataUsage set to %d", value)
-            }
-        else
-            {
-            LOGIT1("KCurrentCellularDataUsage already up-to-date %d", previous)
-            }
-        
-        delete cmRepository;    
+        iCmmRepository->Set( KCurrentCellularDataUsage, value );
+        LOGIT1("KCurrentCellularDataUsage set to %d", value)
         }
     else
         {
-        LOGIT1("CCRepository::NewL( KCRUidCmManager ) FAILED <%d>", err)
+        LOGIT2("KCurrentCellularDataUsage already up-to-date %d <%d>", previous, err)
         }
 
     LOGEXITFN("CCellularDataUsageKeyUpdater::UpdateKeyL()")
+    }
+
+// -----------------------------------------------------------------------------
+// Return ETrue if dial-up PDP context override feature is enabled.
+// -----------------------------------------------------------------------------
+//
+TBool CCellularDataUsageKeyUpdater::DialUpOverrideEnabled() const
+    {
+    LOGENTRFN("CCellularDataUsageKeyUpdater::DialUpOverrideEnabled()")
+    TBool result( EFalse );
+
+    if ( iCmmRepository )
+        {
+        TInt value( 0 );
+        TInt err = iCmmRepository->Get( KDialUpOverride, value );
+        if ( err == KErrNone )
+            {
+            if ( value )
+                {
+                result = ETrue;
+                LOGIT("ConstructL: Dial-up override enabled")
+                }
+            else
+                {
+                LOGIT("ConstructL: Dial-up override disabled")
+                }
+            }
+        else
+            {
+            LOGIT1("Failed to read KDialUpOverride-key from repository <%d>", err)
+            }
+        }
+
+    LOGEXITFN1("CCellularDataUsageKeyUpdater::DialUpOverrideEnabled()", result)
+    return result;
     }
 
 // -----------------------------------------------------------------------------
@@ -136,7 +162,8 @@ CCellularDataUsageKeyUpdater::CCellularDataUsageKeyUpdater( CConnMonServer* aSer
         CActive( EConnMonPriorityNormal ),
         iServer( aServer )
     {
-    iRepository = NULL;
+    iCommsRepository = NULL;
+    iCmmRepository = NULL;
     iErrorCounter = 0;
     }
 
@@ -146,13 +173,21 @@ CCellularDataUsageKeyUpdater::CCellularDataUsageKeyUpdater( CConnMonServer* aSer
 //
 void CCellularDataUsageKeyUpdater::ConstructL()
     {
-    iRepository = CRepository::NewL( KCDCommsRepositoryId );
-    
+    iCommsRepository = CRepository::NewL( KCDCommsRepositoryId );
+
+    // Open CmManager central repository.
+    TRAPD( err, iCmmRepository = CRepository::NewL( KCRUidCmManager ) )
+    if ( err )
+        {
+        LOGIT1("CRepository::NewL( KCRUidCmManager ) FAILED <%d>", err)
+        err = KErrNone;
+        }
+
     // Find out Default connection table id.
     // It contains iCellularDataUsageHome and iCellularDataUsageVisitor keys.
     CMDBSession* db = CMDBSession::NewLC( CMDBSession::LatestVersion() );	
-    TRAPD( err, iTableId = CCDDefConnRecord::TableIdL( *db ) )
-    	
+    TRAP( err, iTableId = CCDDefConnRecord::TableIdL( *db ) )
+
     if ( err )
         {
         LOGIT1("ERROR, CCDDefConnRecord::TableIdL() <%d>", err)
@@ -176,8 +211,8 @@ void CCellularDataUsageKeyUpdater::ConstructL()
 //
 TInt CCellularDataUsageKeyUpdater::RequestNotifications()
     {  	    	
-    LOGIT1("Calling iRepository->NotifyRequest() for table 0x%08X", iTableId)
-    TInt err = iRepository->NotifyRequest( iTableId, KCDMaskShowRecordType, iStatus );
+    LOGIT1("Calling iCommsRepository->NotifyRequest() for table 0x%08X", iTableId)
+    TInt err = iCommsRepository->NotifyRequest( iTableId, KCDMaskShowRecordType, iStatus );
 
     if ( err == KErrNone )
         {
@@ -185,7 +220,7 @@ TInt CCellularDataUsageKeyUpdater::RequestNotifications()
         }
     else
         {
-        LOGIT1("ERROR, iRepository->NotifyRequest() <%d>", err)
+        LOGIT1("ERROR, iCommsRepository->NotifyRequest() <%d>", err)
         }
 
     return err;
@@ -197,7 +232,7 @@ TInt CCellularDataUsageKeyUpdater::RequestNotifications()
 //
 void CCellularDataUsageKeyUpdater::DoCancel()
     {
-    iRepository->NotifyCancel( iTableId, KCDMaskShowRecordType );
+    iCommsRepository->NotifyCancel( iTableId, KCDMaskShowRecordType );
     }
 
 // -----------------------------------------------------------------------------

@@ -246,7 +246,16 @@ TUint32 CCmPluginVpn::GetIntAttributeL( const TUint32 aAttribute ) const
                 User::Leave( KErrNotSupported );
                 }
 
-            retVal = ServiceRecord().iServiceNetwork;
+            TUint32 snapId = iVirtualRecord->iNextLayerSNAP;
+            if ( snapId > KCmDefaultDestinationAPTagId &&
+                    snapId < ( KCmDefaultDestinationAPTagId+255 ) )
+                {
+                retVal = snapId - KCmDefaultDestinationAPTagId;
+                }
+            else
+                {
+                retVal = 0;
+                }
             }
             break;
         case ECmNextLayerIapId:    

@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2002 Nokia Corporation and/or its subsidiary(-ies). 
+* Copyright (c) 2002-2010 Nokia Corporation and/or its subsidiary(-ies). 
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -38,6 +38,7 @@
 
 #include <CConnDlgPlugin.rsg>
 #include <data_caging_path_literals.hrh>
+#include <vpnapi.h>
 
 using namespace CommsDat;
 
@@ -847,7 +848,24 @@ void CConnDlgSelectConnectionPlugin::StartL( const TDesC8& aBuffer,
     	err = GetActiveConnection( iap, snap, bearer );
         }
                                       
-    if ( ( err == KErrNone ) && 
+    RVpnServ vpn;
+    TInt vpnErr( KErrNone );
+    TInt policyCount( 0 );
+    TBool forceDialogForIntranetUsers( EFalse );
+    
+    vpnErr = vpn.Connect();
+    if ( !vpnErr ) 
+    	  {
+    	  vpnErr = vpn.EnumeratePolicies(policyCount);
+    	  if ( !vpnErr && policyCount > 0 )
+    	  	  {
+    	  	  forceDialogForIntranetUsers = ETrue;
+    	  	  }
+        vpn.Close();
+        }
+        
+    if ( !forceDialogForIntranetUsers &&
+    	 ( err == KErrNone ) && 
          ( iap != 0 || snap != 0 ) && 
          ( iPrefs().iBearerSet & bearer ) &&
          ( iPrefs().iDirection == 0 ) )     // JavaVM sets iDirection to "1"

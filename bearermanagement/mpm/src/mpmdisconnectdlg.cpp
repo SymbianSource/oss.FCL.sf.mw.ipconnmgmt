@@ -118,9 +118,18 @@ void CMPMDisconnectDlg::UserSelectedOk( TInt aError )
     MPMLOGSTRING( "CMPMDisconnectDlg::UserSelectedOk: \
 Tell BM to ignore error and do reselection" )
 
-    TBMNeededAction neededAction( EDoReselection );
     TInt error = aError;
 
+    // Get the current connection IapId for this connId 
+    TUint32 iapId = iSession.MyServer().GetBMIap( iSession.ConnectionId() );
+    
+    TBMNeededAction neededActionForPendingMsgs( EIgnoreError );
+    iSession.MyServer().HandlePendingMsgs( iapId, 
+                                           KErrNone,
+                                           &error,
+                                           &neededActionForPendingMsgs );
+										   
+    TBMNeededAction neededAction( EDoReselection );
     iSession.ProcessErrorComplete( KErrNone,
                                    &error,
                                    &neededAction );
@@ -157,6 +166,10 @@ Use original error code %i", iOrigError )
     TConnectionState state;
     iSession.MyServer().GetConnectionState( connId, state );
 
+    // Get the current connection IapId for this connId 
+    //
+    TUint32 currentIap = iSession.MyServer().GetBMIap( connId );
+
     if ( state == EStarting )
         {
         MPMLOGSTRING2( "CMPMDisconnectDlg::UserSelectedCancelL: \
@@ -172,10 +185,6 @@ Tell BM to end the client connection with error code %i", error )
         //
         iSession.StoredIapInfo().ResetStoredIapInfo();
         neededAction = EIgnoreError;
-
-        // Get the current connection IapId for this connId 
-        //
-        TUint32 currentIap = iSession.MyServer().GetBMIap( connId );
 
         TConnMonIapInfo availableIAPs;
         availableIAPs = iSession.GetAvailableIAPs();
@@ -208,6 +217,11 @@ Tell BM to ignore error and let MPM notify application about preferred IAP" )
 Unsupported state %d", state )
         }
 
+    iSession.MyServer().HandlePendingMsgs( currentIap,
+                                           KErrNone,
+                                           errorPtr,
+                                           &neededAction );
+
     iSession.ProcessErrorComplete( KErrNone,
                                    errorPtr,
                                    &neededAction );
@@ -229,8 +243,13 @@ TInt CMPMDisconnectDlg::RunError(TInt aError)
         "CMPMDisconnectDlg::RunError: RunL made a leave with error = %i", 
         aError )
 
-    iSession.ProcessErrorComplete( aError, NULL, NULL );
+    // Get the current connection IapId for this connId 
+    TUint32 iapId = iSession.MyServer().GetBMIap( iSession.ConnectionId() );
 
+    iSession.MyServer().HandlePendingMsgs( iapId, aError, NULL, NULL );
+
+    iSession.ProcessErrorComplete( aError, NULL, NULL );
+	
     // Return KErrNone to prevent panic 
     // 
     return KErrNone;
