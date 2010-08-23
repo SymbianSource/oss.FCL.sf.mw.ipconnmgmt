@@ -524,7 +524,9 @@ TInt CConnMonCommsDatCache::GetAvailableIaps(
     TInt err( KErrNone );
 
     TBool availabilityEventsEnabled( EFalse );
-    if ( ( aBearerId == EBearerIdAll ) || ( aBearerId == EBearerIdVirtualVPN ) )
+    if ( ( aBearerId == EBearerIdAll ) || 
+         ( aBearerId == EBearerIdVirtualVPN ) ||
+         ( aBearerId == EBearerIdWLAN ) )
         {
         // If WLAN background scanning is on, and client is asking IAP
         // availability for all- or virtual IAPs, send IAP availability changed

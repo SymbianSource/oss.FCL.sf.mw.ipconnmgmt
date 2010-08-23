@@ -12,8 +12,8 @@
 * Contributors:
 *
 * Description:  
-*   CpDestinationGroup contains all destination UI items as well as 
-*   items for uncategorized access points and adding new destinations.
+* CpDestinationGroup contains all destination UI items as well as 
+* items for uncategorized access points and adding new destinations.
 */
  
 #ifndef CPDESTINATIONGROUP_H
@@ -44,7 +44,9 @@ public:
     CpDestinationGroup(CpItemDataHelper &itemDataHelper);
     ~CpDestinationGroup();
     
-    void addDestination(const QString &dest, int destId);
+    void addDestination(
+        const QString &name,
+        QSharedPointer<CmDestinationShim> dest);
     void deleteDestination(int destId);
     CpBearerApPluginInterface *findBearerPlugin(int apId);
     

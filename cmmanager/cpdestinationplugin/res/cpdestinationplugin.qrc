@@ -1,5 +1,6 @@
-<RCC>
+<!DOCTYPE RCC>
+<RCC version="1.0">
     <qresource prefix="/docml" >
-        <file>cpdestinationplugindialogs.docml</file>
+        <file alias="cpdestinationplugindialogs.docml">cpdestinationplugindialogs.docml.bin</file>
     </qresource>
 </RCC>

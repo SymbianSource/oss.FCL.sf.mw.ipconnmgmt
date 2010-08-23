@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2001-2010 Nokia Corporation and/or its subsidiary(-ies).
+* Copyright (c) 2010 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -11,19 +11,16 @@
 *
 * Contributors:
 *
-* Description:
-* Build information file for all projects in connectionmonitoring subsystem.
+* Description: Build info for ipconnmgmt package. 
+*
 */
 
 PRJ_PLATFORMS
 DEFAULT
 
 PRJ_EXPORTS
+// Export CommsDat to emulator
+cccccc00_emulator.cre   /epoc32/winscw/c/private/10202be9/persists/cccccc00.cre
 
-PRJ_MMPFILES
-#include "../connmon/connectionmonitor/group/bld.inf"
-#include "../connmon/dataconnectionlogger/group/bld.inf"
-#include "../connmonext/group/bld.inf"
-
-PRJ_TESTMMPFILES
-
+// Export default configuration options
+../inc/meshpreface1.cfg         /epoc32/release/winscw/udeb/z/system/data/meshpreface1.cfg

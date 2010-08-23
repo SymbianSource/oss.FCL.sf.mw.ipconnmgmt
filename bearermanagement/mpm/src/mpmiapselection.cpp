@@ -353,12 +353,12 @@ void CMPMIapSelection::ExplicitConnectionL()
             if ( iSession->IsConfirmFirstL( validateIapId ) &&
                  !( iSession->MyServer().CommsDatAccess()->IsVirtualIapL( validateIapId ) ))
                 {
-            
-                // Check whether queries are enabled
+                // Check that queries aren't disabled and
+                // enough time has elapsed from the last query cancelled by the user.
                 if ( !( iChooseIapPref.NoteBehaviour()
-                        & TExtendedConnPref::ENoteBehaviourConnDisableQueries ) )
+                        & TExtendedConnPref::ENoteBehaviourConnDisableQueries ) &&
+                     !iSession->MyServer().IsConnPermQueryTimerOn() )
                     {
-                
                     TConnectionId connId = iSession->ConnectionId();
 
                     // Set confirmation type based on roaming status
@@ -512,8 +512,10 @@ void CMPMIapSelection::CompleteExplicitSnapConnectionL()
              ( iSession->MyServer().CommsDatAccess()->CheckWlanL( validateIapId ) == ENotWlanIap ) &&
              !( iSession->MyServer().CommsDatAccess()->IsVirtualIapL( validateIapId ) ) )
             {
-            // Check whether queries are disabled
-            if ( !( iChooseIapPref.NoteBehaviour() & TExtendedConnPref::ENoteBehaviourConnDisableQueries ) )
+            // Check that queries aren't disabled and
+            // enough time has elapsed from the last query cancelled by the user.
+            if ( !( iChooseIapPref.NoteBehaviour() & TExtendedConnPref::ENoteBehaviourConnDisableQueries ) &&
+                 !iSession->MyServer().IsConnPermQueryTimerOn() )
                 {
                 if ( iSession->MyServer().RoamingWatcher()->RoamingStatus() == EMPMInternationalRoaming )
                     {
@@ -791,8 +793,10 @@ void CMPMIapSelection::ImplicitConnectionWlanNoteL()
             // to the user in this country
             if ( iSession->MyServer().RoamingWatcher()->RoamingStatus() == EMPMInternationalRoaming )
                 {
-                // Check whether queries are enabled
-                if ( !( iChooseIapPref.NoteBehaviour() & TExtendedConnPref::ENoteBehaviourConnDisableQueries ) )
+                // Check that queries aren't disabled and
+                // enough time has elapsed from the last query cancelled by the user.
+                if ( !( iChooseIapPref.NoteBehaviour() & TExtendedConnPref::ENoteBehaviourConnDisableQueries ) &&
+                     !iSession->MyServer().IsConnPermQueryTimerOn() )
                     {
                     TConnectionId connId = iSession->ConnectionId();
                                                                     

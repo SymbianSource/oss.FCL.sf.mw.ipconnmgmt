@@ -12,18 +12,21 @@
 * Contributors:
 *
 * Description:  
-*   CpDestinationGroup contains all destination UI items as well as 
-*   items for uncategorized access points and adding new destinations.
+* CpDestinationGroup contains all destination UI items as well as 
+* items for uncategorized access points and adding new destinations.
 */
 
 // System includes
+
 #include <QDir>
 #include <QPluginLoader>
 #include <QStringList>
+
 #include <HbDataForm>
 #include <HbDataFormModel>
 #include <HbDataFormViewItem>
 #include <HbParameterLengthLimiter>
+
 #include <cpbasesettingview.h>
 #include <cpitemdatahelper.h>
 #include <cpsettingformentryitemdataimpl.h>
@@ -34,9 +37,11 @@
 #include <cmmanagerdefines_shim.h>
 
 // User includes
+
 #include "cpdestinationgroup.h"
 #include "cpdestinationentryitem.h"
 #include "cpadddestinationentryitemdata.h"
+
 #include "OstTraceDefinitions.h"
 #ifdef OST_TRACE_COMPILER_IN_USE
 #include "cpdestinationgroupTraces.h"
@@ -63,14 +68,16 @@
     @param[in] itemDataHelper Helper for connecting signals and slots.
  */
 CpDestinationGroup::CpDestinationGroup(CpItemDataHelper &itemDataHelper) :
-    CpSettingFormItemData(HbDataFormModelItem::GroupItem, 
+    CpSettingFormItemData(
+        HbDataFormModelItem::GroupItem, 
         hbTrId("txt_occ_subhead_destinations_access_points")),
-   mItemDataHelper(&itemDataHelper),
-   mUncategorisedShown(false)
+    mItemDataHelper(&itemDataHelper),
+    mUncategorisedShown(false),
+    mCmManager(new CmManagerShim()),
+    mBearerPlugins(new QList<CpBearerApPluginInterface *>())
 {
     OstTraceFunctionEntry0(CPDESTINATIONGROUP_CPDESTINATIONGROUP_ENTRY);
-    mCmManager = new CmManagerShim();
-    mBearerPlugins = new QList<CpBearerApPluginInterface *>();
+    
     this->loadBearerPlugins();
     
     QList<QSharedPointer<CmDestinationShim> > destinationList;
@@ -90,10 +97,11 @@ CpDestinationGroup::CpDestinationGroup(CpItemDataHelper &itemDataHelper) :
         destDataItem->setDestinationName(destinationList.at(i)->name());
         HbIcon destIcon(resolveDestinationIcon(destinationList.at(i)));
         destDataItem->setEntryItemIcon(destIcon);
-        bool connected = connect(destDataItem, 
-                                 SIGNAL(destChanged()), 
-                                 this, 
-                                 SLOT(updateDestinationInformation()));
+        bool connected = connect(
+            destDataItem, 
+            SIGNAL(destChanged()), 
+            this, 
+            SLOT(updateDestinationInformation()));
         Q_ASSERT(connected);
         this->appendChild(destDataItem);
     }
@@ -102,9 +110,14 @@ CpDestinationGroup::CpDestinationGroup(CpItemDataHelper &itemDataHelper) :
     createUncategorisedDestination();
     
     // "Add Destination" button
-    CpSettingFormEntryItemData *addDest = new CpAddDestinationEntryItemData(itemDataHelper, this);
-    addDest->setContentWidgetData(QString("text"), hbTrId("txt_occ_button_add_destination"));
+    CpSettingFormEntryItemData *addDest = new CpAddDestinationEntryItemData(
+        itemDataHelper,
+        this);
+    addDest->setContentWidgetData(
+        QString("text"),
+        hbTrId("txt_occ_button_add_destination"));
     this->appendChild(addDest);
+
     OstTraceFunctionExit0(CPDESTINATIONGROUP_CPDESTINATIONGROUP_EXIT);
 }
 
@@ -114,8 +127,10 @@ CpDestinationGroup::CpDestinationGroup(CpItemDataHelper &itemDataHelper) :
 CpDestinationGroup::~CpDestinationGroup()
 {
     OstTraceFunctionEntry0(DUP1_CPDESTINATIONGROUP_CPDESTINATIONGROUP_ENTRY);
+    
     delete mBearerPlugins;
     delete mCmManager;
+    
     OstTraceFunctionExit0(DUP1_CPDESTINATIONGROUP_CPDESTINATIONGROUP_EXIT);
 }
 
@@ -123,25 +138,34 @@ CpDestinationGroup::~CpDestinationGroup()
     addDestination() creates new destination item to Destinations group item.
     The new destination is shown in the UI immediately.
  */
-void CpDestinationGroup::addDestination(const QString &dest, int destId)
+void CpDestinationGroup::addDestination(
+    const QString &name,
+    QSharedPointer<CmDestinationShim> dest)
 {
     OstTraceFunctionEntry0(CPDESTINATIONGROUP_ADDDESTINATION_ENTRY);
     
     // Create UI item for new destination
     CpDestinationEntryItemData *destDataItem;
     destDataItem = new CpDestinationEntryItemData(*mItemDataHelper);
-    destDataItem->setContentWidgetData(QString("text"), dest);
+    destDataItem->setContentWidgetData(QString("text"), name);
     destDataItem->setContentWidgetData(
         QString("additionalText"), 
         hbTrId("txt_occ_dblist_internet_val_no_access_points"));
-    destDataItem->setDestinationId(destId);
-    destDataItem->setDestinationName(dest);
-    connect(destDataItem, SIGNAL(destChanged()), this, SLOT(updateDestinationInformation()));
+    destDataItem->setDestinationId(dest->id());
+    destDataItem->setDestinationName(name);
+    HbIcon destIcon(resolveDestinationIcon(dest));
+    destDataItem->setEntryItemIcon(destIcon);
+    connect(
+        destDataItem,
+        SIGNAL(destChanged()),
+        this,
+        SLOT(updateDestinationInformation()));
     
     // Insert Child to correct position
     QList<QSharedPointer<CmDestinationShim> > destinationList;
     fetchDestinations(destinationList);
     insertChild(destinationList.count() - 1, destDataItem);
+    
     OstTraceFunctionExit0(CPDESTINATIONGROUP_ADDDESTINATION_EXIT);
 }
 
@@ -151,6 +175,7 @@ void CpDestinationGroup::addDestination(const QString &dest, int destId)
 void CpDestinationGroup::deleteDestination(int destId)
 {
     OstTraceFunctionEntry0(CPDESTINATIONGROUP_DELETEDESTINATION_ENTRY);
+    
     // "Add Destination" child is removed from count (childCount() -1)
     for (int i = 0; i < this->childCount() - 1; i++) { 
         CpDestinationEntryItemData  *destDataItem = 
@@ -166,6 +191,7 @@ void CpDestinationGroup::deleteDestination(int destId)
             }
         }
     }
+    
     OstTraceFunctionExit0(CPDESTINATIONGROUP_DELETEDESTINATION_EXIT);
 }
 
@@ -179,6 +205,7 @@ void CpDestinationGroup::deleteDestination(int destId)
 CpBearerApPluginInterface *CpDestinationGroup::findBearerPlugin(int apId)
 {
     OstTraceFunctionEntry0(CPDESTINATIONGROUP_FINDBEARERPLUGIN_ENTRY);
+    
     CpBearerApPluginInterface *retVal = NULL;
     try {
         CmConnectionMethodShim *cm = mCmManager->connectionMethod(apId);
@@ -193,9 +220,13 @@ CpBearerApPluginInterface *CpDestinationGroup::findBearerPlugin(int apId)
         delete cm;
     }
     catch (const std::exception&) {
-        OstTrace0(TRACE_NORMAL, CPDESTINATIONGROUP_FINDBEARERPLUGIN, "CpDestinationGroup::findBearerPlugin: Exception caught");
+        OstTrace0(
+            TRACE_NORMAL,
+            CPDESTINATIONGROUP_FINDBEARERPLUGIN,
+            "CpDestinationGroup::findBearerPlugin: Exception caught");
         // Let return value be NULL.
     }
+    
     OstTraceFunctionExit0(CPDESTINATIONGROUP_FINDBEARERPLUGIN_EXIT);
     return retVal;
 }
@@ -207,10 +238,11 @@ CpBearerApPluginInterface *CpDestinationGroup::findBearerPlugin(int apId)
 void CpDestinationGroup::updateDestinationInformation()
 {
 	OstTraceFunctionEntry0(CPDESTINATIONGROUP_UPDATEDESTINATIONINFORMATION_ENTRY);
+	
 	// "Add Destination" child is removed from count (childCount() -1)
     for (int i = 0; i < childCount() - 1; i++) {
         CpDestinationEntryItemData  *destDataItem = 
-                static_cast<CpDestinationEntryItemData*>(this->childAt(i));
+            static_cast<CpDestinationEntryItemData*>(this->childAt(i));
         
         if (destDataItem->destinationId() == 0) {
             // Uncategrised Iaps
@@ -228,6 +260,7 @@ void CpDestinationGroup::updateDestinationInformation()
         destDataItem->setContentWidgetData(QString("additionalText"), iapCount);
         destDataItem->setContentWidgetData(QString("text"), destDataItem->destinationName());
     }
+    
     OstTraceFunctionExit0(CPDESTINATIONGROUP_UPDATEDESTINATIONINFORMATION_EXIT);
 }
 
@@ -238,6 +271,7 @@ void CpDestinationGroup::updateDestinationInformation()
 void CpDestinationGroup::createUncategorisedDestination()
 {
     OstTraceFunctionEntry0(CPDESTINATIONGROUP_CREATEUNCATEGORISEDDESTINATION_ENTRY);
+    
     QList<uint> apList;
     mCmManager->connectionMethod(apList);
     if (apList.count() > 0) {
@@ -263,6 +297,7 @@ void CpDestinationGroup::createUncategorisedDestination()
         insertChild(destinationList.count(), destDataItem);
         mUncategorisedShown = true;
     }
+    
     OstTraceFunctionExit0(CPDESTINATIONGROUP_CREATEUNCATEGORISEDDESTINATION_EXIT);
 }
 
@@ -274,6 +309,7 @@ void CpDestinationGroup::fetchDestinations(
     QList<QSharedPointer<CmDestinationShim> > &destinationList)
 {
     OstTraceFunctionEntry0(CPDESTINATIONGROUP_FETCHDESTINATIONS_ENTRY);
+    
     try {
         QList<uint> destArray;
         mCmManager->allDestinations(destArray);
@@ -288,8 +324,12 @@ void CpDestinationGroup::fetchDestinations(
             }
         }
     } catch (const std::exception&) {
-        OstTrace0(TRACE_NORMAL, CPDESTINATIONGROUP_FETCHDESTINATIONS, "CpDestinationGroup::fetchDestinations: exception caught, Reading destinations");
+        OstTrace0(
+            TRACE_NORMAL,
+            CPDESTINATIONGROUP_FETCHDESTINATIONS,
+            "CpDestinationGroup::fetchDestinations: exception caught, Reading destinations");
     }
+    
     OstTraceFunctionExit0(CPDESTINATIONGROUP_FETCHDESTINATIONS_EXIT);
 }
 
@@ -301,17 +341,19 @@ void CpDestinationGroup::fetchDestinations(
 void CpDestinationGroup::loadBearerPlugins()
 {
     OstTraceFunctionEntry0(CPDESTINATIONGROUP_LOADBEARERPLUGINS_ENTRY);
+    
     // Load bearer plugins
     QDir pluginsDir("\\resource\\qt\\plugins\\controlpanel\\bearerap");
     foreach (QString fileName, pluginsDir.entryList(QDir::Files)) {
         
         QPluginLoader loader(pluginsDir.absoluteFilePath(fileName));
         CpBearerApPluginInterface *plugin = 
-                qobject_cast<CpBearerApPluginInterface *>(loader.instance());
+            qobject_cast<CpBearerApPluginInterface *>(loader.instance());
         if (plugin) {
             mBearerPlugins->append(plugin);
         }
-    } 
+    }
+    
     OstTraceFunctionExit0(CPDESTINATIONGROUP_LOADBEARERPLUGINS_EXIT);
 }
 
@@ -323,6 +365,7 @@ void CpDestinationGroup::loadBearerPlugins()
 QString CpDestinationGroup::getDestinationAdditionalText(QSharedPointer<CmDestinationShim> destination)
 {
     OstTraceFunctionEntry0(CPDESTINATIONGROUP_GETDESTINATIONADDITIONALTEXT_ENTRY);
+    
     QString result = "";
     int iapCount = destination->connectionMethodCount();
     int counter = 0;
@@ -340,6 +383,7 @@ QString CpDestinationGroup::getDestinationAdditionalText(QSharedPointer<CmDestin
     } else {
         result = hbTrId("txt_occ_dblist_internet_val_no_access_points");
     }
+    
     OstTrace0(TRACE_FLOW, CPDESTINATIONGROUP_GETDESTINATIONADDITIONALTEXT_EXIT, "Exit");
     return result;
 }
@@ -352,6 +396,7 @@ QString CpDestinationGroup::getDestinationAdditionalText(QSharedPointer<CmDestin
 QString CpDestinationGroup::getDestinationAdditionalText(int destinationId)
 {
     OstTraceFunctionEntry0(CPDESTINATIONGROUP_GETDESTINATIONADDITIONALTEXT2_ENTRY);
+    
     QString result = "";
     int iapCount = 0;
     int counter = 0;
@@ -386,6 +431,7 @@ QString CpDestinationGroup::getDestinationAdditionalText(int destinationId)
     } else {
         result = hbTrId("txt_occ_dblist_internet_val_no_access_points");
     }
+    
     OstTrace0(TRACE_FLOW, CPDESTINATIONGROUP_GETDESTINATIONADDITIONALTEXT2_EXIT, "Exit");
     return result;
 }
@@ -406,20 +452,25 @@ QString CpDestinationGroup::resolveDestinationIcon(
             case CMManagerShim::SnapPurposeInternet:
                 result = "qtg_small_internet";
                 break;
+                
             case CMManagerShim::SnapPurposeIntranet:
                 result = "qtg_small_intranet";
                 break;
+                
             case CMManagerShim::SnapPurposeMMS:
                 result = "qtg_small_mms";
                 break;
+                
             case CMManagerShim::SnapPurposeOperator:
                 result = "qtg_small_operator";
                 break;
+                
             default:
                 // CMManagerShim::SnapPurposeUnknown
                 result = "qtg_small_favorite";
                 break;
         }
     }
+    
     return result;
 }

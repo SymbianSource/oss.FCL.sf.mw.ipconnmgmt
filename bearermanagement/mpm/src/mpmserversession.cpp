@@ -913,7 +913,10 @@ void CMPMServerSession::HandleServerApplicationMigratesToCarrierL(
         //Display confirm dialog only if we are moving to cellular IAP
         if ( MyServer().CommsDatAccess()->CheckWlanL( iMigrateIap ) == ENotWlanIap )
             {
-            if ( !( iIapSelection->MpmConnPref().NoteBehaviour() & TExtendedConnPref::ENoteBehaviourConnDisableQueries ) )
+            // Check that connection preferences don't deny queries, and
+            // enough time has elapsed from the last query cancelled by the user.
+            if ( !( iIapSelection->MpmConnPref().NoteBehaviour() & TExtendedConnPref::ENoteBehaviourConnDisableQueries ) &&
+                 !MyServer().IsConnPermQueryTimerOn() )
                 {
                 if ( MyServer().RoamingWatcher()->RoamingStatus() == EMPMInternationalRoaming )
                     {
@@ -1015,6 +1018,10 @@ aError %d, aResponse %d, aReconnect %d",
         {
         if( aResponse == EMsgQueryCancelled )
             {
+            // User cancelled the connection permission query,
+            // don't try again until the timer expires.
+            MyServer().StartConnPermQueryTimer();
+            
             if( !aReconnect )
                 {
                 // Send a preferred IAP notification

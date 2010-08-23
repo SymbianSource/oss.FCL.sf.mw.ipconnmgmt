@@ -23,8 +23,9 @@ INCLUDEPATH += \
     inc \
     ../../inc \
     ../../../../inc
-load(hb.prf)
+CONFIG += hb
 RESOURCES = res/tst_applsettingsui.qrc
+DOCML += res/tst_applsettingsui.docml
 MOC_DIR = moc
 
 # Input
@@ -35,10 +36,8 @@ SOURCES += \
     src/tst_applsettingsui.cpp
 
 symbian*: {
-    CONFIG -= symbian_i18n
     LIBS += -lcmapplsettingsui
     TARGET.UID3 = 0x2002E69A
-    SYMBIAN_PLATFORMS = WINSCW ARMV5
 }
 
 symbian: {

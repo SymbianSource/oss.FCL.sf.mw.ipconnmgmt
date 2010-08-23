@@ -1,5 +1,5 @@
 <RCC>
     <qresource prefix="/docml" >
-        <file>tst_applsettingsui.docml</file>
+        <file alias="tst_applsettingsui.docml">tst_applsettingsui.docml.bin</file>
     </qresource>
 </RCC>

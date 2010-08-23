@@ -29,6 +29,7 @@
 #include <HbListWidgetItem>
 #include <HbMainWindow>
 #include <HbInstance>
+#include <HbParameterLengthLimiter>
 #include <cppluginutility.h>
 #include <cpitemdatahelper.h>
 #include <cpbasesettingview.h>
@@ -344,7 +345,8 @@ void CpDestinationEntryItemData::confirmDestinationDelete()
     OstTraceFunctionEntry0(CPDESTINATIONENTRYITEMDATA_CONFIRMDESTINATIONDELETE_ENTRY);
     HbMessageBox *note = new HbMessageBox(HbMessageBox::MessageTypeQuestion);
     note->setAttribute(Qt::WA_DeleteOnClose);
-    note->setText(hbTrId("txt_occ_info_delete_snap").arg(mDestinationName));
+    note->setText(HbParameterLengthLimiter(
+        "txt_occ_info_delete_snap").arg(mDestinationName));
     note->clearActions();
     HbAction *okAction = new HbAction(
         hbTrId("txt_common_button_yes"),

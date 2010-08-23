@@ -28,6 +28,7 @@
 #include <HbDataFormViewItem>
 #include <HbDataForm>
 #include <HbDataFormModel>
+#include <HbParameterLengthLimiter>
 #include <cpbasesettingview.h>
 #include <cpsettingformitemdata.h>
 #include <cpsettingformentryitemdata.h>
@@ -172,7 +173,8 @@ void CpIapItem::showDeleteConfirmation()
     HbMessageBox *note = new HbMessageBox(HbMessageBox::MessageTypeQuestion);
     note->clearActions();
     note->setAttribute(Qt::WA_DeleteOnClose);
-    note->setText(hbTrId("txt_occ_info_delete_access_point_1").arg(mIapName));
+    note->setText(HbParameterLengthLimiter(
+        "txt_occ_info_delete_access_point_1").arg(mIapName));
     HbAction *primaryAction = new HbAction(hbTrId("txt_common_button_yes"));
     bool connected = connect(
         primaryAction, 

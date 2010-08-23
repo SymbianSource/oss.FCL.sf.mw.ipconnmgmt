@@ -31,6 +31,8 @@ symbian: {
 CONFIG += hb
 RESOURCES = res/cmapplsettingsui.qrc
 
+DOCML += res/cmradiodialog.docml
+
 TRANSLATIONS = cmapplsettingsui.ts
 
 #Store generated files to their own directory

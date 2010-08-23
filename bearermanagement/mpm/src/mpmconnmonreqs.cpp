@@ -349,6 +349,12 @@ ConnMon request completed with error code = %i", iStatus.Int() )
                         //
                         iParent.IapAvailabilityChange( EConnMon );
                         }
+
+                    if ( iParent.AvailabilityNotificationDiscarded() )
+                        {
+                        MPMLOGSTRING( "CMPMConnMonReqs::RunL: AvailabilityNotificationDiscarded, roaming logic triggered" )
+                        iParent.IapAvailabilityChange( EConnMonEvent );
+                        }
                     }
                 // check which callback function to use
                 // 

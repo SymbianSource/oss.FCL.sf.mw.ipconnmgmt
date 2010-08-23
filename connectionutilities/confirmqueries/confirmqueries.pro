@@ -46,3 +46,7 @@ symbian: {
 TRANSLATIONS = cellularpromptdialog.ts
 
 RESOURCES += res/promptdialog.qrc
+
+DOCML += \
+    res/prompt_home.docml \
+    res/prompt_abroad.docml
