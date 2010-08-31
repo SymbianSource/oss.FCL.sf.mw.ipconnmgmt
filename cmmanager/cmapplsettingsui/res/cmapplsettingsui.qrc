@@ -1,0 +1,5 @@
+<RCC>
+    <qresource prefix="/docml" >
+        <file alias="cmradiodialog.docml">cmradiodialog.docml.bin</file>
+    </qresource>
+</RCC>

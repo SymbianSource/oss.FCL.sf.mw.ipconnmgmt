@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2002-2010 Nokia Corporation and/or its subsidiary(-ies). 
+* Copyright (c) 2002 Nokia Corporation and/or its subsidiary(-ies). 
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -41,24 +41,11 @@ SYSTEMINCLUDE		../../../inc
 //Macro to /epoc32 headers
 MW_LAYER_SYSTEMINCLUDE
 
-
-START RESOURCE ../cconndlg/data/CConnDlgPlugin.rss
-HEADER
-TARGETPATH RESOURCE_FILES_DIR
-LANGUAGE_IDS
-END  // RESOURCE
+SYSTEMINCLUDE   /epoc32/include/uikon
 
 
 SOURCEPATH  ../cconndlg/src
-SOURCE  ConnDlgPlugin.cpp IAPDialog.cpp  AuthenticationDialog.cpp
-SOURCE  ReconnectDialog.cpp NewIapDialog.cpp QosDialog.cpp
-SOURCE  ActiveIapPlugin.cpp
-SOURCE  ActiveBase.cpp
-SOURCE  SelectConnectionDialog.cpp
-SOURCE  ActiveSelectConnectionPlugin.cpp
-SOURCE  SelectExplicitDialog.cpp
-SOURCE  ActiveSelectExplicit.cpp
-SOURCE  sortsnaputils.cpp
+SOURCE  ConnDlgPlugin.cpp
 
 SOURCEPATH  ../src
 SOURCE  ConnectionInfo.cpp ConnectionInfoKey.cpp ConnectionInfoArray.cpp ExpiryTimer.cpp
@@ -81,16 +68,16 @@ LIBRARY COMMSDAT.lib
 LIBRARY cmmanagerdatabase.lib
 LIBRARY	egul.lib
 
-LIBRARY vpnapi.lib
 
 DEBUGLIBRARY flogger.lib
 DEBUGLIBRARY efsrv.lib
 
 
 #ifdef WINSCW
-    DEFFILE ../cconndlg/BWinsCw/CConnDlgPlugin.DEF
+DEFFILE ../cconndlg/BWinsCw/CConnDlgPlugin.DEF
 #else
-    DEFFILE ../cconndlg/EABI/CCONNDLGPLUGIN.DEF
+DEFFILE ../cconndlg/EABI/CCONNDLGPLUGIN.DEF
 #endif
 
 // End of File
+

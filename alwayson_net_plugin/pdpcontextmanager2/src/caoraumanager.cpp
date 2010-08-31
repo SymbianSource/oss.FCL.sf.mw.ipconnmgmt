@@ -80,7 +80,8 @@ CAORAUManager::~CAORAUManager()
 // CAORAUManager::CAORAUManager
 // ---------------------------------------------------------------------------
 //
-CAORAUManager::CAORAUManager()
+CAORAUManager::CAORAUManager():
+    iRAUManagerImpl( NULL )
     {
     LOG_1( _L("CAORAUManager::CAORAUManager") );
     }

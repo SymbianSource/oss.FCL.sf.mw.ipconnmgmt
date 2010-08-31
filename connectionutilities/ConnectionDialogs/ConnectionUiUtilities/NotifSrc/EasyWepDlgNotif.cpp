@@ -21,7 +21,7 @@
 #include "WepWpaQueryDlg.h"
 #include "ConnUiUtilsNotif.h"
 
-#include <ConnUiUtilsNotif.rsg>
+#include <connuiutilsnotif.rsg>
 #include <StringLoader.h>
 #include <featmgr.h>
 
@@ -49,13 +49,6 @@ void CEasyWepDlgNotif::StartL( const TDesC8& /*aBuffer*/,
                                     TInt aReplySlot,
                                     const RMessagePtr2& aMessage )
     {
-    if ( ScreenSaverOn() || AutolockOn() )
-        {
-        // Screen saver or Autolock is active. Cancel the dialog.
-        aMessage.Complete( KErrCancel );
-        return;
-        }
-    
     iReplySlot = aReplySlot;
     iMessage = aMessage;
     iCancelled = EFalse;

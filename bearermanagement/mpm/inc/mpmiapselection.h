@@ -23,8 +23,6 @@
 #include "mpmserversession.h"
 #include "mpmcommsdataccess.h"
 
-class CMPMDialog;
-class CMPMWlanQueryDialog;
 class CMPMConfirmDlgStarting;
 class TMpmConnPref;
 
@@ -66,7 +64,8 @@ public: // CMPMServerSession interface
      * Two-phased constructor.
      */
     static CMPMIapSelection* NewL( CMPMCommsDatAccess*  aCommsDatAccess,
-                                   CMPMServerSession*   aSession );
+                                   CMPMServerSession*   aSession,
+                                   CConnectionUiUtilities* aConnUiUtils );
     
     /**
      * Destructor.
@@ -89,26 +88,15 @@ public: // CMPMServerSession interface
      */
     void ExplicitConnectionL();
 
-    /**
-     * Updates connection dialog contents if 
-     * the dilog is shown
-     *
-     * @since S60 v3.2
-     */
-    void UpdateConnectionDialogL();
-
 public:
     /**
-     * Starts Wlan query if Iap is wlan iap.
+     * Returns true if given iap is a wlan iap.
      *
      * @param aIapId Id of Iap
-     * @param aIsRoaming True if wlan query is for roaming
-     * @return ETrue if wlan query was started
-     * @since S60 v3.2
+     * @return ETrue if iap aIap is wlan
+     * @since symbian^4
      */
-    TBool StartWlanQueryIfNeededL(
-        TUint32 aIapId,
-        TBool aIsRoaming = EFalse );
+    TBool IsIapWlanL( TUint32 aIapId );
 
     /**
      * Part of selecting best IAP at connection start. Called when WLAN scan
@@ -129,18 +117,6 @@ public:
      * preference should be passed
      */
     void ChooseIapComplete( TInt aError, const TMpmConnPref* aPolicyPref );
-
-    /**
-     * Callback function used after Wlan network has been selected. 
-     * Uses HandleUserIapSelectionL to complete IAP selection.
-     *
-     * @since 3.2
-     * @param aError Error code from selection
-     * @param aIapId Element id of IAP record if different than reported before. 
-     * May be 0, when error occurred in selection or when no new Iap id is set.
-     *
-     */
-    void UserWlanSelectionDoneL( TInt aError, TUint32 aIapId );
 
     /**
      * Stops displaying the starting dialog.
@@ -268,7 +244,7 @@ private:
      * @since 3.2
      */
     void ImplicitConnectionWlanNoteL();
-    
+
     /**
      * Gets current cellular data usage setting
      * @since 5.2
@@ -281,7 +257,8 @@ private:
      * C++ default constructor.
      */
     CMPMIapSelection( CMPMCommsDatAccess*   aCommsDatAccess,
-                      CMPMServerSession*    aSession );
+                      CMPMServerSession*    aSession,
+                      CConnectionUiUtilities* aConnUiUtils );
 
     /**
      * ConstructL
@@ -302,6 +279,9 @@ private:
     // Used for commsdat related functionalities
     CMPMCommsDatAccess* iCommsDatAccess;
 
+    // Handle to connection UI utilities
+    CConnectionUiUtilities* iConnUiUtils;
+
     // Contains state info whether PrefIapnotifs can be sent 
     // and saved IAP info structure.
     TStoredIapInfo iStoredIapInfo;
@@ -314,12 +294,6 @@ private:
 
     // Pointer to Confirmation dialog.
     CMPMConfirmDlgStarting* iConfirmDlgStarting;
-
-    // Pointer to the dialog active object.
-    CMPMDialog* iDialog;
-
-    // Pointer to Wlan query dialog.
-    CMPMWlanQueryDialog* iWlanDialog;
 
     // Stores the boolean value whether next best iaps 
     // exists in explicit connection start.

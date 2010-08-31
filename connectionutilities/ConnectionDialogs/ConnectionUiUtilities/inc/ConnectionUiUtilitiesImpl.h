@@ -40,7 +40,7 @@ _LIT( KErrNullPointer, "NULL pointer" );
 class CCommsDatabase;
 class TConnectionPrefs;
 class CAknGlobalNote;
-
+class CConnectionStatusPopup;
 
 // CLASS DECLARATION
 
@@ -370,56 +370,6 @@ NONSHARABLE_CLASS( CConnectionUiUtilitiesImpl ) : public CBase
         void WLANNetworkUnavailableNote();           
 
         /**
-        * DEPRECATED, PLEASE USE ASYNC VERSION!
-        * Confirmation note is used after the connection has been successfully 
-        * established via destination and connection method.
-        * @param aDestId Id of used destination.
-        * @param aConnMId Id of used connection method.
-        */
-        void ConnectedViaDestAndConnMethodNote( const TUint32 aDestId, 
-                                                const TUint32 aConnMId );
-
-        /**
-        * Confirmation note is used after the connection has been successfully 
-        * established via destination and connection method.
-        * @param aDestId Id of used destination.
-        * @param aConnMId Id of used connection method.
-        * @param aStatus caller's TRequestStatus to handle asynchronous call.
-        */
-        void ConnectedViaDestAndConnMethodNote( const TUint32 aDestId, 
-                                                const TUint32 aConnMId, 
-                                                TRequestStatus& aStatus );
-
-        /**
-        * Cancel ConnectedViaDestAndConnMethodNote notifier.
-        */
-        void CancelConnectedViaDestAndConnMethodNote();
-
-
-        /**
-        * Information note is used when "Automatically" roaming is enabled. The
-        * actual connection establishment take places in the background 
-        * (no wait note).
-        * @param aConnMId Id of used connection method.
-        */
-        void ChangingConnectionToNote( const TUint32 aConnMId );
-        
-        /**
-        * Information note is used when "Automatically" roaming is enabled. The
-        * actual connection establishment take places in the background 
-        * (no wait note).
-        * @param aConnMId Id of used connection method.
-        * @param aStatus Status object of notifier.
-        */       
-        void ChangingConnectionToNote( const TUint32 aConnMId, 
-        								TRequestStatus& aStatus );
-
-        /**
-        * Cancel ChangingConnectionToNote notifier.
-        */
-        void CancelChangingConnectionToNote();
-        
-        /**
         * Notifier. Shows a query, "Connect to\n '%0U' via\n '%1U'?"
         * @param aResult Result of user selection, ETrue if user accepted 
         * roaming, to more preferred method, EFlase otherwise
@@ -436,25 +386,17 @@ NONSHARABLE_CLASS( CConnectionUiUtilitiesImpl ) : public CBase
         void CancelConfirmMethodUsageQuery();
 
         /**
-        * DEPRECATED, PLEASE USE ASYNC VERSION!
-        * Confirmation note is used after the connection has been successfully 
-        * established via a connection method.
-        * @param aConnMId Id of used connection method.
+        * This note is displayed when power-save feature of the WLAN station 
+        * is incompatible and thus battery consumption of the mobile will increase.
+        * @param aDisable ETrue if user wants to disable this note in the future.
+        * @param aStatus Status object of notifier.
         */
-        void ConnectedViaConnMethodNote( const TUint32 aConnMId );
-
+        void WlanPowerSaveTestNote( TBool& aDisable, TRequestStatus& aStatus );
+        
         /**
-        * Confirmation note is used after the connection has been successfully 
-        * established via a connection method.
-        * @param aConnMId Id of used connection method.
-        * @param aStatus caller's TRequestStatus to handle asynchronous call.
+        * Cancel WlanPowerSaveTestNote notifier.
         */
-        void ConnectedViaConnMethodNote( const TUint32 aConnMId, 
-                                         TRequestStatus& aStatus );
-                /**
-        * Cancel ConnectedViaConnMethodNote notifier.
-        */
-        void CancelConnectedViaConnMethodNote();
+        void CancelWlanPowerSaveTestNote();
         
         /**
         * Notifier. Query for prompting WAPI-PSK. 
@@ -464,19 +406,25 @@ NONSHARABLE_CLASS( CConnectionUiUtilitiesImpl ) : public CBase
         */
         TBool EasyWapiDlg( TDes* aKey );
 
-        /**
-        * Pops up an information note: 
-        * "No WLAN networks are available at the moment. Connection not available."
-        */        
-        void NoWLANNetworksAvailableNote();
+        /**           
+        * Discreet popup. Shows "Connecting" discreet popup 
+        */
+        void ConnectingViaDiscreetPopup( );
 
         /**           
         * Discreet popup. Shows "Connecting via %U" discreet popup 
         * @param aIapId IAP id of the access point.
+        * @param aConnectionAlreadyActive True if connection is already active
+        *   (shared).
         */
-        void ConnectingViaDiscreetPopup( const TUint32& aIapId );
+        void ConnectingViaDiscreetPopup( const TUint32& aIapId, 
+                                         TBool aConnectionAlreadyActive );
 
-        
+        /**           
+        * Cancels (hides) "Connecting via %U" discreet popup. 
+        */
+        void CancelConnectingViaDiscreetPopup();
+
         /**           
         * Discreet popup. Shows discreet popup about connection errors 
         * @param aErrorCode Error code
@@ -528,8 +476,8 @@ NONSHARABLE_CLASS( CConnectionUiUtilitiesImpl ) : public CBase
         // buffer for passing WAPI key between client and server
         TPckgBuf< TBuf< KEasyWapiQueryMaxLength > > iWapiKey;
         
-        // buffer for passing connecting discreet popup info
-        TPckgBuf< TConnUiConnectingViaDiscreetPopup > iConnInfo;
+        // Connection status (via, error) implementation
+        CConnectionStatusPopup* iConnStatusPopup;
         
     };
 

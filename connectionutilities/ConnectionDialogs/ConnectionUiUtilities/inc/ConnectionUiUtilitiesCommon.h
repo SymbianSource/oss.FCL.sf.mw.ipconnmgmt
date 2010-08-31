@@ -83,12 +83,6 @@ public:
 
     };
 
-class TConnUiConnectingViaDiscreetPopup
-    {
-public:
-    TUint32   iIapId;
-    };
-
 #endif  // CONNECTIONUIUTILITIES_COMMON_H
 
 

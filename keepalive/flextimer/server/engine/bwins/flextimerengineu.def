@@ -1,0 +1,5 @@
+EXPORTS
+	?NewL@CFlexTimerEngine@@SAPAV1@XZ @ 1 NONAME ; class CFlexTimerEngine * CFlexTimerEngine::NewL(void)
+	?AddTimer@CFlexTimerEngine@@UAEHABVTTimeIntervalMicroSeconds@@0HPBVMFlexTimerServiceCB@@@Z @ 2 NONAME ; int CFlexTimerEngine::AddTimer(class TTimeIntervalMicroSeconds const &, class TTimeIntervalMicroSeconds const &, int, class MFlexTimerServiceCB const *)
+	?CancelTimer@CFlexTimerEngine@@UAEHPBVMFlexTimerServiceCB@@@Z @ 3 NONAME ; int CFlexTimerEngine::CancelTimer(class MFlexTimerServiceCB const *)
+

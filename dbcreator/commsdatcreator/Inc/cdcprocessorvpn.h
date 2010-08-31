@@ -84,12 +84,8 @@ class CProcessorVpn : public CProcessorBase
                        RPointerArray< HBufC >& aUnderLying );
         
         /**
-        * From CProcessorBase. Processes the actual tag.
-        * @param aFieldIDPresent shows if field id is read from input file
-        * @return the result of the process, KErrNone if the actual tag is
-        * valid.
+        * From CProcessorBase. 
         */
-        ////virtual void ProcessTagL( TBool aFieldIDPresent );
         virtual void ProcessSpecialFieldsL( TInt aField, HBufC* aTagPtr, TInt aDx );
 
     private:

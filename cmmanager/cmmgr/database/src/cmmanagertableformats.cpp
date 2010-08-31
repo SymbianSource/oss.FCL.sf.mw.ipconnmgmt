@@ -36,15 +36,15 @@ START_ATTRIBUTE_TABLE( CCDWlanServiceRecord, 0, 0 )
 	X_REGISTER_ATTRIBUTE( CCDWlanServiceRecord,   iWlanConnMode,  TMDBNum )
 	X_REGISTER_ATTRIBUTE( CCDWlanServiceRecord,   iWLanSSID,  TMDBText )
 	X_REGISTER_ATTRIBUTE( CCDWlanServiceRecord,   iWLanUsedSSID,  TMDBText )
-	X_REGISTER_ATTRIBUTE( CCDWlanServiceRecord,   iWLanWepKey1,  TMDBText )
-	X_REGISTER_ATTRIBUTE( CCDWlanServiceRecord,   iWLanWepKey2,  TMDBText )
-	X_REGISTER_ATTRIBUTE( CCDWlanServiceRecord,   iWLanWepKey3,  TMDBText )
-	X_REGISTER_ATTRIBUTE( CCDWlanServiceRecord,   iWLanWepKey4,  TMDBText )
+	X_REGISTER_ATTRIBUTE( CCDWlanServiceRecord,   iWLanWepKey1,  TMDBBin )
+	X_REGISTER_ATTRIBUTE( CCDWlanServiceRecord,   iWLanWepKey2,  TMDBBin )
+	X_REGISTER_ATTRIBUTE( CCDWlanServiceRecord,   iWLanWepKey3,  TMDBBin )
+	X_REGISTER_ATTRIBUTE( CCDWlanServiceRecord,   iWLanWepKey4,  TMDBBin )
 	X_REGISTER_ATTRIBUTE( CCDWlanServiceRecord,   iWlanWepIndex,  TMDBNum )
 	X_REGISTER_ATTRIBUTE( CCDWlanServiceRecord,   iWlanSecMode,  TMDBNum )
 	X_REGISTER_ATTRIBUTE( CCDWlanServiceRecord,   iWlanAuthMode,  TMDBNum )
 	X_REGISTER_ATTRIBUTE( CCDWlanServiceRecord,   iWlanEnableWpaPsk,  TMDBNum )
-	X_REGISTER_ATTRIBUTE( CCDWlanServiceRecord,   iWLanWpaPreSharedKey,  TMDBText )
+	X_REGISTER_ATTRIBUTE( CCDWlanServiceRecord,   iWLanWpaPreSharedKey,  TMDBBin )
 	X_REGISTER_ATTRIBUTE( CCDWlanServiceRecord,   iWlanWpaKeyLength,  TMDBNum )
 	X_REGISTER_ATTRIBUTE( CCDWlanServiceRecord,   iWLanEaps,  TMDBText )
 	X_REGISTER_ATTRIBUTE( CCDWlanServiceRecord,   iWlanScanSSID,  TMDBNum )
@@ -53,9 +53,9 @@ START_ATTRIBUTE_TABLE( CCDWlanServiceRecord, 0, 0 )
 	X_REGISTER_ATTRIBUTE( CCDWlanServiceRecord,   iWlanFormatKey2,  TMDBNum )
 	X_REGISTER_ATTRIBUTE( CCDWlanServiceRecord,   iWlanFormatKey3,  TMDBNum )
 	X_REGISTER_ATTRIBUTE( CCDWlanServiceRecord,   iWlanFormatKey4,  TMDBNum )
-	X_REGISTER_ATTRIBUTE( CCDWlanServiceRecord,   iWlanAllowSSIDRoaming,  TMDBNum )	
-	X_REGISTER_ATTRIBUTE( CCDWlanServiceRecord,   iWLanEnabledEaps,  TMDBText )
-	X_REGISTER_ATTRIBUTE( CCDWlanServiceRecord,   iWLanDisabledEaps,  TMDBText )
+	X_REGISTER_ATTRIBUTE( CCDWlanServiceRecord,   iWlanAllowSSIDRoaming,  TMDBNum )
+	X_REGISTER_ATTRIBUTE( CCDWlanServiceRecord,   iWLanEnabledEaps,  TMDBBin )
+	X_REGISTER_ATTRIBUTE( CCDWlanServiceRecord,   iWLanDisabledEaps,  TMDBBin )
     X_REGISTER_ATTRIBUTE( CCDRecordBase,          iRecordTag,  TMDBNum )
 	X_REGISTER_ATTRIBUTE( CCDRecordBase,          iRecordName, TMDBText )
 END_ATTRIBUTE_TABLE()
@@ -97,25 +97,25 @@ START_ATTRIBUTE_TABLE( CCDDefConnRecord, 0, 0 )
 	X_REGISTER_ATTRIBUTE( CCDDefConnRecord,   iDefConnType,         TMDBNum )
 	X_REGISTER_ATTRIBUTE( CCDDefConnRecord,   iDefConnUid,          TMDBNum )
 	X_REGISTER_ATTRIBUTE( CCDDefConnRecord,   iUsageOfWlan,      TMDBNum )
-        X_REGISTER_ATTRIBUTE( CCDDefConnRecord,   iCellularDataUsageHome,  TMDBNum )
-        X_REGISTER_ATTRIBUTE( CCDDefConnRecord,   iCellularDataUsageVisitor,  TMDBNum )
+    X_REGISTER_ATTRIBUTE( CCDDefConnRecord,   iCellularDataUsageHome,  TMDBNum )
+    X_REGISTER_ATTRIBUTE( CCDDefConnRecord,   iCellularDataUsageVisitor,  TMDBNum )
     X_REGISTER_ATTRIBUTE( CCDRecordBase,      iRecordTag,           TMDBNum )
 	X_REGISTER_ATTRIBUTE( CCDRecordBase,      iRecordName,          TMDBText )
 END_ATTRIBUTE_TABLE()
 
 const SRecordTypeInfo CCDDefConnRecord::iRecordInfo[]=
   	{
-	    { KCDTIdRecordTag,	         EUint32,    ENoAttrs, KCDTypeNameRecordTag }, 
+	    { KCDTIdRecordTag,	         EUint32,    ENoAttrs, KCDTypeNameRecordTag },
     	{ KCDTIdRecordName,	         EText,      ENotNull, KCDTypeNameRecordName},
     	{ KCDTIdDefConnType,         EUint32,    ENoAttrs, DEFCONN_TYPE },
     	{ KCDTIdDefConnUid,          EUint32,    ENoAttrs, DEFCONN_UID },
     	{ KCDTIdUsageOfWlan,         EUint32,    ENoAttrs, USAGEOFWLAN },
     	{ KCDTIdCellularDataUsageHome,     EUint32,    ENoAttrs,   CELLULAR_DATA_USAGE_HOME },
-        { KCDTIdCellularDataUsageVisitor,  EUint32,    ENoAttrs,   CELLULAR_DATA_USAGE_VISITOR },    	
+        { KCDTIdCellularDataUsageVisitor,  EUint32,    ENoAttrs,   CELLULAR_DATA_USAGE_VISITOR },
 	    { 0, 0, ENoAttrs, KCDNull }
   	};
-  	
-    
+
+
 EXPORT_C const SRecordTypeInfo* CCDDefConnRecord::GetRecordInfo()
     { 
     return iRecordInfo; 

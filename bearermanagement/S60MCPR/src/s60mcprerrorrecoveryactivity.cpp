@@ -174,7 +174,6 @@ namespace S60MCprErrorRecoveryActivity
     DEFINE_SMELEMENT(TRetryConnectionOrProcessErrorTagBackward, NetStateMachine::MStateFork, TContext)
     TInt TRetryConnectionOrProcessErrorTagBackward::TransitionTag()
         {
-        CS60MetaConnectionProvider& node = (CS60MetaConnectionProvider&)iContext.Node();
         TCFMcpr::TReConnectComplete* msg = NULL;
         if ( iContext.iMessage.IsMessage<TCFMcpr::TReConnectComplete>() )
             {
@@ -185,9 +184,8 @@ namespace S60MCprErrorRecoveryActivity
             {
             S60MCPRLOGSTRING1("S60MCPR<%x>::TRetryConnectionOrProcessErrorTagBackward::TransitionTag() KProcessError",(TInt*)&iContext.Node());
             return S60MCprStates::KProcessError | NetStateMachine::EBackward;
-            //return KErrorTag | NetStateMachine::EForward;
             }
-        else// if ( node.ServiceProvider()->ProviderInfo().APId() == node.PolicyPrefs().IapId() )
+        else
             {
             S60MCPRLOGSTRING1("S60MCPR<%x>::TRetryConnectionOrProcessErrorTagBackward::TransitionTag() KRetryConnection",(TInt*)&iContext.Node());
             return S60MCprStates::KRetryConnection | NetStateMachine::EForward;

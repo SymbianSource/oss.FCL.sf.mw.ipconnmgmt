@@ -102,7 +102,7 @@ NONSHARABLE_CLASS( CConnectionInfo ) : public CBase
         * Returns iId member
         * @return iId member
         */
-        inline const TUint32 Id() const;
+        inline TUint32 Id() const;
 
         /**
         * ListItem() function
@@ -123,7 +123,7 @@ NONSHARABLE_CLASS( CConnectionInfo ) : public CBase
         * Returns iVPN_iap_id member
         * @return iVPN_iap_id member
         */
-        inline const TUint32 VPNIapId() const;
+        inline TUint32 VPNIapId() const;
 
 
         /**
@@ -131,7 +131,7 @@ NONSHARABLE_CLASS( CConnectionInfo ) : public CBase
         * Returns iDestinationId member
         * @return iDestinationId member
         */
-        inline const TUint32 DestinationId() const;
+        inline TUint32 DestinationId() const;
 
 
         /**
@@ -139,7 +139,7 @@ NONSHARABLE_CLASS( CConnectionInfo ) : public CBase
         * Tells if connection is VPN
         * @return ETrue if connection is VPN
         */
-        inline const TBool IsVPN() const;
+        inline TBool IsVPN() const;
 
 
     private:    // Data

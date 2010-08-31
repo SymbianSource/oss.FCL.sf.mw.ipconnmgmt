@@ -18,19 +18,12 @@
 
 // INCLUDE FILES
 
-#include <e32property.h>
-#include <ScreensaverInternalPSKeys.h>
-#include <coreapplicationuisdomainpskeys.h>
+#include "ConnectionDialogsNotifBase.h"
+
 #include <bautils.h>
 #include <eikenv.h>
 #include <data_caging_path_literals.hrh>
 
-#include "ConnectionDialogsLogger.h"
-#include "ConnectionDialogsNotifBase.h"
-
-#ifdef _DEBUG
-#include <e32debug.h>
-#endif
 
 // CONSTANTS
 
@@ -95,9 +88,13 @@ void CConnectionDialogsNotifBase::Release()
 // ---------------------------------------------------------
 //
 CConnectionDialogsNotifBase::CConnectionDialogsNotifBase()
-: iCancelled( EFalse ), 
+: iReplySlot( 0 ),
+  iCancelled( EFalse ),
   iResource( 0 )
     {
+    iInfo.iUid = TUid::Null();
+    iInfo.iChannel = TUid::Null();
+    iInfo.iPriority = 0;
     }
 
 
@@ -137,55 +134,6 @@ CConnectionDialogsNotifBase::~CConnectionDialogsNotifBase()
         }
     }
 
-// ---------------------------------------------------------
-// CConnectionDialogsNotifBase::ScreenSaverOn()
-// ---------------------------------------------------------
-//
-TBool CConnectionDialogsNotifBase::ScreenSaverOn()
-    {
-    TInt err( KErrNone );
-    TInt screenSaverOn( 0 );
-
-    // Cancel the dialog if screen saver is on.
-    err = RProperty::Get( KPSUidScreenSaver, 
-            KScreenSaverOn, 
-            screenSaverOn );
-    
-    return (err == KErrNone && screenSaverOn > 0); 
-    }
-
-// ---------------------------------------------------------
-// CConnectionDialogsNotifBase::AutolockOn()
-// ---------------------------------------------------------
-//
-TBool CConnectionDialogsNotifBase::AutolockOn()
-    {
-    TBool retval( EFalse );
-
-    CLOG_ENTERFN( "CConnectionDialogsNotifBase::AutolockOn" );
-    
-#ifdef RD_STARTUP_CHANGE
-    TInt err( KErrNone );
-    TInt autolockOn( 0 );
-    // Cancel the dialog if screen saver is on.
-    err = RProperty::Get( KPSUidCoreApplicationUIs, 
-            KCoreAppUIsAutolockStatus, 
-            autolockOn );
-    // In boot there may come EAutolockStatusUninitialized, when it should be EAutolockOn...
-    retval = (err == KErrNone && autolockOn != EAutolockOff); 
-
-#ifdef _DEBUG
-    RDebug::Print( _L("CConnectionDialogsNotifBase::AutolockOn: autolockOn: %d"), autolockOn );
-    RDebug::Print( _L("CConnectionDialogsNotifBase::AutolockOn: err: %d"), err );
-    RDebug::Print( _L("CConnectionDialogsNotifBase::AutolockOn: %d"), retval );
-#endif
-    
-#endif // RD_STARTUP_CHANGE
-    
-    CLOG_LEAVEFN( "CConnectionDialogsNotifBase::AutolockOn" );
-
-    return retval; 
-    }
 
 
 // End of File

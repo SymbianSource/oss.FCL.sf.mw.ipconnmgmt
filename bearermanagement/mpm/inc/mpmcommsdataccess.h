@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2007-2009 Nokia Corporation and/or its subsidiary(-ies). 
+* Copyright (c) 2007-2010 Nokia Corporation and/or its subsidiary(-ies). 
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -54,36 +54,7 @@ const TInt KCommsDatTextBufferLength = KMaxTextLength + 1;
 enum TWlanIapType
     {
     ENotWlanIap,
-    EWlanIap,
-    EEasyWlanIap
-    };
-
-// Structure containing WLAN WEP key data
-// 
-class TWepKeyData
-    {
-public:
-    inline TWepKeyData(): 
-    iWep1(),
-    iWep2(),
-    iWep3(),
-    iWep4(),
-    iWepFormat1( 0 ),
-    iWepFormat2( 0 ),
-    iWepFormat3( 0 ),
-    iWepFormat4( 0 ),
-    iDefaultWep( EWlanDefaultWepKey1 )
-    {};
-    
-    TWlanWepKey iWep1;
-    TWlanWepKey iWep2;
-    TWlanWepKey iWep3;
-    TWlanWepKey iWep4;
-    TUint iWepFormat1;
-    TUint iWepFormat2;
-    TUint iWepFormat3;
-    TUint iWepFormat4;
-    TWlanDefaultWepKey iDefaultWep;
+    EWlanIap
     };
 
 // CLASS DECLARATION
@@ -138,14 +109,6 @@ class CMPMCommsDatAccess : public CBase
                            CMPMServerSession&       aSession );
     
         /**
-        * Checks if given IAP is Easy WLan.
-        * @since 3.1
-        * @param aIapId IAP Id to be checked
-        * @return ETrue if IAP Id is Easy WLan, otherwise EFalse.
-        */
-        TBool CheckEasyWLanL( TUint32 aIapId ) const;
-
-        /**
         * Find all snap ids
         *
         * @since 3.2
@@ -195,47 +158,6 @@ class CMPMCommsDatAccess : public CBase
         */
         void CheckWLANIapL(CMPMServerSession& aSession);
 
-        /**
-        * Checks whether there is a wlan iap which matches the 
-        * parameter settings.
-        *
-        * @since 3.2
-        * @param aSsid Wlan iap ssid
-        * @param aSecMode Wlan iap security mode
-        * @param aConnMode Wlan iap connection mode
-        */
-        TUint32 CheckWLANIapWithSsidL( TWlanSsid& aSsid, 
-                                       TUint32 aSecMode,
-                                       TWlanNetMode aConnMode );
-
-        /**
-        * Stores easy wlan settings into commsdat. 
-        *
-        * @since 3.2
-        * @param aSsid Wlan iap ssid, stored in used ssid field
-        * @param aSecMode Wlan iap security mode
-        * @param aConnMode Wlan iap connection mode
-        * @param aWepData WEP key data
-        * @param aEnableWpaPsk Wlan iap enable psk mode
-        * @param aWpaPsk Wlan iap wpa psk
-        * @param aWpaKeyLen Wlan iap wpa key length
-        */
-        void SetEasyWlanDataL( const TWlanSsid& aSsid,
-                               TUint            aSecMode,
-                               TWlanNetMode     aConnMode,
-                               TWepKeyData      aWepData,
-                               TUint            aEnableWpaPsk,
-                               const TDesC8&    aWpaPsk,
-                               TUint            aWpaKeyLen  );
-
-        /**
-        * Returns Easy wlan service record id.
-        * @since 3.2
-        * @param aDb DB session
-        * return Easy wlan service record id
-        */
-        TUint32 FindEasyWlanServiceIdL( CMDBSession* aDb );
-        
         /**
         * Checks if the HiddenAgent metadata is set for this IAP.
         * @since 3.2
@@ -291,11 +213,10 @@ class CMPMCommsDatAccess : public CBase
                                            RArray<TNetIap>& aEmbeddedIaps );
 
         /**
-        * Checks if given IAP is WLAN and whether it is EasyWLAN IAP.
+        * Checks if given IAP is WLAN.
         * @since 3.2
         * @param aIapId IAP Id to be checked
-        * @return One of TWlanIapType values depending on 
-        * whether IAP is WLAN or Easy WLAN
+        * @return One of TWlanIapType values
         */
         TWlanIapType CheckWlanL( TUint32 aIapId ) const;
 
@@ -343,7 +264,14 @@ class CMPMCommsDatAccess : public CBase
         */
         TBool IsInternetSnapL( TUint32 aIapId, TUint32 aSnapId );
 
-       /**
+        /**
+         * Returns true if destination is intranet.
+         * @param aSnapId Snap id
+         * @return True or false depending on destination type.
+         */
+         TBool IsIntranetSnapL( TUint32 aSnapId );
+
+        /**
         * Used to get bearer type of the iap.
         *
         * @since 5.0
@@ -351,38 +279,6 @@ class CMPMCommsDatAccess : public CBase
         * @return Type of the bearer.
         */
         TMPMBearerType GetBearerTypeL( TUint32 aIapId );
-        
-       /**
-        * Check if all active connections are in same snap.
-        *
-        * @since 5.0
-        * @param aActiveBMConns Array of active connections.
-        * @param aSnapId Destination where connections are located is returned
-        *                to this parameter.
-        * @param aServer Handle to server class.
-        * @return ETrue if all active connections are in same snap.
-        */
-        TBool AreActiveIapsInSameSnapL ( RArray<TActiveBMConn>& aActiveBMConns,
-                                         TUint32& aSnapId,
-                                         CMPMServer& aServer );
-
-       /**
-        * Select active connection according to snap priorities.
-        *
-        * @since 5.0
-        * @param aSnapId Snap id of the connection.
-        * @param aActiveBMConns Array of active connections.
-        * @param aActiveIapId Iap id of the selected active connection.
-        * @param aActiveSnapId Snap id of the selected active connection.
-        * @param aActiveBearerType Bearer type of the selected active connection.
-        * @param aSession Handle to session class.
-        */
-        void SelectActiveConnectionL ( const TUint32 aSnapId,
-                                       RArray<TActiveBMConn>& aActiveBMConns,
-                                       TUint32& aActiveIapId,
-                                       TUint32& aActiveSnapId,
-                                       TMPMBearerType& aActiveBearerType,
-                                       CMPMServerSession& aSession );
 
        /**
         * Check if snap is empty.
@@ -469,6 +365,14 @@ class CMPMCommsDatAccess : public CBase
         * @return Snap id.
         */
         TUint32 DestinationIdL( CMManager::TSnapPurpose aSnapPurpose );
+        
+        /**
+        * Returns the default connection values
+        * @since symbian^4
+        * @param aType The type of the id
+        * @param aId The id of the snap or the iap
+        */
+        void GetDefaultConnectionL( TCmDefConnType& aType, TUint32& aId );
         	
         /**
         * Finds the real IAP behind the virtual IAP.
@@ -523,30 +427,6 @@ class CMPMCommsDatAccess : public CBase
         CCDRecordBase* LoadLinkedRecordL( CMDBSession&  aSession, 
                                           TMDBElementId aElementId );
 
-        /**
-         * Sets WEP key data for WLAN service record
-         * @since 9.1
-         * @param aFormatId Id of the field where WEP format is stored
-         * @param aKeyId Id of the field where WEP key is stored
-         * @param aWepData WEP key value
-         * @param aWepFormat WEP key format value
-         * @param aRecord WLAN service record where data is stored
-         */        
-       void SetWepKeyL( TMDBElementId       aFormatId,
-                        TMDBElementId       aKeyId, 
-                        TWlanWepKey         aWepData,
-                        TUint               aWepFormat,
-                        CMDBGenericRecord*  aRecord );
-        
-       /**
-        * Converts ascii data to hex
-        * @since 3.2
-        * @param aSource Ascii data
-        * @param aDest hex data to be filled in
-        */        
-        void ConvertAsciiToHex( const TDesC8& aSource, 
-				                HBufC8*      aDest );
-
        /**
         * Returns true if destination is internet.
         * @since 5.1
@@ -574,15 +454,6 @@ class CMPMCommsDatAccess : public CBase
         * @param aWlanArray Array of wlan bearers
         */
         void BuildWlanArrayL(CMDBSession& aDb, RArray<TUint32>& aWlanArray);
-        
-       /**
-        * Get snap id for the iap
-        * 
-        * @since 5.0
-        * @param aIapId Id of the iap
-        * @return Id of the snap
-        */
-        TUint32 GetSnapIdL( TUint32 aIapId );
 
         /**
         * C++ default constructor.

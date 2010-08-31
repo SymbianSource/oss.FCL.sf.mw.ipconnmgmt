@@ -21,7 +21,6 @@
 #define __ACTIVE_SELECT_WLAN_DLG_PLUGIN_H__
 
 // INCLUDES
-#include <e32base.h>
 #include "SelectWLanDlgPlugin.h"
 #include "SelectWLANDlg.h"
 #include "WlanNetworkDataProvider.h"
@@ -58,9 +57,9 @@ public:
     /**
     * Timer callback of iPeridoc.
     */
-    void DoTick();
-
-
+    void DoTick();    
+      
+        
 protected:
     /**
     * ConstructL 
@@ -109,18 +108,6 @@ protected:
     */
     void DestroyResultsListDialog();
     
-    /**
-    * Destroy results dialog
-    */
-    void DestroyAsyncWaitTrigger();
-
-
-private:
-    /**
-     * Start wait note
-     */
-    static TInt StartWaitNoteL( TAny* aObject );
-
 
 protected:
     
@@ -138,9 +125,6 @@ protected:
     
     CAknWaitDialog* iWaitDialog;
     
-    CAsyncCallBack* iAsyncWaitTrigger;
-    
-    TInt iRefreshInterval;
 };     
 
 #endif // __ACTIVE_SELECT_WLAN_DLG_PLUGIN_H__

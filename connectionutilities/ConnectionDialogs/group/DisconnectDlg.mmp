@@ -62,6 +62,8 @@ SYSTEMINCLUDE		../../../inc
 //Macro to /epoc32 headers
 MW_LAYER_SYSTEMINCLUDE
 
+SYSTEMINCLUDE   /epoc32/include/uikon
+
 
 LIBRARY euser.lib
 LIBRARY cone.lib

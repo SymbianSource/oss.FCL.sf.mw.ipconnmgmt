@@ -25,7 +25,7 @@
 #include <eikapp.h>
 #include <eikdoc.h>
 #include <aknlists.h>
-#include <AknDialog.h>
+#include <akndialog.h>
 #include <cmpbasesettingsdlg.h>
 
 // FORWARD DECLARATIONS

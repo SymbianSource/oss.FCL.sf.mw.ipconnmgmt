@@ -48,7 +48,8 @@ const TUint KSignalStrength = 6;
 /** WLAN mode, defined in TConnMonNetworkMode.
 */
 const TUint KNetworkMode = 7;
-/** WLAN connection security mode, defined in TConnMonSecurityMode.
+/** Old WLAN connection security mode, defined in TConnMonSecurityMode.
+It is recommended to use the more detailed KSecurityMode_v2 instead.
 */
 const TUint KSecurityMode = 8;
 /** Bearer information, defined in TConnMonBearerInfo.
@@ -62,6 +63,10 @@ const TUint KWlanScanCacheLifetime = 10;
 /** Network registration values defined in TConnMonNetworkRegistration_v2.
 */
 const TUint KNetworkRegistration_v2 = 11;
+/** WLAN connection security mode, defined in TConnMonSecurityModeV2.
+Replaces the previously used KSecurityMode attribute.
+*/
+const TUint KSecurityMode_v2 = 12;
 
 /** QoS - Not supported.
 */
@@ -509,6 +514,24 @@ enum TConnMonSecurityMode
     };
 
 /**
+* WLAN connection security modes in more detail.
+* New values will be added to the end of the enumeration.
+*/
+enum TConnMonSecurityModeV2
+    {
+    EConnMonSecurityV2Open      = 100,
+    EConnMonSecurityV2WepOpen   = 101,
+    EConnMonSecurityV2WepShared = 102,
+    EConnMonSecurityV2802d1x    = 103,
+    EConnMonSecurityV2Wpa       = 104,
+    EConnMonSecurityV2WpaPsk    = 105,
+    EConnMonSecurityV2Wpa2      = 106,
+    EConnMonSecurityV2Wpa2Psk   = 107,
+    EConnMonSecurityV2Wapi      = 108,
+    EConnMonSecurityV2WapiPsk   = 109
+    };
+
+/**
 * Network Modes.
 */
 enum TConnMonMobilePhoneNetworkMode
@@ -850,7 +873,7 @@ public:
     static const TUint KWlanBssId = 6;
     /** Reserved for future use.
     */
-    static const TUint KExtraCount = 10;
+    static const TUint KExtraCount = 8;
 
     /**
     * Constructor.
@@ -868,6 +891,29 @@ public:
             TUint aConnectionMode,
             TUint aSignalStrength,
             TUint aSecurityMode,
+            const TBuf8<KWlanBssId>& aBssId,
+            const TDesC& aVendorData );
+
+    /**
+    * Constructor.
+    *
+    * @param aName Name (SSID) of the network.
+    * @param aConnectionMode Mode of the network.
+    * @param aSignalStrength Signal strength of the network.
+    * @param aSecurityMode Security mode of the network.
+    * @param aSecurityModeV2 More detailed security mode of the network.
+    * @param aProtectedSetupSupport Wi-Fi Protected Setup support.
+    * @param aBssId Mac address (BSSID) of the base station.
+    * @param aVendorData Not in use.
+    * @return Pointer to the created CConnMonWlanNetwork object.
+    */
+    IMPORT_C static CConnMonWlanNetwork* NewL(
+            const TBuf<KMaxNameLength>& aName,
+            TUint aConnectionMode,
+            TUint aSignalStrength,
+            TUint aSecurityMode,
+            TUint aSecurityModeV2,
+            TUint aProtectedSetupSupport,
             const TBuf8<KWlanBssId>& aBssId,
             const TDesC& aVendorData );
 
@@ -944,6 +990,8 @@ public:
 
     /**
     * Obtains the security mode of the network.
+    * This method is offered for backward compatibility
+    * reasons, SecurityModeV2() should be used instead.
     *
     * @return Security mode (defined in TConnMonSecurityMode).
     */
@@ -951,6 +999,20 @@ public:
         {
         return iSecurityMode;
         }
+
+    /**
+    * Obtains the more detailed security mode of the network.
+    *
+    * @return Security mode (defined in TConnMonSecurityModeV2).
+    */
+    IMPORT_C TUint SecurityModeV2();
+
+    /**
+    * Finds whether Wi-Fi Protected Setup is supported.
+    *
+    * @return ETrue if AP supports Wi-Fi Protected Setup, EFalse if not.
+    */
+    IMPORT_C TBool IsProtectedSetupSupported();
 
     /**
     * Obtains the mac address (BSSID) of the base station.
@@ -1020,6 +1082,28 @@ private:
             const TDesC& aVendorData );
 
     /**
+    * Constructor.
+    *
+    * @param aName Name (SSID) of the network.
+    * @param aConnectionMode Mode of the network.
+    * @param aSignalStrength Signal strength of the network.
+    * @param aSecurityMode Security mode of the network.
+    * @param aSecurityModeV2 More detailed security mode of the network.
+    * @param aProtectedSetupSupport Wi-Fi Protected Setup support.
+    * @param aBssId Mac address (BSSID) of the base station.
+    * @param aVendorData Not in use.
+    */
+    CConnMonWlanNetwork(
+            const TBuf<KMaxNameLength>& aName,
+            TUint aConnectionMode,
+            TUint aSignalStrength,
+            TUint aSecurityMode,
+            TUint aSecurityModeV2,
+            TUint aProtectedSetupSupport,
+            const TBuf8<KWlanBssId>& aBssId,
+            const TDesC& aVendorData );
+
+    /**
     * Second-phase constructor.
     */
     void ConstructL();
@@ -1031,6 +1115,8 @@ private:
     TUint iSecurityMode;          // See TConnMonSecurityMode
     TBuf8<KWlanBssId> iWlanBssId; // BSSID
     HBufC* iVendorData;           // For vendor specific data
+    TUint iSecurityModeV2;        // See TConnMonSecurityModeV2
+    TUint iProtectedSetupSupport; // Wi-Fi Protected Setup support, 0 if not supported
     TUint iExtraBuf[KExtraCount]; // Reserved for future
     };
 

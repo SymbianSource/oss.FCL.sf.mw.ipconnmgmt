@@ -23,6 +23,7 @@
 
 TARGET      ConnectionUiUtilities.dll
 TARGETTYPE  DLL
+UID         0x1000008d 0x2002FF74
 
 CAPABILITY CAP_GENERAL_DLL
 VENDORID VID_DEFAULT
@@ -43,7 +44,7 @@ SOURCE ConnectionUiUtilitiesPanic.cpp
 SOURCE ChangeConnectionDlg.cpp
 SOURCE ActiveCChangeConnectionDlg.cpp
 SOURCE ActiveWrapper.cpp
-
+SOURCE connectionstatuspopup.cpp
 
 SOURCEPATH ../src
 SOURCE ConnectionInfo.cpp
@@ -52,11 +53,11 @@ SOURCE ConnectionInfoArray.cpp
 SOURCE ActiveIAPListing.cpp
 SOURCE ExpiryTimer.cpp
 
-
 USERINCLUDE	    ../ConnectionUiUtilities/inc
 
 // Component specific internal headers 
 USERINCLUDE			../inc
+USERINCLUDE         ../traces
 
 // ADO specific internal headers 
 SYSTEMINCLUDE		../../../inc
@@ -64,23 +65,31 @@ SYSTEMINCLUDE		../../../inc
 //Macro to /epoc32 headers
 MW_LAYER_SYSTEMINCLUDE
 
+// Hb orbit headers
+SYSTEMINCLUDE /epoc32/include/mw/hb/hbcore
+SYSTEMINCLUDE /epoc32/include/mw/hb/hbwidgets
+
 LIBRARY euser.lib cone.lib eikcore.lib eikcoctl.lib avkon.lib eikdlg.lib 
 LIBRARY bafl.lib commonengine.lib commdb.lib AknSkins.lib FeatMgr.lib 
 LIBRARY AknNotify.lib
 LIBRARY Ecom.lib
 LIBRARY	centralrepository.lib 
 LIBRARY	aknlayout.lib 
+LIBRARY hbcore.lib
+LIBRARY hbwidgets.lib
+LIBRARY cmmanager.lib
+LIBRARY efsrv.lib
 
 DEBUGLIBRARY flogger.lib
 
 
 #if defined( ARMCC )
 
-    DEFFILE ../ConnectionUiUtilities/EABI/ConnectionUiUtilities_PROT.def
+DEFFILE ../ConnectionUiUtilities/EABI/ConnectionUiUtilities_PROT.def
 
 #elif defined( WINSCW )
 
-    DEFFILE ../ConnectionUiUtilities/BWinsCw/ConnectionUiUtilities_PROT.def
+DEFFILE ../ConnectionUiUtilities/BWinsCw/ConnectionUiUtilities_PROT.def
 
 #endif
 

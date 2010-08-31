@@ -108,20 +108,6 @@ NONSHARABLE_CLASS( CConnectionDialogsNotifBase ) : public CBase, public MEikSrvN
         void ConstructL( const TDesC& aResourceFileName,
                          const TBool aResourceFileResponsible );
 
-        /**
-        * ScreenSaverOn()
-        * @param  -
-        * return  ETrue if Screen saver is on, EFalse if not.
-        */
-        TBool ScreenSaverOn();
-
-        /**
-        * AutolockOn()
-        * @param  -
-        * return  ETrue if Autolock is on, EFalse if not.
-        */
-        TBool AutolockOn();
-
     private:
 
         /**

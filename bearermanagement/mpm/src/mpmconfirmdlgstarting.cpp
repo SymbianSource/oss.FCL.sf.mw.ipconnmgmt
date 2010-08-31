@@ -81,9 +81,11 @@ CMPMConfirmDlgStarting::CMPMConfirmDlgStarting(
       iIAP( aIAP ),
       iDialogType( aDialogType ),
       iConfirmDlg( NULL ),
+      iMsgQuery( EMsgQueryCancelled ),
       iPref( aPref ),
       iServer( aServer ),
       iSession ( aSession ),
+      iError( 0 ),
       iIapState( aIapState )
     {
     }
@@ -206,11 +208,11 @@ void CMPMConfirmDlgStarting::UserSelectedConnectThisTime()
     {
     MPMLOGSTRING2( "CMPMConfirmDlgStarting<0x%x>::UserSelectedConnectThisTime", iConnId )
     
-    TBool wlanNeeded( EFalse );
-    TRAPD( err, wlanNeeded = iIapSelection.StartWlanQueryIfNeededL( iIAP ) )
+    TBool isWlan( EFalse );
+    TRAPD( err, isWlan = iIapSelection.IsIapWlanL( iIAP ) )
     if( err == KErrNone )
         {
-        if( !wlanNeeded )
+        if( !isWlan )
             {
             if ( iIapState == CMPMIapSelection::EImplicitConnection )
                 {
@@ -231,9 +233,6 @@ void CMPMConfirmDlgStarting::UserSelectedConnectThisTime()
                                             EStarting,
                                             iSession );
 
-                // Complete the ChooseBestIAP message with 
-                // KErrNone if user selected yes.
-                // 
                 MPMLOGSTRING2( "CMPMConfirmDlgStarting<0x%x>::UserSelectedConnectThisTime:\
 Complete KErrNone", iConnId )
                 iIapSelection.ChooseIapComplete( KErrNone, &iPref );                        
@@ -268,11 +267,11 @@ void CMPMConfirmDlgStarting::UserSelectedConnectAutomatically()
             }
         } 
     
-    TBool wlanNeeded( EFalse );
-    TRAPD( err, wlanNeeded = iIapSelection.StartWlanQueryIfNeededL( iIAP ) )
+    TBool isWlan( EFalse );
+    TRAPD( err, isWlan = iIapSelection.IsIapWlanL( iIAP ) )
     if( err == KErrNone )
         {
-        if( !wlanNeeded )
+        if( !isWlan )
             {
             if ( iIapState == CMPMIapSelection::EImplicitConnection )
                 {
@@ -293,8 +292,6 @@ void CMPMConfirmDlgStarting::UserSelectedConnectAutomatically()
                                             EStarting,
                                             iSession );
 
-                 // Complete the ChooseBestIAP message with 
-                 // KErrNone if user selected yes.
                  // 
                  MPMLOGSTRING2( "CMPMConfirmDlgStarting<0x%x>::UserSelectedConnectAutomatically:\
 Complete KErrNone", iConnId )

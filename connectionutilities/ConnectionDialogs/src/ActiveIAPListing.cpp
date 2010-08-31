@@ -92,10 +92,16 @@ enum
 CActiveIAPListing::CActiveIAPListing( const TConnectionPrefs& aPrefs )
 : CActive( EPriorityUserInput ), 
   iDb( NULL ), 
+  iPeriodic( NULL ),
   iWaitDialog( NULL ), 
 #ifndef __WINS__
   iWlanMgmt( NULL ),
 #endif // !__WINS__
+  iIAPs( NULL ),
+  iWlanIAPs( NULL ),
+  iActIAPs( NULL ),
+  iClientStatus( NULL ),
+  iIsWLANFeatureSupported( EFalse ),
   iPrefs( aPrefs )
     {
     }

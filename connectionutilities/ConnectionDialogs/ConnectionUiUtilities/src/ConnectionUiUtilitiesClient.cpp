@@ -263,98 +263,6 @@ void RConnectionUiUtilitiesSession::WLANNetworkUnavailableNote(
     }
     
 // ---------------------------------------------------------
-// RConnectionUiUtilitiesSession::ConnectedViaDestAndConnMethodNote
-// ---------------------------------------------------------
-//
-void RConnectionUiUtilitiesSession::ConnectedViaDestAndConnMethodNote( 
-                                                    const TUint32 aDestId, 
-                                                    const TUint32 aConnMId,
-                                                    TRequestStatus& aStatus )
-    {
-    CLOG_ENTERFN( "RConnectionUiUtilitiesSession::ConnectedViaDestAndConnMethodNote" );
-
-    ::new( &iPassedInfo ) TPckgBuf<TConnUiUiDestConnMethodNoteId>( 
-                                            TConnUiUiDestConnMethodNoteId() );
-
-    iPassedInfo().iDestination = aDestId;    
-    iPassedInfo().iConnectionMethod = aConnMId;
-    iPassedInfo().iNoteId = EConnectedViaDestConnMethodConfirmationNote;
-    iPassedInfo().iNextBestExists = EFalse;
-    
-    if ( iNotifier )
-        {
-        iNotifier->StartNotifierAndGetResponse( aStatus, 
-                                                KUidConnectViaNote,
-                                                iPassedInfo,
-                                                iBool );
-        }
-
-    CLOG_LEAVEFN( "RConnectionUiUtilitiesSession::ConnectedViaDestAndConnMethodNote" );
-    }
-    
-// ---------------------------------------------------------
-// RConnectionUiUtilitiesSession::CancelConnectedViaDestAndConnMethodNote
-// ---------------------------------------------------------
-//
-void RConnectionUiUtilitiesSession::CancelConnectedViaDestAndConnMethodNote()
-    {
-    CLOG_ENTERFN( "RConnectionUiUtilitiesSession::CancelConnectedViaDestAndConnMethodNote" );
-
-    if ( iNotifier )
-        {
-        iNotifier->CancelNotifier( KUidConnectViaNote );
-        }
-
-    CLOG_LEAVEFN( "RConnectionUiUtilitiesSession::CancelConnectedViaDestAndConnMethodNote" );
-    }
-    
-
-// ---------------------------------------------------------
-// RConnectionUiUtilitiesSession::ChangingConnectionToNote
-// ---------------------------------------------------------
-//
-void RConnectionUiUtilitiesSession::ChangingConnectionToNote( 
-                                                const TUint32 aConnMId,
-                                                TRequestStatus& aStatus )
-    {
-    CLOG_ENTERFN( "RConnectionUiUtilitiesSession::ChangingConnectionToNote" );
-
-    ::new( &iPassedInfo ) TPckgBuf<TConnUiUiDestConnMethodNoteId>( 
-                                            TConnUiUiDestConnMethodNoteId() );
-
-    iPassedInfo().iDestination = 0;    
-    iPassedInfo().iConnectionMethod = aConnMId;
-    iPassedInfo().iNoteId = EConnectingToConnMethodInfoNote;
-    iPassedInfo().iNextBestExists = EFalse;
-    
-    if ( iNotifier )
-        {
-        iNotifier->StartNotifierAndGetResponse( aStatus, 
-                                                KUidConnectViaNote,
-                                                iPassedInfo,
-                                                iBool );
-        }
-
-    CLOG_LEAVEFN( "RConnectionUiUtilitiesSession::ChangingConnectionToNote" );
-    }
-        
-// ---------------------------------------------------------
-// RConnectionUiUtilitiesSession::CancelChangingConnectionToNote
-// ---------------------------------------------------------
-//
-void RConnectionUiUtilitiesSession::CancelChangingConnectionToNote()
-    {
-    CLOG_ENTERFN( "RConnectionUiUtilitiesSession::CancelChangingConnectionToNote" );
-
-    if ( iNotifier )
-        {
-        iNotifier->CancelNotifier( KUidConnectViaNote );
-        }
-
-    CLOG_LEAVEFN( "RConnectionUiUtilitiesSession::CancelChangingConnectionToNote" );
-    }
-    
-// ---------------------------------------------------------
 // RConnectionUiUtilitiesSession::ConfirmMethodUsageQuery()
 // ---------------------------------------------------------
 //
@@ -406,50 +314,43 @@ void RConnectionUiUtilitiesSession::CancelConfirmMethodUsageQuery()
     CLOG_LEAVEFN( "RConnectionUiUtilitiesSession::CancelConfirmMethodUsageQuery" );
     }    
 
-
 // ---------------------------------------------------------
-// RConnectionUiUtilitiesSession::ConnectedViaConnMethodNote
+// RConnectionUiUtilitiesSession::CWlanPowerSaveTestNote
 // ---------------------------------------------------------
 //
-void RConnectionUiUtilitiesSession::ConnectedViaConnMethodNote( 
-                                                    const TUint32 aConnMId,
+void RConnectionUiUtilitiesSession::WlanPowerSaveTestNote( 
+                                                    TBool&          aDisable,
                                                     TRequestStatus& aStatus )
     {
-    CLOG_ENTERFN( "RConnectionUiUtilitiesSession::ConnectedViaConnMethodNote" );
+    CLOG_ENTERFN( "RConnectionUiUtilitiesSession::WlanPowerSaveTestNote" );
 
-    ::new( &iPassedInfo ) TPckgBuf<TConnUiUiDestConnMethodNoteId>( 
-                                            TConnUiUiDestConnMethodNoteId() );
+    ::new( &iBool ) TPckg< TBool >( aDisable );
 
-    iPassedInfo().iDestination = 0;
-    iPassedInfo().iConnectionMethod = aConnMId;
-    iPassedInfo().iNoteId = EConnectedViaConnMethodConfirmationNote;
-    iPassedInfo().iNextBestExists = EFalse;
-    
     if ( iNotifier )
         {
         iNotifier->StartNotifierAndGetResponse( aStatus, 
-                                                KUidConnectViaNote,
-                                                iPassedInfo,
+                                                KUidWlanPowerSaveTestNote,
+                                                KNullDesC8(),
                                                 iBool );
         }
 
-    CLOG_LEAVEFN( "RConnectionUiUtilitiesSession::ConnectedViaConnMethodNote" );
+    CLOG_LEAVEFN( "RConnectionUiUtilitiesSession::WlanPowerSaveTestNote" );
     }
     
 // ---------------------------------------------------------
-// RConnectionUiUtilitiesSession::CancelConnectedViaConnMethodNote
+// RConnectionUiUtilitiesSession::CancelWlanPowerSaveTestNote
 // ---------------------------------------------------------
 //
-void RConnectionUiUtilitiesSession::CancelConnectedViaConnMethodNote()
+void RConnectionUiUtilitiesSession::CancelWlanPowerSaveTestNote()
     {
-    CLOG_ENTERFN( "RConnectionUiUtilitiesSession::CancelConnectedViaConnMethodNote" );
+    CLOG_ENTERFN( "RConnectionUiUtilitiesSession::CancelWlanPowerSaveTestNote" );
 
     if ( iNotifier )
         {
-        iNotifier->CancelNotifier( KUidConnectViaNote );
+        iNotifier->CancelNotifier( KUidWlanPowerSaveTestNote );
         }
 
-    CLOG_LEAVEFN( "RConnectionUiUtilitiesSession::CancelConnectedViaConnMethodNote" );
+    CLOG_LEAVEFN( "RConnectionUiUtilitiesSession::CancelWlanPowerSaveTestNote" );
     }
 
 // ---------------------------------------------------------
@@ -486,96 +387,5 @@ void RConnectionUiUtilitiesSession::CancelEasyWapiDlg()
 
     CLOG_LEAVEFN( "RConnectionUiUtilitiesSession::CancelEasyWapiDlg" );
     }
-
-// ---------------------------------------------------------
-// RConnectionUiUtilitiesSession::NoWLANNetworksAvailableNote()
-// ---------------------------------------------------------
-//
-void RConnectionUiUtilitiesSession::NoWLANNetworksAvailableNote(
-                                                     TRequestStatus& aStatus )
-    {    
-    CLOG_ENTERFN( "RConnectionUiUtilitiesSession::NoWLANNetworksAvailableNote" );
-
-    if ( iNotifier )
-        {
-        iNotifier->StartNotifierAndGetResponse( aStatus, 
-                                    KUidNoWLANNetworksAvailableNote, 
-                                    KNullDesC8(), 
-                                    iResponseStrNoWLANNetworksAvailableNote );
-        }
-
-    CLOG_LEAVEFN( "RConnectionUiUtilitiesSession::NoWLANNetworksAvailableNote" );
-    }    
-
-// ---------------------------------------------------------
-// RConnectionUiUtilitiesSession::ConnectingViaDiscreetPopup()
-// ---------------------------------------------------------
-//
-void RConnectionUiUtilitiesSession::ConnectingViaDiscreetPopup( 
-        TPckgBuf< TConnUiConnectingViaDiscreetPopup>& aInfo,
-        TRequestStatus& aStatus )
-    {
-    CLOG_ENTERFN( "RConnectionUiUtilitiesSession::ConnectingViaDiscreetPopup" );
-
-    if ( iNotifier )
-        {
-        iNotifier->StartNotifierAndGetResponse( aStatus, KUidConnectingViaDiscreetPopup,
-                                                aInfo, aInfo );
-        }
-
-    CLOG_LEAVEFN( "RConnectionUiUtilitiesSession::ConnectingViaDiscreetPopup" );
-    }    
-    
-// ---------------------------------------------------------
-// RConnectionUiUtilitiesSession::CancelConnectingViaDiscreetPopup()
-// ---------------------------------------------------------
-//
-void RConnectionUiUtilitiesSession::CancelConnectingViaDiscreetPopup()
-    {
-    CLOG_ENTERFN( "RConnectionUiUtilitiesSession::CancelConnectingViaDiscreetPopup" );
-
-    if ( iNotifier )
-        {
-        iNotifier->CancelNotifier( KUidConnectingViaDiscreetPopup );
-        }
-
-    CLOG_LEAVEFN( "RConnectionUiUtilitiesSession::CancelConnectingViaDiscreetPopup" );
-    }    
-
-
-// ---------------------------------------------------------
-// RConnectionUiUtilitiesSession::ConnectionErrorDiscreetPopup()
-// ---------------------------------------------------------
-//
-void RConnectionUiUtilitiesSession::ConnectionErrorDiscreetPopup( 
-        TPckgBuf< TInt >& aErrCode,
-        TRequestStatus& aStatus )
-    {
-    CLOG_ENTERFN( "RConnectionUiUtilitiesSession::ConnectionErrorDiscreetPopup" );
-
-    if ( iNotifier )
-        {
-        iNotifier->StartNotifierAndGetResponse( aStatus, KUidConnectionErrorDiscreetPopup,
-                                                aErrCode, aErrCode );
-        }
-
-    CLOG_LEAVEFN( "RConnectionUiUtilitiesSession::ConnectionErrorDiscreetPopup" );
-    }    
-    
-// ---------------------------------------------------------
-// RConnectionUiUtilitiesSession::CancelConnectionErrorDiscreetPopup()
-// ---------------------------------------------------------
-//
-void RConnectionUiUtilitiesSession::CancelConnectionErrorDiscreetPopup()
-    {
-    CLOG_ENTERFN( "RConnectionUiUtilitiesSession::CancelConnectionErrorDiscreetPopup" );
-
-    if ( iNotifier )
-        {
-        iNotifier->CancelNotifier( KUidConnectionErrorDiscreetPopup );
-        }
-
-    CLOG_LEAVEFN( "RConnectionUiUtilitiesSession::CancelConnectionErrorDiscreetPopup" );
-    }    
 
 // End of File

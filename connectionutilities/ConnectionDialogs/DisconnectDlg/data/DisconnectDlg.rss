@@ -39,6 +39,21 @@ RESOURCE EIK_APP_INFO
     {
     }
 
+RESOURCE TBUF r_qtn_netw_conf_conn_disconnected 
+    { 
+    buf = qtn_netw_conf_conn_disconnected; 
+    }
+
+RESOURCE TBUF r_qtn_netw_conf_modem_conn_disconnected 
+    { 
+    buf = qtn_netw_conf_modem_conn_disconnected; 
+    }
+
+RESOURCE TBUF r_qtn_cmon_info_conn_already_end 
+    { 
+    buf = qtn_cmon_info_conn_already_end; 
+    }
+
 RESOURCE TBUF r_qtn_netw_info_disconnect_failed 
     { 
     buf = qtn_netw_info_disconnect_failed; 

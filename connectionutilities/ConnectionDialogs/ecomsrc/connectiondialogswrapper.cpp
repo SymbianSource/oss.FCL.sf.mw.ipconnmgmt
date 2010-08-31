@@ -22,7 +22,6 @@
 
 #include <ecom/implementationproxy.h>
 #include <AknNotifierWrapper.h> // link against aknnotifierwrapper.lib
-#include <wifiprotuiddefs.h>
 
 
 // CONSTANTS
@@ -102,19 +101,6 @@ CArrayPtr<MEikSrvNotifierBase2>* DoCreateNotifierArrayL()
                                             KUidCConnDlgSelectConn,
                                             KMyPriority ) );
 
-_LIT( KWiFiProtSetupPluginName , "wifiprotplugin.dll" );
-   master = 
-        CAknCommonNotifierWrapper::NewL( KUidWiFiProtSetup,
-                                         KUidWiFiProtSetup,
-                                         KMyPriority,
-                                         KWiFiProtSetupPluginName,
-                                         1 ); // we don't use synch reply
-
-    CleanupStack::PushL( master );   
-    subjects->AppendL( master );
-    CleanupStack::Pop( master );
-
-
     // Disconnect dialog
     subjects->AppendL( CAknCommonNotifierWrapper::NewL( KUidDisconnectDlg,
                                                         KUidDisconnectDlg,
@@ -172,27 +158,17 @@ _LIT( KWiFiProtSetupPluginName , "wifiprotplugin.dll" );
                                                         KMyPriority ) );
                                                         
     // WLAN wrappers
+                                                        
+    subjects->AppendL( new( ELeave ) CAknNotifierWrapperLight( *master,
+                                            KUidWlanPowerSaveTestNote,
+                                            KUidWlanPowerSaveTestNote,
+                                            KMyPriority ) );
                                             
     subjects->AppendL( new( ELeave ) CAknNotifierWrapperLight( *master,
                                             KUidEasyWapiDlg,
                                             KUidEasyWapiDlg,
                                             KMyPriority ) );
 
-    subjects->AppendL( new( ELeave ) CAknNotifierWrapperLight( *master,
-                                            KUidNoWLANNetworksAvailableNote,
-                                            KUidNoWLANNetworksAvailableNote,
-                                            KMyPriority ) );   
-
-    subjects->AppendL( new( ELeave ) CAknNotifierWrapperLight( *master,
-                                            KUidConnectingViaDiscreetPopup,
-                                            KUidConnectingViaDiscreetPopup,
-                                            KMyPriority ) );
-
-    subjects->AppendL( new( ELeave ) CAknNotifierWrapperLight( *master,
-                                            KUidConnectionErrorDiscreetPopup,
-                                            KUidConnectionErrorDiscreetPopup,
-                                            KMyPriority ) );                                                                                           
-                                            
     CleanupStack::Pop();    // array cleanup
     return( subjects );
     }

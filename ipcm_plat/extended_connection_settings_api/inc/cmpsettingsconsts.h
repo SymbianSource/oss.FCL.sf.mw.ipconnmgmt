@@ -19,6 +19,9 @@
 #ifndef CMPSETTINGS_CONSTS_H
 #define CMPSETTINGS_CONSTS_H
 
+// Deprecation warning
+#warning This header file is deprecated and shall not be used anymore. See Polonium CR #461 for details.
+
 // CONSTANTS
 
 #define KMaxConnNameLength            30

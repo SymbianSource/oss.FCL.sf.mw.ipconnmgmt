@@ -33,7 +33,7 @@ inline void TMpmSnapBuffer::Reset()
 // TMpmSnapBuffer::Count
 // -----------------------------------------------------------------------------
 //
-inline const TInt TMpmSnapBuffer::Count() const
+inline TInt TMpmSnapBuffer::Count() const
     {
     return iCount;
     }

@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2002 Nokia Corporation and/or its subsidiary(-ies). 
+* Copyright (c) 2010 Nokia Corporation and/or its subsidiary(-ies). 
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -27,7 +27,6 @@ PRJ_EXPORTS
 // export iby files
 ../rom/agentdialog.iby				CORE_MW_LAYER_IBY_EXPORT_PATH(agentdialog.iby)
 ../rom/cconndlg.iby				CORE_MW_LAYER_IBY_EXPORT_PATH(cconndlg.iby)
-../rom/cconndlgResources.iby			LANGUAGE_MW_LAYER_IBY_EXPORT_PATH(cconndlgResources.iby)
 
 ../rom/ConnectionDialogs.iby			CORE_MW_LAYER_IBY_EXPORT_PATH(ConnectionDialogs.iby)
 

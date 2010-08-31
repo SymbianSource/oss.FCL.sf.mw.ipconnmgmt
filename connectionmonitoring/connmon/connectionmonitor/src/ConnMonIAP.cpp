@@ -1142,6 +1142,20 @@ TInt CConnMonIAP::GetIntAttributeL( const RMessage2& aMessage, TInt& aValue )
                 {
                 if ( iWlanSupport )
                     {
+                    TInt secModeV2( EConnMonSecurityV2Open );
+                    ret = iWlanSupport->GetConnectionSecurity( secModeV2 );
+                    aValue = iWlanSupport->ConvertConMonSecModeV2ToConnMonSecMode( secModeV2 );
+                    }
+                }
+            break;
+
+        case KSecurityMode_v2:
+            // SECURITY MODE V2
+            ret = KErrNotSupported;
+            if ( iConnInfos[index].iBearer == EBearerWLAN )
+                {
+                if ( iWlanSupport )
+                    {
                     ret = iWlanSupport->GetConnectionSecurity( aValue );
                     }
                 }

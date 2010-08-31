@@ -56,7 +56,9 @@ CMPMConnMonReqs::CMPMConnMonReqs(CMPMConnMonEvents& aParent,
                                  RConnectionMonitor& aConnMon,
                                  TUint aConnId, 
                                  CMPMServerSession* aSession )
-    : CActive(CActive::EPriorityStandard), 
+    : CActive(CActive::EPriorityStandard),
+      iNextState( EGetIapAvailState ),
+      iLastCancelCode( 0 ),
       iParent(aParent), 
       iConnMon(aConnMon), 
       iConnId(aConnId), 
@@ -346,6 +348,12 @@ ConnMon request completed with error code = %i", iStatus.Int() )
                         // Generate event only if not 
                         //
                         iParent.IapAvailabilityChange( EConnMon );
+                        }
+
+                    if ( iParent.AvailabilityNotificationDiscarded() )
+                        {
+                        MPMLOGSTRING( "CMPMConnMonReqs::RunL: AvailabilityNotificationDiscarded, roaming logic triggered" )
+                        iParent.IapAvailabilityChange( EConnMonEvent );
                         }
                     }
                 // check which callback function to use
