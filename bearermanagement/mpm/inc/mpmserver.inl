@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2007-2010 Nokia Corporation and/or its subsidiary(-ies). 
+* Copyright (c) 2007-2009 Nokia Corporation and/or its subsidiary(-ies). 
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -72,6 +72,15 @@ inline TBool CMPMServer::IsWLANScanRequired() const
     }
 
 // -----------------------------------------------------------------------------
+// CMPMServer::DisconnectQueue
+// -----------------------------------------------------------------------------
+//
+inline CArrayPtrFlat<CMPMDisconnectDlg>* CMPMServer::DisconnectQueue()
+    {
+    return iDisconnectQueue;
+    }
+
+// -----------------------------------------------------------------------------
 // CMPMServer::RoamingQueue
 // -----------------------------------------------------------------------------
 //
@@ -87,6 +96,52 @@ inline CArrayPtrFlat<CMPMConfirmDlgRoaming>* CMPMServer::RoamingQueue()
 inline CArrayPtrFlat<CMPMConfirmDlgStarting>* CMPMServer::StartingQueue()
     {
     return iStartingQueue;
+    }
+
+// -----------------------------------------------------------------------------
+// CMPMServer::RemoveFromWlanQueryQueue
+// -----------------------------------------------------------------------------
+//
+inline void CMPMServer::RemoveFromWlanQueryQueue( CMPMWlanQueryDialog* aDlg )
+    {
+    for ( TInt i = 0; i < iWlanQueryQueue->Count(); i++ )
+        {
+        if ( iWlanQueryQueue->At( i ) == aDlg )
+            {
+            iWlanQueryQueue->Delete( i );
+            break;
+            }
+        }
+    }
+
+// -----------------------------------------------------------------------------
+// CMPMServer::WlanQueryQueue
+// -----------------------------------------------------------------------------
+//
+inline CArrayPtrFlat<CMPMWlanQueryDialog>* CMPMServer::WlanQueryQueue()
+    {
+    return iWlanQueryQueue;
+    }
+
+// -----------------------------------------------------------------------------
+// CMPMServer::FirstInWlanQueryQueue
+// -----------------------------------------------------------------------------
+//
+inline CMPMWlanQueryDialog* CMPMServer::FirstInWlanQueryQueue()
+    {
+    if ( iWlanQueryQueue->Count() == 0 )
+        return NULL;
+    else
+        return iWlanQueryQueue->At( 0 );
+    }
+
+// -----------------------------------------------------------------------------
+// CMPMServer::ConnectDialogQueue
+// -----------------------------------------------------------------------------
+//
+inline CArrayPtrFlat<CMPMDialog>* CMPMServer::ConnectDialogQueue()
+    {
+    return iConnectDialogQueue;
     }
 
 // -----------------------------------------------------------------------------
@@ -186,15 +241,6 @@ inline CMpmCsIdWatcher* CMPMServer::CsIdWatcher()
     }
 
 // -----------------------------------------------------------------------------
-// CMPMServer::VpnToggleWatcher
-// -----------------------------------------------------------------------------
-//
-inline CMpmVpnToggleWatcher* CMPMServer::VpnToggleWatcher()
-    {
-    return iMpmVpnToggleWatcher;
-    }
-
-// -----------------------------------------------------------------------------
 // CMPMServer::DedicatedClients
 // -----------------------------------------------------------------------------
 //
@@ -216,18 +262,9 @@ inline CMPMCommsDatAccess* CMPMServer::CommsDatAccess()
 // CMPMServer::RoamingWatcher()
 // -----------------------------------------------------------------------------
 //
-inline CMPMRoamingWatcher* CMPMServer::RoamingWatcher() const
+CMPMRoamingWatcher* CMPMServer::RoamingWatcher() const
     {
     return iRoamingWatcher;
-    }
-
-// -----------------------------------------------------------------------------
-// CMPMServer::ConnUiUtils()
-// -----------------------------------------------------------------------------
-//
-inline CConnectionUiUtilities* CMPMServer::ConnUiUtils() const
-    {
-    return iConnUiUtils;
     }
 
 // -----------------------------------------------------------------------------

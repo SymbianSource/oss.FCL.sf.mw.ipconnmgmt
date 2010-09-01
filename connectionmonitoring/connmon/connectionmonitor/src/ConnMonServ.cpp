@@ -352,14 +352,6 @@ void CConnMonServer::ConstructL()
     // Identify ourselves and open for service
     StartL( KConnectionMonitorServerName );
 
-    //Start Indicator observer process
-    _LIT(KIndicatorObserverExeFile,"indicatorobserver.exe");
-    _LIT(KIndicatorObserverExeFileCmd,"");
-    RProcess proc;
-    User::LeaveIfError(proc.Create(KIndicatorObserverExeFile,KIndicatorObserverExeFileCmd));
-    proc.Resume();
-    proc.Close(); // Closes the handle, not the process.
-
     LOGIT("ConstructL: Server started successfully")
     LOGEXITFN("CConnMonServer::ConstructL()")
     }

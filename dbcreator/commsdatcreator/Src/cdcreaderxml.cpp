@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2004-2010 Nokia Corporation and/or its subsidiary(-ies). 
+* Copyright (c) 2004 Nokia Corporation and/or its subsidiary(-ies). 
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -11,9 +11,12 @@
 *
 * Contributors:
 *
-* Description:
-* Implementation of the class CReaderXML
+* Description:   Implementation of the class CReaderXML
+*
 */
+
+
+
  
 // INCLUDE FILES
 
@@ -166,7 +169,7 @@ const TUint KAsciiUnicodeRatio = 2;
 //---------------
 //WPAPresharedKey         string    WPA/WPA2 pre-shared key in plain text. 
 //WPAKeyLength            integer   The length of the WPA/WPA2 pre-shared key.
-//WPAEapMethod            string    A EAP method in use
+//WPAListOfEAPs           string    A list of EAPs in use
 //WPAUseOfPresharedKey    string    WPA/WPA2 pre-shared key usage.
 //=============
 //VPN specific:
@@ -320,7 +323,7 @@ _LIT16( KWEPKey4Data,               "WEPKey4Data" );
 //WPA security
 _LIT16( KWPAPresharedKey,           "WPAPresharedKey" );
 _LIT16( KWPAKeyLength,              "WPAKeyLength" );
-_LIT16( KWPAEapMethod,              "WPAEapMethod");
+_LIT16( KWPAListOfEAPs,             "WPAListOfEAPs" );
 _LIT16( KWPAUseOfPresharedKey,      "WPAUseOfPresharedKey" );
 
 //EAP security
@@ -470,6 +473,8 @@ _LIT16( KUIPriorityDialOut,         "UIPriorityDialOut" );
 _LIT16( KUIPriorityDialIn,          "UIPriorityDialIn" );
 _LIT16( KUIPriorityVpn,             "UIPriorityVpn" );
 _LIT16( KUIPriorityMip,             "UIPriorityMip" );
+_LIT16( KDefaultConnectionType,     "DefaultConnectionType" );
+_LIT16( KDefaultConnectionName,     "DefaultConnectionName" );
 _LIT16( KUsageOfWlan,               "UsageOfWlan" );
 _LIT16( KCellularDataUsageHome,     "CellularDataUsageHome" );
 _LIT16( KCellularDataUsageVisitor,  "CellularDataUsageVisitor" );
@@ -487,6 +492,15 @@ _LIT16( KWlanRTS,                   "WlanRTS" );
 _LIT16( KWlanTxPowerLevel,          "WlanTxPowerLevel" );
 _LIT16( KWlanRadioMeasurements,     "WlanRadioMeasurements" );
 _LIT16( KWlanPowerMode,             "WlanPowerMode" );
+
+
+//maximum number of PacketData AP parameters
+const TInt KMaxPacketDataParam = 28;
+const TInt KMaxLANParam = 26;
+const TInt KMaxWLANParam = 125;
+const TInt KMaxGlobalParam = 42;
+const TInt KMaxVPNParam = 12;
+const TInt KMaxDNParam = 19;
 
 
 // ================= MEMBER FUNCTIONS =======================
@@ -898,32 +912,26 @@ TDbCreatorFeatures CReaderXML::DetectFeatureHead()
     
     if ( iLine->FindF( KFeatureHeadPacketData ) != KErrNotFound )
         {
-        CLOG_WRITE( "CReaderXML::DetectFeatureHead(): EFeaturePacketData" );
         feature = EFeaturePacketData;
         }
     else if ( iLine->FindF( KFeatureHeadWLAN ) != KErrNotFound )
         {
-        CLOG_WRITE( "CReaderXML::DetectFeatureHead(): EFeatureWLAN" );
         feature = EFeatureWLAN;
         }
     else if ( iLine->FindF( KFeatureHeadLAN ) != KErrNotFound )
         {
-        CLOG_WRITE( "CReaderXML::DetectFeatureHead(): EFeatureLAN" );
         feature = EFeatureLAN;
         }
     else if ( iLine->FindF( KFeatureHeadVPN ) != KErrNotFound )
         {
-        CLOG_WRITE( "CReaderXML::DetectFeatureHead(): EFeatureVPN" );
         feature = EFeatureVPN;
         }
     else if ( iLine->FindF( KFeatureHeadDN ) != KErrNotFound )
         {
-        CLOG_WRITE( "CReaderXML::DetectFeatureHead(): EFeatureDN" );
         feature = EFeatureDN;
         }
     else if ( iLine->FindF( KFeatureHeadGlobal ) != KErrNotFound )
         {
-        CLOG_WRITE( "CReaderXML::DetectFeatureHead(): EFeatureGlobal" );
         feature = EFeatureGlobal;
         iFoundGlobal = ETrue;        
         }
@@ -1012,6 +1020,7 @@ TBool CReaderXML::DetectTailAP()
 //
 TInt CReaderXML::DetectParam()
     {
+    TInt maxParam( 0 );           //maximum nunber of params in array
     TInt fieldId( KErrNotFound ); //field id of detected parameter 
     RArray<EInputParams> *params( NULL ); //pointer to the table used 
                                         //for or detection    
@@ -1019,21 +1028,27 @@ TInt CReaderXML::DetectParam()
     switch ( CurrentFeature() )        
         {
         case EFeaturePacketData:
+            maxParam = KMaxPacketDataParam;
             params   = &iPDParams;
             break;
         case EFeatureWLAN:
+            maxParam = KMaxWLANParam;
             params   = &iWLanParams;
             break;
         case EFeatureLAN:
+            maxParam = KMaxLANParam;
             params   = &iLanParams;
             break;
         case EFeatureVPN:
+            maxParam = KMaxVPNParam;
             params   = &iVpnParams;
             break;
         case EFeatureDN:
+            maxParam = KMaxDNParam;
             params =   &iDNParams;
             break;
         case EFeatureGlobal:
+            maxParam = KMaxGlobalParam;
             params   = &iGlobalParams;
             break;
         default:
@@ -1042,13 +1057,14 @@ TInt CReaderXML::DetectParam()
        
     //looks for parameter match
     HBufC16* paramName = ReadParam( EParamName );
+    TBool found ( EFalse );
+    
     if ( paramName == NULL )
             {
             return fieldId;
             }
 
-    TBool found ( EFalse );
-    for ( TInt idx = 0; idx < params->Count() && !found; idx++ )
+    for ( TInt idx = 0; idx < maxParam && !found; idx++ )
         {        
         if ( paramName->CompareF( (*params)[idx].iParam ) == 0 )
             {
@@ -1111,18 +1127,6 @@ HBufC16* CReaderXML::ReadParam( TParamSegment aSegment )
             CLOG_WRITE_FORMAT( "! Warning: tag could not be allocated %S:",
                                      &tag );
             }
-// Debugging help; commented out for clearer log.
-//        else 
-//            {
-//            if (aSegment == EParamValue)
-//                {
-//                CLOG_WRITE_FORMAT( "CReaderXML::ReadParam: value %S", &tag );
-//                }
-//            else if (aSegment == EParamName)
-//                {
-//                CLOG_WRITE_FORMAT( "CReaderXML::ReadParam: name %S", &tag );
-//                }
-//            }
         }
     return ret;
     }
@@ -1204,310 +1208,310 @@ void CReaderXML::ConvertSpecialXMLChars( HBufC* aPtrTag )
     _LIT16( sp5, "\'" );
     ReplaceInString( aPtrTag, spXML5, sp5 );
     _LIT16( spXML6, "&iexcl;" );
-    _LIT16( sp6, "\u00a1" );
+    _LIT16( sp6, "¡" );
     ReplaceInString( aPtrTag, spXML6, sp6 );
     _LIT16( spXML7, "&cent;" );
-    _LIT16( sp7, "\u00a2" );
+    _LIT16( sp7, "¢" );
     ReplaceInString( aPtrTag, spXML7, sp7 );
     _LIT16( spXML8, "&pound;" );
-    _LIT16( sp8, "\u00a3" );
+    _LIT16( sp8, "£" );
     ReplaceInString( aPtrTag, spXML8, sp8 );
     _LIT16( spXML9, "&curren;" );
-    _LIT16( sp9, "\u00a4" );
+    _LIT16( sp9, "¤" );
     ReplaceInString( aPtrTag, spXML9, sp9 );
     _LIT16( spXML10, "&yen;" );
-    _LIT16( sp10, "\u00a5" );
+    _LIT16( sp10, "¥" );
     ReplaceInString( aPtrTag, spXML10, sp10 );
     _LIT16( spXML11, "&brvbar;" );
-    _LIT16( sp11, "\u00a6" );
+    _LIT16( sp11, "¦" );
     ReplaceInString( aPtrTag, spXML11, sp11 );
     _LIT16( spXML12, "&sect;" );
-    _LIT16( sp12, "\u00a7" );
+    _LIT16( sp12, "§" );
     ReplaceInString( aPtrTag, spXML12, sp12 );
     _LIT16( spXML13, "&uml;" );
-    _LIT16( sp13, "\u00a8" );
+    _LIT16( sp13, "¨" );
     ReplaceInString( aPtrTag, spXML13, sp13 );
     _LIT16( spXML14, "&copy;" );
-    _LIT16( sp14, "\u00a9" );
+    _LIT16( sp14, "©" );
     ReplaceInString( aPtrTag, spXML14, sp14 );
     _LIT16( spXML15, "&ordf;" );
-    _LIT16( sp15, "\u00aa" );
+    _LIT16( sp15, "ª" );
     ReplaceInString( aPtrTag, spXML15, sp15 );
     _LIT16( spXML16, "&laquo;" );
-    _LIT16( sp16, "\u00ab" );
+    _LIT16( sp16, "«" );
     ReplaceInString( aPtrTag, spXML16, sp16 );
     _LIT16( spXML17, "&not;" );
-    _LIT16( sp17, "\u00ac" );
+    _LIT16( sp17, "¬" );
     ReplaceInString( aPtrTag, spXML17, sp17 );
     _LIT16( spXML18, "&reg;" );
-    _LIT16( sp18, "\u00ae" );
+    _LIT16( sp18, "®" );
     ReplaceInString( aPtrTag, spXML18, sp18 );
     _LIT16( spXML19, "&macr;" );
-    _LIT16( sp19, "\u00af" );
+    _LIT16( sp19, "¯" );
     ReplaceInString( aPtrTag, spXML19, sp19 );
     _LIT16( spXML20, "&deg;" );
-    _LIT16( sp20, "\u00b0" );
+    _LIT16( sp20, "°" );
     ReplaceInString( aPtrTag, spXML20, sp20 );
     _LIT16( spXML21, "&plusmn;" );
-    _LIT16( sp21, "\u00b1" );
+    _LIT16( sp21, "±" );
     ReplaceInString( aPtrTag, spXML21, sp21 );
     _LIT16( spXML22, "&sup2;" );
-    _LIT16( sp22, "\u00b2" );
+    _LIT16( sp22, "²" );
     ReplaceInString( aPtrTag, spXML22, sp22 );
     _LIT16( spXML23, "&sup3;" );
-    _LIT16( sp23, "\u00b3" );
+    _LIT16( sp23, "³" );
     ReplaceInString( aPtrTag, spXML23, sp23 );
     _LIT16( spXML24, "&acute;" );
-    _LIT16( sp24, "\u00b4" );
+    _LIT16( sp24, "´" );
     ReplaceInString( aPtrTag, spXML24, sp24 );
     _LIT16( spXML25, "&micro;" );
-    _LIT16( sp25, "\u00b5" );
+    _LIT16( sp25, "µ" );
     ReplaceInString( aPtrTag, spXML25, sp25 );
     _LIT16( spXML26, "&para;" );
-    _LIT16( sp26, "\u00b6" );
+    _LIT16( sp26, "¶" );
     ReplaceInString( aPtrTag, spXML26, sp26 );  
     _LIT16( spXML27, "&middot;" );
-    _LIT16( sp27, "\u00b7" );
+    _LIT16( sp27, "·" );
     ReplaceInString( aPtrTag, spXML27, sp27 );
     _LIT16( spXML28, "&cedil;" );
-    _LIT16( sp28, "\u00b8" );
+    _LIT16( sp28, "¸" );
     ReplaceInString( aPtrTag, spXML28, sp28 );
     _LIT16( spXML29, "&sup1;" );
-    _LIT16( sp29, "\u00b9" );
+    _LIT16( sp29, "¹" );
     ReplaceInString( aPtrTag, spXML29, sp29 );
     _LIT16( spXML30, "&ordm;" );
-    _LIT16( sp30, "\u00ba" );
+    _LIT16( sp30, "º" );
     ReplaceInString( aPtrTag, spXML30, sp30 );
     _LIT16( spXML31, "&raquo;" );
-    _LIT16( sp31, "\u00bb" );
+    _LIT16( sp31, "»" );
     ReplaceInString( aPtrTag, spXML31, sp31 );
     _LIT16( spXML32, "&frac14;" );
-    _LIT16( sp32, "\u00bc" );
+    _LIT16( sp32, "¼" );
     ReplaceInString( aPtrTag, spXML32, sp32 );
     _LIT16( spXML33, "&frac12;" );
-    _LIT16( sp33, "\u00bd" );
+    _LIT16( sp33, "½" );
     ReplaceInString( aPtrTag, spXML33, sp33 );
     _LIT16( spXML34, "&frac34;" );
-    _LIT16( sp34, "\u00be" );
+    _LIT16( sp34, "¾" );
     ReplaceInString( aPtrTag, spXML34, sp34 );
     _LIT16( spXML35, "&iquest;" );
-    _LIT16( sp35, "\u00bf" );
+    _LIT16( sp35, "¿" );
     ReplaceInString( aPtrTag, spXML35, sp35 );
     _LIT16( spXML36, "&Agrave;" );
-    _LIT16( sp36, "\u00c0" );
+    _LIT16( sp36, "À" );
     ReplaceInString( aPtrTag, spXML36, sp36 );
     _LIT16( spXML37, "&Aacute;" );
-    _LIT16( sp37, "\u00c1" );
+    _LIT16( sp37, "Á" );
     ReplaceInString( aPtrTag, spXML37, sp37 );
     _LIT16( spXML38, "&Acirc;" );
-    _LIT16( sp38, "\u00c2" );
+    _LIT16( sp38, "Â" );
     ReplaceInString( aPtrTag, spXML38, sp38 );
     _LIT16( spXML39, "&Atilde;" );
-    _LIT16( sp39, "\u00c3" );
+    _LIT16( sp39, "Ã" );
     ReplaceInString( aPtrTag, spXML39, sp39 );
     _LIT16( spXML40, "&Auml;" );
-    _LIT16( sp40, "\u00c4" );
+    _LIT16( sp40, "Ä" );
     ReplaceInString( aPtrTag, spXML40, sp40 );
     _LIT16( spXML41, "&Aring;" );
-    _LIT16( sp41, "\u00c5" );
+    _LIT16( sp41, "Å" );
     ReplaceInString( aPtrTag, spXML41, sp41 );
     _LIT16( spXML42, "&AElig;" );
-    _LIT16( sp42, "\u00c6" );
+    _LIT16( sp42, "Æ" );
     ReplaceInString( aPtrTag, spXML42, sp42 ); 
     _LIT16( spXML43, "&Ccedil;" );
-    _LIT16( sp43, "\u00c7" );
+    _LIT16( sp43, "Ç" );
     ReplaceInString( aPtrTag, spXML43, sp43 );
     _LIT16( spXML44, "&Egrave;" );
-    _LIT16( sp44, "\u00c8" );
+    _LIT16( sp44, "È" );
     ReplaceInString( aPtrTag, spXML44, sp44 );
     _LIT16( spXML45, "&Eacute;" );
-    _LIT16( sp45, "\u00c9" );
+    _LIT16( sp45, "É" );
     ReplaceInString( aPtrTag, spXML45, sp45 );
     _LIT16( spXML46, "&Ecirc;" );
-    _LIT16( sp46, "\u00ca" );
+    _LIT16( sp46, "Ê" );
     ReplaceInString( aPtrTag, spXML46, sp46 );
     _LIT16( spXML47, "&Euml;" );
-    _LIT16( sp47, "\u00cb" );
+    _LIT16( sp47, "Ë" );
     ReplaceInString( aPtrTag, spXML47, sp47 );
     _LIT16( spXML48, "&Igrave;" );
-    _LIT16( sp48, "\u00cc" );
+    _LIT16( sp48, "Ì" );
     ReplaceInString( aPtrTag, spXML48, sp48 );
     _LIT16( spXML49, "&Iacute;" );
-    _LIT16( sp49, "\u00cd" );
+    _LIT16( sp49, "Í" );
     ReplaceInString( aPtrTag, spXML49, sp49 );
     _LIT16( spXML50, "&Icirc;" );
-    _LIT16( sp50, "\u00ce" );
+    _LIT16( sp50, "Î" );
     ReplaceInString( aPtrTag, spXML50, sp50 );
     _LIT16( spXML51, "&Iuml;" );
-    _LIT16( sp51, "\u00cf" );
+    _LIT16( sp51, "Ï" );
     ReplaceInString( aPtrTag, spXML51, sp51 );
     _LIT16( spXML52, "&ETH;" );
-    _LIT16( sp52, "\u00d0" );
+    _LIT16( sp52, "Ð" );
     ReplaceInString( aPtrTag, spXML52, sp52 );
     _LIT16( spXML53, "&Ntilde;" );
-    _LIT16( sp53, "\u00d1" );
+    _LIT16( sp53, "Ñ" );
     ReplaceInString( aPtrTag, spXML53, sp53 );
     _LIT16( spXML54, "&Ograve;" );
-    _LIT16( sp54, "\u00d2" );
+    _LIT16( sp54, "Ò" );
     ReplaceInString( aPtrTag, spXML54, sp54 );
     _LIT16( spXML55, "&Oacute;" );
-    _LIT16( sp55, "\u00d3" );
+    _LIT16( sp55, "Ó" );
     ReplaceInString( aPtrTag, spXML55, sp55 );
     _LIT16( spXML56, "&Ocirc;" );
-    _LIT16( sp56, "\u00d4" );
+    _LIT16( sp56, "Ô" );
     ReplaceInString( aPtrTag, spXML56, sp56 );
     _LIT16( spXML57, "&Otilde;" );
-    _LIT16( sp57, "\u00d5" );
+    _LIT16( sp57, "Õ" );
     ReplaceInString( aPtrTag, spXML57, sp57 );
     _LIT16( spXML58, "&Ouml;" );
-    _LIT16( sp58, "\u00d6" );
+    _LIT16( sp58, "Ö" );
     ReplaceInString( aPtrTag, spXML58, sp58 );
     _LIT16( spXML59, "&times;" );
-    _LIT16( sp59, "\u00d7" );
+    _LIT16( sp59, "×" );
     ReplaceInString( aPtrTag, spXML59, sp59 );
     _LIT16( spXML60, "&Oslash;" );
-    _LIT16( sp60, "\u00d8" );
+    _LIT16( sp60, "Ø" );
     ReplaceInString( aPtrTag, spXML60, sp60 );
     _LIT16( spXML61, "&Ugrave;" );
-    _LIT16( sp61, "\u00d9" );
+    _LIT16( sp61, "Ù" );
     ReplaceInString( aPtrTag, spXML61, sp61 );
     _LIT16( spXML62, "&Uacute;" );
-    _LIT16( sp62, "\u00da" );
+    _LIT16( sp62, "Ú" );
     ReplaceInString( aPtrTag, spXML62, sp62 );
     _LIT16( spXML63, "&Ucirc;" );
-    _LIT16( sp63, "\u00db" );
+    _LIT16( sp63, "Û" );
     ReplaceInString( aPtrTag, spXML63, sp63 );
     _LIT16( spXML64, "&Uuml;" );
-    _LIT16( sp64, "\u00dc" );
+    _LIT16( sp64, "Ü" );
     ReplaceInString( aPtrTag, spXML64, sp64 );
     _LIT16( spXML65, "&Yacute;" );
-    _LIT16( sp65, "\u00dd" );
+    _LIT16( sp65, "Ý" );
     ReplaceInString( aPtrTag, spXML65, sp65 );
     _LIT16( spXML66, "&THORN;" );
-    _LIT16( sp66, "\u00de" );
+    _LIT16( sp66, "Þ" );
     ReplaceInString( aPtrTag, spXML66, sp66 );
     _LIT16( spXML67, "&szlig;" );
-    _LIT16( sp67, "\u00df" );
+    _LIT16( sp67, "ß" );
     ReplaceInString( aPtrTag, spXML67, sp67 );
     _LIT16( spXML68, "&agrave;" );
-    _LIT16( sp68, "\u00e0" );
+    _LIT16( sp68, "à" );
     ReplaceInString( aPtrTag, spXML68, sp68 );
     _LIT16( spXML69, "&aacute;" );
-    _LIT16( sp69, "\u00e1" );
+    _LIT16( sp69, "á" );
     ReplaceInString( aPtrTag, spXML69, sp69 );
     _LIT16( spXML70, "&acirc;" );
-    _LIT16( sp70, "\u00e2" );
+    _LIT16( sp70, "â" );
     ReplaceInString( aPtrTag, spXML70, sp70 );
     _LIT16( spXML71, "&atilde;" );
-    _LIT16( sp71, "\u00e3" );
+    _LIT16( sp71, "ã" );
     ReplaceInString( aPtrTag, spXML71, sp71 );
     _LIT16( spXML72, "&auml;");
-    _LIT16( sp72, "\u00e4" );
+    _LIT16( sp72, "ä" );
     ReplaceInString( aPtrTag, spXML72, sp72 );
     _LIT16( spXML73, "&aring;" );
-    _LIT16( sp73, "\u00e5" );
+    _LIT16( sp73, "å" );
     ReplaceInString( aPtrTag, spXML73, sp73 );
     _LIT16( spXML74, "&aelig;" );
-    _LIT16( sp74, "\u00e6" );
+    _LIT16( sp74, "æ" );
     ReplaceInString( aPtrTag, spXML74, sp74 );
     _LIT16( spXML75, "&acedil;" );
-    _LIT16( sp75, "\u00e7" );
+    _LIT16( sp75, "ç" );
     ReplaceInString( aPtrTag, spXML75, sp75 );
     _LIT16( spXML76, "&egrave;" );
-    _LIT16( sp76, "\u00e8" );
+    _LIT16( sp76, "è" );
     ReplaceInString( aPtrTag, spXML76, sp76 );
     _LIT16( spXML77, "&eacute;" );
-    _LIT16( sp77, "\u00e9" );
+    _LIT16( sp77, "é" );
     ReplaceInString( aPtrTag, spXML77, sp77 );
     _LIT16( spXML78, "&ecirc;" );
-    _LIT16( sp78, "\u00ea" );
+    _LIT16( sp78, "ê" );
     ReplaceInString( aPtrTag, spXML78, sp78 );
     _LIT16( spXML79, "&euml;" );
-    _LIT16( sp79, "\u00eb" );
+    _LIT16( sp79, "ë" );
     ReplaceInString( aPtrTag, spXML79, sp79 );
     _LIT16( spXML80, "&igrave;" );
-    _LIT16( sp80, "\u00ec" );
+    _LIT16( sp80, "ì" );
     ReplaceInString( aPtrTag, spXML80, sp80 );
     _LIT16( spXML81, "&iacute;" );
-    _LIT16( sp81, "\u00ed" );
+    _LIT16( sp81, "í" );
     ReplaceInString( aPtrTag, spXML81, sp81 );
     _LIT16( spXML82, "&icirc;" );
-    _LIT16( sp82, "\u00ee" );
+    _LIT16( sp82, "î" );
     ReplaceInString( aPtrTag, spXML82, sp82 );
     _LIT16( spXML83, "&iuml;" );
-    _LIT16( sp83, "\u00ef" );
+    _LIT16( sp83, "ï" );
     ReplaceInString( aPtrTag, spXML83, sp83 );
     _LIT16( spXML84, "&eth;" );
-    _LIT16( sp84, "\u00f0" );
+    _LIT16( sp84, "ð" );
     ReplaceInString( aPtrTag, spXML84, sp84 );
     _LIT16( spXML85, "&ntilde;" );
-    _LIT16( sp85, "\u00f1" );
+    _LIT16( sp85, "ñ" );
     ReplaceInString( aPtrTag, spXML85, sp85 );
     _LIT16( spXML86, "&ograve;" );
-    _LIT16( sp86, "\u00f2" );
+    _LIT16( sp86, "ò" );
     ReplaceInString( aPtrTag, spXML86, sp86 );
     _LIT16( spXML87, "&oacute;" );
-    _LIT16( sp87, "\u00f3" );
+    _LIT16( sp87, "ó" );
     ReplaceInString( aPtrTag, spXML87, sp87 );
     _LIT16( spXML88, "&ocirc;" );
-    _LIT16( sp88, "\u00f4" );
+    _LIT16( sp88, "ô" );
     ReplaceInString( aPtrTag, spXML88, sp88 );
     _LIT16( spXML89, "&otilde;" );
-    _LIT16( sp89, "\u00f5" );
+    _LIT16( sp89, "õ" );
     ReplaceInString( aPtrTag, spXML89, sp89 );
     _LIT16( spXML90, "&ouml;" );
-    _LIT16( sp90, "\u00f6" );
+    _LIT16( sp90, "ö" );
     ReplaceInString( aPtrTag, spXML90, sp90 );
     _LIT16( spXML91, "&divide;" );
-    _LIT16( sp91, "\u00f7" );
+    _LIT16( sp91, "÷" );
     ReplaceInString( aPtrTag, spXML91, sp91 );
     _LIT16( spXML92, "&oslash;" );
-    _LIT16( sp92, "\u00f8" );
+    _LIT16( sp92, "ø" );
     ReplaceInString( aPtrTag, spXML92, sp92 );
     _LIT16( spXML93, "&ugrave;" );
-    _LIT16( sp93, "\u00f9" );
+    _LIT16( sp93, "ù" );
     ReplaceInString( aPtrTag, spXML93, sp93 );
     _LIT16( spXML94, "&uacute;" );
-    _LIT16( sp94, "\u00fa" );
+    _LIT16( sp94, "ú" );
     ReplaceInString( aPtrTag, spXML94, sp94 );
     _LIT16( spXML95, "&ucirc;" );
-    _LIT16( sp95, "\u00fb" );
+    _LIT16( sp95, "û" );
     ReplaceInString( aPtrTag, spXML95, sp95 );
     _LIT16( spXML96, "&uuml;" );
-    _LIT16( sp96, "\u00fc" );
+    _LIT16( sp96, "ü" );
     ReplaceInString( aPtrTag, spXML96, sp96 );
     _LIT16( spXML97, "&yacute;" );
-    _LIT16( sp97, "\u00fd" );
+    _LIT16( sp97, "ý" );
     ReplaceInString( aPtrTag, spXML97, sp97 );
     _LIT16( spXML98, "&thorn;" );
-    _LIT16( sp98, "\u00de" );
+    _LIT16( sp98, "þ" );
     ReplaceInString( aPtrTag, spXML98, sp98 );
     _LIT16( spXML99, "&yuml;" );
-    _LIT16( sp99, "\u00ff" );
+    _LIT16( sp99, "ÿ" );
     ReplaceInString( aPtrTag, spXML99, sp99 );
     _LIT16( spXML100, "&OElig;" );
-    _LIT16( sp100, "\u0152" );
+    _LIT16( sp100, "Œ" );
     ReplaceInString( aPtrTag, spXML100, sp100 );
     _LIT16( spXML101, "&oelig;" );
-    _LIT16( sp101, "\u0153" );
+    _LIT16( sp101, "œ" );
     ReplaceInString( aPtrTag, spXML101, sp101 );
     _LIT16( spXML102, "&Scaron;" );
-    _LIT16( sp102, "\u0160" );
+    _LIT16( sp102, "Š" );
     ReplaceInString( aPtrTag, spXML102, sp102 );
     _LIT16( spXML103, "&scaron;" );
-    _LIT16( sp103, "\u0161" );
+    _LIT16( sp103, "š" );
     ReplaceInString( aPtrTag, spXML103, sp103 );
     _LIT16( spXML104, "&Yuml;" );
-    _LIT16( sp104, "\u0178" );
+    _LIT16( sp104, "Ÿ" );
     ReplaceInString( aPtrTag, spXML104, sp104 );
     _LIT16( spXML105, "&fnof;" );
-    _LIT16( sp105, "\u0192" );
+    _LIT16( sp105, "ƒ" );
     ReplaceInString( aPtrTag, spXML105, sp105 );
     _LIT16( spXML106, "&circ;" );
-    _LIT16( sp106, "\u02c6" );
+    _LIT16( sp106, "ˆ" );
     ReplaceInString( aPtrTag, spXML106, sp106 );
     _LIT16( spXML107, "&tilde;" );
-    _LIT16( sp107, "\u02dc" );
+    _LIT16( sp107, "˜" );
     ReplaceInString( aPtrTag, spXML107, sp107 );
     }
 
@@ -1638,7 +1642,7 @@ void CReaderXML::FillWLanParams()
     iWLanParams.Append( EInputParams( EWEPKey4Data,                 KWEPKey4Data ) );
     iWLanParams.Append( EInputParams( EWPAPresharedKey,             KWPAPresharedKey ) );
     iWLanParams.Append( EInputParams( EWPAKeyLength,                KWPAKeyLength ) );
-    iWLanParams.Append( EInputParams( EWPAEapMethod,                KWPAEapMethod ) );
+    iWLanParams.Append( EInputParams( EWPAListOfEAPs,               KWPAListOfEAPs ) );
     iWLanParams.Append( EInputParams( EWPAUseOfPresharedKey,        KWPAUseOfPresharedKey ) );
     iWLanParams.Append( EInputParams( EEapGtcUsername,              KEapGtcUsername ) );
     iWLanParams.Append( EInputParams( EEapGtcSessionValidityTime,   KEapGtcSessionValidityTime ) );
@@ -1773,6 +1777,8 @@ void CReaderXML::FillGlobalParams()
     iGlobalParams.Append( EInputParams( EUIPriorityDialIn,      KUIPriorityDialIn ) );
     iGlobalParams.Append( EInputParams( EUIPriorityVpn,         KUIPriorityVpn ) );
     iGlobalParams.Append( EInputParams( EUIPriorityMip,         KUIPriorityMip ) );
+    iGlobalParams.Append( EInputParams( EDefaultConnectionType, KDefaultConnectionType ) );
+    iGlobalParams.Append( EInputParams( EDefaultConnectionName, KDefaultConnectionName ) );
     iGlobalParams.Append( EInputParams( EUsageOfWlan,           KUsageOfWlan ) );
     iGlobalParams.Append( EInputParams( ECellularDataUsageHome,         KCellularDataUsageHome ) );
     iGlobalParams.Append( EInputParams( ECellularDataUsageVisitor,      KCellularDataUsageVisitor ) );
@@ -1817,5 +1823,6 @@ void CReaderXML::FillDNParams()
     iDNParams.Append( EInputParams( EDN_IAPName,        KDN_IAPName9 ) );
     iDNParams.Append( EInputParams( EDN_IAPName,        KDN_IAPName10 ) );   
     };
+
         
 // End of File.

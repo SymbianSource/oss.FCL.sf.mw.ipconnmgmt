@@ -26,7 +26,7 @@
 #include <aknnotewrappers.h>
 #include <aknnotedialog.h>
 #include <connectionuiutilities.mbg>
-#include <connuiutilsnotif.rsg>
+#include <ConnUiUtilsNotif.rsg>
 #include <StringLoader.h>
 #include <data_caging_path_literals.hrh>
 #include <uikon/eiksrvui.h>
@@ -65,9 +65,7 @@ CSelectWLANDlg::CSelectWLANDlg( CSelectWLanDlgPlugin* aPlugin, TInt aIndex,
 : CAknListQueryDialog( &aIndex ),
   iPlugin( aPlugin ),
   iNetworkArray( aNetworkArray ),
-  iFromOkToExit( EFalse ),
-  iWaitDialog( NULL ),
-  iExpiryTimer( NULL )
+  iFromOkToExit( EFalse )
     {
     }
 
@@ -212,7 +210,12 @@ TBool CSelectWLANDlg::OkToExitL( TInt aButtonId )
                 TWlanConnectionSecurityMode sMode;
                 TWlanConnectionExtentedSecurityMode sExtMode;
 
-                sSID.Copy( buff->Des() );       
+                //sSID.Copy( buff->Des() );
+                TInt err = CnvUtfConverter::ConvertFromUnicodeToUtf8( sSID, buff->Des() );
+                if ( err )
+                    {
+                    sSID.Copy( buff->Des() );
+                    }        
                 CleanupStack::PopAndDestroy( buff );
 
                 iPlugin->SetEasyWlanToHiddenL( ETrue ); 

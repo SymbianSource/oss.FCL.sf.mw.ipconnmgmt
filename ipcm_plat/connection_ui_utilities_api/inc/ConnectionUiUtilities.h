@@ -108,35 +108,17 @@ NONSHARABLE_CLASS( CConnectionUiUtilities ) : public CBase
         
         /**
         * Pops up discreet popup indicating that connection is being
-        * established to not yet known access point. The access point details
-        * can be later provided with ConnectingViaDiscreetPopup( aIAPId,
-        * aConnectionAlreadyActive) method.
-        * This method should only be used from the MPM in order to provide
-        * a consistent popup behavior across the platform.
-        */
-        IMPORT_C void ConnectingViaDiscreetPopup( );
-
-        /**
-        * Pops up discreet popup indicating that connection is being
         * established to the given access point.
         * This method should only be used from the MPM in order to provide
         * a consistent popup behavior across the platform.
         * @param aIAPId The id of the access point.
-        * @param aConnectionActive ETrue connection already active.
         */
-        IMPORT_C void ConnectingViaDiscreetPopup( const TUint32& aIAPId,
-                TBool aConnectionAlreadyActive );
-
-        /**
-        * Cancels (hides) connecting via discreet popup.
-        * This method should only be used from the MPM in order to provide
-        * a consistent popup behavior across the platform.
-        */
-        IMPORT_C void CancelConnectingViaDiscreetPopup( );
+        IMPORT_C void ConnectingViaDiscreetPopup( const TUint32& aIAPId );
 
         /**
         * Pops up a discreet popup indicating a connection error.
-        * Only appropriate error codes show the popup.
+        * Only appropriate error codes show the popup, otherwise
+        * (such as with general errors) the popup is not shown.
         * This method should only be used from the MPM in order to provide
         * a consistent popup behavior across the platform.
         * @param aErrCode Symbian error code.
@@ -513,19 +495,7 @@ NONSHARABLE_CLASS( CConnectionUiUtilities ) : public CBase
         */
         IMPORT_C void OffLineWlanNote( TRequestStatus& aStatus );
         
-        /**
-        * Notifier that displays "Power save test" information note.
-        * @param aDisable On completion, contains ETrue if user wants to disable
-        *                 the note in the future. EFalse otherwise. 
-        * @param aStatus KErrNone if successful, a system-wide error code if not.
-        */
-        IMPORT_C void WlanPowerSaveTestNote( TBool&          aDisable,
-                                             TRequestStatus& aStatus );
-        
-        /**
-        * Cancel WlanPowerSaveTestNote notifier.
-        */
-        IMPORT_C void CancelWlanPowerSaveTestNote();
+
         
         /**
         * Notifier. Shows a data query prompting for WAPI pre-shared key. 

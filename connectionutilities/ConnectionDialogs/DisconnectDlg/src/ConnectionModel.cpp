@@ -34,7 +34,7 @@
 #include <commsdat_partner.h>
 #endif
 
-#include <disconnectdlg.rsg>
+#include <DisconnectDlg.rsg>
 
 
 // CONSTANTS
@@ -165,12 +165,12 @@ void CConnectionModel::InitConnectionArrayL()
             User::WaitForRequest( status );
             CLOG_WRITEF(_L( "KClientInfo status: %d" ), status.Int() );  
             
-    
+            bearer = EBearerUnknown;
             iMonitor.GetIntAttribute( connId, 0, KBearer, bearer, status );
             User::WaitForRequest( status );
             CLOG_WRITEF(_L( "KBearer status: %d" ), status.Int() ); 
             
-    
+            connStatus = KConnectionUninitialised;
             iMonitor.GetIntAttribute( connId, 0, KConnectionStatus, connStatus,
                                       status );
             User::WaitForRequest( status );
@@ -308,8 +308,12 @@ void CConnectionModel::EventL( const CConnMonEventBase& aConnMonEvent )
         {
         // notifier will finish, so cancel all other notifications
         iMonitor.CancelNotifications();     
-        SelectedConnectionClosedL();
-        
+
+        // Bring back the 3s delay to avoid possible problems.
+        // (GPRS Detach and Attach overlapping, when only 1 context allowed,
+        // causing 15s delay.)
+        User::After( CAknNoteDialog::ELongTimeout );
+
         iDisconnectDialogUi->CompleteL( KErrNone );
         }
     else if( iDisconnectDialogUi  && 
@@ -344,33 +348,6 @@ void CConnectionModel::EventL( const CConnMonEventBase& aConnMonEvent )
 CConnectionCArray* CConnectionModel::GetConnArray() const
     {
     return iConnArray;
-    }
-
-
-// ---------------------------------------------------------
-// CConnectionModel::SelectedConnectionClosedL
-// ---------------------------------------------------------
-//
-void CConnectionModel::SelectedConnectionClosedL()
-    {
-    CLOG_ENTERFN("CConnectionModel::SelectedConnectionClosedL");    
-    
-    // the connection is succesfully closed
-    CConnectionInfo* info = iConnArray->At( iClosingConnectionIndex );
-
-    TPtrC iap = info->GetIapNameL();
-    TInt bearerType = info->GetBearerType();
-
-    if( bearerType < EBearerExternalCSD )
-        {
-        InfoNoteL( R_QTN_NETW_CONF_CONN_DISCONNECTED, &iap );
-        }
-    else
-        {
-        InfoNoteL( R_QTN_NETW_CONF_MODEM_CONN_DISCONNECTED );
-        }
-
-    CLOG_LEAVEFN("CConnectionModel::SelectedConnectionClosedL");    
     }
 
 

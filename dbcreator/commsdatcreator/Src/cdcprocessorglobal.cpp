@@ -38,6 +38,7 @@
 #include <cmmanagerext.h>
 #include <cmmanager.h>
 #include <cmdestinationext.h>
+#include <cmdefconnvalues.h>
 #include <WlanCdbCols.h>
 #include <wlancontainer.h>
 #include <featmgr.h>
@@ -105,14 +106,16 @@ CProcessorGlobal* CProcessorGlobal::NewL(
                           RPointerArray< RCmConnectionMethodExt >& aPluginArray,
                           RPointerArray< HBufC >& aPluginNames, 
                           RPointerArray< RCmDestinationExt >& aDestArray,
-                          RPointerArray< HBufC >& aDestNames )
+                          RPointerArray< HBufC >& aDestNames,
+                          RPointerArray< HBufC >& aDefCon )
     {
     CProcessorGlobal* self = new ( ELeave ) CProcessorGlobal( aFileReader,
                                                               aCmManager,
                                                               aPluginArray,
                                                               aPluginNames,
                                                               aDestArray,
-                                                              aDestNames );
+                                                              aDestNames,
+                                                              aDefCon );
     CleanupStack::PushL( self );
 
     // From base class
@@ -131,10 +134,12 @@ CProcessorGlobal::CProcessorGlobal( CReaderBase* aFileReader,
                                     RPointerArray< RCmConnectionMethodExt >& aPluginArray,
                                     RPointerArray< HBufC >& aPluginNames, 
                                     RPointerArray< RCmDestinationExt >& aDestArray,
-                                    RPointerArray< HBufC >& aDestNames ) :
+                                    RPointerArray< HBufC >& aDestNames,
+                                    RPointerArray< HBufC >& aDefCon ) :
     CProcessorBase( aFileReader, aCmManager, aPluginArray, aPluginNames, aDestArray, aDestNames ),
     iAttachWhenNeeded ( EFalse )
     {
+    iDefCon = &aDefCon;
     }
     
     
@@ -151,7 +156,7 @@ void CProcessorGlobal::ConstructL()
     // Create General connection settings struct and set the default values
     iGenConnSettings = new (ELeave) TCmGenConnSettings;
     iGenConnSettings->iUsageOfWlan = ECmUsageOfWlanKnown;
-    iGenConnSettings->iCellularDataUsageHome = ECmCellularDataUsageAutomatic;
+    iGenConnSettings->iCellularDataUsageHome = ECmCellularDataUsageConfirm;
     iGenConnSettings->iCellularDataUsageVisitor = ECmCellularDataUsageConfirm;
 
     CLOG_WRITE( "Initialising FeatureManager\n" )   
@@ -262,10 +267,19 @@ void CProcessorGlobal::ProcessTagL( TBool /*aFieldIDPresent*/ )
                     CCDSNAPMetadataRecord* defaultRecord = new( ELeave )
                             CCDSNAPMetadataRecord( snapTable->TableId() );
                     CleanupStack::PushL( defaultRecord );
-                    defaultRecord->SetRecordId( KCDNewRecordRequest );
                     defaultRecord->iMetadata.SetL( 0 );
-                    defaultRecord->iIcon.SetL( icon );
-                    defaultRecord->StoreL( *iSession );
+                    
+                    if ( !defaultRecord->FindL( *iSession ) )
+                        {
+                        defaultRecord->SetRecordId( KCDNewRecordRequest );
+                        defaultRecord->iIcon.SetL( icon );
+                        defaultRecord->StoreL( *iSession );
+                        }
+                    else
+                        {
+                        defaultRecord->iIcon.SetL( icon );
+                        defaultRecord->ModifyL( *iSession );
+                        }
                     
                     CleanupStack::PopAndDestroy( defaultRecord ); // defaultRecord
                     CleanupStack::PopAndDestroy( snapTable ); // snapTable
@@ -300,6 +314,20 @@ void CProcessorGlobal::ProcessTagL( TBool /*aFieldIDPresent*/ )
                     {
                     UpdateGlobalBearerArrayL( fieldId, prio );
                     }
+                break;
+                }
+                
+            case EDefaultConnectionType:
+                {
+                iDefCon->Append( ptrTag->AllocL() );
+                //SetDefaultConnectionTypeL( ptrTag )
+                break;
+                }
+                
+            case EDefaultConnectionName:
+                {
+                iDefCon->Append( ptrTag->AllocL() );
+                //SetDefaultConnectionNameL( ptrTag )
                 break;
                 }
                 
@@ -592,6 +620,87 @@ void CProcessorGlobal::UpdateGlobalBearerArrayL
     }
 
 // ---------------------------------------------------------
+// CProcessorGlobal::SetDefaultConnectionL
+// ---------------------------------------------------------
+//
+void CProcessorGlobal::SetDefaultConnectionL()
+    {
+    if( iDefCon->Count() > 0 )
+        {
+        SetDefaultConnectionTypeL( (*iDefCon)[0] );
+        }
+    if( iDefCon->Count() > 1 )
+        {
+        SetDefaultConnectionNameL( (*iDefCon)[1] );
+        }
+    }
+
+// ---------------------------------------------------------
+// CProcessorGlobal::SetDefaultConnectionTypeL
+// ---------------------------------------------------------
+//
+void CProcessorGlobal::SetDefaultConnectionTypeL( HBufC16* aPtrTag )
+    {
+    iDefaultConnectionSet = EFalse;
+    
+    if ( aPtrTag->CompareF( KStrAlwaysAsk ) == 0 ) 
+        {
+        iDefaultConnectionType = ECmDefConnAlwaysAsk;
+        SetDefConnRecordL( 0 );
+        }
+    else if ( aPtrTag->CompareF( KStrAskOnce ) == 0 ) 
+        {
+        iDefaultConnectionType = ECmDefConnAskOnce;
+        SetDefConnRecordL( 0 );
+        }
+    else if ( aPtrTag->CompareF( KStrDestination ) == 0 ) 
+        {
+        iDefaultConnectionType = ECmDefConnDestination;
+        }
+    else if ( aPtrTag->CompareF( KStrConnectionMethod ) == 0 ) 
+        {
+        iDefaultConnectionType = ECmDefConnConnectionMethod;
+        }
+    else
+        {
+        CLOG_WRITE(
+        "Warning: Default connection type is not valid. Always ask is set.")
+        iDefaultConnectionType = ECmDefConnAlwaysAsk;
+        SetDefConnRecordL( 0 );
+        }    
+    }
+
+// ---------------------------------------------------------
+// CProcessorGlobal::SetDefaultConnectionNameL
+// ---------------------------------------------------------
+//
+void CProcessorGlobal::SetDefaultConnectionNameL( HBufC16* aPtrTag )
+    {
+        
+    // Name is ignored if the defconn has been set. It can happen e.g.
+    // if iDefaultConnectionType is ECmDefConnAlwaysAsk or ECmDefConnAskOnce     
+    if ( iDefaultConnectionSet )
+        {
+        return;
+        }
+        
+    TInt uId = KErrNotFound;
+    if ( iDefaultConnectionType == ECmDefConnDestination )
+        {
+        uId = GetDestinationIdL( aPtrTag );
+        }
+    else if ( iDefaultConnectionType == ECmDefConnConnectionMethod )
+        {
+        uId = GetPluginIdL( aPtrTag );
+        }
+        
+    if( uId != KErrNotFound )
+        {
+        SetDefConnRecordL( uId );
+        }
+    }
+
+// ---------------------------------------------------------
 // CProcessorGlobal::SetGenConnSettingWlanUsage
 // ---------------------------------------------------------
 //
@@ -654,6 +763,25 @@ void CProcessorGlobal::SetGenConnSettingsL()
     cmManager.WriteGenConnSettingsL( *iGenConnSettings );
     CleanupStack::PopAndDestroy( &cmManager );
     }
+
+//-----------------------------------------------------------------------------
+//  CProcessorGlobal::SetDefConnRecordL()
+//-----------------------------------------------------------------------------
+//
+void CProcessorGlobal::SetDefConnRecordL( const TInt aId )
+    {
+
+    TCmDefConnValue value;
+    value.iType = iDefaultConnectionType;
+    value.iId = aId;
+    
+    iCmManager->WriteDefConnL( value );
+    
+    // It gets true if the defconn was set correctly
+    iDefaultConnectionSet = ETrue;
+
+    }
+    
 
 //-----------------------------------------------------------------------------
 //  CProcessorGlobal::SaveGlobalWlanParameterL()

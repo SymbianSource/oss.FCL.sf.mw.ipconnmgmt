@@ -28,7 +28,7 @@
 // CConnectionInfo::Id
 // ---------------------------------------------------------
 //
-TUint32 CConnectionInfo::Id() const
+const TUint32 CConnectionInfo::Id() const
     {
     return iId;
     }
@@ -58,7 +58,7 @@ const TDesC& CConnectionInfo::ListItem() const
 // CConnectionInfo::VPNIapId()
 // ---------------------------------------------------------
 //
-TUint32 CConnectionInfo::VPNIapId() const
+const TUint32 CConnectionInfo::VPNIapId() const
     {
     return iVPN_iap_id;
     }
@@ -68,7 +68,7 @@ TUint32 CConnectionInfo::VPNIapId() const
 // CConnectionInfo::DestinationId()
 // ---------------------------------------------------------
 //
-TUint32 CConnectionInfo::DestinationId() const
+const TUint32 CConnectionInfo::DestinationId() const
     {
     return iDestinationId;
     }
@@ -78,7 +78,7 @@ TUint32 CConnectionInfo::DestinationId() const
 // CConnectionInfo::VPNIapId()
 // ---------------------------------------------------------
 //
-TBool CConnectionInfo::IsVPN() const
+const TBool CConnectionInfo::IsVPN() const
     {
     return iIsVPN;
     }

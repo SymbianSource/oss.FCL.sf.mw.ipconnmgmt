@@ -22,7 +22,7 @@
 #include <StringLoader.h>
 #include <avkon.hrh>
 #include <connectionuiutilities.mbg>
-#include <connuiutilsnotif.rsg>
+#include <ConnUiUtilsNotif.rsg>
 
 #include "nowlansdiscreetpopup.h"
 

@@ -65,7 +65,6 @@ namespace S60MCPRMPMOperations
     {
     enum TPolicyServerOperations
         {
-        EPolicyRequestInvalid,
         EPolicyRequestChooseBestIAP = EMPMChooseBestIAP,
         EPolicyRequestReselectBestIAP = EMPMReselectBestIAP,
         EPolicyRequestProcessError = EMPMProcessError,
@@ -95,14 +94,12 @@ class PolicyRequest
          * c++ constructor 
          */
         PolicyRequest()
-            :   iRequestType( S60MCPRMPMOperations::EPolicyRequestInvalid ),
-                iConnPref(NULL),
+            :   iConnPref(NULL),
                 iIapId(0),
                 iConnId(0),
                 iAppUid(KNullUid),
                 iError(KErrNone),
                 iPolicyPref(NULL),
-                iNeededAction( EIgnoreError ),
                 iStatus(KErrNone),
                 iUser(NULL)
             {}

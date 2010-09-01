@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<!DOCTYPE SystemDefinition SYSTEM "sysdef_1_5_1.dtd" [
+<!DOCTYPE SystemDefinition SYSTEM "sysdef_1_4_0.dtd" [
   <!ENTITY layer_real_source_path "sf/mw/ipconnmgmt" >
 ]>
 
@@ -7,7 +7,7 @@
   <systemModel>
     <layer name="mw_layer">
       <module name="ipconnmgmt">
-        <unit unitID="netdo.ipconnmgmtqt" mrp="" bldFile="&layer_real_source_path;" name="ipconnmgmtqt" proFile="ipconnmgmt.pro" qmakeArgs="-r"/>
+        <unit unitID="netdo.ipconnmgmt" mrp="" bldFile="&layer_real_source_path;/group" name="ipconnmgmt" />
       </module>
     </layer>
   </systemModel>

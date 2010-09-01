@@ -62,8 +62,12 @@ class CProcessorGlobal : public CProcessorBase
                                 RPointerArray< RCmConnectionMethodExt >& aPluginArray,
                                 RPointerArray< HBufC >& aPluginNames, 
                                 RPointerArray< RCmDestinationExt >& aDestArray,
-                                RPointerArray< HBufC >& aDestNames );
+                                RPointerArray< HBufC >& aDestNames,
+                                RPointerArray< HBufC >& aDefCon );
 
+        // Stores the default connection values
+        void SetDefaultConnectionL();
+        
         /**
         * Destructor.
         */
@@ -80,7 +84,8 @@ class CProcessorGlobal : public CProcessorBase
                           RPointerArray< RCmConnectionMethodExt >& aPluginArray,
                           RPointerArray< HBufC >& aPluginNames, 
                           RPointerArray< RCmDestinationExt >& aDestArray,
-                          RPointerArray< HBufC >& aDestNames );
+                          RPointerArray< HBufC >& aDestNames,
+                          RPointerArray< HBufC >& aDefCon);
                           
         /**
         * Second phase constructor. Leaves on failure.
@@ -114,7 +119,22 @@ class CProcessorGlobal : public CProcessorBase
         void UpdateGlobalBearerArrayL
                             ( TDbCreatorGlobalSettings aField, TUint32 aPrio );
                 
-                         
+        /**
+        * Sets the value of default connection type parsing and converting
+        *                           the param string to the right enum. 
+        * @param aPtrTag string of the type.
+        */
+        void SetDefaultConnectionTypeL( HBufC16* aPtrTag );
+                            
+        /**
+        * Sets the id of default connection method. It founds the connection
+        *     method or destination corresponding to the given name.
+        *     Type depends on the default connection type.
+        *     If the method/destination cannot be found then no id is set.
+        * @param aPtrTag string of the connection method/destination name.
+        */
+        void SetDefaultConnectionNameL( HBufC16* aPtrTag );
+
         /**
         * Sets the WLAN Usage parameter in general connection settings.
         * @param aPtrTag string containing the parameter's value.
@@ -138,6 +158,9 @@ class CProcessorGlobal : public CProcessorBase
         // Stores the general connection settings, using CMM
         void SetGenConnSettingsL();
         
+        // Stores the default connection's values, using CMM
+        void SetDefConnRecordL( const TInt aId );
+        
         // Stores the WLAN parameters
         void SaveGlobalWlanParameterL( const TUint32 aTableType, 
         							   const TDbCreatorGlobalSettings aField, 
@@ -145,12 +168,18 @@ class CProcessorGlobal : public CProcessorBase
 
     private:
         
+        // @var Default connection's data
+        TCmDefConnType iDefaultConnectionType;
+        TBool iDefaultConnectionSet;
 
         // @var GPRS attach mode : whenneeded/whenavailable
         TBool  iAttachWhenNeeded;
         
         RArray< TBearerPriority > iBearerArray;
         TBool iBearerArrayChanged;
+        
+        // @var Stores the default connection type / name pair
+        RPointerArray< HBufC >* iDefCon; 
         
         // @var Stores the general connection settings
         TCmGenConnSettings* iGenConnSettings;

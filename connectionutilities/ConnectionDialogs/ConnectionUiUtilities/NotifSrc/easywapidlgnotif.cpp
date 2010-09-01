@@ -20,7 +20,7 @@
 #include "WepWpaQueryDlg.h"
 #include "ConnUiUtilsNotif.h"
 
-#include <connuiutilsnotif.rsg>
+#include <ConnUiUtilsNotif.rsg>
 #include <StringLoader.h>
 
 
@@ -47,6 +47,13 @@ void CEasyWapiDlgNotif::StartL( const TDesC8&      /*aBuffer*/,
                                 TInt                aReplySlot,
                                 const RMessagePtr2& aMessage )
     {
+    if ( ScreenSaverOn() || AutolockOn() )
+        {
+        // Screen saver or Autolock is active. Cancel the dialog. 
+        aMessage.Complete( KErrCancel );
+        return;
+        }
+    
     iReplySlot = aReplySlot;
     iMessage   = aMessage;
     iCancelled = EFalse;

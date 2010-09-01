@@ -44,8 +44,10 @@ class CVpnApEngine;
 class CEikonEnv;
 
 class CWEPSecuritySettings;
+class CWEPSecuritySettingsUi;
 
 class CWPASecuritySettings;
+class CWPASecuritySettingsUi;
 
 
 
@@ -674,9 +676,11 @@ NONSHARABLE_CLASS( CApSettingsModel ) : public CBase
 
     public:
         CWEPSecuritySettings*       iWepSecSettings;    ///< WEP settings data
+        CWEPSecuritySettingsUi*     iWepSecSettingsUi;  ///< WEP settings UI
         TInt                        iWepUiExitReason;   ///< WEP UI exit reason
 
         CWPASecuritySettings*       iWpaSecSettings;    ///< WPA settings data
+        CWPASecuritySettingsUi*     iWpaSecSettingsUi;  ///< WPA settings UI
         TInt                        iWpaUiExitReason;   ///< WPA UI exit reason
         TBool                       iNoEdit;
         

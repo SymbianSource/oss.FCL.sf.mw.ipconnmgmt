@@ -253,11 +253,11 @@ private:
      * Used to filter out extra notifications because MPM only needs one 
      * started/stopped event. Implement as simple FlipFlop -flag.
      */
-    TBool                   iDataClientStatusStarted;
+    TBool                   iDataClientStatusStarted : 1;
     /**
      * Synchronisation flags, private by design, can be modified only by CMobilityActivity
      */
-    TBool                   iIsHandshakingNow; 
+    TBool                   iIsHandshakingNow : 1; 
     
     /**
      * Connection preference list

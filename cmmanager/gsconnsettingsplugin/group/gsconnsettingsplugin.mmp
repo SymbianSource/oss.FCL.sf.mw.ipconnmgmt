@@ -1,0 +1,85 @@
+/*
+* Copyright (c) 2007 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:    Resource file for plugin.
+*
+*/
+
+
+#include <data_caging_paths.hrh>
+#include <platform_paths.hrh>
+
+CAPABILITY          CAP_ECOM_PLUGIN
+TARGET              gsconnsettingsplugin.dll
+TARGETTYPE          PLUGIN
+UID                 0x10009D8D 0x200255B8
+VENDORID            VID_DEFAULT
+
+
+USERINCLUDE         ../inc
+USERINCLUDE         ../data
+USERINCLUDE         ../loc
+USERINCLUDE         ../traces
+
+SYSTEMINCLUDE       /epoc32/include/ecom
+// Default system include paths for middleware layer modules.
+MW_LAYER_SYSTEMINCLUDE
+
+#ifdef SYMBIAN_ENABLE_SPLIT_HEADERS
+APP_LAYER_SYSTEMINCLUDE
+#endif
+
+SOURCEPATH          ../src
+
+SOURCE              gsconnsettingspluginimpltable.cpp 
+SOURCE              gsconnsettingsplugin.cpp
+SOURCE              gsconnsettingsplugincontainer.cpp
+SOURCE              gsconnsettingspluginmodel.cpp gsconnsettingsselectiondlg.cpp
+
+START RESOURCE ../data/200255B8.rss
+	TARGET gsconnsettingsplugin.rsc
+END
+
+// View resources
+START RESOURCE ../data/gsconnsettingspluginrsc.rss
+DEPENDS gsapp.rsg
+	HEADER
+	TARGETPATH RESOURCE_FILES_DIR
+LANGUAGE_IDS
+END
+
+LIBRARY             egul.lib
+LIBRARY             aknskins.lib 
+LIBRARY             euser.lib
+LIBRARY             ecom.lib
+LIBRARY             efsrv.lib
+LIBRARY             avkon.lib
+LIBRARY             bafl.lib 
+LIBRARY             cone.lib 
+LIBRARY             eikcoctl.lib 
+LIBRARY             eikcore.lib 
+LIBRARY             commonengine.lib// For RConeResourceLoader
+LIBRARY             GSEcomPlugin.lib
+LIBRARY             GSFramework.lib
+LIBRARY             GSListBox.lib         // For CGSListBoxItemTextArray
+LIBRARY             FeatMgr.lib           // Feature manager
+LIBRARY             hlplch.lib            // for "Help" options menu
+LIBRARY             cmmanager.lib
+
+//Documents. Defining these is optional. Used only by IDE's file browser.
+//DOCUMENT            ./gsconnsettingspluginicons.mk
+
+DOCUMENT ../data/200255B8.rss
+DOCUMENT ../data/gsconnsettingspluginrsc.rss
+
+// End of File

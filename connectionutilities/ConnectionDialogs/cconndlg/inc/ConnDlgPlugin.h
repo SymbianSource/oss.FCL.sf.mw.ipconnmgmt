@@ -16,10 +16,6 @@
 */
 
 
-// NOTE that the functionality this header contains is DEPRECATED
-// None on the methods have UI functionality, the plugins complete the requests
-// immediately when they are started
-
 
 #ifndef __CONNDLGPLUGIN_H__
 #define __CONNDLGPLUGIN_H__
@@ -91,6 +87,8 @@ IMPORT_C CArrayPtr<MEikSrvNotifierBase2>* NotifierArray();
 // FORWARD DECLARATION
 class CAknMultiLineDataQueryDialog;
 class CAknQueryDialog;
+class CActiveCConnDlgIapPlugin;
+class CActiveSelectConnectionPlugin;
 
 // CLASS DECLARATION
 
@@ -113,65 +111,7 @@ public:
     * @param  -
     * return CConnDlgIapPlugin*
     */
-    static CConnDlgIapPlugin* NewL( const TBool /*aResourceFileResponsible*/ );
-
-    /**
-    * RegisterL register the client notifier function
-    * @param  -
-    * return TNotifierInfo
-    */
-    TNotifierInfo RegisterL();
-
-    /**
-    * Start the Notifier
-    * @param  aBuffer    Buffer
-    * @param  aReplySlot Identifies which message argument to use for the 
-    *                    reply. This message argument will refer to a 
-    *                    modifiable descriptor, a TDes8 type, into which data
-    *                    can be returned. 
-    * @param  aMessage   Message
-    * return -
-    */
-    void StartL( const TDesC8& aBuffer, TInt aReplySlot, 
-                 const RMessagePtr2& aMessage );
-
-    /**
-    * Cancel() the notifier
-    * @param  -
-    * return -
-    */
-    void Cancel();
-
-public:
-
-    /**
-    * CompleteL the notifier is complete
-    * @param  aStatus status
-    * return  -
-    */
-    void CompleteL( TInt aStatus );   
-    
-private:
-    TUint32 iIAP;                       // Internet Access Point
-    };
-
-
-/**
- * Authentication Plugin class
- */
-NONSHARABLE_CLASS( CConnDlgAuthenticationPlugin ) : 
-                                            public CConnectionDialogsNotifBase
-    {
-public:
-    CConnDlgAuthenticationPlugin();
-
-    /**
-    * NewL function
-    * @param  -
-    * return CConnDlgAuthenticationPlugin*
-    */
-    static CConnDlgAuthenticationPlugin* NewL( 
-                                        const TBool /*aResourceFileResponsible*/ );
+    static CConnDlgIapPlugin* NewL( const TBool aResourceFileResponsible );
 
     /**
     * RegisterL register the client notifier function
@@ -208,6 +148,102 @@ public:
     * return  -
     */
     void CompleteL( TInt aStatus );
+    
+    /**
+    * Sets the preferred iap into db.
+    * calls iActivePlugin    
+    * @param aIAPId id of the preferred iap
+    */
+    void SetPreferredIapIdL( TUint32 aIAPId );
+    
+private:
+
+    /**
+    * Gets user connection info.    
+    * @param aIapId id of the iap
+    */ 
+    TInt GetUserConnection( TInt& aIapId );
+    
+    /**
+    * Gets active connection info.    
+    * @param aIapId id of the iap
+    * @param aBearer bearer type
+    */
+    TInt GetActiveConnection( TInt& aIapId, TInt& aBearer );    
+    
+private:
+    TUint32 iIAP;                       // Internet Access Point
+    TPckgBuf<TConnectionPrefs> iPrefs;  // Selected preferences
+    CActiveCConnDlgIapPlugin* iActivePlugin;    // pointer to active object
+    };
+
+
+/**
+ * Authentication Plugin class
+ */
+NONSHARABLE_CLASS( CConnDlgAuthenticationPlugin ) : 
+                                            public CConnectionDialogsNotifBase
+    {
+public:
+    CConnDlgAuthenticationPlugin::CConnDlgAuthenticationPlugin();
+
+    /**
+    * NewL function
+    * @param  -
+    * return CConnDlgAuthenticationPlugin*
+    */
+    static CConnDlgAuthenticationPlugin* NewL( 
+                                        const TBool aResourceFileResponsible );
+
+    /**
+    * RegisterL register the client notifier function
+    * @param  -
+    * return TNotifierInfo
+    */
+    TNotifierInfo RegisterL();
+
+    /**
+    * Start the Notifier
+    * @param  aBuffer    Buffer
+    * @param  aReplySlot Identifies which message argument to use for the 
+    *                    reply. This message argument will refer to a 
+    *                    modifiable descriptor, a TDes8 type, into which data
+    *                    can be returned. 
+    * @param  aMessage   Message
+    * return -
+    */
+    void StartL( const TDesC8& aBuffer, TInt aReplySlot, 
+                 const RMessagePtr2& aMessage );
+
+    /**
+    * Cancel() the notifier
+    * @param  -
+    * return -
+    */
+    void Cancel();
+
+public:
+
+    /**
+    * GetAuthenticationL() show the Authenticate  dialog
+    * @param  -
+    * return -
+    */
+    void GetAuthenticationL();
+
+    /**
+    * CompleteL the notifier is complete
+    * @param  aStatus status
+    * return  -
+    */
+    void CompleteL( TInt aStatus );
+
+private:
+    TPckgBuf<TAuthenticationPair> iAuthPair;    // Authentication pair 
+                                                // (username and password)
+    TPckgBuf<TAuthenticationPairBuff> iAuthPairBuff;    // Authentication pair 
+                                                // (username and password)
+    CAknMultiLineDataQueryDialog *iDialog;      // Pointer to the dialog
     };
 
 
@@ -225,7 +261,7 @@ public:
     * return CConnDlgReconnectPlugin*
     */
     static CConnDlgReconnectPlugin* NewL( 
-                                        const TBool /*aResourceFileResponsible*/ );
+                                        const TBool aResourceFileResponsible );
 
     /**
     * RegisterL register the client notifier function
@@ -257,11 +293,22 @@ public:
 public:
 
     /**
+    * GetReconnectL() call the reconnect dialog
+    * @param  -
+    * return -
+    */
+    void GetReconnectL();
+
+    /**
     * CompleteL the notifier is complete
     * @param  aStatus status
     * return  -
     */
     void CompleteL(TInt aStatus);
+
+private:
+    CAknQueryDialog* iDialog;   // Pointer to the dialog
+    TBool iBool;                // Tells if it has to connect to the IAP
     };
 
 
@@ -277,7 +324,7 @@ public:
     * @param  -
     * return CConnDlgReconnectPlugin*
     */
-    static CConnDlgQosPlugin* NewL( const TBool /*aResourceFileResponsible*/ );
+    static CConnDlgQosPlugin* NewL( const TBool aResourceFileResponsible );
 
     /**
     * RegisterL register the client notifier function
@@ -309,11 +356,22 @@ public:
 public:
 
     /**
+    * GetReconnectL() call the reconnect dialog
+    * @param  -
+    * return -
+    */
+    void GetReconnectL();
+
+    /**
     * CompleteL the notifier is complete
     * @param  aStatus status
     * return  -
     */
     void CompleteL( TInt aStatus );
+
+private:
+    CAknQueryDialog* iDialog;   // Pointer to the dialog
+    TBool iBool;                // Tells if it has to connect to the IAP
     };
 
 
@@ -329,7 +387,7 @@ public:
     * @param  -
     * return CConnDlgNewIapPlugin*
     */
-    static CConnDlgNewIapPlugin* NewL( const TBool /*aResourceFileResponsible*/ );
+    static CConnDlgNewIapPlugin* NewL( const TBool aResourceFileResponsible );
 
     /**
     * RegisterL register the client notifier function
@@ -361,11 +419,24 @@ public:
 public:
 
     /**
+    * GetNewIapL show NewIap dialog
+    * @param  -
+    * return  -
+    */
+    void GetNewIapL();
+
+    /**
     * CompleteL the notifier is complete
     * @param  aStatus status
     * return  -
     */
     void CompleteL( TInt aStatus );
+
+private:
+    CAknQueryDialog* iDialog;                   // Pointer to the dialog
+    TBool iConnect;                             // Tells if it has to connect 
+                                                // to the IAP
+    TPckgBuf<TNewIapConnectionPrefs> iPrefs;    // Selected preferences
     };
 
 
@@ -383,7 +454,7 @@ public:
     * return CConnDlgSelectConnectionPlugin*
     */
     static CConnDlgSelectConnectionPlugin* NewL( 
-                                        const TBool /*aResourceFileResponsible*/ );
+                                        const TBool aResourceFileResponsible );
 
     /**
     * RegisterL register the client notifier function
@@ -402,7 +473,7 @@ public:
     * @param  aMessage   Message
     * return -
     */
-    void StartL( const TDesC8& /*aBuffer*/, TInt aReplySlot, 
+    void StartL( const TDesC8& aBuffer, TInt aReplySlot, 
                  const RMessagePtr2& aMessage );
 
     /**
@@ -420,9 +491,36 @@ public:
     * return  -
     */
     void CompleteL( TInt aStatus );
+    
+    /**
+    * Sets the preferred iap into db.
+    * calls iActivePlugin    
+    * @param aIAPId id of the preferred iap
+    * @param aDestinationId id of the preferred Destination
+    */
+    void SetElementIDL( TUint32 aIAPId, TUint32 aDestinationId );
+    
+private:
+
+    /**
+    * Gets user connection info.    
+    * @param aIapId id of the iap
+    * @param aSnapId id of the destination
+    */
+    TInt GetUserConnection( TInt& aIapId, TInt& aSnapId );
+    
+    /**
+    * Gets active connection info.    
+    * @param aIapId id of the iap
+    * @param aSnapId id of the destination
+    * @param aBearer bearer type
+    */    
+    TInt GetActiveConnection( TInt& aIapId, TInt& aSnapId, TInt& aBearer );
 
 private:
     TUint32 iElementID;
+    TPckgBuf<TConnectionPrefs> iPrefs;  // Selected preferences
+    CActiveSelectConnectionPlugin* iActivePlugin;   // pointer to active object
     };
 
 #endif

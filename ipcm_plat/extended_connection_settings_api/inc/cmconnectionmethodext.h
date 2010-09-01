@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2006-2010 Nokia Corporation and/or its subsidiary(-ies).
+* Copyright (c) 2006 Nokia Corporation and/or its subsidiary(-ies). 
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -11,24 +11,20 @@
 *
 * Contributors:
 *
-* Description:
-* Connection method extended interface class.
+* Description:  Connection method extended interface class.
 *
 */
 
 #ifndef CMCONNECTIONMETHODEXT_H
 #define CMCONNECTIONMETHODEXT_H
 
-// Deprecation warning
-#warning This header file is deprecated and shall not be used anymore. Please use cmconnectionmethod.h instead. See Polonium CR #461 for details.
-
+// INCLUDES
 #include <e32base.h>
 #include <cmconnectionmethoddef.h>
 
-// Forward declarations
+// CLASS DECLARATION
+class CCmPluginBaseEng;
 class RCmDestinationExt;
-class CCmConnectionMethodWrapper;
-
 
 /**
  *  RCmConnectionMethodExt is for getting/setting values of a connection method.
@@ -38,36 +34,44 @@ class CCmConnectionMethodWrapper;
  */
 NONSHARABLE_CLASS( RCmConnectionMethodExt )
     {
+    //=====================================================================
+    // Constructors/Destructors
+    // 
     public:
+    
         /**
-        * Default constructor.
+        * Default constructor. 
         */
         IMPORT_C RCmConnectionMethodExt();
 
-        /**
-        * Copy constructor.
-        */
-        IMPORT_C RCmConnectionMethodExt(
-                const RCmConnectionMethodExt& aConnMethod );
 
         /**
-        * Destructor.
+        * Copy constructor. 
+        */
+        IMPORT_C RCmConnectionMethodExt(const RCmConnectionMethodExt& aItem);
+
+
+        /**
+        * Destructor. 
         */
         IMPORT_C ~RCmConnectionMethodExt();
 
+    //=====================================================================
+    // API functions
     public:
+    
         /**
         * Close the session.
         */
         IMPORT_C void Close();
-
+        
         /**
-        * Creates a copy of this connection method. UpdateL() has to be called
+        * Creates a copy of this connection method. UpdateL() has to be called 
         * to store new connection method in database. Copy is put to
         * the Uncategorized destination. The ownership is passed.
         */
         IMPORT_C RCmConnectionMethodExt CreateCopyL();
-
+            
         /**
         * Gets the value for a TInt attribute.
         * @param aAttribute Identifies the attribute to be retrived.
@@ -89,7 +93,7 @@ NONSHARABLE_CLASS( RCmConnectionMethodExt )
         * @return copy of the requested attribute. Ownership is passed.
         */
         IMPORT_C HBufC* GetStringAttributeL( TUint32 aAttribute ) const;
-
+        
         /**
         * Gets the value for a String8 attribute.
         * HBuf ownership is passed to the caller
@@ -120,20 +124,18 @@ NONSHARABLE_CLASS( RCmConnectionMethodExt )
         * @param aValue The value to be set.
         * @return None.
         */
-        IMPORT_C void SetStringAttributeL(
-                TUint32 aAttribute,
-                const TDesC16& aValue );
-
+        IMPORT_C void SetStringAttributeL( TUint32 aAttribute, 
+                                           const TDesC16& aValue );
+        
         /**
         * Sets the value for a String8 attribute.
         * @param aAttribute Identifies the attribute to be set.
         * @param aValue The value to be set.
         * @return None.
         */
-        IMPORT_C void SetString8AttributeL(
-                TUint32 aAttribute,
-                const TDesC8& aValue );
-
+        IMPORT_C void SetString8AttributeL( TUint32 aAttribute, 
+                                            const TDesC8& aValue );
+        
         /**
         * Call this function only if this CM is an embedded destination!
         * @return embedded destination
@@ -141,8 +143,8 @@ NONSHARABLE_CLASS( RCmConnectionMethodExt )
         IMPORT_C RCmDestinationExt DestinationL() const;
 
         /**
-        * Try to delete the connection method. If it is referenced from
-        * any destination, then the references are removed and the
+        * Try to delete the connection method. If it is referenced from 
+        * any destination, then the references are removed and the 
         * connection method is deleted.
         * Do NOT call this function if you got this
         * connection method from a destination. Call destination's
@@ -150,49 +152,51 @@ NONSHARABLE_CLASS( RCmConnectionMethodExt )
         * @return ETrue if connection method deleted.
         */
         IMPORT_C TBool DeleteL();
-
+        
         /**
         * Update in the database.
         * @return None.
-        */
+        */        
         IMPORT_C void UpdateL();
-
+        
         /**
-        * checks if connection methods are the same
-        *
+        * checks if connection methods are the same 
+        * 
         * @since S60 3.2
         * @param aConnMethod the connection method being compared
         * @return ETrue if the destinations are the same
         */
         IMPORT_C TBool operator==( RCmConnectionMethodExt& aConnMethod ) const;
-
+        
         /**
-        * checks if connection methods are not the same
-        *
+        * checks if connection methods are not the same 
+        * 
         * @since S60 3.2
         * @param aConnMethod the connection method being compared
         * @return ETrue if the destinations are different
         */
         IMPORT_C TBool operator!=( RCmConnectionMethodExt& aConnMethod ) const;
-
+        
 
         /**
-        * assignment operator
-        *
+        * assignment operator 
+        * 
         * @since S60 3.2
         * @return RCmConnectionMethod
         */
-        IMPORT_C RCmConnectionMethodExt& operator=(
-                const RCmConnectionMethodExt& aConnMethod );
+        IMPORT_C RCmConnectionMethodExt& operator=(const RCmConnectionMethodExt& 
+                                                    aConnMethod);
 
     private:
+    
         friend class RCmManagerExt;
         friend class RCmDestinationExt;
-
+        
     private:
-        CCmConnectionMethodWrapper* iCmConnectionMethodWrapper;
+    
+        CCmPluginBaseEng* iImplementation;
     };
 
-#endif // CMCONNECTIONMETHODEXT_H
-
-// End of file
+#endif      // CMCONNECTIONMETHODEXT_H
+           
+//  End of File

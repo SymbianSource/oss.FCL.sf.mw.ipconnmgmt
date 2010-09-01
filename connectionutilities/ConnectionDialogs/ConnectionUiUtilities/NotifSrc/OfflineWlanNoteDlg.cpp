@@ -37,8 +37,7 @@ _LIT( KErrNullPointer, "NULL pointer" );
 // ---------------------------------------------------------
 //
 COfflineWlanNoteDlg::COfflineWlanNoteDlg( COfflineWlanNoteNotif* aNotif )
-: iNotif( aNotif ),
-  iExpiryTimer( NULL )
+: iNotif( aNotif )    
     {
     }
     

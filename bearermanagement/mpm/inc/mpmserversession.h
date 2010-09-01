@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2004-2010 Nokia Corporation and/or its subsidiary(-ies). 
+* Copyright (c) 2004-2009 Nokia Corporation and/or its subsidiary(-ies). 
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -28,7 +28,7 @@ Mobility Policy Manager server session class definitions.
 #include <commdbconnpref.h> // for TCommDbConnPref
 #include <connpref.h>       // for TConnPref
 #include <rconnmon.h>       // for TConnMonIapInfo
-#include <ConnectionUiUtilities.h>
+#include <ConnectionUiUtilities.h> //TMsgQueryLinkedResults
 #include "rmpm.h"
 #include "mpmserver.h"
 
@@ -53,6 +53,7 @@ const TInt    KMaxGetIntSettingLength = KCommsDbSvrMaxColumnNameLength * 2;
 _LIT( KIapProxyServiceSetting, "IAP\\IAPService" );
 
 // FORWARD DECLARATIONS
+class CMPMDisconnectDlg;
 class CMPMConfirmDlgRoaming;
 class CMPMCommsDatAccess;
 class CMPMIapSelection;
@@ -320,6 +321,13 @@ class CMPMServerSession : public CSession2
         void SortSnapL( const TUint32   aSnapId, 
                         TMpmSnapBuffer& aSortedIaps );
 
+        /**
+        * If session is displaying connection selection dialog
+        * updated contents for it are written to publish& subscribe API.
+        *
+        * @since 3.2
+        */
+        void UpdateConnectionDialogL();
 
         /**
         * Returns a reference to iStoredIapInfo. 
@@ -411,18 +419,6 @@ class CMPMServerSession : public CSession2
          * @since 5.1
          */
         TBool UseUserConnPref();
-        
-        /**
-         * Returns VPN user connection usage status.
-         * @return ETrue if VPN user connection is used in this session.
-         */
-        inline TBool VpnUserConnectionUsed() const;
-
-        /**
-         * Sets VPN user connection usage status.
-         * @param aEnabled Informs if VPN user connection is used.
-         */
-        void SetVpnUserConnectionUsed( const TBool aEnabled );
         
         /**
         * Returns id of the client.
@@ -603,7 +599,7 @@ class CMPMServerSession : public CSession2
         * @param aMessage message from client
         */
         void HandleServerProcessErrorL(const RMessage2& aMessage);
-        
+
         /**
         * Handling of prefered IAP notification registration.
         * @since 3.1
@@ -833,7 +829,7 @@ class CMPMServerSession : public CSession2
         * @param aUid Application Uid
         */
         TBool IsBackgroundApplication( TUint32 aUid ) const;
-        
+
         /**
         * Checks if disconnect dialog should be displayed for this error
         * @since 3.2
@@ -884,6 +880,9 @@ class CMPMServerSession : public CSession2
     
         // Server class reference
         CMPMServer& iMyServer;
+
+        // Pointer to the disconnect dialog active object
+        CMPMDisconnectDlg* iDisconnectDlg;
 
         // Pointer to the roaming confirmation dialog active object
         CMPMConfirmDlgRoaming* iConfirmDlgRoaming;
@@ -938,26 +937,27 @@ class CMPMServerSession : public CSession2
         //    
         CMPMIapSelection* iIapSelection;
 
-        // Stored state of migrating to carrier
-        // 
-        TMigrateToCarrierState iMigrateState;
+		// Stored state of migrating to carrier
+		// 
+		TMigrateToCarrierState iMigrateState;
 
-        // Last Iap notified using PreferredIap-notification
-        //
-        TUint32 iLastNotifiedIap;
-    
-        // Iap to which connection is migrating
+		// Last Iap notified using PreferredIap-notification
+		//
+		TUint32 iLastNotifiedIap;
+		
+		// Iap to which connection is migrating
         //
         TUint32 iMigrateIap;
 
         // Set when this session is user connection
-        //
+		//
         TBool iUserConnection;
-
-        // Set when this session uses VPN user connection
+        
+        // Set when disconnect dialog is shown to avoid 
+        // showing duplicate cellulara data usage dialog
         //
-        TBool iVpnUserConnectionUsed;        
-
+        TBool iDisconnectDialogShown;
+        
         // Set when error discreet popup shown for IAP so it is
         // not shown again if the SNAP is empty
         TBool iErrorDiscreetPopupShown;

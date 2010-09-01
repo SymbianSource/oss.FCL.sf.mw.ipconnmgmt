@@ -20,6 +20,7 @@
 // INCLUDE FILES
 
 #include <ApNetworkItem.h>
+#include <csxhelp/cp.hlp.hrh>
 #include <featmgr.h>
 
 #include "ApSettingsHandlerUI.hrh"
@@ -182,6 +183,8 @@ void CApNetSelPopupList::GetHelpContext(TCoeHelpContext& aContext) const
     APSETUILOGGER_ENTERFN( EListbox,"NetSelPopup::GetHelpContext")
     
     aContext.iMajor = iHandler->iHelpMajor;
+    // help no longer available for user, use dummy ID
+    aContext.iContext = KSET_HLP_AP_SETTING_GPRS;
     
     APSETUILOGGER_LEAVEFN( EListbox,"NetSelPopup::GetHelpContext")
     }

@@ -89,6 +89,8 @@ LIBRARY commonui.lib
 LIBRARY FeatMgr.lib
 LIBRARY AknInputLanguage.lib
 
+LIBRARY WEPSecuritySettingsUi.lib
+LIBRARY WPASecuritySettingsUi.lib
 LIBRARY ConnectionUiUtilities.lib
 LIBRARY centralrepository.lib
 

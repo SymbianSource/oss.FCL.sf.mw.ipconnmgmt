@@ -259,11 +259,8 @@ public:
     IMPORT_C TBool DisconnectDialog() const;
 
     /**
-    * DEPRECATED
-    *
-    * Enables or disables Connection selection dialog, but since the
-    * Connection selection dialog is deprecated functionality, this
-    * method gets the Internet SNAP chosen if set as enabled.
+    * Enables or disables Connection selection dialog. Only the SNAPs/IAPs
+    * matching with BearerSet are shown in the dialog.
     * By default, Connection selection dialog is disabled.
     *
     * If Connection selection dialog is enabled, SNAP id shall be zero.
@@ -274,20 +271,14 @@ public:
     * selection dialog shall be enabled.
     *
     * @param aConnSelectionDialog Indicates whether Connection selection
-    * dialog is enabled or disabled.
-    * @deprecated since Symbian^4 
+    *                             dialog is enabled or disabled.
     */
     IMPORT_C void SetConnSelectionDialog( TBool aConnSelectionDialog );
 
     /**
-    * DEPRECATED
-    *
-    * Indicates whether Connection selection dialog is enabled. This
-    * function holds no value since the usage of the Connection selection
-    * dialog is deprecated, thus this function is deprecated also.
+    * Indicates whether Connection selection dialog is enabled.
     *
     * @return Indicates whether Connection selection dialog is enabled.
-    * @deprecated since Symbian^4
     */
     IMPORT_C TBool ConnSelectionDialog() const;
 

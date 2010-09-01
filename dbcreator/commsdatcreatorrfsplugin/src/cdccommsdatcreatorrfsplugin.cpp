@@ -18,6 +18,7 @@
 
 
 #include <centralrepository.h>
+#include "cdccommsdatcreatorcrkeys.h"
 
 #include "cdccommsdatcreatorrfsplugin.h"
 #include "cdclogger.h"

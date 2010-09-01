@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2006 Nokia Corporation and/or its subsidiary(-ies).
+* Copyright (c) 2006 Nokia Corporation and/or its subsidiary(-ies). 
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -11,8 +11,7 @@
 *
 * Contributors:
 *
-* Description:
-* Packet data specific enums.
+* Description:  packet data specific enums
 *
 */
 
@@ -275,13 +274,13 @@ enum TConnectionMethodPacketDataSpecificAttributes
                                     * ( TBool - default: None)
                                     */
 
-    EGPRSReqTrafficClass = 10200,   /**<
+    EGPRSReqTrafficClass = 10200,   /**< 
                                     * Requested traffic class
                                     * Defined in etelqos.h in RPacketQoS::TTrafficClass.
                                     * (TUint32 - default: ETrafficClassUnspecified)
                                     */
-
-    EGPRSMinTrafficClass,           /**<
+    
+    EGPRSMinTrafficClass,           /**< 
                                     * Minimum acceptable traffic class.
                                     * Defined in etelqos.h in RPacketQoS::TTrafficClass.
                                     * (TUint32 - default: ETrafficClassUnspecified)

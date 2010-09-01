@@ -24,5 +24,6 @@ PRJ_EXPORTS
 PRJ_MMPFILES
 #include "../apeng/group/bld.inf"
 #include "../apsettingshandlerui/group/bld.inf"
+#include "../apsettingsplugin/group/bld.inf"
 
 PRJ_TESTMMPFILES

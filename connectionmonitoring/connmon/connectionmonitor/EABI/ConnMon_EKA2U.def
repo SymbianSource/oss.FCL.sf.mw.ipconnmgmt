@@ -105,8 +105,8 @@ EXPORTS
 	_ZTV18TConnMonVirtualIap @ 104 NONAME ; #<VT>#
 	_ZTV19ConnMonIdsArrayPckg @ 105 NONAME ; #<VT>#
 	_ZTV19TConnMonWLANNetwork @ 106 NONAME ; #<VT>#
-	_ZTV20CCDIAPMetadataRecord @ 107 NONAME ABSENT ; #<VT>#
-	_ZTV21CCDSNAPMetadataRecord @ 108 NONAME ABSENT ; #<VT>#
+	_ZTV20CCDIAPMetadataRecord @ 107 NONAME ABSENT; #<VT>#
+	_ZTV21CCDSNAPMetadataRecord @ 108 NONAME  ABSENT ; #<VT>#
 	_ZTV22CCDMIPServiceExtRecord @ 109 NONAME ABSENT ; #<VT>#
 	_ZTV25CConnMonCommsDataNotifier @ 110 NONAME ; #<VT>#
 	_ZTV27CConnMonAvailabilityManager @ 111 NONAME ; #<VT>#
@@ -137,28 +137,25 @@ EXPORTS
 	_ZNK24CConnMonBearerInfoChange10BearerInfoEv @ 136 NONAME
 	_ZNK25CConnMonBearerGroupChange12BearerGroupsERjS0_ @ 137 NONAME
 	_ZNK25CConnMonBearerGroupChange8InternalEv @ 138 NONAME
-	_ZN26CConnMonWlanProbeRawBuffer4NewLEPK6HBufC8 @ 139 NONAME
-	_ZN26CConnMonWlanProbeRawBuffer4NewLERS_ @ 140 NONAME
-	_ZN26CConnMonWlanProbeRawBuffer4NewLEv @ 141 NONAME
-	_ZN26CConnMonWlanProbeRawBuffer8FromPtrCERK6TPtrC8PS_ @ 142 NONAME
-	_ZN26CConnMonWlanProbeRawBufferD0Ev @ 143 NONAME
-	_ZN26CConnMonWlanProbeRawBufferD1Ev @ 144 NONAME
-	_ZN26CConnMonWlanProbeRawBufferD2Ev @ 145 NONAME
-	_ZN26CConnMonWlanProbeRawBufferaSERS_ @ 146 NONAME
-	_ZN31CConnMonWlanProbeRawBuffersPckgC1Ej @ 147 NONAME
-	_ZN31CConnMonWlanProbeRawBuffersPckgC2Ej @ 148 NONAME
-	_ZN31CConnMonWlanProbeRawBuffersPckgD0Ev @ 149 NONAME
-	_ZN31CConnMonWlanProbeRawBuffersPckgD1Ev @ 150 NONAME
-	_ZN31CConnMonWlanProbeRawBuffersPckgD2Ev @ 151 NONAME
-	_ZNK26CConnMonWlanProbeRawBuffer5ToBufEv @ 152 NONAME
-	_ZNK31CConnMonWlanProbeRawBuffersPckg3BufEv @ 153 NONAME
-	_ZNK31CConnMonWlanProbeRawBuffersPckg9UnpackToLER13RPointerArrayI26CConnMonWlanProbeRawBufferE @ 154 NONAME
-	_ZTI31CConnMonWlanProbeRawBuffersPckg @ 155 NONAME
-	_ZTV31CConnMonWlanProbeRawBuffersPckg @ 156 NONAME
-	_ZNK26CConnMonWlanProbeRawBuffer9RawBufferEv @ 157 NONAME
-	_ZNK31CConnMonWlanProbeRawBuffersPckg5CountEv @ 158 NONAME
-	_ZNK31CConnMonWlanProbeRawBuffersPckg5TotalEv @ 159 NONAME
-	_ZN19CConnMonWlanNetwork14SecurityModeV2Ev @ 160 NONAME
-	_ZN19CConnMonWlanNetwork25IsProtectedSetupSupportedEv @ 161 NONAME
-	_ZN19CConnMonWlanNetwork4NewLERK4TBufILi32EEjjjjjRK5TBuf8ILi6EERK7TDesC16 @ 162 NONAME
+	_ZN26CConnMonWlanProbeRawBuffer4NewLEPK6HBufC8 @139
+	_ZN26CConnMonWlanProbeRawBuffer4NewLERS_ @140
+	_ZN26CConnMonWlanProbeRawBuffer4NewLEv @141
+	_ZN26CConnMonWlanProbeRawBuffer8FromPtrCERK6TPtrC8PS_ @142
+	_ZN26CConnMonWlanProbeRawBufferD0Ev @143
+	_ZN26CConnMonWlanProbeRawBufferD1Ev @144
+	_ZN26CConnMonWlanProbeRawBufferD2Ev @145
+	_ZN26CConnMonWlanProbeRawBufferaSERS_ @146
+	_ZN31CConnMonWlanProbeRawBuffersPckgC1Ej @147
+	_ZN31CConnMonWlanProbeRawBuffersPckgC2Ej @148
+	_ZN31CConnMonWlanProbeRawBuffersPckgD0Ev @149
+	_ZN31CConnMonWlanProbeRawBuffersPckgD1Ev @150
+	_ZN31CConnMonWlanProbeRawBuffersPckgD2Ev @151
+	_ZNK26CConnMonWlanProbeRawBuffer5ToBufEv @152
+	_ZNK31CConnMonWlanProbeRawBuffersPckg3BufEv @153
+	_ZNK31CConnMonWlanProbeRawBuffersPckg9UnpackToLER13RPointerArrayI26CConnMonWlanProbeRawBufferE @154
+	_ZTI31CConnMonWlanProbeRawBuffersPckg @155
+	_ZTV31CConnMonWlanProbeRawBuffersPckg @156
+	_ZNK26CConnMonWlanProbeRawBuffer9RawBufferEv @157
+	_ZNK31CConnMonWlanProbeRawBuffersPckg5CountEv @158
+	_ZNK31CConnMonWlanProbeRawBuffersPckg5TotalEv @159
 

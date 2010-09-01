@@ -20,13 +20,10 @@
 // INCLUDE FILES
 #include "GenConAgentDialogServer.h"
 #include "ConnectionDialogsUidDefs.h"
+#include "ActiveLogin.h"
 #include "ConnectionDialogsLogger.h"
 
 #include <agentdialog.h>
-
-// NOTE that the functionality this file is DEPRECATED
-// None on the methods have UI functionality, the plugins complete the requests
-// immediately when they are started
 
 
 // ---------------------------------------------------------
@@ -226,20 +223,31 @@ EXPORT_C void RGenConAgentDialogServer::Authenticate( TDes& aUsername,
     {
     CLOG_ENTERFN( "RGenConAgentDialogServer::Authenticate" );
 
-    // To get rid of compile warnings;
-    aPassword = aPassword;
-    aUsername = aUsername;
+    CActiveLogin* activeLogin = NULL;
+
+    TRAPD( err, activeLogin = CActiveLogin::NewL( aUsername, aPassword ) );
+
+    iNotUsed() = ( TUint32 )activeLogin;
     
-
-    // temporaty variable to get the notifier started
-    TPckgBuf<TUint32> notUsed;
-
-    if ( iNotifier )
+    if ( err != KErrNone )
         {
-        iNotifier->StartNotifierAndGetResponse( aStatus,
-                                                KUidCConnDlgAuthentication,
-                                                notUsed,
-                                                notUsed );
+        TRequestStatus* pS = &aStatus;
+        User::RequestComplete( pS, err );
+        }
+    else
+        {
+        activeLogin->Observe( aStatus );
+
+        TPckgBuf<TAuthenticationPairBuff>* authenticationPairBuff = 
+                                                    activeLogin->GetBuffer();
+
+        if ( iNotifier )
+            {
+            iNotifier->StartNotifierAndGetResponse( activeLogin->iStatus,
+                                                    KUidCConnDlgAuthentication,
+                                                    *authenticationPairBuff,
+                                                    *authenticationPairBuff );
+            }
         }
 
     CLOG_LEAVEFN( "RGenConAgentDialogServer::Authenticate" );
@@ -430,6 +438,11 @@ EXPORT_C void RGenConAgentDialogServer::CancelAuthenticate()
         {
         iNotifier->CancelNotifier( KUidCConnDlgAuthentication );
         }
+
+    CActiveLogin* activeLogin = ( CActiveLogin* )iNotUsed();
+
+    activeLogin->Cancel();
+    delete activeLogin;
 
     CLOG_LEAVEFN( "RGenConAgentDialogServer::CancelAuthenticate" );
     }

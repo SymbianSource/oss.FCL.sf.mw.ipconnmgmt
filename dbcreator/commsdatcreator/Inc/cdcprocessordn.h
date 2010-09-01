@@ -114,7 +114,14 @@ class CProcessorDN : public CProcessorBase
         * Writes the actual created access point to the log file.
         */
         void DoLogL();
-            
+    
+    private:
+        /**
+        * Helper function for creating destinations. 
+        * @param aDnId Destination ID for the new destination
+        */
+        void CreateDestination( TInt aDnId );
+        
     private:
     
         // @var The destiantion that is created

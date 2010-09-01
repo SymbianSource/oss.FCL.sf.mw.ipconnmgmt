@@ -1,0 +1,98 @@
+/*
+* Copyright (c) 2006 Nokia Corporation and/or its subsidiary(-ies). 
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description: 
+*      Project specification for LAN Plugin.   
+*      
+*
+*/
+
+#include <data_caging_paths.hrh>
+#include <platform_paths.hrh>
+
+TARGET      cmpluginwlan.dll
+UID         0x10009D8D 0x10281BB2
+
+TARGETTYPE		PLUGIN
+
+CAPABILITY      CAP_ECOM_PLUGIN
+VENDORID        VID_DEFAULT
+
+SOURCEPATH  ../src
+
+SOURCE      cmpluginwlanproxy.cpp
+SOURCE      cmpluginwlan.cpp
+SOURCE      cmpluginwlandata.cpp
+SOURCE      cmpluginwlandataarray.cpp
+SOURCE      ../../../Framework/Src/cmlogger.cpp
+SOURCE      cmpwlansettingsdlg.cpp
+SOURCE      cmpwlansettingsdlgadv.cpp
+SOURCE      cmpwlansettingsdlgipv4.cpp
+SOURCE      cmpwlansettingsdlgipv6.cpp
+SOURCE      cmwlancoveragecheck.cpp
+SOURCE      cmpwlanactivewaiter.cpp
+
+SOURCEPATH  ../data
+
+START RESOURCE 10281BB2.rss
+TARGET cmpluginwlan.rsc
+END
+
+START RESOURCE cmwlanui.rss
+DEPENDS cmmanager.rsg
+HEADER
+TARGETPATH   RESOURCE_FILES_DIR
+LANGUAGE_IDS
+END
+
+USERINCLUDE     ../../../Framework/Inc
+
+// Component specific internal headers 
+USERINCLUDE			../inc
+
+// ADO specific internal headers 
+SYSTEMINCLUDE		../../../../../inc
+   
+//Macro to /epoc32 headers
+MW_LAYER_SYSTEMINCLUDE
+
+LIBRARY     euser.lib
+LIBRARY 	efsrv.lib
+LIBRARY	    ECOM.LIB
+LIBRARY     cmmanager.lib
+LIBRARY     COMMSDAT.lib
+LIBRARY     WEPSecuritySettingsUi.lib
+LIBRARY     WPASecuritySettingsUi.lib
+LIBRARY     wapisecuritysettingsui.lib
+LIBRARY     AknSkins.lib
+LIBRARY     ConnectionUiUtilities.lib
+LIBRARY     cmmanagerdatabase.lib
+
+DEBUGLIBRARY flogger.lib
+
+LIBRARY	CommonUI.LIB
+LIBRARY	CommonEngine.lib
+LIBRARY	bafl.lib
+LIBRARY eikcoctl.lib avkon.lib eikdlg.lib
+LIBRARY insock.lib
+LIBRARY FeatMgr.lib
+   
+LIBRARY eikcore.lib egul.lib
+LIBRARY eikctl.lib  cone.lib 
+LIBRARY fbscli.lib
+LIBRARY AknCapServerClient.lib
+LIBRARY aknnotify.lib
+
+LIBRARY	wifiprotplugin.lib
+LIBRARY charconv.lib
+

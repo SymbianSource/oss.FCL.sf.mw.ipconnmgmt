@@ -26,9 +26,12 @@
 #include "EasyWepDlgNotif.h"
 #include "EasyWpaDlgNotif.h"
 #include "WLANNetworkUnavailableNoteNotif.h"
-#include "wlanpowersavetestnotif.h"
+#include "ConfirmationQueryNotif.h"
+#include "ConnectViaNoteNotif.h"
 #include "easywapidlgnotif.h"
-#include "cellulardataconfirmation.h"
+#include "nowlannetworksavailablenotif.h"
+#include "connectingviadiscreetpopupnotif.h"
+#include "connectionerrordiscreetpopupnotif.h"
 
 // CONSTANTS
 
@@ -46,9 +49,8 @@ LOCAL_C void CreateNotifiersL(
 //
 EXPORT_C CArrayPtr<MEikSrvNotifierBase2>* NotifierArray()
     {
-    CArrayPtrFlat<MEikSrvNotifierBase2>* array = NULL;
-    TRAP_IGNORE( array = new (ELeave) 
-                    CArrayPtrFlat<MEikSrvNotifierBase2>( KPluginGranularity ); )
+    CArrayPtrFlat<MEikSrvNotifierBase2>* array = new (ELeave) 
+                    CArrayPtrFlat<MEikSrvNotifierBase2>( KPluginGranularity );
 
     if ( array )
         {
@@ -111,12 +113,12 @@ LOCAL_C void CreateNotifiersL(
     aNotifiers->AppendL( serNotify );
     CleanupStack::Pop( serNotify );      
 
-    serNotify = CCellularDataConfirmation::NewL( resourceFileResponsible );
+    serNotify = CConfirmationQueryNotif::NewL( resourceFileResponsible );
     CleanupStack::PushL( serNotify );
     aNotifiers->AppendL( serNotify );
     CleanupStack::Pop( serNotify );     
     
-    serNotify = CWlanPowerSaveQueryNotif::NewL( resourceFileResponsible );
+    serNotify = CConnectViaNoteNotif::NewL( resourceFileResponsible );
     CleanupStack::PushL( serNotify );
     aNotifiers->AppendL( serNotify );
     CleanupStack::Pop( serNotify );
@@ -126,6 +128,20 @@ LOCAL_C void CreateNotifiersL(
     aNotifiers->AppendL( serNotify );
     CleanupStack::Pop( serNotify );    
 
+    serNotify = CConnectingViaDiscreetPopupNotif::NewL( resourceFileResponsible );
+    CleanupStack::PushL( serNotify );
+    aNotifiers->AppendL( serNotify );
+    CleanupStack::Pop( serNotify );
+    
+    serNotify = CNoWLANNetworksAvailableNotif::NewL( resourceFileResponsible );
+    CleanupStack::PushL( serNotify );
+    aNotifiers->AppendL( serNotify );
+    CleanupStack::Pop( serNotify );
+
+    serNotify = CConnectionErrorDiscreetPopupNotif::NewL( resourceFileResponsible );
+    CleanupStack::PushL( serNotify );
+    aNotifiers->AppendL( serNotify );
+    CleanupStack::Pop( serNotify );
     }
     
 // End of File

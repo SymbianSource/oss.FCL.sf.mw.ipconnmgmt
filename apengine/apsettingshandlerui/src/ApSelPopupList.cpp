@@ -24,6 +24,9 @@
 #include <apsetui.rsg>
 #include <featmgr.h>
 
+#include <csxhelp/cp.hlp.hrh>
+
+
 #include "ApSelectorListBoxModel.h"
 #include "ApSettingsModel.h"
 #include "ApSettingsHandlerUI.hrh"
@@ -240,7 +243,8 @@ iReqIpvType( aReqIpvType ),
 iVpnFilterType( aVpnFilterType ),
 iVariant( aHandler.iExt->iVariant ),
 iIncludeEasyWlan( EFalse ),
-iNoEdit( aNoEdit )
+iNoEdit( aNoEdit ),
+iFirstEnter( ETrue )
     {
     }
 
@@ -278,7 +282,8 @@ iVpnFilterType( aVpnFilterType ),
 iVariant( aHandler.iExt->iVariant ),
 iIncludeEasyWlan( aIncludeEasyWlan ),
 iInitialised( EFalse ),
-iNoEdit( aNoEdit )
+iNoEdit( aNoEdit ),
+iFirstEnter( ETrue )
     {
     }
 
@@ -313,6 +318,8 @@ void CApSelPopupList::GetHelpContext(TCoeHelpContext& aContext) const
     APSETUILOGGER_ENTERFN( EListbox,"SelPopupList::GetHelpContext")
     
     aContext.iMajor = iHandler->iHelpMajor;
+    // help no longer available for user, use dummy ID
+    aContext.iContext = KSET_HLP_AP_SETTING_GPRS;
     
     APSETUILOGGER_LEAVEFN( EListbox,"SelPopupList::GetHelpContext")
     }
@@ -483,16 +490,14 @@ void CApSelPopupList::FillListBoxWithDataL()
 
     iList->HandleItemAdditionL();
 
-    iList->View()->SetDisableRedraw( EFalse );
-    iList->HandleItemAdditionL();
-
     SetSelectedL();
     iPreferredUid = *iSelected;
     
     SetHighlighted();
 
+    iList->View()->SetDisableRedraw( EFalse );
+    
     SizeChanged();
-    DrawNow();
     
     CheckAndSetDataValidity();
     UpdateCbaL();
@@ -520,7 +525,8 @@ void CApSelPopupList::SetSelectedL()
             i = count;
             }
         }
-    iList->SetCurrentItemIndexAndDraw( idx );
+    
+    iList->SetCurrentItemIndex( idx );
     SelectCurrentItemL();
     
     APSETUILOGGER_LEAVEFN( EListbox,"SelPopupList::SetSelectedL")
@@ -833,11 +839,29 @@ TKeyResponse CApSelPopupList::OfferKeyEventL( const TKeyEvent& aKeyEvent,
                 ( ( iSelMenuType == EApSettingsSelMenuSelectOnly ) ||
                     ( iSelMenuType == EApSettingsSelMenuSelectNormal ) ) )
                 { // process only if command is available...
-                ProcessCommandL( EApSelCmdSelect );
-                retval = EKeyWasConsumed;
+                if ( aKeyEvent.iCode == EKeyEnter  &&  iFirstEnter )
+                    {//pressing the enter key at the first time will be changed
+                     //to an up arrow key so the first item in the list will be highlighted
+                    iFirstEnter = EFalse;
+                    iPreferredUid = 0;
+                    SetHighlighted();
+                    TKeyEvent aKeyEventmy = aKeyEvent;
+                    aKeyEventmy.iCode = EKeyUpArrow;
+                    retval = CAknRadioButtonSettingPage::OfferKeyEventL( aKeyEventmy, aType );
+                    }
+                else
+                    {
+                    iFirstEnter = ETrue; //change back to true for the next session
+                    ProcessCommandL( EApSelCmdSelect );
+                    retval = EKeyWasConsumed;
+                    }
                 }
             else
                 {
+                if ( aKeyEvent.iCode == EKeyUpArrow || aKeyEvent.iCode == EKeyDownArrow )
+                    {//we will have highligt so the following enter key should select the item
+                    iFirstEnter = EFalse;
+                    }
                 retval = CAknRadioButtonSettingPage::OfferKeyEventL(
                                         aKeyEvent, aType );
                 }

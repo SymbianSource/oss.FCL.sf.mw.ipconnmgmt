@@ -65,10 +65,7 @@ CAOCenRepObserver::~CAOCenRepObserver()
 CAOCenRepObserver::CAOCenRepObserver( MAOCenRepObserver& aObserver )
         :
         CActive( CActive::EPriorityStandard ),
-        iObserver( aObserver ),
-        iRepository( NULL ), 
-        iErrorCounter( 0 )
-                
+        iObserver( aObserver )
     {
     }
 

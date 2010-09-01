@@ -278,10 +278,10 @@ EXPORT_C void CConnectionUiUtilities::SearchWLANNetworkAsync(
 // ---------------------------------------------------------
 //
 EXPORT_C void CConnectionUiUtilities::ConnectedViaDestAndConnMethodNote( 
-                                                const TUint32 /*aDestId*/, 
-                                                const TUint32 /*aConnMId*/ )
+                                                const TUint32 aDestId, 
+                                                const TUint32 aConnMId )
     {
-    // Deprecated.    
+    iImpl->ConnectedViaDestAndConnMethodNote( aDestId, aConnMId );    
     }
  
 // ---------------------------------------------------------
@@ -289,11 +289,11 @@ EXPORT_C void CConnectionUiUtilities::ConnectedViaDestAndConnMethodNote(
 // ---------------------------------------------------------
 //
 EXPORT_C void CConnectionUiUtilities::ConnectedViaDestAndConnMethodNote( 
-                                                const TUint32 /*aDestId*/, 
-                                                const TUint32 /*aConnMId*/, 
-                                                TRequestStatus& /*aStatus*/  )
+                                                const TUint32 aDestId, 
+                                                const TUint32 aConnMId, 
+                                                TRequestStatus& aStatus  )
     {
-    // Deprecated. 
+    iImpl->ConnectedViaDestAndConnMethodNote( aDestId, aConnMId, aStatus ); 
     }
            
 // ---------------------------------------------------------
@@ -302,7 +302,7 @@ EXPORT_C void CConnectionUiUtilities::ConnectedViaDestAndConnMethodNote(
 //
 EXPORT_C void CConnectionUiUtilities::CancelConnectedViaDestAndConnMethodNote()
     {
-    // Deprecated.            
+    iImpl->CancelConnectedViaDestAndConnMethodNote();            
     }
 
 // ---------------------------------------------------------
@@ -354,19 +354,19 @@ EXPORT_C void CConnectionUiUtilities::CancelRoamingToMorePrefMethodQuery()
 // ---------------------------------------------------------
 //
 EXPORT_C void CConnectionUiUtilities::ChangingConnectionToNote( 
-                                                const TUint32 /*aConnMId*/ )
+                                                const TUint32 aConnMId )
     {
-    // Deprecated.                
+    iImpl->ChangingConnectionToNote( aConnMId );                
     }
 
 // ---------------------------------------------------------
 // CConnectionUiUtilities::ChangingConnectionToNote
 // ---------------------------------------------------------
 //    
-EXPORT_C void CConnectionUiUtilities::ChangingConnectionToNote( const TUint32 /*aConnMId*/, 
-        											TRequestStatus& /*aStatus*/ )
+EXPORT_C void CConnectionUiUtilities::ChangingConnectionToNote( const TUint32 aConnMId, 
+        											TRequestStatus& aStatus )
 	{
-	// Deprecated. 
+	iImpl->ChangingConnectionToNote( aConnMId, aStatus ); 
 	}
 
 // ---------------------------------------------------------
@@ -375,7 +375,7 @@ EXPORT_C void CConnectionUiUtilities::ChangingConnectionToNote( const TUint32 /*
 //
 EXPORT_C void CConnectionUiUtilities::CancelChangingConnectionToNote()
     {
-    // Deprecated.            
+    iImpl->CancelChangingConnectionToNote();            
     }
 
 // ---------------------------------------------------------
@@ -408,9 +408,9 @@ EXPORT_C void CConnectionUiUtilities::CancelConfirmMethodUsageQuery()
 // ---------------------------------------------------------
 //
 EXPORT_C void CConnectionUiUtilities::ConnectedViaConnMethodNote( 
-                                                    const TUint32 /*aConnMId*/ )
+                                                    const TUint32 aConnMId )
     {
-    // Deprecated.    
+    iImpl->ConnectedViaConnMethodNote( aConnMId );    
     }
 
 // ---------------------------------------------------------
@@ -418,10 +418,10 @@ EXPORT_C void CConnectionUiUtilities::ConnectedViaConnMethodNote(
 // ---------------------------------------------------------
 //
 EXPORT_C void CConnectionUiUtilities::ConnectedViaConnMethodNote( 
-                                                    const TUint32 /*aConnMId*/, 
-                                                    TRequestStatus& /*aStatus*/ )
+                                                    const TUint32 aConnMId, 
+                                                    TRequestStatus& aStatus )
     {
-    // Deprecated.    
+    iImpl->ConnectedViaConnMethodNote( aConnMId , aStatus );    
     }
 
 // ---------------------------------------------------------
@@ -430,7 +430,7 @@ EXPORT_C void CConnectionUiUtilities::ConnectedViaConnMethodNote(
 //
 EXPORT_C void CConnectionUiUtilities::CancelConnectedViaConnMethodNote()
     {
-    // Deprecated.
+    iImpl->CancelConnectedViaConnMethodNote();
     }
 
 
@@ -490,26 +490,6 @@ EXPORT_C void CConnectionUiUtilities::OffLineWlanNote(
     }
     
 // ---------------------------------------------------------
-// CConnectionUiUtilities::WlanPowerSaveTestNote
-// ---------------------------------------------------------
-//
-EXPORT_C void CConnectionUiUtilities::WlanPowerSaveTestNote(
-                                               TBool&          aDisable,
-                                               TRequestStatus& aStatus )
-    {
-    iImpl->WlanPowerSaveTestNote( aDisable, aStatus );
-    }
-
-// ---------------------------------------------------------
-// CConnectionUiUtilities::CancelWlanPowerSaveTestNote
-// ---------------------------------------------------------
-//
-EXPORT_C void CConnectionUiUtilities::CancelWlanPowerSaveTestNote()
-    {
-    iImpl->CancelWlanPowerSaveTestNote();
-    }
-
-// ---------------------------------------------------------
 // CConnectionUiUtilities::EasyWapiDlg
 // ---------------------------------------------------------
 //
@@ -524,7 +504,7 @@ EXPORT_C TBool CConnectionUiUtilities::EasyWapiDlg( TDes* aKey )
 //
 EXPORT_C void CConnectionUiUtilities::NoWLANNetworksAvailableNote()
     {
-    // Note removed.
+    iImpl->NoWLANNetworksAvailableNote();
     }
 
 // ---------------------------------------------------------
@@ -607,30 +587,11 @@ EXPORT_C TBool CConnectionUiUtilities::SearchWLANNetwork(
 // CConnectionUiUtilities::ConnectingViaDiscreetPopup
 // ---------------------------------------------------------
 //
-EXPORT_C void CConnectionUiUtilities::ConnectingViaDiscreetPopup( )
-    {
-    iImpl->ConnectingViaDiscreetPopup( );
-    } 
-
-// ---------------------------------------------------------
-// CConnectionUiUtilities::ConnectingViaDiscreetPopup
-// ---------------------------------------------------------
-//
 EXPORT_C void CConnectionUiUtilities::ConnectingViaDiscreetPopup( 
-        const TUint32& aIapId,
-        TBool aConnectionAlreadyActive )
+        const TUint32& aIapId )
     {
-    iImpl->ConnectingViaDiscreetPopup( aIapId, aConnectionAlreadyActive );
+    iImpl->ConnectingViaDiscreetPopup( aIapId );
     } 
-
-// ---------------------------------------------------------
-// CConnectionUiUtilities::CancelConnectingViaDiscreetPopup
-// ---------------------------------------------------------
-//
-EXPORT_C void CConnectionUiUtilities::CancelConnectingViaDiscreetPopup()
-    {
-    iImpl->CancelConnectingViaDiscreetPopup();
-    }
 
 // ---------------------------------------------------------
 // CConnectionUiUtilities::ConnectionErrorDiscreetPopup

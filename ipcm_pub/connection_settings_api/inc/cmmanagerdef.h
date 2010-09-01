@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2006-2009 Nokia Corporation and/or its subsidiary(-ies).
+* Copyright (c) 2006 Nokia Corporation and/or its subsidiary(-ies). 
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -11,19 +11,17 @@
 *
 * Contributors:
 *
-* Description:
-* Definition module for Connection Method Manager.
+* Description:  Definition module for Connection Method Manager
 *
 */
-
 
 #ifndef CMMANAGERDEF_H
 #define CMMANAGERDEF_H
 
+// System includes
 #include <e32def.h>
 #include <e32std.h>
-
-
+           
 namespace CMManager
     {
     /**
@@ -161,22 +159,22 @@ namespace CMManager
 NONSHARABLE_CLASS( TBearerPriority )
     {
     public:
-
+        
         HBufC*     iServiceType;    /**<
                                     * Name of the service table to identify
-                                    * type of bearer
+                                    * type of bearer 
                                     */
-
+                                    
         TUint32    iPriority;       /**<
-                                    * Priority of the bearer.
-                                    * Values must be unique within the table
+                                    * Priority of the bearer. 
+                                    * Values must be unique within the table 
                                     */
-
+                                    
         TUint32    iUIPriority;     /**<
                                     * Priority of this bearer type when shown
-                                    * in UI for configuring a new IAP.
-                                    * Values must be unique within the table
+                                    * in UI for configuring a new IAP. 
+                                    * Values must be unique within the table 
                                     */
-    };
-
+    };       
+    
 #endif // CMMANAGERDEF_H

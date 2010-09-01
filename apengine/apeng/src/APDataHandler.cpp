@@ -38,12 +38,16 @@
 #include "ApEngineCommons.h"
 #include "ApUtils.h"
 #include "ApEngineVer.h"
-#include "ApEngineLogger.h" 
+#include "ApEngineLogger.h"
 #include "ApNetworkItem.h"
 #include "APItemExtra.h"
 #include "APItemCdmaData.h"
 #include "APItemWlanData.h"
 #include "ApSpeedLookup.h"
+
+#include <WEPSecuritySettingsUI.h>
+#include <WPASecuritySettingsUI.h>
+
 
 // CONSTANTS
 #if defined(_DEBUG)
@@ -252,8 +256,140 @@ EXPORT_C void CApDataHandler::UpdateAccessPointDataL
 //
 EXPORT_C TUint32 CApDataHandler::CreateCopyFromL( TUint32 aBaseId )
     {
-    CLOG( ( EHandler, 0, _L( "-> CApDataHandler::CreateCopyFromL - ERROR: not suported" ) ) );
-    User::Leave( KErrNotSupported );
+    CLOG( ( EHandler, 0, _L( "-> CApDataHandler::CreateCopyFromL" ) ) );
+
+    if ( iExt->iVariant & KApUiEditOnlyVPNs )
+        {
+        User::Leave( KErrNotSupported );
+        }
+
+    CApAccessPointItem* holder = CApAccessPointItem::NewLC();
+
+    TBool ownTransaction = ApCommons::StartPushedTransactionLC( *iDb );
+    AccessPointDataL( aBaseId, *holder );
+    TUint32 oldwlanid( 0 );
+    holder->ReadUint( EApIapServiceId, oldwlanid );
+    
+    TUint32 retval( 0 );
+    TBool aNameChanged( EFalse );
+    
+    TApBearerType bearer = holder->BearerTypeL();
+    CWEPSecuritySettings* wepSecSettings = NULL;
+    CWPASecuritySettings* wpaSecSettings( NULL );
+    // only one of the above might be loaded once, so after copying
+    // we might need to PopAndDestroy only one item
+    TBool pushed(EFalse);
+
+    if ( bearer == EApBearerTypeWLAN )
+        {
+        TUint32 secmode( 0 );
+        holder->ReadUint( EApWlanSecurityMode, secmode );
+        switch ( secmode )
+            {
+            case EOpen:
+                {
+                break;
+                }
+            case EWep:
+                {
+                wepSecSettings = CWEPSecuritySettings::NewL();
+                CleanupStack::PushL( wepSecSettings );
+                pushed = ETrue;
+                TUint32 wlanid( 0 );
+                holder->ReadUint( EApIapServiceId, wlanid );
+                wepSecSettings->LoadL( wlanid, *iDb );
+                break;
+                }
+            case E802_1x:
+                {
+                wpaSecSettings = 
+                    CWPASecuritySettings::NewL( ESecurityMode8021x );
+                CleanupStack::PushL( wpaSecSettings );
+                pushed = ETrue;
+                TUint32 wlanid( 0 );
+                holder->ReadUint( EApIapServiceId, wlanid );
+                wpaSecSettings->LoadL( wlanid, *iDb );
+                break;
+                }
+            case EWpa:
+            case EWpa2:
+                {
+                wpaSecSettings = 
+                        CWPASecuritySettings::NewL( ESecurityModeWpa );
+                CleanupStack::PushL( wpaSecSettings );
+                pushed = ETrue;
+                TUint32 wlanid( 0 );
+                holder->ReadUint( EApIapServiceId, wlanid );
+                wpaSecSettings->LoadL( wlanid, *iDb );
+                break;
+                }
+            default:
+                {
+                __ASSERT_DEBUG( EFalse, ApCommons::Panic( ENotSupported ) );
+                // do nothing in urel
+                break;
+                }
+            }
+        
+        }
+    
+    retval = DoUpdateAccessPointDataL( *holder, ETrue, aNameChanged );
+    
+    if ( bearer == EApBearerTypeWLAN )
+        {
+        TUint32 wlanid(0);
+        holder->ReadUint( EApIapServiceId, wlanid );        
+        // now check if it is WEP...
+        // read up security mode
+        TUint32 secmode( 0 );
+        holder->ReadUint( EApWlanSecurityMode, secmode );
+        switch ( secmode )
+            {
+            case EOpen:
+                {
+                break;
+                }
+            case EWep:
+                {
+                // we have to try to save
+                wepSecSettings->SaveL( wlanid, *iDb );
+                break;
+                }
+            case E802_1x:
+                {
+                wpaSecSettings->SaveL( wlanid, *iDb, 
+                                       ESavingNewAPAsACopy, oldwlanid );
+                break;
+                }
+            case EWpa:
+            case EWpa2:
+                {
+                wpaSecSettings->SaveL( wlanid, *iDb,
+                                       ESavingNewAPAsACopy, oldwlanid );
+                break;
+                }
+            default:
+                {
+                __ASSERT_DEBUG( EFalse, ApCommons::Panic( ENotSupported ) );
+                // do nothing in urel
+                break;
+                }
+            }
+        }
+    if ( pushed )        
+        {
+        CleanupStack::PopAndDestroy(); // the sec. settings
+        }
+        
+    if ( ownTransaction )
+        {
+        ApCommons::CommitTransaction( *iDb );
+        CleanupStack::Pop(); // RollbackTransactionOnLeave
+        }
+    CleanupStack::PopAndDestroy( holder );    // holder
+
+    CLOG( ( EHandler, 1, _L( "<- CApDataHandler::CreateCopyFromL" ) ) );
+    return retval;
     }
 
 
@@ -2394,8 +2530,71 @@ void CApDataHandler::RemoveLanL( TUint32 aUid )
 //
 void CApDataHandler::RemoveWlanL( TUint32 aUid )
     {
-    CLOG( ( EHandler, 0, _L( "-> CApDataHandler::RemoveWlanL - ERROR: not suported" ) ) );
-    User::Leave( KErrNotSupported );
+    CLOG( ( EHandler, 0, _L( "-> CApDataHandler::RemoveWlanL" ) ) );
+
+    CCommsDbTableView* table = NULL;
+
+    // now check the WLAN table for corresponding record and delete them, too
+    table = iDb->OpenViewMatchingUintLC
+            ( TPtrC(WLAN_SERVICE), TPtrC(WLAN_SERVICE_ID), aUid );
+
+    TInt res = table->GotoFirstRecord(); // O.K.
+    if ( res == KErrNone )
+        { // exists, delete it
+        TUint32 tempint( 0 );
+        ApCommons::ReadUintL( table, TPtrC(WLAN_SECURITY_MODE), tempint );
+        // now tempint holds the security mode
+        // we have to delete security settings, too
+        switch ( tempint )
+            {
+            case EOpen:
+            case EWep:
+                {
+                break;
+                }
+            case E802_1x:
+                {
+                CWPASecuritySettings* wpa = 
+                        CWPASecuritySettings::NewL( ESecurityMode8021x );
+                CleanupStack::PushL( wpa );
+                wpa->DeleteL( aUid );
+                CleanupStack::PopAndDestroy( wpa );
+                break;
+                }
+            case EWpa:
+            case EWpa2:
+                {
+                CWPASecuritySettings* wpa = 
+                        CWPASecuritySettings::NewL( ESecurityModeWpa );
+                CleanupStack::PushL( wpa );
+                wpa->DeleteL( aUid );
+                CleanupStack::PopAndDestroy( wpa );
+                break;
+                }
+            default:
+                {
+                // some weird error, repair it...
+                __ASSERT_DEBUG( EFalse, ApCommons::Panic( ENotSupported ) );
+                break;
+                }
+            }
+        
+        User::LeaveIfError( table->DeleteRecord() );
+        }
+    else
+        {
+        // silently ignore KErrNotFound. It is caused by incorrect DB,
+        // we are 'repairing it' this way.
+        if ( res != KErrNotFound )
+            {
+            User::Leave( res );
+            }
+        }
+
+    // only need to destroy if it was successfully created!
+    CleanupStack::PopAndDestroy( table ); // table            
+    
+    CLOG( ( EHandler, 1, _L( "<- CApDataHandler::RemoveWlanL" ) ) );
     }
 
 

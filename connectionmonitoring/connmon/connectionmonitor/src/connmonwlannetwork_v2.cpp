@@ -75,40 +75,6 @@ CConnMonWlanNetwork::CConnMonWlanNetwork(
 //  Constructor
 // ---------------------------------------------------------------------------
 //
-CConnMonWlanNetwork::CConnMonWlanNetwork(
-        const TBuf<KMaxNameLength>& aName,
-        TUint aConnectionMode,
-        TUint aSignalStrength,
-        TUint aSecurityMode,
-        TUint aSecurityModeV2,
-        TUint aProtectedSetupSupport,
-        const TBuf8<KWlanBssId>& aBssId,
-        const TDesC& aVendorData )
-        :
-        iName( aName ),
-        iConnectionMode( aConnectionMode ),
-        iSignalStrength( aSignalStrength ),
-        iSecurityMode( aSecurityMode ),
-        iWlanBssId( aBssId ),
-        iVendorData( NULL ),
-        iSecurityModeV2( aSecurityModeV2 ),
-        iProtectedSetupSupport( aProtectedSetupSupport )
-    {
-    if ( aVendorData != KNullDesC() && aVendorData.Length() > 0 )
-        {
-        // Can't leave here, copy contents only if enough memory
-        iVendorData = HBufC::New( aVendorData.Length() );
-        if ( iVendorData )
-            {
-            iVendorData->Des().Copy( aVendorData );
-            }
-        }
-    }
-
-// ---------------------------------------------------------------------------
-//  Constructor
-// ---------------------------------------------------------------------------
-//
 EXPORT_C CConnMonWlanNetwork* CConnMonWlanNetwork::NewL(
         const TBuf<KMaxNameLength>& aName,
         TUint aConnectionMode,
@@ -122,33 +88,6 @@ EXPORT_C CConnMonWlanNetwork* CConnMonWlanNetwork::NewL(
             aConnectionMode,
             aSignalStrength,
             aSecurityMode,
-            aBssId,
-            aVendorData );
-
-    return wlanNet;
-    }
-
-// ---------------------------------------------------------------------------
-//  Constructor
-// ---------------------------------------------------------------------------
-//
-EXPORT_C CConnMonWlanNetwork* CConnMonWlanNetwork::NewL(
-        const TBuf<KMaxNameLength>& aName,
-        TUint aConnectionMode,
-        TUint aSignalStrength,
-        TUint aSecurityMode,
-        TUint aSecurityModeV2,
-        TUint aProtectedSetupSupport,
-        const TBuf8<KWlanBssId>& aBssId,
-        const TDesC& aVendorData )
-    {
-    CConnMonWlanNetwork* wlanNet = new( ELeave ) CConnMonWlanNetwork(
-            aName,
-            aConnectionMode,
-            aSignalStrength,
-            aSecurityMode,
-            aSecurityModeV2,
-            aProtectedSetupSupport,
             aBssId,
             aVendorData );
 
@@ -178,8 +117,6 @@ EXPORT_C CConnMonWlanNetwork* CConnMonWlanNetwork::NewL(
                 aConnMonWlanNetwork.iConnectionMode,
                 aConnMonWlanNetwork.iSignalStrength,
                 aConnMonWlanNetwork.iSecurityMode,
-                aConnMonWlanNetwork.iSecurityModeV2,
-                aConnMonWlanNetwork.iProtectedSetupSupport,
                 aConnMonWlanNetwork.iWlanBssId,
                 aConnMonWlanNetwork.iVendorData->Des() );
         }
@@ -190,8 +127,6 @@ EXPORT_C CConnMonWlanNetwork* CConnMonWlanNetwork::NewL(
                 aConnMonWlanNetwork.iConnectionMode,
                 aConnMonWlanNetwork.iSignalStrength,
                 aConnMonWlanNetwork.iSecurityMode,
-                aConnMonWlanNetwork.iSecurityModeV2,
-                aConnMonWlanNetwork.iProtectedSetupSupport,
                 aConnMonWlanNetwork.iWlanBssId,
                 KNullDesC() );
         }
@@ -220,8 +155,6 @@ EXPORT_C CConnMonWlanNetwork& CConnMonWlanNetwork::operator=(
     iConnectionMode = aConnMonWlanNetwork.ConnectionMode();
     iSignalStrength = aConnMonWlanNetwork.SignalStrength();
     iSecurityMode = aConnMonWlanNetwork.SecurityMode();
-    iSecurityModeV2 = aConnMonWlanNetwork.SecurityModeV2();
-    iProtectedSetupSupport = aConnMonWlanNetwork.IsProtectedSetupSupported();
     iWlanBssId = aConnMonWlanNetwork.WlanBssid();
 
     if ( aConnMonWlanNetwork.iVendorData )
@@ -263,29 +196,6 @@ EXPORT_C TInt CConnMonWlanNetwork::CompareBySignal(
 
     //LOGEXITFN1("CConnMonWlanNetwork::CompareBySignal()", rc)
     return rc;
-    }
-
-// ---------------------------------------------------------------------------
-// Obtains the more detailed security mode of the network.
-// ---------------------------------------------------------------------------
-//
-EXPORT_C TUint CConnMonWlanNetwork::SecurityModeV2()
-    {
-    return iSecurityModeV2;
-    }
-
-// ---------------------------------------------------------------------------
-// Finds whether Wi-Fi Protected Setup is supported.
-// ---------------------------------------------------------------------------
-//
-EXPORT_C TBool CConnMonWlanNetwork::IsProtectedSetupSupported()
-    {
-    TBool result( EFalse );
-    if ( iProtectedSetupSupport )
-        {
-        result = ETrue;
-        }
-    return result;
     }
 
 // ---------------------------------------------------------------------------

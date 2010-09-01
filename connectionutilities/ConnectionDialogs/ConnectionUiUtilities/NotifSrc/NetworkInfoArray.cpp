@@ -37,7 +37,6 @@ LOCAL_D const TUint KConnArrayGranularity = 3;
 // ---------------------------------------------------------
 //
 CNetworkInfoArray::CNetworkInfoArray()
-: iNetworkInfoArray( NULL )
     {
     }
 
@@ -122,7 +121,7 @@ TPtrC CNetworkInfoArray::MdcaPoint( TInt aIndex ) const
 // CNetworkInfoArray::GetArrayIndex
 // ---------------------------------------------------------
 //
-TInt CNetworkInfoArray::GetArrayIndex( TName& aNetworkName ) const
+TInt CNetworkInfoArray::GetArrayIndex( TName aNetworkName ) const
     {
     CLOG_ENTERFN( "CNetworkInfoArray::GetArrayIndex" );
 

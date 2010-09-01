@@ -26,7 +26,7 @@
 #include <apgcli.h>
 #include <AknsUtils.h>
 
-#include <disconnectdlg.rsg>
+#include <DisconnectDlg.rsg>
 #include <disconnectdlgui.mbg>
 #include <data_caging_path_literals.hrh>
 

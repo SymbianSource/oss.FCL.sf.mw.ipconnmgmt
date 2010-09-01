@@ -114,8 +114,7 @@ TInt CAOConnection::NumberOfConnections()
 // Constructor
 // ---------------------------------------------------------------------------
 //
-CAOConnection::CAOConnection():
-    iConnectionImpl( NULL )
+CAOConnection::CAOConnection()
     {
     LOG_1( _L("CAOConnection::CAOConnection") );
     }

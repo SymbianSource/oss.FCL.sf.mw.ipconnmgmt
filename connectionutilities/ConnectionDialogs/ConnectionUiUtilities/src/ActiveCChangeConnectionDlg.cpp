@@ -26,7 +26,7 @@
 #include <wlanmgmtclient.h>
 #endif
 
-#include <connectionuiutilities.rsg>
+#include <ConnectionUiUtilities.rsg>
 
 #include "ActiveCChangeConnectionDlg.h"
 #include "ChangeConnectionDlg.h"
@@ -81,8 +81,7 @@ CActiveCChangeConnectionDlg::CActiveCChangeConnectionDlg(
                                             TUint32* aIAPId, 
                                             const TConnectionPrefs& aPrefs,
                                             TDes& aConnectionName  ) 
-: CActiveIAPListing( aPrefs ),
-  iDialog( NULL ),
+: CActiveIAPListing( aPrefs ), 
   isDialogDeleting( EFalse ),
   iIAPId( aIAPId ),
   iConnectionName( aConnectionName ),

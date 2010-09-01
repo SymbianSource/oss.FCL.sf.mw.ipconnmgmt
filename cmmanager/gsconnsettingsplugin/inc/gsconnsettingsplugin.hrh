@@ -1,0 +1,69 @@
+/*
+* Copyright (c) 2005 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:  Contains common definitions for Connectivity Settings plugin
+*
+*/
+
+
+#ifndef GSCONNECTIVITYSETTINGSPLUGIN_HRH
+#define GSCONNECTIVITYSETTINGSPLUGIN_HRH
+
+// commands
+enum TMenuCommands
+    {     // GS plugin commands starts from 500
+    EGSConnSettMenuOpen = 550, // Menu command Open
+    EGSConnSettMenuChange,     // Menu command change
+    EGSConnSettMskGeneral,     // MSK general in main view. Can be either 'Change' or 'Open'
+    EGSConnSettMenuExit        // 'Exit' menu command. Overridden to take control of exit
+    };
+
+// Main view item identifiers
+enum {
+    EGSSettIdUsageOfWlan,
+    EGSSettIdDataUsageHomeNw,
+    EGSSettIdDataUsageAbroad,
+    EGSExtPluginsListItemId
+    };
+
+//Indexes for usage of new WLAN values
+//These have to match to the order of r_usage_of_wlan_setting_page_lbx
+//resource in gsconnsettingsplugin.rss
+enum {
+    EUsageOfWlanKnown = 0,
+    EUsageOfNewWlanManual = 1
+    };
+
+//Indexes for data usage abroad values
+//These have to match to the order of r_data_usage_abroad_setting_page_lbx
+//resource in gsconnsettingsplugin.rss
+enum {
+    EDataUsageAbroadAutomatic = 0,
+    EDataUsageAbroadConfirm = 1,
+    EDataUsageAbroadWlanOnly = 2,
+    EDataUsageAbroadDisabled = 3
+    };
+
+//Indexes for data usage in home NW values
+//These have to match to the order of r_data_usage_home_nw_setting_page_lbx
+//resource in gsconnsettingsplugin.rss
+enum {
+    EDataUsageHomeNwAutomatic = 0,
+    EDataUsageHomeNwConfirm = 1,
+    EDataUsageHomeNwWlanOnly = 2,
+    EDataUsageHomeNwDisabled = 3
+    };
+
+#endif //  GSCONNECTIVITYSETTINGSPLUGIN_HRH
+
+//End of File

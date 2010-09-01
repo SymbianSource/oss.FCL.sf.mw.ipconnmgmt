@@ -26,7 +26,7 @@
 
 
 // CONSTANTS
-const TUint KNumberOfWrappedDialogs = 7;
+const TUint KNumberOfWrappedDialogs = 13;
 
 enum TWrappedDialogs
     {
@@ -34,9 +34,15 @@ enum TWrappedDialogs
     EOffLineWlan,
     EWlanDisabled,
     EWlanNetwUnavail,
+    EConnViaDestCM,
+    EChangingConnTo,
+    EConnViaCM,
     EWlanEasyWep,
     EWlanEasyWpa,
-    EWlanEasyWapi
+    EWlanEasyWapi,
+    ENoWlanNetwsAvail,
+    EConnectingViaDiscreetPopup,
+    EConnectionErrorDiscreetPopup
     };
 
 
@@ -90,6 +96,10 @@ NONSHARABLE_CLASS( CActiveWrapper ) : public CActive
     
         TInt StartEasyWapiDlg( TPckgBuf< TBuf< KEasyWapiQueryMaxLength > >& aKey );
 
+        void StartConnectingViaDiscreetPopup(TPckgBuf< TConnUiConnectingViaDiscreetPopup>& aInfo);
+
+        void StartConnectionErrorDiscreetPopup( TPckgBuf<TInt>& aErrCode);
+        
     public: // Functions from base classes
 
         void DoCancel();

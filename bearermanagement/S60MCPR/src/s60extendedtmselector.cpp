@@ -56,12 +56,10 @@ static const TUid KLegacyNextLayerTierId = { 0x10281DF0 }; //CIPProtoTierManager
 // -----------------------------------------------------------------------------
 //
 CExtendedS60SelectorBase::CExtendedS60SelectorBase(  TUid aTierId, const ESock::RConnPrefList& aConnPrefList )
-    :    ASimpleSelectorBase( ),
-         iDefaultAp( 0 ),
-         iConnPrefList( aConnPrefList ),
-         iTierId( aTierId ),
-         iSubSessionUniqueId( 0 )
+    :    ASimpleSelectorBase( )
     {
+    iTierId = aTierId;
+    iConnPrefList = aConnPrefList;
     }
 
 // -----------------------------------------------------------------------------

@@ -83,7 +83,7 @@ NONSHARABLE_CLASS( CNetworkInfoArray ) : public CBase, public MDesCArray
         * @return index value of network in the array, or -1 if there
         * is no network the given Id
         */
-        TInt GetArrayIndex( TName& aNetworkName ) const;
+        TInt GetArrayIndex( TName aNetworkName ) const;
 
         /**
         * Add only new network to the array

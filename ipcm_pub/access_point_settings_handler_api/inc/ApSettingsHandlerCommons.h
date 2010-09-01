@@ -21,7 +21,7 @@
 #define APSETTINGS_HANDLER_COMMONS_H
 
 // Deprecation warning
-#warning This header file has been deprecated and will be fully removed between weeks 12 and 18 of 2010. See Polonium CR #153 for details.
+#warning This header file has been deprecated. Will be removed in one of the next SDK releases.
  
  
 // INCLUDES

@@ -33,6 +33,7 @@
 #include <WlanCdbCols.h>
 #include <commsdattypesv1_1.h>
 #include <wlancontainer.h>
+#include <EapType.h>
 
 using namespace CMManager;
 
@@ -58,6 +59,12 @@ const TUint32 KDefaultPortNum = 0;
 
 // ratio between sizes of ascii and unicode characters
 const TUint KAsciiUnicodeRatio = 2;
+
+// Length of expanded EAP type identifier
+const TUint KExpandedEAPIdLength = 8;
+
+// Plain MSCHAPv2 EAP identifier. Needed because of special handling
+const TUint8 KMschapv2TypeId[] = {0xfe, 0xff, 0xff, 0xff, 0x00, 0x00, 0x00, 0x63};
 
 // ================= MEMBER FUNCTIONS =======================
 
@@ -137,7 +144,6 @@ CProcessorWlan::CProcessorWlan( CReaderBase* aFileReader,
 CProcessorWlan::~CProcessorWlan()
     {
     delete iEmptyTag;
-    REComSession::FinalClose();
     }
 
 // ---------------------------------------------------------
@@ -373,7 +379,7 @@ void CProcessorWlan::ProcessSpecialFieldsL( TInt aField, HBufC* aPtrTag, TInt /*
             //WPA
             case EWPAPresharedKey:
             case EWPAKeyLength:
-            case EWPAEapMethod:
+            case EWPAListOfEAPs:
             case EWPAUseOfPresharedKey:
                 {
                 if( iSecurityMode != ESecurityModeWEP && iSecurityMode != ESecurityModeOpen )
@@ -595,30 +601,50 @@ void CProcessorWlan::SaveSecurityInfoL()
 	    
 	    CleanupStack::PopAndDestroy( iapRecord );	        
 	            
-        CEapType* eapType ( NULL );
-        TRAPD( leave, 
-               eapType = CEapType::NewL( ELan, 
-                                         serviceId, 
-                                         eap->iEapSettings->iEAPExpandedType ) );
-        if ( leave == KErrNone )
-            {
-            CleanupStack::PushL( eapType );
-            
-            // Inner EAP
-            if ( eap->iEncapsulatingEapId != *EapExpandedTypeNone.GetType() )
-                {
-                eapType->SetTunnelingType( eap->iEncapsulatingEapId );
-                }
-                    
-            // write EAP setting
-            eapType->SetConfigurationL(*eap->iEapSettings);
-            CleanupStack::PopAndDestroy( eapType );
-            }
+		TInt err = KErrNone;
+	    TUint8 expandedEapId[] = {0xfe, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
+
+	    TBuf8<KExpandedEAPIdLength> cue;
+	    
+		// Set-up 64-bit expanded EAP id
+		if ( eap->iEapSettings->iEAPType == KMschapv2TypeId[7] )
+			{
+			// This is plain MSCHAPv2. Set vendor ID correctly
+			expandedEapId[1] = KMschapv2TypeId[1];
+			expandedEapId[2] = KMschapv2TypeId[2];
+			expandedEapId[3] = KMschapv2TypeId[3];
+			}
+		
+		expandedEapId[KExpandedEAPIdLength - 1] = static_cast<TUint8> ( eap->iEapSettings->iEAPType );	
+		cue.Copy( expandedEapId, KExpandedEAPIdLength );
+		
+		// Try loading EAP ECOM module
+		CLOG_WRITE_FORMAT( "Try to load EAP module: %d", expandedEapId[7]);
+		CEapType* eapType = 0;
+		TRAP( err, eapType = CEapType::NewL( cue, ELan, serviceId ) );
+		// The error is caused by probably missing EAP method from the device. Ignore the error
+		// because same scripts can be used for devices with and without certain methods.
+		if( err == KErrNone )
+			{
+		    CleanupStack::PushL( eapType );
+		        
+		    // Check if this type is tunneled
+		    if ( eap->iEncapsulatingEapId != EAPSettings::EEapNone )
+		    	{
+		    	// It is tunneled. Take the last byte of the expanded id.
+		    	eapType->SetTunnelingType( eap->iEncapsulatingEapId );    	
+		    	}
+		    CLOG_WRITE( "Calling eapType->SetConfiguration" );
+		    eapType->SetConfigurationL( *eap->iEapSettings );
+		    CLOG_WRITE( "eapType->SetConfiguration success!" );
+		    CleanupStack::PopAndDestroy( eapType );
+			}
         }
-    
+        
     session->Close();
     CleanupStack::PopAndDestroy( session );
     CLOG_WRITE( "Finished EAP settings saving" );
+	//iEapSettings.ResetAndDestroy();
 
     CLOG_WRITE_FORMAT( "SaveSecurityInfoL end %d", iSecurityInfo->Count() );
 }
@@ -1180,7 +1206,6 @@ TBool CProcessorWlan::VerifyHex( const TDesC8& aHex )
 void CProcessorWlan::SaveWPAL( TUint32 aIapId )
     {
     CLOG_WRITE( "CProcessorWlan::SaveWPAL enter" );
-    
     CMDBSession* session = CMDBSession::NewL( CMDBSession::LatestVersion() );
     CleanupStack::PushL( session );
     
@@ -1223,11 +1248,17 @@ void CProcessorWlan::SaveWPAL( TUint32 aIapId )
     secModeField->SetL( iSecurityMode );
     
     CLOG_WRITE( "Wrote securityMode" );
-
     // Save EAP list
-    SetExpandedEapListL( service );
-    CLOG_WRITE( "Wrote Expanded EAPList" );
-    
+    CMDBField<TDesC>* wlanEapsField = static_cast<CMDBField<TDesC>*>
+                                ( generic->GetFieldByIdL( KCDTIdWlanEaps ) );
+    wlanEapsField->SetL( WPAFieldData( EWPAListOfEAPs )->Des() );
+
+	CLOG_WRITE( "Wrote EAPList" );
+	
+    SetExpandedEapListL( generic );
+
+	CLOG_WRITE( "Wrote expandedEapList" );	
+	
     // Save PreShared Key
     TBuf8<KMaxLengthOfKeyData> keyWPA;
     //convert to 8 bit
@@ -1265,103 +1296,120 @@ void CProcessorWlan::SaveWPAL( TUint32 aIapId )
 // CProcessorWlan::SetExpandedEapListL
 // ---------------------------------------------------------
 //
-void CProcessorWlan::SetExpandedEapListL( const TUint aServiceId )
+void CProcessorWlan::SetExpandedEapListL( CMDBGenericRecord* generic )
     {
-    CLOG_WRITE( "CProcessorWlan::SetExpandedEapListL" )
     // Gets the text format eap list
-    HBufC16* eapList = WPAFieldData( EWPAEapMethod );
+    HBufC16* eapList = WPAFieldData( EWPAListOfEAPs );
     
     if ( eapList != NULL && 0 < eapList->Length() )
         {
-        // load general EAP settings If
-        CEapGeneralSettings* eapGs;
-        eapGs = CEapGeneralSettings::NewL( ELan, aServiceId );
-        CleanupStack::PushL( eapGs );
         
-        // get lists of enabled/disabled EAPs for the IAP
-        RArray< TEapExpandedType > enabledEapMethods;
-        RArray< TEapExpandedType > disabledEapMethods;
+        // Creates the expanded eap lists    
+        HBufC8* enabledEapList = ExpandedEapListLC( eapList, ETrue );
+        HBufC8* disabledEapList = ExpandedEapListLC( eapList, EFalse );
         
-        enabledEapMethods.Append( GetExpandedEapTypeIdL( *eapList ) );
+        // Save enabled EAP list
+        CMDBField<TDesC8>* wlanEnabledEapsField = static_cast<CMDBField<TDesC8>*>
+                                ( generic->GetFieldByIdL( KCDTIdWlanEnabledEaps ) );
+        wlanEnabledEapsField->SetL( enabledEapList->Des() );
+
+        // Save disabled EAP list
+        CMDBField<TDesC8>* wlanDisabledEapsField = static_cast<CMDBField<TDesC8>*>
+                                ( generic->GetFieldByIdL( KCDTIdWlanDisabledEaps ) );
+        wlanDisabledEapsField->SetL( disabledEapList->Des() );
         
-        // disabledEapMethods can be empty, SetEapMethods takes care of it,
-        // only enabledEapMethods is a must with correct contents
-        User::LeaveIfError( eapGs->SetEapMethods( enabledEapMethods, 
-                                                     disabledEapMethods ) );
-   
-        CleanupStack::PopAndDestroy( eapGs );
+        CleanupStack::PopAndDestroy( disabledEapList );
+        CleanupStack::PopAndDestroy( enabledEapList );
+        
         }
     }
 
 // ---------------------------------------------------------
-// CProcessorWlan::GetExpandedEapTypeId
+// CProcessorWlan::ExpandedEapListLC
 // ---------------------------------------------------------
 //
-TEapExpandedType CProcessorWlan::GetExpandedEapTypeIdL( TDesC& aField )
+HBufC8* CProcessorWlan::ExpandedEapListLC( HBufC16* aEapList, TBool aEnabledNeed )
     {
-    TUint8 resultByte;
-    TLex16 lex( aField.Ptr() );
-    User::LeaveIfError( lex.Val( resultByte, EDecimal ) );
+    // The eap list has a well defined form 
+    // so this parser supposes this concrete form like this:
+    // "+018,-023,+026,-021,-006"
     
-    CLOG_WRITE_FORMAT( "CProcessorWlan::GetExpandedEapTypeIdL: EAP %d",
-                    (int)resultByte )
+    // Lenght of a 3 digit long signed number 
+     const TInt sliceLength = 4;
+     
+   // Max lenght of the resulted list.
+    // Adding one "," then divide the lenght of a slice+1   
+    TInt maxLenght = ( ( aEapList->Length()+1 ) / 5 ) * 8;
     
-    switch ( resultByte )
+    HBufC8* expandedEapList = HBufC8::NewLC( maxLenght );
+    
+    TInt pos = 0;
+    while ( pos + sliceLength <= aEapList->Length() )
         {
-        case 0x06:
+        // Getting a slice
+        TPtrC16 slice = aEapList->Mid( pos, sliceLength );
+        
+        // Checks the sign
+        if( slice[0] == '+' )
             {
-            return *EapExpandedTypeGtc.GetType();
+            if( aEnabledNeed )
+                {
+                AddToList( expandedEapList, slice );
+                }
             }
-        case 0x0d:
+        else if( slice[0] == '-' )
             {
-            return *EapExpandedTypeTls.GetType();
+            if( !aEnabledNeed )
+                {
+                AddToList( expandedEapList, slice );
+                }
             }
-        case 0x11:
+        else
             {
-            return *EapExpandedTypeLeap.GetType();
+            CLOG_WRITE_FORMAT( "! Error : Wrong Eap list format %S", aEapList );
             }
-        case 0x12:
-            {
-            return *EapExpandedTypeSim.GetType();
-            }
-        case 0x15:
-            {
-            return *EapExpandedTypeTtls.GetType();
-            }
-        case 0x17:
-            {
-            return *EapExpandedTypeAka.GetType();
-            }
-        case 0x19:
-            {
-            return *EapExpandedTypePeap.GetType();
-            }
-        case 0x1a:
-            {
-            return *EapExpandedTypeMsChapv2.GetType();
-            }
-        case 0x2b:
-            {
-            return *EapExpandedTypeFast.GetType();
-            }
-        case 0x01:
-            {
-            return *EapExpandedTypeProtectedSetup.GetType();
-            }
-        case 0x62:
-            {
-            return *EapExpandedTypeTtlsPap.GetType();
-            }
-        case 0x63:
-            {
-            return *EapExpandedPlainMsChapv2.GetType();
-            }
-        default:
-            {
-            return *EapExpandedTypeNone.GetType();
-            }
+        
+        // Step over one slice and "," e.g. "+023,"
+        pos+=5;    
+        
         }
+    if( pos != aEapList->Length() + 1)    
+        {
+        CLOG_WRITE_FORMAT( "! Warning : possible wrong Eap list format %S", aEapList );
+        }
+        
+    return expandedEapList;    
     }
+
+// ---------------------------------------------------------
+// CProcessorWlan::AddToList
+// ---------------------------------------------------------
+//
+void CProcessorWlan::AddToList( HBufC8* aExpandedEapList, TPtrC16 aSlice )
+    {
+    // Fills the 8 byte form with "0xFE000000000000"        
+    TBuf8<8> expandedForm;
+    expandedForm.AppendFill( 0xFE, 1 );
+    expandedForm.AppendFill( 0x00, 6 );
+        
+    // Leave the "sign"     
+    TPtrC16 number = aSlice.Mid( 1 );    
+    TUint8 resultByte;
+    TLex16 lex( number );
+        
+    if( KErrNone == lex.Val( resultByte, EDecimal ) )
+        {
+        expandedForm.AppendFill( resultByte, 1 );
+        }
+    else
+        {
+        expandedForm.AppendFill( 0x00, 1 );
+        CLOG_WRITE( "! Error : Unlexed Eap number. 0 is addded" );
+        }
+
+    aExpandedEapList->Des().Append( expandedForm ); 
+    }
+
 
 // ---------------------------------------------------------
 // CProcessorWlan::WPAIndex
@@ -1374,6 +1422,7 @@ TInt CProcessorWlan::WPAIndex( TDbCreatorWPAFields aFieldId )
                      
     return aFieldId - 0x2000 + iDataStart;                     
     }
+    
     
 // ---------------------------------------------------------
 // CProcessorWlan::WPAFieldData
@@ -1533,12 +1582,11 @@ TBool CProcessorWlan::EAPSetting( const TInt aField )
 		return EFalse;
 		}
 	}
-
 // ---------------------------------------------------------
 // CProcessorWlan::GetEapTypeIdFromSettingId
 // ---------------------------------------------------------
 //
-TEapExpandedType CProcessorWlan::GetEapTypeIdFromSettingId( const TInt aField )
+EAPSettings::TEapType CProcessorWlan::GetEapTypeIdFromSettingId( const TInt aField )
 	{
 	switch ( aField )
 		{
@@ -1546,7 +1594,7 @@ TEapExpandedType CProcessorWlan::GetEapTypeIdFromSettingId( const TInt aField )
 		case EEapGtcSessionValidityTime:
 		case EEapGtcEncapsulation:
 			{
-			return *EapExpandedTypeGtc.GetType();
+			return EAPSettings::EEapGtc;
 			}
 		case EEapTlsUsername:
 		case EEapTlsRealm:
@@ -1562,13 +1610,13 @@ TEapExpandedType CProcessorWlan::GetEapTypeIdFromSettingId( const TInt aField )
 		case EEapTlsCaCertSerialNumber:
 		case EEapTlsEncapsulation:
 			{
-			return *EapExpandedTypeTls.GetType();
+			return EAPSettings::EEapTls;
 			}
 		case EEapLeapUsername:
 		case EEapLeapPassword:
 		case EEapLeapSessionValidityTime:
 			{
-			return *EapExpandedTypeLeap.GetType();
+			return EAPSettings::EEapLeap;
 			}
 		case EEapSimUsername:
 		case EEapSimRealm:
@@ -1576,7 +1624,7 @@ TEapExpandedType CProcessorWlan::GetEapTypeIdFromSettingId( const TInt aField )
 		case EEapSimSessionValidityTime:
 		case EEapSimEncapsulation:
 			{
-			return *EapExpandedTypeSim.GetType();
+			return EAPSettings::EEapSim;
 			}
 		case EEapTtlsUsername:
 		case EEapTtlsRealm:
@@ -1592,7 +1640,7 @@ TEapExpandedType CProcessorWlan::GetEapTypeIdFromSettingId( const TInt aField )
 		case EEapTtlsCaCertIssuerName:
 		case EEapTtlsCaCertSerialNumber:
 			{
-			return *EapExpandedTypeTtls.GetType();
+			return EAPSettings::EEapTtls;
 			}
 		case EEapAkaUsername:
 		case EEapAkaRealm:
@@ -1600,7 +1648,7 @@ TEapExpandedType CProcessorWlan::GetEapTypeIdFromSettingId( const TInt aField )
 		case EEapAkaSessionValidityTime:
 		case EEapAkaEncapsulation:
 			{
-			return *EapExpandedTypeAka.GetType();
+			return EAPSettings::EEapAka;
 			}
 		case EEapPeapUsername:
 		case EEapPeapRealm:
@@ -1619,14 +1667,14 @@ TEapExpandedType CProcessorWlan::GetEapTypeIdFromSettingId( const TInt aField )
 		case EEapPeapCaCertIssuerName:
 		case EEapPeapCaCertSerialNumber:		
 			{
-			return *EapExpandedTypePeap.GetType();
+			return EAPSettings::EEapPeap;
 			}
 		case EEapMschapv2Username:
 		case EEapMschapv2Password:
 		case EEapMschapv2SessionValidityTime:
 		case EEapMschapv2Encapsulation:
 			{
-			return *EapExpandedTypeMsChapv2.GetType();
+			return EAPSettings::EEapMschapv2;
 			}
 		case EEapFastUsername:
 		case EEapFastRealm:
@@ -1647,7 +1695,7 @@ TEapExpandedType CProcessorWlan::GetEapTypeIdFromSettingId( const TInt aField )
 		case EEapFastCaCertIssuerName:
 		case EEapFastCaCertSerialNumber:
 			{
-			return *EapExpandedTypeFast.GetType();
+			return EAPSettings::EEapFast; 
 			}
 		
 		case EMschapv2Username:
@@ -1655,24 +1703,23 @@ TEapExpandedType CProcessorWlan::GetEapTypeIdFromSettingId( const TInt aField )
 		case EMschapv2SessionValidityTime:
 		case EMschapv2Encapsulation:
 			{
-			return *EapExpandedPlainMsChapv2.GetType();
+			return EAPSettings::EPlainMschapv2;
 			}
 		default:
 			{
-			return *EapExpandedTypeNone.GetType();
+			return EAPSettings::EEapNone;
 			}
 		
 		}
 	}
-	
 // ---------------------------------------------------------
 // CProcessorWlan::AddEAPSetting
 // ---------------------------------------------------------
 //
-void CProcessorWlan::AddEAPSettingL( const TInt aField, HBufC16* aValue  )
+void CProcessorWlan::AddEAPSettingL( const TInt aField, const HBufC16* const aValue  )
     {
-    TEapExpandedType eapId = GetEapTypeIdFromSettingId( aField );
-    if ( eapId == *EapExpandedTypeNone.GetType() )
+    EAPSettings::TEapType eapId = GetEapTypeIdFromSettingId( aField );
+    if ( eapId == EAPSettings::EEapNone )
     	{
     	CLOG_WRITE( "! Error : Unknown EAP method" );
     	User::Leave( KErrArgument ); 
@@ -1682,7 +1729,7 @@ void CProcessorWlan::AddEAPSettingL( const TInt aField, HBufC16* aValue  )
 	// Search if the EAP instance already exists in the array for this
 	for ( eapIndex = 0 ; eapIndex < iEapSettings.Count() ; eapIndex++ )
 		{       				
-		if ( ( iEapSettings[eapIndex]->iEapSettings->iEAPExpandedType == eapId )
+		if ( ( iEapSettings[eapIndex]->iEapSettings->iEAPType == eapId )
 			 && ( iEapSettings[eapIndex]->iName != NULL ) 
 			 && ( iEapSettings[eapIndex]->iName->Compare( *iName ) == 0 ))        					 	
 		 	{       				
@@ -1699,7 +1746,7 @@ void CProcessorWlan::AddEAPSettingL( const TInt aField, HBufC16* aValue  )
 		
 		newEap->iEapSettings = new (ELeave) EAPSettings;
 		
-		newEap->iEapSettings->iEAPExpandedType = eapId;
+		newEap->iEapSettings->iEAPType = eapId;
 		
 		newEap->iName = iName->AllocL();                           
 		               	    	
@@ -1726,8 +1773,6 @@ void CProcessorWlan::AddEAPSettingL( const TInt aField, HBufC16* aValue  )
 			{
 			iEapSettings[eapIndex]->iEapSettings->iUsernamePresent = ETrue;
 			iEapSettings[eapIndex]->iEapSettings->iUsername.Copy( *aValue );
-			iEapSettings[eapIndex]->iEapSettings->iUseAutomaticUsernamePresent = ETrue;
-			iEapSettings[eapIndex]->iEapSettings->iUseAutomaticUsername = EFalse;
 			break;
 			}
 			
@@ -1736,9 +1781,7 @@ void CProcessorWlan::AddEAPSettingL( const TInt aField, HBufC16* aValue  )
 		case EMschapv2Password:
 			{
 			iEapSettings[eapIndex]->iEapSettings->iPasswordPresent = ETrue;
-			iEapSettings[eapIndex]->iEapSettings->iPassword.Copy( *aValue );
-			iEapSettings[eapIndex]->iEapSettings->iShowPassWordPromptPresent = ETrue;
-			iEapSettings[eapIndex]->iEapSettings->iUseAutomaticUsername = EFalse;
+			iEapSettings[eapIndex]->iEapSettings->iPassword.Copy( *aValue );			
 			break;
 			}
 
@@ -1750,9 +1793,7 @@ void CProcessorWlan::AddEAPSettingL( const TInt aField, HBufC16* aValue  )
 		case EEapFastRealm:
 			{
 			iEapSettings[eapIndex]->iEapSettings->iRealmPresent = ETrue;
-			iEapSettings[eapIndex]->iEapSettings->iRealm.Copy( *aValue );
-			iEapSettings[eapIndex]->iEapSettings->iUseAutomaticRealmPresent = ETrue;
-			iEapSettings[eapIndex]->iEapSettings->iUseAutomaticRealm = EFalse;
+			iEapSettings[eapIndex]->iEapSettings->iRealm.Copy( *aValue );			
 			break;
 			}
 				
@@ -1772,7 +1813,7 @@ void CProcessorWlan::AddEAPSettingL( const TInt aField, HBufC16* aValue  )
 			TUint value( 0 );
 			if( lex.Val( value, EDecimal) != KErrNone )
 				{				
-				CLOG_WRITE_FORMAT( "! Error : Invalid session validity time value. EapId: %d", eapId.GetVendorType() );
+				CLOG_WRITE_FORMAT( "! Error : Invalid session validity time value. EapId: %d", eapId );
 				User::Leave( KErrArgument );
 				}			
 
@@ -1792,10 +1833,11 @@ void CProcessorWlan::AddEAPSettingL( const TInt aField, HBufC16* aValue  )
 			TUint eapTypeId( 0 );						
 			if( lex.Val( eapTypeId, EDecimal) != KErrNone )
 				{
-				CLOG_WRITE_FORMAT( "! Error : Invalid encapsulation value. EapId: %d", eapId.GetVendorType() );
+				CLOG_WRITE_FORMAT( "! Error : Invalid encapsulation value. EapId: %d", eapId );
 				User::Leave( KErrArgument );
 				}			
-			iEapSettings[eapIndex]->iEncapsulatingEapId.SetValue( eapId.GetVendorId(), eapTypeId ); 
+
+			iEapSettings[eapIndex]->iEncapsulatingEapId = static_cast< EAPSettings::TEapType >( eapTypeId );
 			break;
 			}
 		
@@ -1816,7 +1858,7 @@ void CProcessorWlan::AddEAPSettingL( const TInt aField, HBufC16* aValue  )
                 }
             else 
                 {                
-                CLOG_WRITE_FORMAT( "! Error : Invalid VerifyServerRealm. EapId: %d", eapId.GetVendorType() );                
+                CLOG_WRITE_FORMAT( "! Error : Invalid VerifyServerRealm. EapId: %d", eapId );                
                 User::Leave( KErrArgument );
                 }
 
@@ -1840,7 +1882,7 @@ void CProcessorWlan::AddEAPSettingL( const TInt aField, HBufC16* aValue  )
                 }
             else 
                 {                
-                CLOG_WRITE_FORMAT( "! Error : Invalid RequireClientAuth. EapId: %d", eapId.GetVendorType() );                
+                CLOG_WRITE_FORMAT( "! Error : Invalid RequireClientAuth. EapId: %d", eapId );                
                 User::Leave( KErrArgument );
                 }
 			
@@ -1855,7 +1897,7 @@ void CProcessorWlan::AddEAPSettingL( const TInt aField, HBufC16* aValue  )
 			TRAPD( err, FillCipherSuitesL( aValue, eapIndex ) );
 			if( err != KErrNone )
 				{
-				CLOG_WRITE_FORMAT( "! Error : Invalid CipherSuites. EapId: %d", eapId.GetVendorType() );
+				CLOG_WRITE_FORMAT( "! Error : Invalid CipherSuites. EapId: %d", eapId );
 				User::Leave( KErrArgument );
 				}
 			break;
@@ -1866,21 +1908,20 @@ void CProcessorWlan::AddEAPSettingL( const TInt aField, HBufC16* aValue  )
 		case EEapPeapUserCertSubjectKeyId:
 		case EEapFastUserCertSubjectKeyId:
 			{
-			TInt certIndex = FindCertificateEntryL( EapCertificateEntry::EUser, eapIndex ); 
+			TInt certIndex = FindCertificateEntryL( CertificateEntry::EUser, eapIndex );
 
-			TKeyIdentifier key;
+			TBuf<KKeyIdentifierLength> key;
 			
 			TRAPD( err, ConvertSubjectKeyIdToBinaryL( aValue, key) );
 			if( err != KErrNone )
 				{
-				CLOG_WRITE_FORMAT( "! Error : Invalid UserCertSubjectKeyId. EapId: %d", eapId.GetVendorType() );
+				CLOG_WRITE_FORMAT( "! Error : Invalid UserCertSubjectKeyId. EapId: %d", eapId );
 				User::Leave( KErrArgument );
 				}
    			
    			iEapSettings[eapIndex]->iEapSettings->iCertificatesPresent = ETrue;
-   			iEapSettings[eapIndex]->iEapSettings->iCertificates[certIndex]->SetIsEnabled( ETrue );
-   			iEapSettings[eapIndex]->iEapSettings->iCertificates[certIndex]->SetSubjectKeyId( key );
-   			iEapSettings[eapIndex]->iEapSettings->iCertificates[certIndex]->SetSubjectKeyIdPresent();
+			iEapSettings[eapIndex]->iEapSettings->iCertificates[certIndex].iSubjectKeyID.Copy(key);
+   			iEapSettings[eapIndex]->iEapSettings->iCertificates[certIndex].iSubjectKeyIDPresent = ETrue;
 			break;
 			}
 		
@@ -1889,12 +1930,11 @@ void CProcessorWlan::AddEAPSettingL( const TInt aField, HBufC16* aValue  )
 		case EEapPeapUserCertIssuerName:
 		case EEapFastUserCertIssuerName:
 			{
-			TUint certIndex = FindCertificateEntryL( EapCertificateEntry::EUser, eapIndex ); 
+			TUint certIndex = FindCertificateEntryL( CertificateEntry::EUser, eapIndex );
 			
 			iEapSettings[eapIndex]->iEapSettings->iCertificatesPresent = ETrue;
-			iEapSettings[eapIndex]->iEapSettings->iCertificates[certIndex]->SetIsEnabled( ETrue );
-			iEapSettings[eapIndex]->iEapSettings->iCertificates[certIndex]->SetSubjectKeyIdPresent();
-	 		iEapSettings[eapIndex]->iEapSettings->iCertificates[certIndex]->SetIssuerName( *aValue );			
+			iEapSettings[eapIndex]->iEapSettings->iCertificates[certIndex].iIssuerNamePresent= ETrue;
+	 		iEapSettings[eapIndex]->iEapSettings->iCertificates[certIndex].iIssuerName.Copy( *aValue );			
 			break;
 			}
 		
@@ -1903,12 +1943,11 @@ void CProcessorWlan::AddEAPSettingL( const TInt aField, HBufC16* aValue  )
 		case EEapPeapUserCertSerialNumber:
 		case EEapFastUserCertSerialNumber:
 			{
-			TUint certIndex = FindCertificateEntryL( EapCertificateEntry::EUser, eapIndex );
+			TUint certIndex = FindCertificateEntryL( CertificateEntry::EUser, eapIndex );
 			
 			iEapSettings[eapIndex]->iEapSettings->iCertificatesPresent = ETrue;
-			iEapSettings[eapIndex]->iEapSettings->iCertificates[certIndex]->SetIsEnabled( ETrue );
-			iEapSettings[eapIndex]->iEapSettings->iCertificates[certIndex]->SetSerialNumberPresent();
-	 		iEapSettings[eapIndex]->iEapSettings->iCertificates[certIndex]->SetSerialNumber( *aValue );			
+			iEapSettings[eapIndex]->iEapSettings->iCertificates[certIndex].iSerialNumberPresent= ETrue;
+	 		iEapSettings[eapIndex]->iEapSettings->iCertificates[certIndex].iSerialNumber.Copy( *aValue );			
 			break;
 			}
 		
@@ -1917,23 +1956,20 @@ void CProcessorWlan::AddEAPSettingL( const TInt aField, HBufC16* aValue  )
 		case EEapPeapCaCertSubjectKeyId:
 		case EEapFastCaCertSubjectKeyId:
 			{
-			TInt certIndex = FindCertificateEntryL( EapCertificateEntry::ECA, eapIndex ); 
+			TInt certIndex = FindCertificateEntryL( CertificateEntry::ECA, eapIndex );
 
-			TKeyIdentifier key;
+			TBuf<KKeyIdentifierLength> key;
 			
 			TRAPD( err, ConvertSubjectKeyIdToBinaryL( aValue, key) );
 			if( err != KErrNone )
 				{
-				CLOG_WRITE_FORMAT( "! Error : Invalid UserCertSubjectKeyId. EapId: %d", eapId.GetVendorType() );
+				CLOG_WRITE_FORMAT( "! Error : Invalid UserCertSubjectKeyId. EapId: %d", eapId );
 				User::Leave( KErrArgument );
 				}
 
 			iEapSettings[eapIndex]->iEapSettings->iCertificatesPresent = ETrue;
-			iEapSettings[eapIndex]->iEapSettings->iCertificates[certIndex]->SetIsEnabled( ETrue );
-			iEapSettings[eapIndex]->iEapSettings->iCertificates[certIndex]->SetSubjectKeyId( key );
-			iEapSettings[eapIndex]->iEapSettings->iCertificates[certIndex]->SetSubjectKeyIdPresent();
-			iEapSettings[eapIndex]->iEapSettings->iUseAutomaticCACertificatePresent = ETrue;
-			iEapSettings[eapIndex]->iEapSettings->iUseAutomaticCACertificate = EFalse;
+			iEapSettings[eapIndex]->iEapSettings->iCertificates[certIndex].iSubjectKeyID.Copy(key);   			
+   			iEapSettings[eapIndex]->iEapSettings->iCertificates[certIndex].iSubjectKeyIDPresent = ETrue;
 			break;
 			}
 		
@@ -1942,13 +1978,10 @@ void CProcessorWlan::AddEAPSettingL( const TInt aField, HBufC16* aValue  )
 		case EEapPeapCaCertIssuerName:
 		case EEapFastCaCertIssuerName:
 			{
-			TUint certIndex = FindCertificateEntryL( EapCertificateEntry::ECA, eapIndex ); 
+			TUint certIndex = FindCertificateEntryL( CertificateEntry::ECA, eapIndex );
 			iEapSettings[eapIndex]->iEapSettings->iCertificatesPresent = ETrue;
-			iEapSettings[eapIndex]->iEapSettings->iCertificates[certIndex]->SetIsEnabled( ETrue );
-			iEapSettings[eapIndex]->iEapSettings->iCertificates[certIndex]->SetIssuerNamePresent();
-	 		iEapSettings[eapIndex]->iEapSettings->iCertificates[certIndex]->SetIssuerName( *aValue );
-			iEapSettings[eapIndex]->iEapSettings->iUseAutomaticCACertificatePresent = ETrue;
-			iEapSettings[eapIndex]->iEapSettings->iUseAutomaticCACertificate = EFalse;
+			iEapSettings[eapIndex]->iEapSettings->iCertificates[certIndex].iIssuerNamePresent= ETrue;
+	 		iEapSettings[eapIndex]->iEapSettings->iCertificates[certIndex].iIssuerName.Copy( *aValue );			
 			
 			break;
 			}
@@ -1958,13 +1991,10 @@ void CProcessorWlan::AddEAPSettingL( const TInt aField, HBufC16* aValue  )
 		case EEapPeapCaCertSerialNumber:
 		case EEapFastCaCertSerialNumber:
 			{
-			TUint certIndex = FindCertificateEntryL( EapCertificateEntry::ECA, eapIndex ); 
+			TUint certIndex = FindCertificateEntryL( CertificateEntry::ECA, eapIndex );
 			iEapSettings[eapIndex]->iEapSettings->iCertificatesPresent = ETrue;
-			iEapSettings[eapIndex]->iEapSettings->iCertificates[certIndex]->SetIsEnabled( ETrue );
-			iEapSettings[eapIndex]->iEapSettings->iCertificates[certIndex]->SetSerialNumberPresent();
-	 		iEapSettings[eapIndex]->iEapSettings->iCertificates[certIndex]->SetSerialNumber( *aValue );
-			iEapSettings[eapIndex]->iEapSettings->iUseAutomaticCACertificatePresent = ETrue;
-			iEapSettings[eapIndex]->iEapSettings->iUseAutomaticCACertificate = EFalse;
+			iEapSettings[eapIndex]->iEapSettings->iCertificates[certIndex].iSerialNumberPresent= ETrue;
+	 		iEapSettings[eapIndex]->iEapSettings->iCertificates[certIndex].iSerialNumber.Copy( *aValue );
 			break;
 			}
 		
@@ -1983,7 +2013,7 @@ void CProcessorWlan::AddEAPSettingL( const TInt aField, HBufC16* aValue  )
 	            }
 	        else 
 	            {
-	            CLOG_WRITE_FORMAT( "! Error : Invalid UsePseudonyms. EapId: %d", eapId.GetVendorType() );                
+	            CLOG_WRITE_FORMAT( "! Error : Invalid UsePseudonyms. EapId: %d", eapId );                
                 User::Leave( KErrArgument );
 	            }
 			break;
@@ -1993,8 +2023,35 @@ void CProcessorWlan::AddEAPSettingL( const TInt aField, HBufC16* aValue  )
 		case EEapPeapEncapsulatedTypes:
 		case EEapFastEncapsulatedTypes:
 			{
-			iEapSettings[eapIndex]->iEapSettings->iEnabledEncapsulatedEAPExpandedTypes.Append( GetExpandedEapTypeIdL( *aValue ) );
-            iEapSettings[eapIndex]->iEapSettings->iEnabledEncapsulatedEAPExpandedTypesPresent = ETrue;
+		    // Lenght of a 3 digit long signed number 
+		     const TInt sliceLength = 4;
+    
+		    TInt pos = 0;
+    		while ( pos + sliceLength <= aValue->Length() )
+        		{
+	        	// Getting a slice
+	        	TPtrC16 slice = aValue->Mid( pos, sliceLength );
+	        
+	        	// Checks the sign
+	        	if( slice[0] == '+' )
+	            	{
+         		   	TLex lex( slice.Ptr() + 1 );		
+					TUint encapsEapId( 0 );		
+					
+					if( lex.Val( encapsEapId, EDecimal) != KErrNone )
+						{				
+						CLOG_WRITE_FORMAT( "! Error : Invalid EncapsulatedTypes. EapId: %d", eapId );
+						User::Leave( KErrArgument );
+						}								
+					
+           			iEapSettings[eapIndex]->iEapSettings->iEncapsulatedEAPTypes.Append( encapsEapId );
+					iEapSettings[eapIndex]->iEapSettings->iEncapsulatedEAPTypesPresent = ETrue;
+	            	}
+	                    	       
+		        // Step over one slice and "," e.g. "+023,"
+		        pos+=5;            
+        		}
+
 			break;
 			}
 		
@@ -2012,7 +2069,7 @@ void CProcessorWlan::AddEAPSettingL( const TInt aField, HBufC16* aValue  )
 	            }
 	        else 
 	            {
-   	            CLOG_WRITE_FORMAT( "! Error : Invalid EapPeapV0Allowed. EapId: %d", eapId.GetVendorType() );                
+   	            CLOG_WRITE_FORMAT( "! Error : Invalid EapPeapV0Allowed. EapId: %d", eapId );                
                 User::Leave( KErrArgument );
 	            }
 			
@@ -2033,7 +2090,7 @@ void CProcessorWlan::AddEAPSettingL( const TInt aField, HBufC16* aValue  )
 	            }
 	        else 
 	            {
-   	            CLOG_WRITE_FORMAT( "! Error : Invalid EapPeapV1Allowed. EapId: %d", eapId.GetVendorType() );                
+   	            CLOG_WRITE_FORMAT( "! Error : Invalid EapPeapV1Allowed. EapId: %d", eapId );                
                 User::Leave( KErrArgument );
 	            }
 			
@@ -2054,7 +2111,7 @@ void CProcessorWlan::AddEAPSettingL( const TInt aField, HBufC16* aValue  )
 	            }
 	        else 
 	            {
-   	            CLOG_WRITE_FORMAT( "! Error : Invalid EapPeapV2Allowed. EapId: %d", eapId.GetVendorType() );
+   	            CLOG_WRITE_FORMAT( "! Error : Invalid EapPeapV2Allowed. EapId: %d", eapId );
                 User::Leave( KErrArgument );
 	            }
 			
@@ -2075,7 +2132,7 @@ void CProcessorWlan::AddEAPSettingL( const TInt aField, HBufC16* aValue  )
 	            }
 	        else 
 	            {
-  	            CLOG_WRITE_FORMAT( "! Error : Invalid EEapFastAuthProvModeAllowed. EapId: %d", eapId.GetVendorType() );                
+  	            CLOG_WRITE_FORMAT( "! Error : Invalid EEapFastAuthProvModeAllowed. EapId: %d", eapId );                
                 User::Leave( KErrArgument );
 	            }
 			
@@ -2097,7 +2154,7 @@ void CProcessorWlan::AddEAPSettingL( const TInt aField, HBufC16* aValue  )
 	        else 
 	            {
 
-  	            CLOG_WRITE_FORMAT( "! Error : Invalid EapFastUnauthProvModeAllowed. EapId: %d", eapId.GetVendorType() );                
+  	            CLOG_WRITE_FORMAT( "! Error : Invalid EapFastUnauthProvModeAllowed. EapId: %d", eapId );                
                 User::Leave( KErrArgument );
 	            }
 			
@@ -2118,7 +2175,7 @@ void CProcessorWlan::AddEAPSettingL( const TInt aField, HBufC16* aValue  )
 	            }
 	        else 
 	            {
-  	            CLOG_WRITE_FORMAT( "! Error : Invalid EapFastWarnADHPNoPAC. EapId: %d", eapId.GetVendorType() );                
+  	            CLOG_WRITE_FORMAT( "! Error : Invalid EapFastWarnADHPNoPAC. EapId: %d", eapId );                
                 User::Leave( KErrArgument );
 	            }
 			
@@ -2139,7 +2196,7 @@ void CProcessorWlan::AddEAPSettingL( const TInt aField, HBufC16* aValue  )
 	            }
 	        else 
 	            {
-  	            CLOG_WRITE_FORMAT( "! Error : Invalid EapFastWarnADHPNoMatchingPAC. EapId: %d", eapId.GetVendorType() );                
+  	            CLOG_WRITE_FORMAT( "! Error : Invalid EapFastWarnADHPNoMatchingPAC. EapId: %d", eapId );                
                 User::Leave( KErrArgument );
 	            }
 			
@@ -2160,7 +2217,7 @@ void CProcessorWlan::AddEAPSettingL( const TInt aField, HBufC16* aValue  )
 	            }
 	        else 
 	            {
-  	            CLOG_WRITE_FORMAT( "! Error : Invalid EapFastWarnNotDefaultServer. EapId: %d", eapId.GetVendorType() );                
+  	            CLOG_WRITE_FORMAT( "! Error : Invalid EapFastWarnNotDefaultServer. EapId: %d", eapId );                
                 User::Leave( KErrArgument );
 	            }
 			
@@ -2211,12 +2268,12 @@ void CProcessorWlan::FillCipherSuitesL( const HBufC16* const aPtrTag, const TInt
 // CProcessorWlan::FindCertificateEntry
 // ---------------------------------------------------------
 //
-TUint CProcessorWlan::FindCertificateEntryL( const EapCertificateEntry::TCertType aCertType, const TInt aEapIndex )
+TUint CProcessorWlan::FindCertificateEntryL( const CertificateEntry::TCertType aCertType, const TInt aEapIndex )
     {
     TUint certIndex( 0 );
 	for( certIndex = 0; certIndex < iEapSettings[aEapIndex]->iEapSettings->iCertificates.Count() ; certIndex++ )
 		{
-		if( iEapSettings[aEapIndex]->iEapSettings->iCertificates[certIndex]->GetCertType() == aCertType )
+		if( iEapSettings[aEapIndex]->iEapSettings->iCertificates[certIndex].iCertType == aCertType )
 			{
 			// Found
 			break;
@@ -2225,9 +2282,9 @@ TUint CProcessorWlan::FindCertificateEntryL( const EapCertificateEntry::TCertTyp
 	if( certIndex == iEapSettings[aEapIndex]->iEapSettings->iCertificates.Count() )
 		{
 		// Not found. Create
-		EapCertificateEntry* entry;
-		entry = new (ELeave) EapCertificateEntry;
-		entry->SetCertType( aCertType );
+		CertificateEntry entry;
+
+		entry.iCertType = aCertType;
 
 		iEapSettings[aEapIndex]->iEapSettings->iCertificates.AppendL( entry );
 
@@ -2240,7 +2297,7 @@ TUint CProcessorWlan::FindCertificateEntryL( const EapCertificateEntry::TCertTyp
 // CProcessorWlan::ConvertSubjectKeyIdToBinary
 // ---------------------------------------------------------
 //
-void CProcessorWlan::ConvertSubjectKeyIdToBinaryL( const HBufC16* const aSubjectKeyIdString, TKeyIdentifier& aBinaryKey)
+void CProcessorWlan::ConvertSubjectKeyIdToBinaryL( const HBufC16* const aSubjectKeyIdString, TDes& aBinaryKey)
 	{
 	TInt err( KErrNone );
 	

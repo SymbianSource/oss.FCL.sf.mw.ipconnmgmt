@@ -94,7 +94,4 @@ EXPORTS
 	?ToBuf@CConnMonWlanProbeRawBuffer@@QBEPBVHBufC8@@XZ @ 93 NONAME ; class HBufC8 const * CConnMonWlanProbeRawBuffer::ToBuf(void) const
 	?Total@CConnMonWlanProbeRawBuffersPckg@@QBEIXZ @ 94 NONAME ; unsigned int CConnMonWlanProbeRawBuffersPckg::Total(void) const
 	?UnpackToL@CConnMonWlanProbeRawBuffersPckg@@QBEXAAV?$RPointerArray@VCConnMonWlanProbeRawBuffer@@@@@Z @ 95 NONAME ; void CConnMonWlanProbeRawBuffersPckg::UnpackToL(class RPointerArray<class CConnMonWlanProbeRawBuffer> &) const
-	?NewL@CConnMonWlanNetwork@@SAPAV1@ABV?$TBuf@$0CA@@@IIIIIABV?$TBuf8@$05@@ABVTDesC16@@@Z @ 96 NONAME ; class CConnMonWlanNetwork * CConnMonWlanNetwork::NewL(class TBuf<32> const &, unsigned int, unsigned int, unsigned int, unsigned int, unsigned int, class TBuf8<6> const &, class TDesC16 const &)
-	?SecurityModeV2@CConnMonWlanNetwork@@QAEIXZ @ 97 NONAME ; unsigned int CConnMonWlanNetwork::SecurityModeV2(void)
-	?IsProtectedSetupSupported@CConnMonWlanNetwork@@QAEHXZ @ 98 NONAME ; int CConnMonWlanNetwork::IsProtectedSetupSupported(void)
 

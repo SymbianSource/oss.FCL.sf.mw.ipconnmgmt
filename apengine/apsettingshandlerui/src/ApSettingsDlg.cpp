@@ -43,6 +43,8 @@
 #include "ApSettingsModel.h"
 #include <apsetui.rsg>
 
+#include <csxhelp/cp.hlp.hrh>
+
 #include "ApSettingsHandlerUI.hrh"
 #include "ApsettingshandleruiImpl.h"
 #include "ApSettingsHandlerConsts.h"
@@ -773,6 +775,90 @@ void CApSettingsDlg::GetHelpContext(TCoeHelpContext& aContext) const
     APSETUILOGGER_ENTERFN( ESettings,"Settings::GetHelpContext")
     
     aContext.iMajor = iHandler->iHelpMajor;
+    switch ( iBearerType )
+        {
+        case EApBearerTypeCSD:
+        case EApBearerTypeHSCSD:
+            {
+            switch ( iLevel )
+                {
+                case 2:
+                    {
+                    if ( iL2Ipv4 )
+                        {
+                        aContext.iContext = KSET_HLP_AP_DATA_AS_IPV4;
+                        }
+                    else
+                        {
+                        aContext.iContext = KSET_HLP_AP_DATA_AS_IPV6;
+                        }
+                    break;
+                    }
+                case 1:
+                    {
+                    aContext.iContext = KSET_HLP_AP_SETTING_DATA_AS;
+                    break;
+                    }
+                case 0:
+                default:
+                    {
+                    aContext.iContext = KSET_HLP_AP_SETTING_DATA;
+                    break;
+                    }
+                }
+            break;
+            }
+        case EApBearerTypeGPRS:
+            {
+            if ( iLevel )
+                {
+                aContext.iContext = KSET_HLP_AP_SETTING_GPRS_AS;
+                }
+            else
+                {
+                aContext.iContext = KSET_HLP_AP_SETTING_GPRS;
+                }
+            break;
+            }
+        case EApBearerTypeWLAN: 
+            {
+            switch ( iLevel )
+                {
+                case 2:
+                    {
+                    if ( iL2Ipv4 )
+                        {
+                        aContext.iContext = KSET_HLP_AP_WLAN_AS_IPV4;
+                        }
+                    else
+                        {
+                        aContext.iContext = KSET_HLP_AP_WLAN_AS_IPV6;
+                        }
+                    break;
+                    }
+                case 1:
+                    {
+                    aContext.iContext = KSET_HLP_AP_SETTING_WLAN_AS;
+                    break;
+                    }
+                case 0:
+                    {
+                    aContext.iContext = KSET_HLP_AP_SETTING_WLAN;
+                    break;
+                    }
+                default:
+                    {
+                    break;
+                    }
+                }
+            break;
+            }
+        default:
+            {
+            __ASSERT_DEBUG( EFalse, Panic( EInvalidBearerType ) );
+            break;
+            }
+        }
     
     APSETUILOGGER_LEAVEFN( ESettings,"Settings::GetHelpContext")
     }

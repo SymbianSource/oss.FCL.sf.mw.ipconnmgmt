@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2005-2010 Nokia Corporation and/or its subsidiary(-ies). 
+* Copyright (c) 2005-2009 Nokia Corporation and/or its subsidiary(-ies). 
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -51,8 +51,7 @@ CMPMConnMonEvents* CMPMConnMonEvents::NewL( CMPMServer& aServer )
 // 
 CMPMConnMonEvents::CMPMConnMonEvents( CMPMServer& aServer )
     : iMyServer( aServer ),
-      iDiscardAvailabilityNotification( EFalse ),
-      iAvailabilityNotificationDiscarded( EFalse )
+      iDiscardAvailabilityNotification( EFalse )
     {
     }
 
@@ -467,7 +466,6 @@ void CMPMConnMonEvents::IapAvailabilityChange( const TPrefIAPNotifCaller aCaller
     if ( ( iAvailableIAPs.Count() > 0 ) && 
          !DiscardAvailabilityNotification() )
         {
-        iAvailabilityNotificationDiscarded = EFalse;
         // Remove temporary blacklistings as fresh availability 
         // info is available.
         // 
@@ -481,7 +479,6 @@ void CMPMConnMonEvents::IapAvailabilityChange( const TPrefIAPNotifCaller aCaller
         }
     else
         {
-        iAvailabilityNotificationDiscarded = ETrue;
         MPMLOGSTRING2( "CMPMConnMonEvents::EventL - IAPs count: %d", 
             iAvailableIAPs.Count() )
         MPMLOGSTRING2( 
@@ -538,6 +535,13 @@ void CMPMConnMonEvents::EventL( const CConnMonEventBase& aConnMonEvent )
             iAvailableIAPs = eventIap->IapAvailability();
             UpdateIAPRefreshTime();
             IapAvailabilityChange( EConnMonEvent );
+            
+            TRAPD( err, iMyServer.UpdateSessionConnectionDlgL() )
+            if( err != KErrNone )
+                {
+                MPMLOGSTRING2( "CMPMConnMonEvents::EventL UpdateSessionConnectionDlgL \
+error code %d", err )
+                }
             break;
             }
         default:

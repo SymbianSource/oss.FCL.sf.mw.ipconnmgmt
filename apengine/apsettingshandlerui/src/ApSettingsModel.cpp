@@ -44,6 +44,9 @@
 #include "ApNetworks.h"
 #include "FeatureManagerWrapper.h"
 
+#include <WEPSecuritySettingsUI.h>
+#include <WPASecuritySettingsUI.h>
+
 #include <ApAccessPointItem.h>
 
 #include "ApSettingsHandlerLogger.h"
@@ -142,6 +145,11 @@ CApSettingsModel::~CApSettingsModel( )
         delete iop;
         }
 
+    delete iWepSecSettings;
+    delete iWepSecSettingsUi;
+
+    delete iWpaSecSettings;
+    delete iWpaSecSettingsUi;
     APSETUILOGGER_LEAVEFN( EModel,"~Model")    
     }
 
@@ -1080,9 +1088,35 @@ TUint32 CApSettingsModel::CreateFromDataL( CApAccessPointItem& aApItem )
 //
 TInt CApSettingsModel::ChangeWepSettingsL( CApAccessPointItem* aApItem )
     {
-    APSETUILOGGER_ENTERFN( EModel,"Model::ChangeWepSettingsL - ERROR: not suported")
-    aApItem = aApItem;
-    return KErrNotSupported;
+    APSETUILOGGER_ENTERFN( EModel,"Model::ChangeWepSettingsL")
+    TInt retval(0);
+        
+    if ( !iWepSecSettings )
+        {
+        iWepSecSettings = CWEPSecuritySettings::NewL();
+        TUint32 iapid( 0 );
+        aApItem->ReadUint( EApIapServiceId, iapid );
+        iWepSecSettings->LoadL( iapid, *Database()->Database() );        
+        }
+
+    if ( !iWepSecSettingsUi )
+        {
+        iWepSecSettingsUi = CWEPSecuritySettingsUi::NewL( *EikEnv() );
+        }
+
+    iWepUiExitReason = iWepSecSettings->EditL( *iWepSecSettingsUi, 
+                                               aApItem->ConnectionName() );
+                                               
+    if ( iWepUiExitReason & CWEPSecuritySettings::EExitReq )
+        {
+        retval += KApUiEventExitRequested;
+        }
+    if ( iWepUiExitReason & CWEPSecuritySettings::EShutDownReq )
+        {
+        retval += KApUiEventShutDownRequested;
+        }
+    APSETUILOGGER_LEAVEFN( EModel,"Model::ChangeWepSettingsL")
+    return retval;
     }
 
 
@@ -1093,9 +1127,35 @@ TInt CApSettingsModel::ChangeWepSettingsL( CApAccessPointItem* aApItem )
 //
 TInt CApSettingsModel::ChangeWpaSettingsL( CApAccessPointItem* aApItem )
     {
-    APSETUILOGGER_ENTERFN( EModel,"Model::ChangeWpaSettingsL - ERROR: not suported")
-    aApItem = aApItem;
-    return KErrNotSupported;
+    APSETUILOGGER_ENTERFN( EModel,"Model::ChangeWpaSettingsL")
+    TInt retval(0);
+
+    if ( !iWpaSecSettings )
+        {
+        iWpaSecSettings = CWPASecuritySettings::NewL( ESecurityModeWpa );
+        TUint32 iapid( 0 );
+        aApItem->ReadUint( EApIapServiceId, iapid );
+        iWpaSecSettings->LoadL( iapid, *Database()->Database() );
+        }
+
+    if ( !iWpaSecSettingsUi )
+        {
+        iWpaSecSettingsUi = CWPASecuritySettingsUi::NewL( *EikEnv() );
+        }
+
+    iWpaUiExitReason = iWpaSecSettings->EditL( *iWpaSecSettingsUi, 
+                                               aApItem->ConnectionName() );
+                                               
+    if ( iWpaUiExitReason & CWPASecuritySettings::EExitReq )
+        {
+        retval += KApUiEventExitRequested;
+        }
+    if ( iWpaUiExitReason & CWPASecuritySettings::EShutDownReq )
+        {
+        retval += KApUiEventShutDownRequested;
+        }
+    APSETUILOGGER_LEAVEFN( EModel,"Model::ChangeWpaSettingsL")    
+    return retval;
     }
 
 
@@ -1106,9 +1166,35 @@ TInt CApSettingsModel::ChangeWpaSettingsL( CApAccessPointItem* aApItem )
 //
 TInt CApSettingsModel::Change8021xSettingsL( CApAccessPointItem* aApItem )
     {
-    APSETUILOGGER_ENTERFN( EModel,"Model::Change8021xSettingsL - ERROR: not suported")
-    aApItem = aApItem;
-    return KErrNotSupported;
+    APSETUILOGGER_ENTERFN( EModel,"Model::Change8021xSettingsL")
+    TInt retval(0);
+
+    if ( !iWpaSecSettings )
+        {
+        iWpaSecSettings = CWPASecuritySettings::NewL( ESecurityMode8021x );
+        TUint32 iapid( 0 );
+        aApItem->ReadUint( EApIapServiceId, iapid );
+        iWpaSecSettings->LoadL( iapid, *Database()->Database() );        
+        }
+        
+    if ( !iWpaSecSettingsUi )
+        {
+        iWpaSecSettingsUi = CWPASecuritySettingsUi::NewL( *EikEnv() );
+        }
+        
+    iWpaUiExitReason = iWpaSecSettings->EditL( *iWpaSecSettingsUi, 
+                                               aApItem->ConnectionName() );
+
+    if ( iWpaUiExitReason & CWPASecuritySettings::EExitReq )
+        {
+        retval += KApUiEventExitRequested;
+        }
+    if ( iWpaUiExitReason & CWPASecuritySettings::EShutDownReq )
+        {
+        retval += KApUiEventShutDownRequested;
+        }
+    APSETUILOGGER_LEAVEFN( EModel,"Model::Change8021xSettingsL")       
+    return retval;
     }
 
 
@@ -1119,8 +1205,17 @@ TInt CApSettingsModel::Change8021xSettingsL( CApAccessPointItem* aApItem )
 //
 void CApSettingsModel::ClearWEPAndWPASettings()
     {
-    APSETUILOGGER_ENTERFN( EModel,"Model::ClearWEPAndWPASettings - ERROR: not suported")
+    APSETUILOGGER_ENTERFN( EModel,"Model::ClearWEPAndWPASettings")
+    
+    delete iWepSecSettings;
+    iWepSecSettings = NULL;
+
+    delete iWpaSecSettings;
+    iWpaSecSettings = NULL;
+    
+    APSETUILOGGER_LEAVEFN( EModel,"Model::ClearWEPAndWPASettings") 
     }
+
 
 
 // ---------------------------------------------------------
@@ -1130,11 +1225,116 @@ void CApSettingsModel::ClearWEPAndWPASettings()
 void CApSettingsModel::WriteWlanL( CApAccessPointItem& aApItem,
                                    TBool aIsNew )
     {
-    APSETUILOGGER_ENTERFN( EModel,"Model::WriteWlanL - ERROR: not supported")
-    aApItem;
-    aIsNew;
-    User::Leave( KErrNotSupported );
+    APSETUILOGGER_ENTERFN( EModel,"Model::WriteWlanL")
+    // now check if it is WLAN and handle security savings...
+    if ( aApItem.BearerTypeL() == EApBearerTypeWLAN )
+        { // it is WLAN...
+        // check that there were no bearer-change, because if orig. bearer 
+        // was NOT wlan, then we shouls consider it as a new record!!!
+        TUint32 wlanid(0);
+        aApItem.ReadUint( EApIapServiceId, wlanid );        
+        
+        TUint32 oldwlanid(wlanid);
+        
+        TTypeOfSaving savetype( ESavingEditedAP );
+        
+        if ( aIsNew )
+            {
+            savetype = ESavingBrandNewAP;
+            oldwlanid = 0;
+            }
+        // now check if it is WEP...
+        // read up security mode
+        TUint32 secmode( 0 );
+        aApItem.ReadUint( EApWlanSecurityMode, secmode );
+        
+        
+        TBool fresh(EFalse); 
+        
+        
+        switch ( secmode )
+            {
+            case EOpen:
+                {
+                break;
+                }
+            case EWep:
+                {
+                // we have to try to save if:
+                // 1. it is a changed AP, it is possible that only 
+                // sec. settings have been changed. 
+                // In this case, iWepSecSettings might be NULL!!
+                // 2. it's sec. settings had been edited
+                
+                if ( !iWepSecSettings )
+                    {
+                    iWepSecSettings = CWEPSecuritySettings::NewL();
+                    fresh = ETrue;
+                    iWepSecSettings->LoadL( oldwlanid, 
+                                            *Database()->Database() );
+                    }
+                
+                if ( ( iWepUiExitReason & CWEPSecuritySettings::EValid ) 
+                    || ( fresh ) )
+                    { // save WEP settings, too, into same transaction...
+                    iWepSecSettings->SaveL( wlanid, *iDb->Database() );
+                    }
+                break;
+                }
+            case E802_1x:
+                {
+                
+                if ( !iWpaSecSettings )
+                    {
+                    iWpaSecSettings = 
+                        CWPASecuritySettings::NewL( ESecurityMode8021x );
+                    fresh = ETrue;
+                    iWpaSecSettings->LoadL( oldwlanid, 
+                                            *Database()->Database() );
+                    }                
+                
+                if ( ( iWpaUiExitReason & CWPASecuritySettings::EValid )
+                    || ( fresh ) )
+                    { // save WPA settings, too, into same transaction...
+                    iWpaSecSettings->SaveL( wlanid, *iDb->Database(), 
+                                            savetype, oldwlanid );
+                    }
+                break;
+                }
+            case EWpa:
+            case EWpa2:
+                {
+                
+                if ( !iWpaSecSettings )
+                    {
+                    iWpaSecSettings = 
+                          CWPASecuritySettings::NewL( ESecurityModeWpa );
+                    fresh = ETrue;
+                    iWpaSecSettings->LoadL( oldwlanid, 
+                                            *Database()->Database() );
+                    }                
+                
+                if ( ( iWpaUiExitReason & CWPASecuritySettings::EValid )
+                    || ( fresh ) )
+                    { // save WPA settings, too, into same transaction...
+                    iWpaSecSettings->SaveL( wlanid, *iDb->Database(),
+                                            savetype, oldwlanid );
+                    }
+                break;
+                }
+            default:
+                {
+                __ASSERT_DEBUG( EFalse, Panic( EUnknownCase ) );
+                // do nothing in urel
+                break;
+                }
+            }
+        }
+    APSETUILOGGER_LEAVEFN( EModel,"Model::WriteWlanL")    
     }
+
+
+
 
 
 // ---------------------------------------------------------
@@ -1143,10 +1343,87 @@ void CApSettingsModel::WriteWlanL( CApAccessPointItem& aApItem,
 //
 void CApSettingsModel::LoadWlanL( CApAccessPointItem& aApItem )
     {
-    APSETUILOGGER_ENTERFN( EModel,"Model::LoadWlanL - ERROR: not supported")
-    aApItem;
-    User::Leave( KErrNotSupported );
+    APSETUILOGGER_ENTERFN( EModel,"Model::LoadWlanL")
+    // now check if it is WLAN and handle security savings...
+    if ( aApItem.BearerTypeL() == EApBearerTypeWLAN )
+        { // it is WLAN...
+        // now check if it is WEP...
+        // read up security mode
+        TUint32 secmode( 0 );
+        aApItem.ReadUint( EApWlanSecurityMode, secmode );
+        switch ( secmode )
+            {
+            case EOpen:
+                {
+                break;
+                }
+            case EWep:
+                {
+                if ( !iWepSecSettings )
+                    {
+                    iWepSecSettings = CWEPSecuritySettings::NewL();
+                    }
+    
+                if ( !iWepSecSettingsUi )
+                    {
+                    iWepSecSettingsUi = 
+                        CWEPSecuritySettingsUi::NewL( *EikEnv() );
+                    }
+                TUint32 wlanid( 0 );
+                aApItem.ReadUint( EApIapServiceId, wlanid );
+                iWepSecSettings->LoadL( wlanid, *Database()->Database() );
+                break;
+                }
+            case E802_1x:
+                {
+                if ( !iWpaSecSettings )
+                    {
+                    iWpaSecSettings = 
+                        CWPASecuritySettings::NewL( ESecurityMode8021x );
+                    }
+    
+                if ( !iWpaSecSettingsUi )
+                    {
+                    iWpaSecSettingsUi = 
+                        CWPASecuritySettingsUi::NewL( *EikEnv() );
+                    }
+                TUint32 wlanid( 0 );
+                aApItem.ReadUint( EApIapServiceId, wlanid );
+                iWpaSecSettings->LoadL( wlanid, *Database()->Database() );
+                break;
+                }
+            case EWpa:
+            case EWpa2:
+                {
+                if ( !iWpaSecSettings )
+                    {
+                    iWpaSecSettings = 
+                        CWPASecuritySettings::NewL( ESecurityModeWpa );
+                    }
+    
+                if ( !iWpaSecSettingsUi )
+                    {
+                    iWpaSecSettingsUi = 
+                        CWPASecuritySettingsUi::NewL( *EikEnv() );
+                    }
+                TUint32 wlanid( 0 );
+                aApItem.ReadUint( EApIapServiceId, wlanid );
+                iWpaSecSettings->LoadL( wlanid, *Database()->Database() );
+                break;
+                }
+            default:
+                {
+                __ASSERT_DEBUG( EFalse, Panic( EUnknownCase ) );
+                // do nothing in urel
+                break;
+                }
+            }
+        }
+    APSETUILOGGER_LEAVEFN( EModel,"Model::LoadWlanL")    
     }
+
+
+
 
 
 //----------------------------------------------------------
@@ -1155,9 +1432,77 @@ void CApSettingsModel::LoadWlanL( CApAccessPointItem& aApItem )
 //
 TBool CApSettingsModel::HasWlanSecSettingsFilledL( CApAccessPointItem& aApItem )
     {
-    APSETUILOGGER_ENTERFN( EModel,"Model::HasWlanSecSettingsFilledL - ERROR: not supported")
-    aApItem;
-    return EFalse;
+    APSETUILOGGER_ENTERFN( EModel,"Model::HasWlanSecSettingsFilledL")
+    TBool retval(EFalse);
+    
+    TUint32 secmode( 0 );
+    aApItem.ReadUint( EApWlanSecurityMode, secmode );
+    
+    TUint32 wlanid(0);
+    aApItem.ReadUint( EApIapServiceId, wlanid );        
+        
+    TUint32 oldwlanid(wlanid);
+
+    TUint32 wapuid = aApItem.WapUid();
+
+    if ( ( wapuid == KApNoneUID )
+        || ( iUtils->BearerTypeL( wapuid ) != EApBearerTypeWLAN ) )
+        {
+        oldwlanid = 0;
+        }
+
+    switch ( secmode )
+        {
+        case EOpen:
+            {
+            retval = ETrue;
+            break;
+            }
+        case EWep:
+            {
+            if ( !iWepSecSettings )
+                {
+                iWepSecSettings = CWEPSecuritySettings::NewL();
+                iWepSecSettings->LoadL( oldwlanid, 
+                                        *Database()->Database() );
+                }
+            retval = iWepSecSettings->IsValid();
+            break;
+            }
+        case E802_1x:
+            {
+            if ( !iWpaSecSettings )
+                {
+                iWpaSecSettings = 
+                    CWPASecuritySettings::NewL( ESecurityMode8021x );
+                iWpaSecSettings->LoadL( oldwlanid, 
+                                        *Database()->Database() );
+                }
+            retval = iWpaSecSettings->IsValid();
+            break;
+            }
+        case EWpa:
+        case EWpa2:
+            {
+            if ( !iWpaSecSettings )
+                {
+                iWpaSecSettings = 
+                      CWPASecuritySettings::NewL( ESecurityModeWpa );
+                iWpaSecSettings->LoadL( oldwlanid, 
+                                        *Database()->Database() );
+                }                
+            retval = iWpaSecSettings->IsValid();                
+            break;
+            }
+        default:
+            {
+            __ASSERT_DEBUG( EFalse, Panic( EUnknownCase ) );
+            // do nothing in urel
+            break;
+            }
+        }
+    APSETUILOGGER_LEAVEFN( EModel,"Model::HasWlanSecSettingsFilledL")    
+    return retval;
     }
 
 
@@ -1167,9 +1512,66 @@ TBool CApSettingsModel::HasWlanSecSettingsFilledL( CApAccessPointItem& aApItem )
 //
 void CApSettingsModel::UpdateSecurityModeL( CApAccessPointItem& aApItem )
     {
-    APSETUILOGGER_ENTERFN( EModel,"Model::UpdateSecurityModeL - ERROR: not supported")
-    aApItem;
-    User::Leave( KErrNotSupported );
+    APSETUILOGGER_ENTERFN( EModel,"Model::UpdateSecurityModeL")
+    TUint32 secmode( 0 );
+    aApItem.ReadUint( EApWlanSecurityMode, secmode );
+
+    TUint32 wlanid(0);
+    aApItem.ReadUint( EApIapServiceId, wlanid );
+
+    switch ( secmode )
+        {
+        case EOpen:
+            {
+            break;
+            }
+        case EWep:
+            {
+            if ( iWepSecSettings )
+                {
+                delete iWepSecSettings;
+                iWepSecSettings = NULL; // to satisfy CodeScanner
+                }
+            iWepSecSettings = CWEPSecuritySettings::NewL();
+            iWepSecSettings->LoadL( wlanid, 
+                                    *Database()->Database() );
+            break;
+            }
+        case E802_1x:
+            {
+            if ( iWpaSecSettings )
+                {
+                delete iWpaSecSettings;
+                iWpaSecSettings = NULL; // to satisfy CodeScanner
+                }
+            iWpaSecSettings = 
+                CWPASecuritySettings::NewL( ESecurityMode8021x );
+            iWpaSecSettings->LoadL( wlanid, 
+                                    *Database()->Database() );
+            break;
+            }
+        case EWpa:
+        case EWpa2:
+            {
+            if ( iWpaSecSettings )
+                {
+                delete iWpaSecSettings;
+                iWpaSecSettings = NULL; // to satisfy CodeScanner
+                }
+            iWpaSecSettings = 
+                  CWPASecuritySettings::NewL( ESecurityModeWpa );
+            iWpaSecSettings->LoadL( wlanid, 
+                                    *Database()->Database() );
+            break;
+            }
+        default:
+            {
+            __ASSERT_DEBUG( EFalse, Panic( EUnknownCase ) );
+            // do nothing in urel
+            break;
+            }
+        }
+    APSETUILOGGER_LEAVEFN( EModel,"Model::UpdateSecurityModeL")    
     }
 
 // End of File

@@ -44,6 +44,13 @@ class MPMStarter
         static CServer2* CreateAndStartServerL();
 
         /**
+        * Creates and starts server Default connection server.
+        * @since 3.2
+        * @return Pointer to the server object.
+        */
+        static CServer2* CreateDefaultConnServerL( CMPMServer* aMPMServer );
+
+        /**
         * Gets server name.
         * @since 3.0
         * @return Descriptor of the server name.

@@ -241,7 +241,30 @@ class CCmPluginBase : public CBase
 
         IMPORT_C CommsDat::CMDBSession& Session() const;
 
-       
+        /**
+        * Launches the settings dialog of the plugin
+        *
+        * @since S60 3.2
+        * @return soft key selection
+        */
+        TInt RunSettingsL();
+
+        /**
+        * Called on a newly created connection method to initialize it properly
+        * with user interaction (e.g. APN setting for a packet data-, WEP-key
+        * setting for a WLAN connection method, etc.).
+        * Note: each plug-in should set its name (i.e. ECmName) in this
+        * function call.
+        *
+        * @since S60 3.2
+        * @param aManuallyConfigure let's the plugin know if a plugin should 
+        *                           be configured manually or automatically
+        * @return ETrue if initialization was successful and wasn't cancelled.
+        * EFalse, if initialization process was cancelled (i.e. user pressed
+        * Cancel button).
+        */
+        TBool InitializeWithUiL( TBool aManuallyConfigure );
+        
         /**
         * Checks if the plug-in can handle the given AP.
         * @param aIapId IAPId of the AP to be checked

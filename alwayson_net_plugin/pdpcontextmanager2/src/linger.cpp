@@ -46,11 +46,7 @@ CLingerConnection::CLingerConnection( TUint           aConnectionId,
     iDlData( 0 ),
     iPckgDlData( iDlData ),
     iUlData( 0 ),
-    iPckgUlData( iUlData ),
-    iTimer( NULL ), 
-    iLingerInterval( 0 ), 
-    iLingerTimerCount( 0 ),
-    iCurrentTimerInterval( 0 ) 
+    iPckgUlData( iUlData )
     {
     }
 

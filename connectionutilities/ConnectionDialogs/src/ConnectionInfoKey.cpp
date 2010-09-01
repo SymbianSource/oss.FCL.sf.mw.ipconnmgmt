@@ -29,9 +29,7 @@
 //
 CConnectionInfoKey::CConnectionInfoKey( TBool aIsWLANFeatureSupported )
 : TKeyArrayFix( 0, ECmpCollated ),
-  iPtr( NULL ),
-  iIsWLANFeatureSupported( aIsWLANFeatureSupported ),
-  iNameEasyWLAN( NULL )
+  iIsWLANFeatureSupported( aIsWLANFeatureSupported )
     {
     }
 

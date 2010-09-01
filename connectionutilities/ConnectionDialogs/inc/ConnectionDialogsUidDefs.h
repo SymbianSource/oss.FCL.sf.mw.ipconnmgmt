@@ -58,12 +58,10 @@ const TUid KUidCConnDlgSelectConn = { 0x10281BB3 };
 const TUid KUidDisconnectDlg = { 0x101F85F1 };
 
 // ID of Connecting via discreet popup
-// Deprecated. Left here for documentation purpose.
-// const TUid KUidConnectingViaDiscreetPopup = { 0x20026FC5 };
+const TUid KUidConnectingViaDiscreetPopup = { 0x20026FC5 };
 
 // ID of Connection error discreet popup
-// Deprecated. Left here for documentation purpose.
-// const TUid KUidConnectionErrorDiscreetPopup = { 0x20026FEF };
+const TUid KUidConnectionErrorDiscreetPopup = { 0x20026FEF };
 
 // WLAN uids
 
@@ -92,15 +90,11 @@ const TUid KUidConfirmationQuery = { 0x10281BAF };
 // ID of two info notes
 const TUid KUidConnectViaNote = { 0x10281BB0 };
 
-// ID of WLAN Power Save Test query
-const TUid KUidWlanPowerSaveTestNote = { 0x101F6D4F };
-
 // ID of Easy Wapi dialog
 const TUid KUidEasyWapiDlg = { 0x101F6D51 };
 
 // ID of No WLAN networks are available at the moment -note
-// Deprecated. Left here for documentation purpose.
-// const TUid KUidNoWLANNetworksAvailableNote = { 0x20016A83 };
+const TUid KUidNoWLANNetworksAvailableNote = { 0x20016A83 };
 
 #endif  // __CONNECTIONDIALOGSUIDDEFS_H__
 

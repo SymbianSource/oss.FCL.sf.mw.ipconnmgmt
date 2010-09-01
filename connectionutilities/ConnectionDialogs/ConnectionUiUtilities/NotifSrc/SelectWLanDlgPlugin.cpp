@@ -84,6 +84,13 @@ void CSelectWLanDlgPlugin::StartL( const TDesC8& aBuffer, TInt aReplySlot,
     {
     CLOG_ENTERFN( "CSelectWLanDlgPlugin::StartL " );  
     
+    if ( ScreenSaverOn() || AutolockOn() )
+        {
+        // Screen saver or Autolock is active. Cancel the dialog. 
+        aMessage.Complete( KErrCancel );
+        return;
+        }
+    
     TPckgBuf<TBool> asyncVersion;
     asyncVersion.Copy( aBuffer );
 
@@ -103,8 +110,7 @@ void CSelectWLanDlgPlugin::StartL( const TDesC8& aBuffer, TInt aReplySlot,
         {
         aMessage.ReadL( aReplySlot, iNetworkPrefs );
     
-        TInt err( KErrNone );
-        TRAP( err, iActivePlugin = CActiveSelectWLanDlgPlugin::NewL( this ) ); 
+        TRAPD( err, iActivePlugin = CActiveSelectWLanDlgPlugin::NewL( this ) ); 
         if ( err )
             {
             delete iActivePlugin;

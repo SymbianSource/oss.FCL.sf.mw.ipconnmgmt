@@ -27,6 +27,7 @@
 #include <etelpckt.h>
 
 #include <centralrepository.h>
+#include "cdccommsdatcreatorcrkeys.h"
 
 #include "cdccommsdatstartup.h"
 #include "cdccommsdatcreator.h"
@@ -36,7 +37,6 @@
 
 // CONSTANTS
 const TUid KCRUidCommsDb = { 0xcccccc00 };
-_LIT( KVariantXmlFile, "Z:\\private\\10281BC3\\VariantData_commsdat.xml" );
 
 //------------------------------------------------
 // CCdcCommsDatStartup::DoStartL
@@ -49,6 +49,11 @@ void CCdcCommsDatStartup::DoStartL()
     CLOG_WRITE( "-----------------------------" );
     
     CheckCreatorUIdL();
+
+    CreateRepositoryL();
+    
+    // Set status to not initialised
+    SetStartupStatusL( ECommsDatInitialisationFailed );
 
 	CLOG_WRITE( "CCdcCommsDatStartup::ResetCommsDatToDefaultL()" );
 	// In all RFS cases CommsDat must be reset 
@@ -66,37 +71,133 @@ void CCdcCommsDatStartup::DoStartL()
 	// In all RFS cases CommsDat tables must be checked/created
 	cdc->CreateTablesL();
 	
-    // If variant XML file exists, read it and create settings
-    TFileName fileName( KVariantXmlFile );
-    RFs fs;
-    User::LeaveIfError( fs.Connect() );
-    RFile file;
-    if ( KErrNone == file.Open( fs, fileName, EFileRead ) )
+    TFileName fileName;
+    GetInputFileNameL( fileName );
+        
+    // CommsDatCreator feature is supported if input file name
+    // lenght is not 0. However file name lenght at least 5. (x.xml)     
+    if( fileName.Length() > 0 )
         {
-        file.Close();
         CLOG_WRITE( "CCdcCommsDatStartup::CommsDat generation enabled" );
-    
-        TRAPD(err, cdc->CreateCommsDatL( fileName ) );
-        if ( err != KErrNone )
-            {
-            // CommsDat creation leaved so something must be wrong.
-            // Reset CommsDat and EAP settings.
-            ResetCommsDatToDefaultL();
-            ResetEAPSettingsL();
-            cdc->CreateTablesL();
-            User::Leave( err );
-            }
+        
+        TFileName path( _L("Z:\\private\\10281BC3\\" )  );
+        path.Append( fileName );
 
-        CLOG_WRITE( "CCdcCommsDatStartup::CommsDat generation done" );
+		CLOG_WRITE( "CCdcCommsDatStartup::CreateCommsDatL begin" );
+	
+        TRAPD(err, cdc->CreateCommsDatL( path ) );
+        if(err != KErrNone )
+        	{
+        	// CommsDat creation leaved so something must be wrong.
+        	// Reset CommsDat and EAP settings.
+        	ResetCommsDatToDefaultL();
+        	ResetEAPSettingsL();
+        	cdc->CreateTablesL();
+        	User::Leave( err );
+        	}
+
+        CLOG_WRITE( "CCdcCommsDatStartup::CreateCommsDatL end" );               
         }
-    else
-        {
-        CLOG_WRITE( "CCdcCommsDatStartup::CommsDat generation disabled" );
-        }
-    fs.Close();
+       else
+       	{
+       	CLOG_WRITE( "CCdcCommsDatStartup::CommsDat generation disabled" );
+       	}
+        
+    // If nothing has leaved then everything is okay (both in disabled and
+    // enabled cases.
+    SetStartupStatusL( ECommsDatInitialised );
         
     CleanupStack::PopAndDestroy( cdc );
     CLOG_WRITE( "CCdcCommsDatStartup::DoStartL end" );
+    }
+
+// ----------------------------------------------------------------------------
+// CCdcCommsDatStartup::CreateRepositoryL()
+// ----------------------------------------------------------------------------
+//    
+void CCdcCommsDatStartup::CreateRepositoryL()
+    {
+    CLOG_WRITE( "CCdcCommsDatStartup::CreateRepositoryL()" );
+
+    TRAPD( err, iRepository = CRepository::NewL( KCRUidCommsDatCreator ) );
+    
+    // Log is important now, because repository cannot contain the 
+    // error value if it cannot be used 
+    if( err != KErrNone )
+        {
+        CLOG_WRITE_FORMAT( "Repository could not created err : %d", err );
+        User::Leave( err );
+        }
+    }
+
+// ----------------------------------------------------------------------------
+// CCdcCommsDatStartup::SetStartupStatusL()
+// ----------------------------------------------------------------------------
+//    
+void CCdcCommsDatStartup::SetStartupStatusL( TInt aResult )
+    {
+    CLOG_WRITE_FORMAT( "CCdcCommsDatStartup::SetStartupStatusL() %d", aResult );
+
+    TInt err = iRepository->Set( KCommsDatCreatorStartupStatus, aResult );
+    if( err != KErrNone )
+        {
+        CLOG_WRITE_FORMAT( 
+                "Value could not write to repository err : %d", err );
+        User::Leave( err );
+        }
+
+    CLOG_WRITE_FORMAT( "CCdcCommsDatStartup::SetStartupStatusL() %d", aResult );
+    }
+
+// ----------------------------------------------------------------------------
+// CCdcCommsDatStartup::GetInputFileNameL()
+// ----------------------------------------------------------------------------
+//    
+void CCdcCommsDatStartup::GetInputFileNameL( TFileName &aFileName )
+    {
+    CLOG_WRITE( "CCdcCommsDatStartup::GetInputFileNameL()" );
+
+    TInt err = iRepository->Get( KCommsDatCreatorInputFileName, aFileName );
+    if( err != KErrNone )
+        {
+        CLOG_WRITE_FORMAT(
+                 "Value could not red from repository err : %d", err );
+        User::Leave( err );
+        }
+
+    CLOG_WRITE( "Input filename red" );
+
+    HBufC *fileName = aFileName.AllocLC();
+
+    CLOG_WRITE_FORMAT( "Input filename value : %S", fileName );
+    
+    CleanupStack::PopAndDestroy( fileName );
+    
+    // Check if file exists. If it doesn't reset filename.
+    RFs fs;
+    err = fs.Connect();//check
+    
+    if( err == KErrNone )
+    	{
+    	RFile file;
+    
+    	TFileName path( _L("Z:\\private\\10281BC3\\" )  );
+    	path.Append( aFileName );
+
+    	err = file.Open(fs, path, EFileRead);
+    	if( err != KErrNone )
+    	{
+	    	CLOG_WRITE( "CCdcCommsDatStartup::GetInputFileNameL() File does not exist");
+  	  	aFileName.Zero();
+    	}
+    	else
+    	{
+    		file.Close();
+    	}
+    	fs.Close();
+    	}
+    
+    CLOG_WRITE( "CCdcCommsDatStartup::GetInputFileNameL()" );
     }
 
 // ----------------------------------------------------------------------------
@@ -110,7 +211,7 @@ void CCdcCommsDatStartup::CheckCreatorUIdL()
     
     CLOG_WRITE( "CCdcCommsDatStartup::CheckCreatorUIdL" );
     
-    TUid creatorId = User::CreatorSecureId();
+    TUid creatorId = User::CreatorIdentity();
 
     CLOG_WRITE_FORMAT( "CreatorId : %x", creatorId );
    
@@ -128,6 +229,10 @@ void CCdcCommsDatStartup::CheckCreatorUIdL()
 //   	
 CCdcCommsDatStartup::~CCdcCommsDatStartup()
     {
+    if( iRepository )
+        {
+        delete iRepository;
+        }
     }
 
 // ----------------------------------------------------------------------------

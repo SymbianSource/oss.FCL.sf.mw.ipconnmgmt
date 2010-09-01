@@ -591,13 +591,33 @@ TInt CWlanSupport::GetConnectionSecurity( TInt& aConnectionSecurity )
     LOGENTRFN("CWlanSupport::GetConnectionSecurity()")
     TInt err( KErrNone );
 
-    TWlanConnectionExtentedSecurityMode mode( EWlanConnectionExtentedSecurityModeOpen );
+    TWlanConnectionSecurityMode mode( EWlanConnectionSecurityOpen );
 
     // Get security mode
-    err = iWlanMgmt->GetExtendedConnectionSecurityMode( mode );
+    err = iWlanMgmt->GetConnectionSecurityMode( mode );
     if ( KErrNone == err )
         {
-        aConnectionSecurity = ConvertWlanExtSecModeToConnMonSecModeV2( mode );
+        switch ( mode )
+            {
+            case EWlanConnectionSecurityOpen:
+                aConnectionSecurity = EConnMonSecurityOpen;
+                break;
+            case EWlanConnectionSecurityWep:
+                aConnectionSecurity = EConnMonSecurityWep;
+                break;
+            case EWlanConnectionSecurity802d1x:
+                aConnectionSecurity = EConnMonSecurity802d1x;
+                break;
+            case EWlanConnectionSecurityWpa:
+                aConnectionSecurity = EConnMonSecurityWpa;
+                break;
+            case EWlanConnectionSecurityWpaPsk:
+                aConnectionSecurity = EConnMonSecurityWpaPsk;
+                break;
+            default:
+                aConnectionSecurity = EConnMonSecurityOpen;
+                break;
+            }
         LOGIT1("GetConnectionSecurity: security mode %d", aConnectionSecurity)
         }
 
@@ -753,10 +773,8 @@ void CWlanSupport::GetWLANNetworksL( RConnMonWLANNetworksArray& aWlanNetworks )
             TUint signalStrength(scanInfo->RXLevel());
             LOGIT1("CWlanSupport::GetWLANNetworksL: signalStrength %d", signalStrength)
 
-            // Security mode
-            TInt wlanExtSecurityMode( scanInfo->ExtendedSecurityMode() );
-            TInt securityModeV2( ConvertWlanExtSecModeToConnMonSecModeV2( wlanExtSecurityMode ) );
-            TInt securityMode( ConvertConMonSecModeV2ToConnMonSecMode( securityModeV2 ) );
+            // SecurityMode
+            TUint securityMode = ConvertWlan2ConnMonExtSecMode(scanInfo);
             LOGIT1("CWlanSupport::GetWLANNetworksL: securityMode %d", securityMode)
 
             // SSID == name
@@ -861,14 +879,9 @@ void CWlanSupport::ParseWlanNetworksL(
         // Signal strength
         TUint signalStrength( aScanInfo->RXLevel() );
 
-        // Security mode
-        TInt wlanExtSecurityMode( aScanInfo->ExtendedSecurityMode() );
-        TInt securityModeV2( ConvertWlanExtSecModeToConnMonSecModeV2( wlanExtSecurityMode ) );
-        TInt securityMode( ConvertConMonSecModeV2ToConnMonSecMode( securityModeV2 ) );
-
-        // Protected setup
-        TBool protectedSetupSupport( aScanInfo->IsProtectedSetupSupported() );
-
+        // SecurityMode
+        TUint securityMode = ConvertWlan2ConnMonExtSecMode(aScanInfo);
+                
         // SSID == name
         TBuf8<CConnMonWlanNetwork::KMaxNameLength> name8;
         TUint8 ieLen( 0 );
@@ -902,8 +915,6 @@ void CWlanSupport::ParseWlanNetworksL(
                 connectionMode,
                 signalStrength,
                 securityMode,
-                securityModeV2,
-                protectedSetupSupport,
                 bssid,
                 KNullDesC() );
         CleanupStack::PushL( net );
@@ -930,7 +941,6 @@ TInt CWlanSupport::GetCurrentWlanNetworkL(
 
     TInt connectionMode;
     TInt connectionSecurity;
-    TInt connectionSecurityV2;
     TInt connectionSignalQuality;
     TBuf<CConnMonWlanNetwork::KMaxNameLength> connectionSsid;
     TBuf8<CConnMonWlanNetwork::KWlanBssId> connectionBssid;
@@ -940,8 +950,7 @@ TInt CWlanSupport::GetCurrentWlanNetworkL(
     if ( KErrNone == err )
         {
         // Get connection security mode
-        err = GetConnectionSecurity( connectionSecurityV2 );
-        connectionSecurity = ConvertConMonSecModeV2ToConnMonSecMode( connectionSecurityV2 );
+        err = GetConnectionSecurity( connectionSecurity );
         }
     if ( KErrNone == err )
         {
@@ -966,8 +975,6 @@ TInt CWlanSupport::GetCurrentWlanNetworkL(
                 connectionMode,
                 connectionSignalQuality,
                 connectionSecurity,
-                connectionSecurityV2,
-                0,
                 connectionBssid,
                 KNullDesC() );
         CleanupStack::PushL( net );
@@ -1425,87 +1432,48 @@ TBool CWlanSupport::WlanRssGoodEnough()
     }
 
 // -----------------------------------------------------------------------------
-// CWlanSupport::ConvertConMonSecModeV2ToConnMonSecMode
+// CWlanSupport::ConvertWlan2ConnMonExtSecMode
 // -----------------------------------------------------------------------------
 //
-TInt CWlanSupport::ConvertConMonSecModeV2ToConnMonSecMode( TInt aConnMonSecModeV2 )
+TUint CWlanSupport::ConvertWlan2ConnMonExtSecMode(CWlanScanInfo* scanInfo)
     {
-    TInt connMonSecMode( EConnMonSecurityOpen );
-    switch ( aConnMonSecModeV2 )
-        {
-        case EConnMonSecurityV2Open:
-            connMonSecMode = EConnMonSecurityOpen;
-            break;
-        case EConnMonSecurityV2WepOpen:
-        case EConnMonSecurityV2WepShared:
-            connMonSecMode = EConnMonSecurityWep;
-            break;
-        case EConnMonSecurityV2802d1x:
-            connMonSecMode = EConnMonSecurity802d1x;
-            break;
-        case EConnMonSecurityV2Wpa:
-        case EConnMonSecurityV2Wpa2:
-            connMonSecMode = EConnMonSecurityWpa;
-            break;
-        case EConnMonSecurityV2WpaPsk:
-        case EConnMonSecurityV2Wpa2Psk:
-            connMonSecMode = EConnMonSecurityWpaPsk;
-            break;
-        case EConnMonSecurityV2Wapi:
-        case EConnMonSecurityV2WapiPsk:
-            connMonSecMode = EConnMonSecurity802d1x;
-            break;
-        default:
-            connMonSecMode = EConnMonSecurityOpen;
-            break;
-        }
-    return connMonSecMode;
-    }
+    LOGENTRFN("CWlanSupport::ConvertWlan2ConnMonExtSecMode()")
 
-// -----------------------------------------------------------------------------
-// CWlanSupport::ConvertWlanExtSecModeToConnMonSecModeV2
-// -----------------------------------------------------------------------------
-//
-TInt CWlanSupport::ConvertWlanExtSecModeToConnMonSecModeV2( TInt aWlanExtSecMode )
-    {
-    TInt connMonSecModeV2( EConnMonSecurityV2Open );
-    switch ( aWlanExtSecMode )
+    TUint securityMode(EConnMonSecurityOpen);
+    switch (scanInfo->ExtendedSecurityMode())
         {
         case EWlanConnectionExtentedSecurityModeOpen:
-            connMonSecModeV2 = EConnMonSecurityV2Open;
+            securityMode = EConnMonSecurityOpen;
             break;
+            
         case EWlanConnectionExtentedSecurityModeWepOpen:
-            connMonSecModeV2 = EConnMonSecurityV2WepOpen;
-            break;
         case EWlanConnectionExtentedSecurityModeWepShared:
-            connMonSecModeV2 = EConnMonSecurityV2WepShared;
+            securityMode = EConnMonSecurityWep;
             break;
+            
         case EWlanConnectionExtentedSecurityMode802d1x:
-            connMonSecModeV2 = EConnMonSecurityV2802d1x;
+            securityMode = EConnMonSecurity802d1x;
             break;
+            
         case EWlanConnectionExtentedSecurityModeWpa:
-            connMonSecModeV2 = EConnMonSecurityV2Wpa;
-            break;
-        case EWlanConnectionExtentedSecurityModeWpaPsk:
-            connMonSecModeV2 = EConnMonSecurityV2WpaPsk;
-            break;
         case EWlanConnectionExtentedSecurityModeWpa2:
-            connMonSecModeV2 = EConnMonSecurityV2Wpa2;
+            securityMode = EConnMonSecurityWpa;
             break;
+            
+        case EWlanConnectionExtentedSecurityModeWpaPsk:
         case EWlanConnectionExtentedSecurityModeWpa2Psk:
-            connMonSecModeV2 = EConnMonSecurityV2Wpa2Psk;
+            securityMode = EConnMonSecurityWpaPsk;
             break;
+            
         case EWlanConnectionExtentedSecurityModeWapi:
-            connMonSecModeV2 = EConnMonSecurityV2Wapi;
-            break;
         case EWlanConnectionExtentedSecurityModeWapiPsk:
-            connMonSecModeV2 = EConnMonSecurityV2WapiPsk;
-            break;
         default:
-            connMonSecModeV2 = EConnMonSecurityV2Open;
+            securityMode = EConnMonSecurityOpen;
             break;
         }
-    return connMonSecModeV2;
+
+    LOGEXITFN1("CWlanSupport::ConvertWlan2ConnMonExtSecMode()", securityMode)
+    return securityMode;
     }
 
 // ============================ MEMBER FUNCTIONS ===============================

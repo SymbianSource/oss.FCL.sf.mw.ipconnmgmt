@@ -18,9 +18,6 @@
 #ifndef CMCOMMONUI_H
 #define CMCOMMONUI_H
 
-// Deprecation warning
-#warning This header file is deprecated and will be removed. See Polonium CR #461 for details.
-
 // INCLUDES
 #include <e32def.h>
 #include <e32cmn.h>

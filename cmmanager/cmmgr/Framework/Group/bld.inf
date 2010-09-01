@@ -1,0 +1,69 @@
+/*
+* Copyright (c) 2006-2008 Nokia Corporation and/or its subsidiary(-ies). 
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:  Build file for Connection Method Manager's framework.
+*
+*/
+
+
+#include <platform_paths.hrh>
+
+PRJ_PLATFORMS
+DEFAULT
+
+PRJ_EXPORTS
+// export localised loc file
+../loc/cmmanager.loc             MW_LAYER_LOC_EXPORT_PATH(cmmanager.loc)
+../conf/cmmanager.confml         MW_LAYER_CONFML(cmmanager.confml)
+../conf/cmmanager_10207376.crml  MW_LAYER_CRML(cmmanager_10207376.crml)
+
+PRJ_MMPFILES
+cmmanager.mmp
+
+PRJ_EXTENSIONS
+START EXTENSION s60/mifconv
+OPTION TARGETFILE cmmanager.mif
+OPTION HEADERFILE cmmanager.mbg
+OPTION SOURCES -c8,8 qgn_indi_sett_protected_add\
+               -c8,8 qgn_prop_set_conn_dest_add\
+               -c8,8 qgn_prop_set_conn_dest_internet\
+               -c8,8 qgn_prop_set_conn_dest_wap\
+               -c8,8 qgn_prop_set_conn_dest_mms\
+               -c8,8 qgn_prop_set_conn_dest_intranet\
+               -c8,8 qgn_prop_set_conn_dest_operator\
+               -c8,8 qgn_prop_set_conn_dest_icon1\
+               -c8,8 qgn_prop_set_conn_dest_icon2\
+               -c8,8 qgn_prop_set_conn_dest_icon3\
+               -c8,8 qgn_prop_set_conn_dest_icon4\
+               -c8,8 qgn_prop_set_conn_dest_icon5\
+               -c8,8 qgn_prop_set_conn_dest_icon6\
+               -c8,8 qgn_prop_set_conn_dest_default\
+               -c8,8 qgn_prop_set_conn_dest_uncategorized\
+               -c8,8 qgn_prop_set_conn_bearer_avail_wlan\
+               -c8,8 qgn_prop_set_conn_bearer_avail_packetdata\
+               -c8,8 qgn_prop_set_conn_wlan_easy\
+               -c8,8 qgn_prop_set_conn_dest_internet_small\
+               -c8,8 qgn_prop_set_conn_dest_wap_small\
+               -c8,8 qgn_prop_set_conn_dest_mms_small\
+               -c8,8 qgn_prop_set_conn_dest_intranet_small\
+               -c8,8 qgn_prop_set_conn_dest_operator_small\
+               -c8,8 qgn_prop_set_conn_dest_icon1_small\
+               -c8,8 qgn_prop_set_conn_dest_icon2_small\
+               -c8,8 qgn_prop_set_conn_dest_icon3_small\
+               -c8,8 qgn_prop_set_conn_dest_icon4_small\
+               -c8,8 qgn_prop_set_conn_dest_icon5_small\
+               -c8,8 qgn_prop_set_conn_dest_icon6_small\
+               -c8,8 qgn_prop_set_conn_dest_default_small\
+               -c8,8 qgn_indi_cb_hot_add\
+               -c8,8 qgn_indi_default_conn_add
+END

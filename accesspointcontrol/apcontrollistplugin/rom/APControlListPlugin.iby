@@ -1,0 +1,32 @@
+/*
+* Copyright (c) 2006 Nokia Corporation and/or its subsidiary(-ies). 
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:  Image description file for project APControlListPlugin
+*
+*/
+
+
+#ifndef __APControlListPLUGIN_IBY__
+#define __APControlListPLUGIN_IBY__
+
+#ifdef __PROTOCOL_WCDMA
+#ifdef _DEBUG
+ECOM_PLUGIN_UDEB(APControlListPlugin.DLL,10281BB4.rsc)
+SCALABLE_IMAGE(APP_BITMAP_DIR,APP_BITMAP_DIR,APControlListplugin)
+#else
+ECOM_PLUGIN(APControlListPlugin.DLL,10281BB4.rsc)
+SCALABLE_IMAGE(APP_BITMAP_DIR,APP_BITMAP_DIR,APControlListplugin)
+#endif
+#endif //__PROTOCOL_WCDMA
+
+#endif __APControlListPLUGIN_IBY__

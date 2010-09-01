@@ -22,7 +22,7 @@
 #include <eiklbo.h>
 #include <aknlists.h>
 #include <AknDialog.h>
-#include <coneresloader.h>
+#include <ConeResLoader.h>
 #include <cmcommonconstants.h>
 #include <cmconnectionmethoddef.h>
 
@@ -398,6 +398,10 @@ class CmPluginBaseSettingsDlg : public CAknDialog,
 
         // A flag to indicate if setting has been changed by user
         TBool                   iHasSettingChanged;
+        
+        // A flag to indicate if edited IAP can be continued
+        // IAP may be possible to be modified or deleted by other application
+        TBool                   iCanEditingContinue;
         
     };
 

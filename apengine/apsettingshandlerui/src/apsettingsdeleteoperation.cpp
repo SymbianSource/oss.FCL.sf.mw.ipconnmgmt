@@ -28,6 +28,8 @@
 #include <ErrorUI.h>
 #include "Apsettingsdeleteoperation.h"
 
+#include <WEPSecuritySettingsUI.h>
+#include <WPASecuritySettingsUI.h>
 #include <ApAccessPointItem.h>
 
 // Following includes are needed only for the test

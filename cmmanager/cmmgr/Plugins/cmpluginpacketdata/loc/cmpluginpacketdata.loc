@@ -1,0 +1,96 @@
+/*
+* Copyright (c) 2006 Nokia Corporation and/or its subsidiary(-ies). 
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:  Localization strings for project cmpluginpacketdata
+*
+*/
+
+
+//  LOCALISATION STRINGS
+
+//d: The name of a new, default connection. Max.30 chars, longer ones will be truncated.
+//d: Used in Connection method view.
+//l: list_setting_pane_t1
+//w:
+//r: 3.2
+//
+#define qtn_set_access_point_name "Access point name"
+
+//d: Item text in setting list. Gives the network type 
+//d: (whether it is IP4 or IP6)
+//l: list_setting_pane_t1
+//w:
+//r: 3.2
+//
+#define qtn_set_network_type "Network type"
+
+//d: States that the network type is IPv4
+//l: list_set_graphic_pane_t1
+//w:
+//r: 3.2
+//
+#define qtn_set_nw_type_ipv4 "IPv4"
+
+//d: States that the network type is IPv6
+//l: list_set_graphic_pane_t1
+//w:
+//r: 3.2
+//
+#define qtn_set_nw_type_ipv6 "IPv6"
+
+//d: Connection method list text
+//l: list_set_graphic_pane_t1
+//w:
+//r: 3.2
+//
+#define qtn_selec_sett_val_field_none "None"
+
+//d: Prompt for Access Point Name query window.
+//l: popup_query_data_window
+//w:
+//r: 3.2
+//
+#define qtn_netw_conset_prmpt_packet_data_apn "Packet data access point name (APN):"
+
+//d: Name of packet data bearer type shown in a list of supported bearers.
+//l: list_single_graphic_pane_t1_cp2
+//w: 
+//r: 3.2
+//
+#define qtn_netw_conset_bearer_supported_packet_data "Packet data"
+
+//d: First line of a double large graphic style listbox - packet data specific
+//l: list_double_large_graphic_pane_t1_cp2
+//w: 
+//r: 3.2
+//
+#define qtn_netw_conset_bearer_available_packet_data "Packet data"
+
+//d: Second line of a double large graphic style listbox - packet data specific
+//l: list_double_large_graphic_pane_t2_cp2
+//w: 
+//r: 3.2
+//
+#define qtn_netw_conset_packet_data_available "Available"
+
+//d: Name of the data bearer displayed in 'data bearer' setting
+//l: list_set_graphic_pane_t1
+//w:
+//r: 3.2
+//
+#define qtn_set_bearer_packet_data "Packet data"
+
+//d: Data bearer of the highlighted connection method.
+//l: popup_preview_text_window_t1
+//r: 3.2
+#define qtn_netw_conset_popup_bearer_packet_data "Packet data"

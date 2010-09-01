@@ -1,0 +1,64 @@
+/*
+* Copyright (c) 2002 Nokia Corporation and/or its subsidiary(-ies). 
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description: 
+*     
+*
+*/
+
+
+#include <platform_paths.hrh>
+
+PRJ_PLATFORMS
+DEFAULT
+
+// Help exports
+#include "../help/group/bld.inf"
+
+PRJ_EXPORTS
+// export iby files
+../ROM/ConnectionMonitorUi.iby		CORE_MW_LAYER_IBY_EXPORT_PATH(ConnectionMonitorUi.iby)
+../ROM/ConnectionMonitorUiResources.iby	LANGUAGE_MW_LAYER_IBY_EXPORT_PATH(ConnectionMonitorUiResources.iby)
+
+// export localised loc file
+../loc/connectionmonitorui.loc	MW_LAYER_LOC_EXPORT_PATH(connectionmonitorui.loc)
+
+PRJ_MMPFILES
+./ConnectionMonitorUI.mmp
+
+PRJ_EXTENSIONS
+START EXTENSION s60/mifconv
+OPTION TARGETFILE ConnectionMonitorUi.mif
+OPTION HEADERFILE ConnectionMonitorUi.mbg
+OPTION SOURCES -c8,1 qgn_prop_wml_gprs.bmp \
+               -c8,1 qgn_prop_wml_csd.bmp \
+               -c8,1 qgn_prop_wml_hscsd.bmp \
+               -c8,1 qgn_prop_empty.bmp \
+               -c8,1 qgn_prop_cmon_gprs_suspended.bmp \
+               -c8,8 qgn_prop_cmon_conn_active.bmp \
+               -c8,8 qgn_prop_cmon_wlan_avail.bmp \
+               -c8,1 qgn_prop_wlan_bearer.bmp \
+               -c8,1 qgn_prop_cmon_wlan_conn.bmp \
+               -c8,1 qgn_indi_wlan_signal_low_add.bmp \
+               -c8,1 qgn_indi_wlan_signal_med_add.bmp \
+               -c8,1 qgn_indi_wlan_signal_good_add.bmp \
+               -c8,1 qgn_indi_wlan_secure_network_add.bmp
+END
+
+PRJ_EXTENSIONS
+START EXTENSION s60/mifconv
+  OPTION TARGETFILE ConnectionMonitorUi_aif.mif
+  OPTION SOURCES -c8,8 qgn_prop_cp_conn_man.bmp
+END
+
+//PRJ_TESTMMPFILES

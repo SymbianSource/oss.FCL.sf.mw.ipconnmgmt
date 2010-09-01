@@ -162,7 +162,7 @@ enum TDbCreatorWPAFields
     {
     EWPAPresharedKey = 0x00002000,    // Preshared key 
     EWPAKeyLength    = 0x00002001,    // Key length
-    EWPAEapMethod    = 0x00002002,    // EAP Method
+    EWPAListOfEAPs   = 0x00002002,    // List of EA plugins
     EWPAUseOfPresharedKey =0x00002003,// Use of preshared key
     };
     

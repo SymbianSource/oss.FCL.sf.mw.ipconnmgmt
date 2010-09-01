@@ -44,9 +44,8 @@
 #include "ConnectionUiUtilitiesImpl.h"
 #include "ChangeConnectionDlg.h"
 #include "ActiveCChangeConnectionDlg.h"
-#include "connectionstatuspopup.h"
 
-#include <connectionuiutilities.rsg>
+#include <ConnectionUiUtilities.rsg>
 #include <data_caging_path_literals.hrh>
 
 #include "ConnectionDialogsLogger.h"
@@ -85,11 +84,7 @@ CConnectionUiUtilitiesImpl* CConnectionUiUtilitiesImpl::NewL()
 //
 CConnectionUiUtilitiesImpl::CConnectionUiUtilitiesImpl() 
 : iResOffset( 0 ),
-  iIsWlanSupported( EFalse ),
-  iDummy( EFalse ),
-  iDummySecMode( EWlanConnectionSecurityOpen ),
-  iDummyExtSecMode( EWlanConnectionExtentedSecurityModeOpen ),
-  iConnStatusPopup( NULL )
+  iIsWlanSupported( EFalse )
     {
     for ( TInt i = 0; i < KNumberOfWrappedDialogs; i++ )
         {
@@ -110,7 +105,6 @@ void CConnectionUiUtilitiesImpl::ConstructL()
     iIsWlanSupported = 
                 FeatureManager::FeatureSupported( KFeatureIdProtocolWlan );
     FeatureManager::UnInitializeLib();
-    iConnStatusPopup = CConnectionStatusPopup::NewL();
     }
 
 
@@ -130,8 +124,6 @@ CConnectionUiUtilitiesImpl::~CConnectionUiUtilitiesImpl()
         {
         delete iActiveWrapper[i];
         }
-
-    delete iConnStatusPopup;
     }
 
 // ---------------------------------------------------------
@@ -908,6 +900,89 @@ void CConnectionUiUtilitiesImpl::SearchWLANNetworkAsync(
     CLOG_LEAVEFN( "CConnectionUiUtilitiesImpl::SearchWLANNetworkAsync" );    
     }
 
+// ---------------------------------------------------------
+// CConnectionUiUtilitiesImpl::ConnectedViaDestAndConnMethodNote
+// ---------------------------------------------------------
+//
+void CConnectionUiUtilitiesImpl::ConnectedViaDestAndConnMethodNote( 
+                                                const TUint32 aDestId, 
+                                                const TUint32 aConnMId )
+    {
+    if ( !iActiveWrapper[EConnViaDestCM] )
+        {
+        TRAP_IGNORE( iActiveWrapper[EConnViaDestCM] = 
+                                    CActiveWrapper::NewL( EConnViaDestCM ) );
+        }
+
+    if ( iActiveWrapper[EConnViaDestCM] )
+        {
+        iActiveWrapper[EConnViaDestCM]->StartGenericNote( EConnViaDestCM, 
+                                                          aConnMId, aDestId );
+        }
+    }
+
+// ---------------------------------------------------------
+// CConnectionUiUtilitiesImpl::ConnectedViaDestAndConnMethodNote
+// ---------------------------------------------------------
+//
+void CConnectionUiUtilitiesImpl::ConnectedViaDestAndConnMethodNote( 
+                                                const TUint32 aDestId, 
+                                                const TUint32 aConnMId, 
+                                                TRequestStatus& aStatus )
+    {
+    iNotif.ConnectedViaDestAndConnMethodNote( aDestId, aConnMId, aStatus );
+    }
+        
+// ---------------------------------------------------------
+// CConnectionUiUtilitiesImpl::CancelConnectedViaDestAndConnMethodNote
+// ---------------------------------------------------------
+//
+void CConnectionUiUtilitiesImpl::CancelConnectedViaDestAndConnMethodNote()
+    {
+    iNotif.CancelConnectedViaDestAndConnMethodNote();
+    }
+
+// ---------------------------------------------------------
+// CConnectionUiUtilitiesImpl::ChangingConnectionToNote
+// ---------------------------------------------------------
+//
+void CConnectionUiUtilitiesImpl::ChangingConnectionToNote( 
+                                                const TUint32 aConnMId )
+    {
+    if ( !iActiveWrapper[EChangingConnTo] )
+        {
+        TRAP_IGNORE( iActiveWrapper[EChangingConnTo] = 
+                                    CActiveWrapper::NewL( EChangingConnTo ) );
+        }
+
+    if ( iActiveWrapper[EChangingConnTo] )
+        {
+        iActiveWrapper[EChangingConnTo]->StartGenericNote( EChangingConnTo,
+                                                           aConnMId );
+        }
+    }
+
+// ---------------------------------------------------------
+// CConnectionUiUtilitiesImpl::ChangingConnectionToNote
+// ---------------------------------------------------------
+//    
+void CConnectionUiUtilitiesImpl::ChangingConnectionToNote( 
+                                                const TUint32 aConnMId, 
+                                                TRequestStatus& aStatus )
+    {
+    iNotif.ChangingConnectionToNote( aConnMId, aStatus );  
+    }
+
+
+// ---------------------------------------------------------
+// CConnectionUiUtilitiesImpl::CancelChangingConnectionToNote
+// ---------------------------------------------------------
+//
+void CConnectionUiUtilitiesImpl::CancelChangingConnectionToNote()
+    {
+    iActiveWrapper[EChangingConnTo]->Cancel();
+    }
+
 // ---------------------------------------------------------    
 // CConnectionUiUtilitiesImpl::ConfirmMethodUsageQuery
 // ---------------------------------------------------------
@@ -929,28 +1004,47 @@ void CConnectionUiUtilitiesImpl::CancelConfirmMethodUsageQuery()
     iNotif.CancelConfirmMethodUsageQuery();
     }
 
-    
+
 // ---------------------------------------------------------
-// CConnectionUiUtilitiesImpl::WlanPowerSaveTestNote
+// CConnectionUiUtilitiesImpl::ConnectedViaConnMethodNote
 // ---------------------------------------------------------
 //
-void CConnectionUiUtilitiesImpl::WlanPowerSaveTestNote( 
-                                                    TBool&          aDisable,
+void CConnectionUiUtilitiesImpl::ConnectedViaConnMethodNote( 
+                                                    const TUint32 aConnMId )
+    {
+    if ( !iActiveWrapper[EConnViaCM] )
+        {
+        TRAP_IGNORE( iActiveWrapper[EConnViaCM] = 
+                                        CActiveWrapper::NewL( EConnViaCM ) );
+        }
+
+    if ( iActiveWrapper[EConnViaCM] )
+        {
+        iActiveWrapper[EConnViaCM]->StartGenericNote( EConnViaCM, aConnMId );
+        }
+    }
+
+// ---------------------------------------------------------
+// CConnectionUiUtilitiesImpl::ConnectedViaConnMethodNote
+// ---------------------------------------------------------
+//
+void CConnectionUiUtilitiesImpl::ConnectedViaConnMethodNote( 
+                                                    const TUint32 aConnMId,
                                                     TRequestStatus& aStatus )
     {
-    iNotif.WlanPowerSaveTestNote( aDisable, aStatus );
+    iNotif.ConnectedViaConnMethodNote( aConnMId, aStatus );
     }
 
         
 // ---------------------------------------------------------
-// CConnectionUiUtilitiesImpl::CancelWlanPowerSaveTestNote
+// CConnectionUiUtilitiesImpl::CancelConnectedViaConnMethodNote
 // ---------------------------------------------------------
 //
-void CConnectionUiUtilitiesImpl::CancelWlanPowerSaveTestNote()
+void CConnectionUiUtilitiesImpl::CancelConnectedViaConnMethodNote()
     {
-    iNotif.CancelWlanPowerSaveTestNote();
+    iNotif.CancelConnectedViaConnMethodNote();
     }
-    
+
 // ---------------------------------------------------------    
 // CConnectionUiUtilitiesImpl::EasyWapiDlg
 // ---------------------------------------------------------
@@ -979,47 +1073,72 @@ TBool CConnectionUiUtilitiesImpl::EasyWapiDlg( TDes* aKey )
     return ( status == KErrNone ) ? ETrue : EFalse;
     }
 
-// ---------------------------------------------------------    
-// CConnectionUiUtilitiesImpl::ConnectingViaDiscreetPopup
+// ---------------------------------------------------------
+// CConnectionUiUtilitiesImpl::NoWLANNetworksAvailableNote
 // ---------------------------------------------------------
 //
-void CConnectionUiUtilitiesImpl::ConnectingViaDiscreetPopup( )
-    { 
-    iConnStatusPopup->ConnectingViaDiscreetPopup( );
-    }
-
-
-// ---------------------------------------------------------    
-// CConnectionUiUtilitiesImpl::ConnectingViaDiscreetPopup
-// ---------------------------------------------------------
-//
-void CConnectionUiUtilitiesImpl::ConnectingViaDiscreetPopup(
-        const TUint32& aIapId,
-        TBool aConnectionAlreadyActive )
-    { 
-    iConnStatusPopup->ConnectingViaDiscreetPopup( aIapId,
-            aConnectionAlreadyActive );
-    }
-
-
-// ---------------------------------------------------------    
-// CConnectionUiUtilitiesImpl::CancelConnectingViaDiscreetPopup
-// ---------------------------------------------------------
-//
-void CConnectionUiUtilitiesImpl::CancelConnectingViaDiscreetPopup()
+void CConnectionUiUtilitiesImpl::NoWLANNetworksAvailableNote()
     {
-    iConnStatusPopup->CancelConnectingViaDiscreetPopup();
+    if ( iIsWlanSupported )    
+        {
+        if ( !iActiveWrapper[ ENoWlanNetwsAvail ] )
+            {
+            TRAP_IGNORE( iActiveWrapper[ ENoWlanNetwsAvail ] = 
+                                    CActiveWrapper::NewL( ENoWlanNetwsAvail ) );
+            }
+
+        if ( iActiveWrapper[ ENoWlanNetwsAvail ] )
+            {
+            iActiveWrapper[ ENoWlanNetwsAvail ]->StartGenericNote( 
+                                                            ENoWlanNetwsAvail );
+            }
+        }
     }
+
+
+// ---------------------------------------------------------    
+// CConnectionUiUtilitiesImpl::ConnectingViaDiscreetPopup
+// ---------------------------------------------------------
+//
+void CConnectionUiUtilitiesImpl::ConnectingViaDiscreetPopup( const TUint32& aIapId )
+    { 
+    iConnInfo().iIapId = aIapId;
+    
+    if ( !iActiveWrapper[ EConnectingViaDiscreetPopup ] )
+        {
+        TRAP_IGNORE( iActiveWrapper[ EConnectingViaDiscreetPopup ] = 
+                                CActiveWrapper::NewL( EConnectingViaDiscreetPopup ) );
+        }
+
+    if ( iActiveWrapper[ EConnectingViaDiscreetPopup ] )
+        {
+        iActiveWrapper[ EConnectingViaDiscreetPopup ]
+                        ->StartConnectingViaDiscreetPopup( iConnInfo );
+        }
+    }
+
 
 
 // ---------------------------------------------------------    
 // CConnectionUiUtilitiesImpl::ConnectionErrorDiscreetPopup
 // ---------------------------------------------------------
 //
-void CConnectionUiUtilitiesImpl::ConnectionErrorDiscreetPopup(
-        const TInt& aErrCode )
+void CConnectionUiUtilitiesImpl::ConnectionErrorDiscreetPopup( const TInt& aErrCode )
     {
-    iConnStatusPopup->ConnectionErrorDiscreetPopup( aErrCode );
+    TPckgBuf< TInt > buf;
+    buf() = aErrCode;
+    
+    if ( !iActiveWrapper[ EConnectionErrorDiscreetPopup ] )
+        {
+        TRAP_IGNORE( iActiveWrapper[ EConnectionErrorDiscreetPopup ] = 
+                                CActiveWrapper::NewL( EConnectionErrorDiscreetPopup ) );
+        }
+
+    if ( iActiveWrapper[ EConnectionErrorDiscreetPopup ] )
+        {
+        iActiveWrapper[ EConnectionErrorDiscreetPopup ]
+                        ->StartConnectionErrorDiscreetPopup( buf );
+        }
     }
         
 // End of File

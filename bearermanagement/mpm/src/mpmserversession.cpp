@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2004-2010 Nokia Corporation and/or its subsidiary(-ies). 
+* Copyright (c) 2004-2009 Nokia Corporation and/or its subsidiary(-ies). 
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -38,10 +38,13 @@ Mobility Policy Manager server session implementation.
 #include "mpmcommsdataccess.h"
 #include "mpmserversession.h"
 #include "mpmconnmonevents.h"
+#include "mpmdialog.h"
+#include "mpmdisconnectdlg.h"
 #include "mpmconfirmdlgstarting.h"
 #include "mpmconfirmdlgroaming.h"
 #include "mpmlogger.h"
 #include "mpmpropertydef.h"
+#include "mpmdefaultconnection.h"
 #include "mpmiapselection.h"
 #include "mpmcsidwatcher.h"
 
@@ -68,20 +71,12 @@ CMPMServerSession* CMPMServerSession::NewL(CMPMServer& aServer)
 CMPMServerSession::CMPMServerSession(CMPMServer& aServer)
     : CSession2(), 
       iMyServer( aServer ),
+      iDisconnectDlg( NULL ),
       iConfirmDlgRoaming( NULL ),
-      iConnId( 0 ),
-      iNotifRequested( EFalse ),
-      iPreferredIAPRequested( EFalse ),
-      iOfflineFeatureSupported( EFalse ),
-      iEasyWlanIap( 0 ),
-      iAppUid( 0 ),
       iStoredIapInfo(),
       iIapSelection( NULL ),
       iMigrateState( EMigrateNone ),
-      iLastNotifiedIap( 0 ),
-      iMigrateIap( 0 ),
-      iUserConnection( 0 ),
-      iVpnUserConnectionUsed( EFalse ),
+      iDisconnectDialogShown( EFalse ),
       iErrorDiscreetPopupShown( EFalse )
     {
     }
@@ -96,7 +91,7 @@ void CMPMServerSession::ConstructL()
     MPMLOGSTRING( "CMPMServerSession::ConstructL" )
     if ( !iMyServer.Events() )
         {
-        iMyServer.SetEvents(CMPMConnMonEvents::NewL(
+        iMyServer.SetEvents( CMPMConnMonEvents::NewL(
             *const_cast<CMPMServer*>( &iMyServer ) ) );
         }
 
@@ -112,37 +107,40 @@ void CMPMServerSession::ConstructL()
 //
 CMPMServerSession::~CMPMServerSession()
     {
-    delete iConfirmDlgRoaming;
-    delete iIapSelection;
+
 
     // Remove serverside objects for notification session.
     // 
     iMyServer.RemoveSession( this );
 
-    if (VpnUserConnectionUsed())
-        {
-        SetVpnUserConnectionUsed( EFalse );
-    
-    MPMLOGSTRING( "CMPMServerSession::~CMPMServerSession -\
- VPN user connection usage ended" )    
-        }
-    else if (UserConnection())
+    if (UserConnection())
         {
         iMyServer.ClearUserConnection();
         ClearUserConnection();
         
-        MPMLOGSTRING( "CMPMServerSession::~CMPMServerSession -\
+        // Set PS keys to zero
+        RProperty::Set( KMPMUserConnectionCategory,
+                        KMPMPSKeyUserConnectionSnap,
+                        0 );
+        
+        RProperty::Set( KMPMUserConnectionCategory,
+                        KMPMPSKeyUserConnectionIap,
+                        0 );
+        
+        MPMLOGSTRING( "CMPMServerSession::HandleServerApplicationConnectionEnds -\
 User connection deactivated" )
         }   
 
     // Clean up the blacklist table 
     iMyServer.HandleServerUnblackListIap( iConnId, 0 );
-
+    
     // Make sure the connection is removed from server's information array.
     iMyServer.RemoveBMConnection( iConnId, *this );
-    
-    // Cancel discreet popup
-    iMyServer.ConnUiUtils()->CancelConnectingViaDiscreetPopup();
+
+    delete iDisconnectDlg;
+    delete iConfirmDlgRoaming;
+    delete iIapSelection;
+
     }
 
 
@@ -424,7 +422,16 @@ ChooseBestIAP() already completed or in progress %d", KErrAlreadyExists )
         if ( ! ( mpmConnPref.NoteBehaviour() &
             TExtendedConnPref::ENoteBehaviourConnDisableNotes ) )
             {
-            iMyServer.ConnUiUtils()->ConnectionErrorDiscreetPopup( error );
+            CConnectionUiUtilities* connUiUtils = NULL;
+        
+            TRAP_IGNORE( connUiUtils = CConnectionUiUtilities::NewL() );
+            
+            if ( connUiUtils )
+                {
+                connUiUtils->ConnectionErrorDiscreetPopup( error );
+                delete connUiUtils;
+                connUiUtils = NULL;
+                }
             }    	
         	
         MPMLOGSTRING( "CMPMServerSession::HandleServerChooseIapL - Error \
@@ -434,34 +441,23 @@ while extracting TCommDbConnPref from TConnPref" )
         }
 
     // Store the Uid of the application to the member variable so 
-    // that it can be used when AlwaysOnline connection is being established.
+    // that it can be used to avoid DisconnectDialog popping up when 
+    // AlwaysOnline connection is being established.
     // 
     iAppUid = aMessage.Int2();
+
+    MPMLOGSTRING2( "CMPMServerSession::HandleServerChooseIapL: \
+Client UID = 0x%x", iAppUid )
 
     if ( !iIapSelection )
         {
         iIapSelection = CMPMIapSelection::NewL( iMyServer.CommsDatAccess(),
-                                                this,
-                                                iMyServer.ConnUiUtils() ); 
+                                                this ); 
         }
     
     MPMLOGSTRING3( "CMPMServerSession::HandleServerChooseIapL - iap %d \
 connType %d", mpmConnPref.IapId(), mpmConnPref.ConnType() )
 
-
-    if ( iMyServer.UseVpnUserConnection(mpmConnPref,
-                                        AppUid()) )
-        {
-        // VPN user connection needs to be used.
-        TBool prepareOk = iMyServer.PrepareVpnUserConnection( mpmConnPref );
-        if ( prepareOk )
-            {
-            SetVpnUserConnectionUsed( ETrue );
-            MPMLOGSTRING( "CMPMServerSession::HandleServerChooseIapL -\
- VPN user connection used" )                    
-            }
-        }
-            
     iIapSelection->ChooseIapL( mpmConnPref );
 
     if ( iAppUid == iMyServer.CsIdWatcher()->ConnectScreenId() )
@@ -473,6 +469,16 @@ connType %d", mpmConnPref.IapId(), mpmConnPref.ConnType() )
         iMyServer.SetUserConnection();
         SetUserConnection();
         iMyServer.SetUserConnPref( mpmConnPref );
+        
+        // Set PS keys according to user connection
+        // Do not check return values. Can do nothing in case of failing.
+        RProperty::Set( KMPMUserConnectionCategory,
+                        KMPMPSKeyUserConnectionSnap,
+                        mpmConnPref.SnapId() );
+        
+        RProperty::Set( KMPMUserConnectionCategory,
+                        KMPMPSKeyUserConnectionIap,
+                        mpmConnPref.IapId() );
         }
     }
 
@@ -529,6 +535,13 @@ void CMPMServerSession::HandleServerCancelRequest( const RMessage2& aMessage )
             //
             TRAP_IGNORE( iMyServer.Events()->CancelScanL( this ) )
 
+            if ( iDisconnectDlg )
+                {
+                MPMLOGSTRING( "CMPMServerSession::HandleServerCancelRequest: \
+removing dconn dlg" )
+                delete iDisconnectDlg;
+                iDisconnectDlg = NULL;
+                }
             return;
             }
         case EMPMWaitNotification:
@@ -547,7 +560,7 @@ void CMPMServerSession::HandleServerCancelRequest( const RMessage2& aMessage )
                 // TODO Change CancelScanL to non-leaving.
                 // Otherwise, nothing clever can be done here.
                 // And OOM may risk MPM stability.
-                TRAP_IGNORE( iMyServer.Events()->CancelScanL( this ))
+                TRAP_IGNORE( iMyServer.Events()->CancelScanL( this ) )
                 iServerSortSNAPMessage.Complete( KErrCancel );
                 }
             break;
@@ -697,10 +710,7 @@ void CMPMServerSession::HandleServerIapConnectionStartedL(
     // Complete the message as soon as possible to avoid latency in BM
     // 
     aMessage.Complete( KErrNone );
-    
-    iMyServer.ConnUiUtils()->CancelConnectingViaDiscreetPopup();
     }
-
 
 // -----------------------------------------------------------------------------
 // CMPMServerSession::HandleServerIapConnectionStopped
@@ -740,17 +750,19 @@ void CMPMServerSession::HandleServerApplicationConnectionEnds(
     //
     TConnectionId endId = aMessage.Int0();
 
-    if (VpnUserConnectionUsed())
-        {
-        SetVpnUserConnectionUsed( EFalse );
-
-        MPMLOGSTRING( "CMPMServerSession::HandleServerApplicationConnectionEnds -\
- VPN user connection usage ended" )    
-        }
-    else if (UserConnection())
+    if (UserConnection())
         {
         iMyServer.ClearUserConnection();
         ClearUserConnection();
+        
+        // Set PS keys to zero
+        RProperty::Set( KMPMUserConnectionCategory,
+                        KMPMPSKeyUserConnectionSnap,
+                        0 );
+        
+        RProperty::Set( KMPMUserConnectionCategory,
+                        KMPMPSKeyUserConnectionIap,
+                        0 );
         
         MPMLOGSTRING( "CMPMServerSession::HandleServerApplicationConnectionEnds -\
 User connection deactivated" )
@@ -805,8 +817,8 @@ TBool CMPMServerSession::IsConfirmFirstL( const TUint32 aIapId )
 
     // check whether a started connection exists which already 
     // uses this IAP. If so, it won't need to be confirmed again
-    // 
-    if( iMyServer.CheckIfStarted( aIapId, iConnId ) )
+    //
+    if ( iMyServer.CheckUsageOfIap( aIapId, iConnId ) == EStarted )
         {
         MPMLOGSTRING(
         "CMPMServerSession::IsConfirmFirstL - IAP already started, \
@@ -836,6 +848,21 @@ should not be confirmed - False" )
         {
         MPMLOGSTRING( "CMPMServerSession::IsConfirmFirstL - True" )
         isConfirmFirst = ETrue;
+
+        // iDisconnectDialogShown is set when disconnect dialog is shown.
+        // Before the disconnect dialog is shown, data usage confirmation
+        // dialog is already shown for the new PDP context. If you choose
+        // to disconnect the active PDP context then data usage dialog is
+        // shown again for the new context. So, set isConfirmFirst to
+        // False to avoid duplicate cellular confirm dialog
+        //
+        if ( iDisconnectDialogShown )
+            {
+            MPMLOGSTRING( "CMPMServerSession::IsConfirmFirstL  - False; Data \
+confirmation dialog already shown this IAP" )
+            isConfirmFirst = EFalse;
+            iDisconnectDialogShown = EFalse;
+            }
         }
     else 
         {
@@ -916,7 +943,7 @@ void CMPMServerSession::HandleServerApplicationMigratesToCarrierL(
             // Check that connection preferences don't deny queries, and
             // enough time has elapsed from the last query cancelled by the user.
             if ( !( iIapSelection->MpmConnPref().NoteBehaviour() & TExtendedConnPref::ENoteBehaviourConnDisableQueries ) &&
-                 !MyServer().IsConnPermQueryTimerOn() )
+                    !MyServer().IsConnPermQueryTimerOn() )
                 {
                 if ( MyServer().RoamingWatcher()->RoamingStatus() == EMPMInternationalRoaming )
                     {
@@ -977,6 +1004,10 @@ void CMPMServerSession::MigrateCallbackL( TInt aError )
 	    if( aError == KErrNone )
 	        {
 	        iMigrateState = EMigrateOfflineConfirmation;
+    	    if( IapSelectionL()->StartWlanQueryIfNeededL( iMigrateIap, ETrue ) )
+	            {
+	            return;
+                }
 	        }
 	    }
 	else if( iMigrateState == EMigrateOfflineConfirmation )
@@ -1396,21 +1427,56 @@ void CMPMServerSession::HandleServerProcessErrorL(
         return;
         }
 
-    if ( !ChooseBestIapCalled() )
-        {
-        MPMLOGSTRING( "CMPMServerSession::HandleServerProcessErrorL - \
-Warning: ChooseBestIap has not been called yet" )
-        TBMNeededAction neededAction( EPropagateError );
-        ProcessErrorComplete( KErrNone, &error, &neededAction );
-        return;
-        }
-    
     // Read the Connection Id of the application
     // 
     TConnectionId connId = iProcessErrorMessage.Int1();
+    
+    MPMLOGSTRING3( "CMPMServerSession::HandleServerProcessErrorL \
+- error code = %i, Connection Id = 0x%x", error, connId )
 
-    MPMLOGSTRING3( "CMPMServerSession::HandleServerProcessErrorL\
- - error code = %i, Connection Id = 0x%x", error, connId )
+    if ( !ChooseBestIapCalled() )
+        {
+        MPMLOGSTRING( "CMPMServerSession::HandleServerProcessErrorL - \
+ChooseBestIap has not been called yet" )
+
+        // If it is not disconnect dialog error then complete message. 
+        // If it is then leave message pending and it will be completed when 
+        // disconnect dialog completes in other session.
+        if ( !DisconnectDlgErrorCode( error ) )
+            {
+            TBMNeededAction neededAction( EPropagateError );
+            ProcessErrorComplete( KErrNone, &error, &neededAction );
+            }
+        else
+            {
+            MPMLOGSTRING( "Disconnect dlg error - leave msg pending" );
+            }
+        return;
+        }
+
+    // Show error popup if it's allowed per client request
+    // Don't show the pop up if error code is for disconnect dialog
+    //
+    if ( !( iIapSelection->MpmConnPref().NoteBehaviour() &
+            TExtendedConnPref::ENoteBehaviourConnDisableNotes ) &&
+         !DisconnectDlgErrorCode( error ) )
+        {
+        CConnectionUiUtilities* connUiUtils = NULL;
+        TRAPD( popupCreateError, connUiUtils = CConnectionUiUtilities::NewL() );
+        if ( popupCreateError == KErrNone && connUiUtils )
+            {
+            // Note: Below function shows the discreet popup only if the error code
+            // belongs to the set of errors that are shown to the user.
+            // Otherwise the popup is not shown.
+            connUiUtils->ConnectionErrorDiscreetPopup( error );
+            delete connUiUtils;
+            connUiUtils = NULL;
+            
+            // Error discreet popup has been shown. This is needed so that we
+            // dont show it again for SNAP.
+            iErrorDiscreetPopupShown = ETrue;
+            }
+        }
 
     // Get the current connection IapId for this connId 
     //
@@ -1419,29 +1485,6 @@ Warning: ChooseBestIap has not been called yet" )
     // Get the current connection SNAP for this Connection Id
     //
     TUint32 snapId = iMyServer.GetBMSnap( connId );
-
-    // The popup is shown if the connection is not silent and the
-    // error is something else than a disconnect dialog error code.
-    // The popup is also shown if the connection is silent and the
-    // error is a disconnect dlg error, a background application 
-    // is not in question, a MMS IAP is not
-    // in question, and a started connection does not exist.
-    TBool silent = iIapSelection->MpmConnPref().NoteBehaviour() &
-                TExtendedConnPref::ENoteBehaviourConnDisableNotes;
-    if ( !silent && ( !DisconnectDlgErrorCode( error ) ||
-            ( !IsBackgroundApplication( iAppUid ) &&
-            !IsMMSIap( currentIap ) && 
-            iMyServer.StartedConnectionExists() != KErrNotFound ) ) )
-        {
-        // Note: Below function shows the discreet popup only if the error code
-        // belongs to the set of errors that are shown to the user.
-        // Otherwise the popup is not shown.
-        iMyServer.ConnUiUtils()->ConnectionErrorDiscreetPopup( error );
-        
-        // Error discreet popup has been shown. This is needed so that we
-        // dont show it again for SNAP.
-        iErrorDiscreetPopupShown = ETrue;
-        }  
 
     TConnMonIapInfo availableIAPs;
     availableIAPs = GetAvailableIAPs();
@@ -1454,8 +1497,6 @@ Warning: ChooseBestIap has not been called yet" )
     // 
     TConnectionState state;
     iMyServer.GetConnectionState( connId, state );
-    MPMLOGSTRING2(
-        "CMPMServerSession::HandleServerProcessErrorL - state %d", state )
 
     // We need to blacklist the presumed IAP too
     // 
@@ -1466,213 +1507,256 @@ Warning: ChooseBestIap has not been called yet" )
     // 
     iMyServer.Events()->ResetIapConnInfo( currentIap );
 
-    TInt* returnError( NULL );
-    switch ( state )
+    // Check if IAP is reported by MMS
+    //
+    TBool isMMSIap = IsMMSIap( currentIap );
+    if ( isMMSIap )
         {
-        case EStarting: 
-            if ( ( snapId == 0 ) || ( error == KErrCancel ) )
-                {
-                neededAction = EPropagateError;
+        MPMLOGSTRING( "CMPMServerSession::HandleServerProcessErrorL\
+        - DisconnectDialog is not started because of MMS reported IAP" )
+        }
 
-                MPMLOGSTRING(
-                    "CMPMServerSession::HandleServerProcessErrorL - \
-                Tell BM to end the client connection with appropriate error code" )
+    TInt* returnError( NULL );
+    if ( ( state == EStarting ) || ( state == ERoaming ) )
+        {
+        // Process error according to the fact that the connection 
+        // has not yet been started.
+        // 
+        if ( DisconnectDlgErrorCode( error ) &&
+             !IsBackgroundApplication( iAppUid ) &&
+             !isMMSIap && 
+             iIapSelection->MpmConnPref().DisconnectDialog() &&
+             iMyServer.StartedConnectionExists() != KErrNotFound )
+            {
+            // Start the Disconnect dialog
+            // 
+            MPMLOGSTRING( "CMPMServerSession::HandleServerProcessErrorL\
+ - Start Disconnect dialog" )
+            iDisconnectDlg = CMPMDisconnectDlg::NewL( *const_cast<CMPMServerSession*>(this),
+                                                      error,
+                                                      *MyServer().DisconnectQueue() );
+            iDisconnectDialogShown = ETrue;
+            return;
+            }
+        else
+            {
+            MPMLOGSTRING( "CMPMServerSession::HandleServerProcessErrorL - \
+Error not handled with disconnect dialog" )
+
+            if ( state == EStarting ) 
+                {
+                if ( ( snapId == 0 ) || ( error == KErrCancel ) )
+                    {
+                    neededAction = EPropagateError;
+
+                    MPMLOGSTRING(
+                        "CMPMServerSession::HandleServerProcessErrorL - \
+Tell BM to end the client connection with appropriate error code" )
+                    }
+                else
+                    {
+                    neededAction = EDoReselection;
+
+                    MPMLOGSTRING(
+                        "CMPMServerSession::HandleServerProcessErrorL - \
+Tell BM to ignore error and do reselection" )
+
+                    iMyServer.HandleServerBlackListIap( connId, 
+                                                        currentIap, 
+                                                        ETemporary );
+                    if ( ( presumedIap != 0 ) && 
+                         ( presumedIap != currentIap ) )
+                        {
+                        iMyServer.HandleServerBlackListIap( connId, 
+                                                            presumedIap, 
+                                                            ETemporary );
+                        }
+                    }
                 }
-            else
+            else if ( state == ERoaming ) 
                 {
-                neededAction = EDoReselection;
+                // ERoaming means commsfw stack is moving to new IAP and failed.
+                // Hence, MPM should mark to current iap as zero. 
+                //
+                iMyServer.ResetBMConnection( iConnId, currentIap, *this );
+                
+                // Notification will be sent with latest 
+                // availability info
+                //
+                iStoredIapInfo.ResetStoredIapInfo();
 
-                MPMLOGSTRING(
-                    "CMPMServerSession::HandleServerProcessErrorL - \
-                Tell BM to ignore error and do reselection" )
+                neededAction = EIgnoreError;
 
                 iMyServer.HandleServerBlackListIap( connId, 
                                                     currentIap, 
                                                     ETemporary );
                 if ( ( presumedIap != 0 ) && 
-                    ( presumedIap != currentIap ) )
+                     ( presumedIap != currentIap ) )
                     {
                     iMyServer.HandleServerBlackListIap( connId, 
                                                         presumedIap, 
                                                         ETemporary );
                     }
-                }
-            // Error might be different from KErrNone if there 
-            // is no preferred IAP among the available IAPs.
-            // 
-            ProcessErrorComplete( KErrNone,
-                                  returnError,
-                                  &neededAction );
-            break;
-            
-        case ERoaming: 
-            // ERoaming means commsfw stack is moving to new IAP and failed.
-            // Hence, MPM should mark to current iap as zero. 
-            //
-            iMyServer.ResetBMConnection( iConnId, currentIap, *this );
-                
-            // Notification will be sent with latest 
-            // availability info
-            //
-            iStoredIapInfo.ResetStoredIapInfo();
-            
-            neededAction = EIgnoreError;
-
-            iMyServer.HandleServerBlackListIap( connId, 
-                                                currentIap, 
-                                                ETemporary );
-            if ( ( presumedIap != 0 ) && 
-                ( presumedIap != currentIap ) )
-                {
-                iMyServer.HandleServerBlackListIap( connId, 
-                                                    presumedIap, 
-                                                    ETemporary );
-                }
-            TRAP( error, PrefIAPNotificationL( availableIAPs, 
+                TRAP( error, PrefIAPNotificationL( availableIAPs, 
                                                    EBearerMan ) );
-            if ( error == KErrNotFound )
-                {
-                neededAction = EPropagateError;
+                if ( error == KErrNotFound )
+                    {
+                    neededAction = EPropagateError;
 
-                returnError = &error;
+                    returnError = &error;
 
-                TRAP_IGNORE( ErrorNotificationL( KErrNotFound, 
-                                                EMPMMobilityErrorNotification ) );
-                MPMLOGSTRING(
-                    "CMPMServerSession::HandleServerProcessErrorL - \
-                Tell BM to end the client connection with appropriate error code" )
+                    TRAP_IGNORE( ErrorNotificationL( KErrNotFound, 
+                                                     EMPMMobilityErrorNotification ) );
+                    MPMLOGSTRING(
+                        "CMPMServerSession::HandleServerProcessErrorL - \
+Tell BM to end the client connection with appropriate error code" )
+                    }
+                else
+                    {
+                    MPMLOGSTRING(
+                        "CMPMServerSession::HandleServerProcessErrorL - \
+Tell BM to ignore error and let MPM notify application about preferred IAP" )
+                    }
                 }
             else
                 {
-                MPMLOGSTRING(
+                MPMLOGSTRING2(
                     "CMPMServerSession::HandleServerProcessErrorL - \
-                Tell BM to ignore error and let MPM notify application about preferred IAP" )
+Unknown state %d", state )
                 }
-            
+
             // Error might be different from KErrNone if there 
             // is no preferred IAP among the available IAPs.
             // 
             ProcessErrorComplete( KErrNone,
                                   returnError,
                                   &neededAction );
-            break;
-      
-        case EStarted:
-            // Process error according to the fact that the connection 
-            // has already been started.
-            // KErrConnectionTerminated is received when user disconnects
-            // connection from Settings/Connection mgr.
-            //         
-            if ( ( error == KErrCancel ) || ( error == KErrTimedOut ) || ( error == KErrConnectionTerminated ) )
+            
+            iMyServer.HandlePendingMsgs( currentIap,
+                                         KErrNone,
+                                         returnError,
+                                         &neededAction );
+            return;
+            }
+        }
+    else if ( state == EStarted )
+        {
+        // Process error according to the fact that the connection 
+        // has already been started.
+        // KErrConnectionTerminated is received when user disconnects
+        // connection from Settings/Connection mgr.
+        //       
+        if ( ( error == KErrCancel ) || ( error == KErrTimedOut ) || ( error == KErrConnectionTerminated )
+                || ( error == KErrDisconnected && iMyServer.IsPhoneOffline() ) )
+            {
+            neededAction = EPropagateError;
+
+            MPMLOGSTRING(
+                "CMPMServerSession::HandleServerProcessErrorL - \
+Tell BM to end the client connection with appropriate error code" )
+
+            // Send error notification. 
+            // Not sent if connection not registered
+            // 
+            TRAP_IGNORE( ErrorNotificationL( error,
+                                             EMPMMobilityErrorNotification ) )
+            }
+        else if ( iPreferredIAPRequested )
+            {
+            // IAP connection
+            //
+            if( snapId == 0 )
                 {
                 neededAction = EPropagateError;
-
+    
                 MPMLOGSTRING(
                     "CMPMServerSession::HandleServerProcessErrorL - \
-                    Tell BM to end the client connection with appropriate error code" )
+Tell BM to end the client connection with appropriate error code" )
 
-                // Send error notification. 
-                // Not sent if connection not registered
-                // 
-                TRAP_IGNORE( ErrorNotificationL( error,
-                                             EMPMMobilityErrorNotification ) )
+                TRAP_IGNORE( ErrorNotificationL( KErrNotFound,
+                                                 EMPMMobilityErrorNotification ) )
                 }
-            else if ( iPreferredIAPRequested )
+            // SNAP connection
+            //
+            else
                 {
-                // IAP connection
+                // If this has been WLAN IAP and the SNAP contains 
+                // other WLAN IAPs, we need to perform WLAN scan before
+                // knowing the availability of those
                 //
-                if( snapId == 0 )
+                RArray<TUint> iapPath;
+                CleanupClosePushL( iapPath );
+
+                iMyServer.HandleServerBlackListIap( connId, 
+                                                    currentIap, 
+                                                    ETemporary );
+                if ( ( presumedIap != 0 ) && 
+                     ( presumedIap != currentIap ) )
                     {
+                    iMyServer.HandleServerBlackListIap( connId, 
+                                                        presumedIap, 
+                                                        ETemporary );
+                    }
+
+                // current iap is either WLAN or EasyWlan
+                // 
+                if( ( iMyServer.CommsDatAccess()->CheckWlanL( currentIap ) != ENotWlanIap ) && 
+                      iMyServer.CommsDatAccess()->SnapContainsWlanL( snapId, iapPath, KMPMNrWlansTwo ) )
+                    {
+                    // perform WLAN scan 
+                    // message is completed in callback function 
+                    // ProcessErrorWlanScanCompletedL
+                    // 
+                    iMyServer.Events()->ScanWLANNetworksL( this, 
+                                                           ConnectionId(), 
+                                                           EWlanScanCallbackProcessErr );
+                    CleanupStack::PopAndDestroy( &iapPath );
+                    return;
+                    }
+
+                CleanupStack::PopAndDestroy( &iapPath );
+                neededAction = EIgnoreError;
+
+                TRAPD( err2, PrefIAPNotificationL( availableIAPs, EBearerMan ) );
+                if ( err2 == KErrNotFound )
+                    {
+                    error = err2;
                     neededAction = EPropagateError;
-    
-                    MPMLOGSTRING(
-                        "CMPMServerSession::HandleServerProcessErrorL - \
-                        Tell BM to end the client connection with appropriate error code" )
 
                     TRAP_IGNORE( ErrorNotificationL( KErrNotFound,
                                                      EMPMMobilityErrorNotification ) )
+                    MPMLOGSTRING(
+                        "CMPMServerSession::HandleServerProcessErrorL - \
+Tell BM to end the client connection with appropriate error code" )   
                     }
-                // SNAP connection
-                //
                 else
                     {
-                    // If this has been WLAN IAP and the SNAP contains 
-                    // other WLAN IAPs, we need to perform WLAN scan before
-                    // knowing the availability of those
-                    //
-                    RArray<TUint> iapPath;
-                    CleanupClosePushL( iapPath );
-
-                    iMyServer.HandleServerBlackListIap( connId, 
-                                                    currentIap, 
-                                                    ETemporary );
-                    if ( ( presumedIap != 0 ) && 
-                        ( presumedIap != currentIap ) )
-                        {
-                        iMyServer.HandleServerBlackListIap( connId, 
-                                                        presumedIap, 
-                                                        ETemporary );
-                        }
-
-                    // current iap is WLAN
-                    // 
-                    if( ( iMyServer.CommsDatAccess()->CheckWlanL( currentIap ) != ENotWlanIap ) && 
-                        iMyServer.CommsDatAccess()->SnapContainsWlanL( snapId, iapPath, KMPMNrWlansTwo ) )
-                        {
-                        // perform WLAN scan 
-                        // message is completed in callback function 
-                        // ProcessErrorWlanScanCompletedL
-                        // 
-                        iMyServer.Events()->ScanWLANNetworksL( this, 
-                                                           ConnectionId(), 
-                                                           EWlanScanCallbackProcessErr );
-                        CleanupStack::PopAndDestroy( &iapPath );
-                        return;
-                        }
-
-                    CleanupStack::PopAndDestroy( &iapPath );
-                    neededAction = EIgnoreError;
-
-                    TRAPD( err2, PrefIAPNotificationL( availableIAPs, EBearerMan ) );
-                    if ( err2 == KErrNotFound )
-                        {
-                        error = err2;
-                        neededAction = EPropagateError;
-
-                        TRAP_IGNORE( ErrorNotificationL( KErrNotFound,
-                                                         EMPMMobilityErrorNotification ) )
-                        MPMLOGSTRING(
-                            "CMPMServerSession::HandleServerProcessErrorL - \
-                            Tell BM to end the client connection with appropriate error code" )   
-                        }
-                    else
-                        {
-                        MPMLOGSTRING(
-                            "CMPMServerSession::HandleServerProcessErrorL - \
-                            Tell BM to ignore error and let MPM notify application about preferred IAP" )
-                        }
+                    MPMLOGSTRING(
+                        "CMPMServerSession::HandleServerProcessErrorL - \
+Tell BM to ignore error and let MPM notify application about preferred IAP" )
                     }
                 }
-            else
-                {
-                neededAction = EPropagateError;
+            }
+        else
+            {
+            neededAction = EPropagateError;
 
-                MPMLOGSTRING(
-                    "CMPMServerSession::HandleServerProcessErrorL - \
-                    Tell BM to end the client connection with appropriate error code" )
+            MPMLOGSTRING(
+                "CMPMServerSession::HandleServerProcessErrorL - \
+Tell BM to end the client connection with appropriate error code" )
 
-                }
-            ProcessErrorComplete( KErrNone, &error, &neededAction );
-            break;
-            
-        default:
-            MPMLOGSTRING2(
-                "CMPMServerSession::HandleServerProcessErrorL Unknown state %d",
-                state )
-            ProcessErrorComplete( KErrCorrupt,
-                                  NULL,
-                                  NULL );
-            break;
+            }
+        ProcessErrorComplete( KErrNone, &error, &neededAction );
+        
+        }
+    else
+        {
+        MPMLOGSTRING2(
+            "CMPMServerSession::HandleServerProcessErrorL Unknown state %d",
+            state )
+        ProcessErrorComplete( KErrCorrupt,
+                              NULL,
+                              NULL );
         }
     }
 
@@ -2186,6 +2270,18 @@ Remove unavailable IAP = %i", embeddedIaps[m].iIapId )
 
     MPMLOGSTRING(
             "CMPMServerSession::SortSnapL: Sorting completed" )
+    }
+
+// -----------------------------------------------------------------------------
+// CMPMServerSession::UpdateConnectionDialog
+// -----------------------------------------------------------------------------
+//
+void CMPMServerSession::UpdateConnectionDialogL()
+    {
+    if( iIapSelection )
+        {
+        iIapSelection->UpdateConnectionDialogL();
+        }
     }
 
 // -----------------------------------------------------------------------------
@@ -2810,10 +2906,21 @@ No notification requested" )
     if ( !( iIapSelection->MpmConnPref().NoteBehaviour() &
             TExtendedConnPref::ENoteBehaviourConnDisableNotes) )
         {
-        TBool connectionAlreadyActive = iMyServer.CheckIfStarted( aIapId, iConnId );
-        
-        iMyServer.ConnUiUtils()->ConnectingViaDiscreetPopup( aIapId,
-                                                  connectionAlreadyActive );
+        TConnectionState state = iMyServer.CheckUsageOfIap( aIapId, iConnId );
+        TBool connectionAlreadyActive = (state == EStarted || state == EStarting || state == ERoaming);
+        CConnectionUiUtilities* connUiUtils = NULL;
+        if (!connectionAlreadyActive )
+            {
+            TRAPD( popupError,
+                   connUiUtils = CConnectionUiUtilities::NewL();
+                   connUiUtils->ConnectingViaDiscreetPopup(
+                   			        aIapId );
+                   delete connUiUtils; );
+            if ( popupError && connUiUtils )
+                {
+                delete connUiUtils;
+                }
+            }
         }
 
     TMpmNotificationStartIAP notifInfo;
@@ -3015,20 +3122,23 @@ void CMPMServerSession::AvailableUnblacklistedIapsL(
                 //
                 TBool usesSame( EFalse ); 
 
-                TRAP_IGNORE( iMyServer.CommsDatAccess()->MatchSSIDL( ssid, 
-                                                                     unavailableIAPs[i], 
-                                                                     usesSame,
-                                                                     *this ) )
-                                                              
-                if ( usesSame )
+                if ( !iMyServer.CommsDatAccess()->CheckEasyWLanL( unavailableIAPs[i] ) )
                     {
-                    // Append unavailable IAP to list of available IAPs
-                    // if it uses same SSID as active WLAN connection.
-                    // 
-                    MPMLOGSTRING2(
-                        "CMPMServerSession::AvailableUnblacklistedIapsL:\
+                    TRAP_IGNORE( iMyServer.CommsDatAccess()->MatchSSIDL( ssid, 
+                                                              unavailableIAPs[i], 
+                                                              usesSame,
+                                                              *this ) )
+                                                              
+                    if ( usesSame )
+                        {
+                        // Append unavailable IAP to list of available IAPs
+                        // if it uses same SSID as active WLAN connection.
+                        // 
+                        MPMLOGSTRING2(
+                            "CMPMServerSession::AvailableUnblacklistedIapsL:\
  Append unavailable IapId = %i", unavailableIAPs[i] )
-                    aAvailableIAPs.AppendL( unavailableIAPs[i] );
+                        aAvailableIAPs.AppendL( unavailableIAPs[i] );
+                        }
                     }
                 }
             }
@@ -3246,6 +3356,25 @@ void CMPMServerSession::ChooseIapComplete(
     {
     MPMLOGSTRING2( "CMPMServerSession::ChooseIapComplete aError = %d", aError )
 
+    // Show error popup if it's allowed per client request.
+	// Error popup shown to SNAP only if error discreet has not been shown for IAP.
+    if ( ChooseBestIapCalled() && (!( iIapSelection->MpmConnPref().NoteBehaviour() &
+            TExtendedConnPref::ENoteBehaviourConnDisableNotes ))
+              && ( aError != KErrNone )
+              && ( iErrorDiscreetPopupShown == EFalse ) )
+        {
+        CConnectionUiUtilities* connUiUtils = NULL;
+        TRAPD( error, connUiUtils = CConnectionUiUtilities::NewL() );
+        if ( error == KErrNone && connUiUtils )
+            {
+            // Note: Below function shows the discreet popup only if the error code
+            // belongs to the set of errors that are shown to the user.
+            // Otherwise the popup is not shown.
+            connUiUtils->ConnectionErrorDiscreetPopup( aError );
+            delete connUiUtils;
+            connUiUtils = NULL;
+            }
+        }
     
     // Try to write back arguments and complete message.
     // 
@@ -3301,32 +3430,6 @@ Inconsistent state %d", KErrGeneral )
         MPMLOGSTRING( "CMPMServerSession::ChooseIapComplete Message completed" )
         iChooseIapMessage.Complete( aError );
         }
-
-    // Show error popup if it's allowed per client request
-    // Error popup shown to SNAP only if error discreet has not been shown for IAP.
-    if ( ChooseBestIapCalled() && (!( iIapSelection->MpmConnPref().NoteBehaviour() &
-            TExtendedConnPref::ENoteBehaviourConnDisableNotes ))
-            && ( aError != KErrNone ) 
-            && ( iErrorDiscreetPopupShown == EFalse ) )
-        {
-        // Note: Below function shows the discreet popup only if the error code
-        // belongs to the set of errors that are shown to the user.
-        // Otherwise the popup is not shown.
-        iMyServer.ConnUiUtils()->ConnectionErrorDiscreetPopup( aError );
-        }
-    else if ( aError == KErrNone )
-        {
-        if (!( iIapSelection->MpmConnPref().NoteBehaviour() &
-            TExtendedConnPref::ENoteBehaviourConnDisableNotes ) &&
-            ( IsMMSIap( aPolicyPref->IapId() ) == EFalse ) )
-            {
-            TBool connectionAlreadyActive =
-                MyServer().CheckIfStarted( aPolicyPref->IapId(), iConnId );
-
-            iMyServer.ConnUiUtils()->ConnectingViaDiscreetPopup( aPolicyPref->IapId(),
-                                                      connectionAlreadyActive );
-            }            
-        }
     
     // Enable showing error discreet popup for SNAP again
     iErrorDiscreetPopupShown = EFalse;
@@ -3342,6 +3445,9 @@ void CMPMServerSession::ProcessErrorComplete( TInt             aError,
                                               TBMNeededAction* aNeededAction )
     {
     MPMLOGSTRING2( "CMPMServerSession::ProcessErrorComplete aError = %d", aError )
+
+    delete iDisconnectDlg;
+    iDisconnectDlg = NULL;
     
     if ( !iProcessErrorMessage.IsNull() )
         {
@@ -3478,24 +3584,6 @@ TBool CMPMServerSession::UseUserConnPref()
         }
     
     return EFalse;
-    }
-
-// -----------------------------------------------------------------------------
-// CMPMServerSession::SetVpnUserConnectionUsed
-// -----------------------------------------------------------------------------
-//
-void CMPMServerSession::SetVpnUserConnectionUsed( const TBool aUseVpnUserConnection )
-    {
-    if ( aUseVpnUserConnection )
-        {
-        iVpnUserConnectionUsed = ETrue;
-        iMyServer.AddVpnUserConnectionSession();        
-        }
-    else 
-        {
-        iVpnUserConnectionUsed = EFalse;
-        iMyServer.RemoveVpnUserConnectionSession();        
-        }
     }
 
 // -----------------------------------------------------------------------------

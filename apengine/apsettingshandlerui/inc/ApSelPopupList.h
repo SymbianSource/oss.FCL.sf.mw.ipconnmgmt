@@ -337,6 +337,10 @@ NONSHARABLE_CLASS( CApSelPopupList ) : public CAknRadioButtonSettingPage,
         TBool							iHelpSupported;
         TBool							iProtectionSupported;
         TBool                           iDoExit;
+        TBool                           iFirstEnter;  // pressing the enter key
+                                                      // first time will be
+                                                      // handled as an uparrow 
+                                                      // key
     };
 
 #endif

@@ -83,32 +83,30 @@ RESOURCE DIALOG r_query_dialog
     }    
 
 RESOURCE DIALOG r_easy_wep_wpa_dlg
-	{
+    {
     flags = EEikDialogFlagNotifyEsc | EEikDialogFlagCbaButtons | 
-            EEikDialogFlagNoDrag | EEikDialogFlagNoTitleBar |
-            EEikDialogFlagVirtualInput;
-	buttons=R_AVKON_SOFTKEYS_OK_CANCEL__OK;
+            EEikDialogFlagNoDrag | EEikDialogFlagNoTitleBar;
+    buttons=R_AVKON_SOFTKEYS_OK_CANCEL__OK;
     items=
-		{
-		DLG_LINE
-			{
-			type=EAknCtQuery;
-			id=EGeneralQuery;
-			control= AVKON_DATA_QUERY
-				{ 
-				layout=EDataLayout;
+        {
+        DLG_LINE
+            {
+            type=EAknCtQuery;
+            id=EGeneralQuery;
+            control= AVKON_DATA_QUERY
+                { 
+                layout=EDataLayout;
                 control = EDWIN
                     {
                     avkon_flags = EAknEditorFlagLatinInputModesOnly;
                     default_case = EAknEditorLowerCase;
-					default_input_mode = EAknEditorTextInputMode;
+                    default_input_mode = EAknEditorTextInputMode;
                     allowed_input_modes = EAknEditorAllInputModes;
                     };
-				};
-			}
-		};
-
-	}
+                };
+             }
+        };
+    }
 
 RESOURCE TBUF r_info_no_networks_found
     { 
@@ -353,11 +351,6 @@ RESOURCE TBUF r_qtn_occ_connecting_discreet_popup_text1
     buf = qtn_occ_connecting_discreet_popup_text1;
     }
 
-RESOURCE TBUF r_qtn_occ_connecting_discreet_popup_text2
-    {
-    buf = qtn_occ_connecting_discreet_popup_text2;
-    }
-
 RESOURCE TBUF r_qtn_occ_connection_failed_discreet_popup_text1
     {
     buf = qtn_occ_connection_failed_discreet_popup_text1;
@@ -498,6 +491,46 @@ RESOURCE TBUF r_qtn_occ_list_cs_data_home_nw_automatic
 RESOURCE TBUF r_qtn_occ_list_cs_data_home_nw_this_time 
     {    
     buf = qtn_occ_list_cs_data_home_nw_this_time;
+    }
+
+RESOURCE CBA r_softkeys_connect_cancel__connect
+    {
+    buttons =
+        {
+        CBA_BUTTON {id=EAknSoftkeySelect; txt=qtn_netw_conset_softkey_connect; },
+        CBA_BUTTON {id=EAknSoftkeyCancel; txt=text_softkey_cancel; },
+        CBA_BUTTON {id=EAknSoftkeySelect; txt=qtn_netw_conset_softkey_connect; }
+        };
+    }
+
+RESOURCE DIALOG r_visitor_query
+    {
+    flags = EEikDialogFlagNoDrag | EEikDialogFlagNoTitleBar | 
+            EEikDialogFlagCbaButtons | EEikDialogFlagNoBorder | 
+            EEikDialogFlagNoShadow | EEikDialogFlagNotifyEsc;
+    buttons = r_softkeys_connect_cancel__connect;
+    items =
+        {
+        DLG_LINE
+            {
+            type = EAknCtPopupHeadingPane;
+            id = EAknMessageQueryHeaderId;
+            control = AVKON_HEADING
+                {
+                label = "";
+                headinglayout = R_AVKON_WML_SIGN_QUERY_HEADING_PANE;
+                };
+            },
+
+        DLG_LINE
+            {
+            type = EAknCtMessageQuery;
+            id = EAknMessageQueryContentId;
+            control = AVKON_MESSAGE_QUERY
+                {
+                };
+            }
+        };
     }
 
 // End of File

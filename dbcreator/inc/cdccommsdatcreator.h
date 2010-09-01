@@ -67,7 +67,7 @@ class CCdcCommsDatCreator: public CBase
 
 
         /** Destructor */
-        virtual ~CCdcCommsDatCreator();
+	    IMPORT_C virtual ~CCdcCommsDatCreator();
         
     private:
     
@@ -96,7 +96,7 @@ class CCdcCommsDatCreator: public CBase
 
         void SetUnderlyingIapL( RPointerArray< HBufC >& aUnderLying );
 
-//        void SetDefaultConnectionL( RPointerArray< HBufC >& aDefCon );
+        void SetDefaultConnectionL( RPointerArray< HBufC >& aDefCon );
         
         void SetWlanSecurityL( RPointerArray< HBufC >& aWlanSecurity );
         

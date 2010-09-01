@@ -71,15 +71,7 @@ void CActiveWrapper::ConstructL()
 //
 CActiveWrapper::CActiveWrapper( const TUint aIndexOfNote ) 
 : CActive( CActive::EPriorityStandard ),
-  iSSID( NULL ),
-  iConnectionMode( NULL ),
-  iSecurityMode( NULL ),
-  iExtSecurityMode( NULL ),
-  iProtectedSetupSupported( NULL ),
-  iRS( NULL ),
-  iIndexOfNote( aIndexOfNote ),
-  iKey( NULL ),
-  iHex( NULL )
+  iIndexOfNote( aIndexOfNote )
     {
     }
 
@@ -207,6 +199,23 @@ void CActiveWrapper::DoCancel()
             break;
             }
 
+        case EConnViaDestCM:
+            {
+            iNotif.CancelConnectedViaDestAndConnMethodNote();
+            break;
+            }
+
+        case EChangingConnTo:
+            {
+            iNotif.CancelChangingConnectionToNote();
+            break;
+            }
+
+        case EConnViaCM:
+            {
+            iNotif.CancelConnectedViaConnMethodNote();            
+            break;
+            }
         case EWlanEasyWep:
             {
             iNotif.CancelEasyWepDlg();
@@ -428,6 +437,31 @@ void CActiveWrapper::StartGenericNote( const TUint aIndexOfNote,
                 break;
                 }
 
+            case EConnViaDestCM:
+                {
+                iNotif.ConnectedViaDestAndConnMethodNote( aDestId, aConnMId,
+                                                          iStatus );
+                break;
+                }
+
+            case EChangingConnTo:
+                {
+                iNotif.ChangingConnectionToNote( aConnMId, iStatus );
+                break;
+                }
+
+            case EConnViaCM:
+                {
+                iNotif.ConnectedViaConnMethodNote( aConnMId, iStatus );
+                break;
+                }
+
+            case ENoWlanNetwsAvail:
+                {
+                iNotif.NoWLANNetworksAvailableNote( iStatus );
+                break;
+                }
+
             default:
                 {
                 return;
@@ -460,6 +494,43 @@ TInt CActiveWrapper::StartEasyWapiDlg( TPckgBuf< TBuf< KEasyWapiQueryMaxLength >
         }
 
     return iStatus.Int();  
+    }
+
+// ---------------------------------------------------------
+// CActiveWrapper::StartConnectingViaDiscreetPopup
+//
+// Starts the active object
+// ---------------------------------------------------------
+//
+void CActiveWrapper::StartConnectingViaDiscreetPopup( TPckgBuf< TConnUiConnectingViaDiscreetPopup>& aInfo )
+    {
+    if ( IsActive() == EFalse )
+        {
+        iIndexOfNote = EConnectingViaDiscreetPopup;
+        iNotif.ConnectingViaDiscreetPopup( aInfo, iStatus );
+        SetActive();
+        iWait.Start();
+        }
+
+    }
+
+
+// ---------------------------------------------------------
+// CActiveWrapper::StartConnectionErrorDiscreetPopup
+//
+// Starts the active object
+// ---------------------------------------------------------
+//
+void CActiveWrapper::StartConnectionErrorDiscreetPopup( TPckgBuf<TInt>& aErrCode )
+    {
+    if ( IsActive() == EFalse )
+        {
+        iIndexOfNote = EConnectionErrorDiscreetPopup;
+        iNotif.ConnectionErrorDiscreetPopup( aErrCode, iStatus );
+        SetActive();
+        iWait.Start();
+        }
+
     }
 
 // End of File

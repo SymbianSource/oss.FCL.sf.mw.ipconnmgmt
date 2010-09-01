@@ -293,13 +293,6 @@ class CMPMConnMonEvents : public CBase, public MConnectionMonitorObserver
         inline TBool DiscardAvailabilityNotification(); 
         
         /**
-        * Returns the setting whether IAP availability notification has been discarded by MPM.
-        * @since 3.2
-        * @return ETrue if availability notifications have been discarded. 
-        */
-        inline TBool AvailabilityNotificationDiscarded();
-        
-        /**
          * Creates preferred carrier available notification when needed.
          * @since 5.1
          * @param aCaller Identifies the calling context
@@ -350,9 +343,6 @@ class CMPMConnMonEvents : public CBase, public MConnectionMonitorObserver
         // until MPM initiated WLAN scan request has completed. 
         TBool iDiscardAvailabilityNotification;
 
-        // ConnMon's IAP availability event has been discarded.
-        TBool iAvailabilityNotificationDiscarded;
-
 #ifdef _DEBUG 
         TBool iFilterEvents; // by default off. (CBase)
     public:
@@ -386,15 +376,6 @@ inline void CMPMConnMonEvents::DisableDiscarding()
 inline TBool CMPMConnMonEvents::DiscardAvailabilityNotification()
     {
     return iDiscardAvailabilityNotification;
-    }
-
-// -----------------------------------------------------------------------------
-// CMPMConnMonEvents::AvailabilityNotificationDiscarded
-// -----------------------------------------------------------------------------
-//
-inline TBool CMPMConnMonEvents::AvailabilityNotificationDiscarded()
-    {
-    return iAvailabilityNotificationDiscarded;
     }
 
 #endif // MPMCONNMONEVENTS_H

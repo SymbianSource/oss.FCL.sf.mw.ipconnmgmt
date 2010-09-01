@@ -18,7 +18,7 @@
 
 // INCLUDE FILES
 #include <AknWaitDialog.h>
-#include <connuiutilsnotif.rsg>
+#include <ConnUiUtilsNotif.rsg>
 #include <AknGlobalNote.h>
 #include <StringLoader.h>
 #include <centralrepository.h>
@@ -84,11 +84,7 @@ void CActiveSelectWLanDlgPlugin::ConstructL()
 CActiveSelectWLanDlgPlugin::CActiveSelectWLanDlgPlugin( 
                                                 CSelectWLanDlgPlugin* aPlugin )
 : CActive( EPriorityStandard ), 
-  iPlugin( aPlugin ),
-  iWlanDataProv( NULL ),
-  iPeriodic( NULL),
-  iResultsListDialog( NULL),
-  iWaitDialog( NULL )
+  iPlugin( aPlugin )
     {
     }
     
@@ -111,7 +107,10 @@ CActiveSelectWLanDlgPlugin::~CActiveSelectWLanDlgPlugin()
         iResultsListDialog = NULL;
         }
     
+    DestroyAsyncWaitTrigger();
+        
     delete iWlanDataProv;
+    iWlanDataProv = NULL;
 
     CLOG_LEAVEFN( "CActiveSelectWLanDlgPlugin::~CActiveSelectWLanDlgPlugin " );
     }
@@ -137,6 +136,8 @@ void CActiveSelectWLanDlgPlugin::DoCancel()
     CLOG_WRITE( "deleting wlan data provider" );
     delete iWlanDataProv;
     iWlanDataProv = NULL;
+
+    DestroyAsyncWaitTrigger();
 
     CLOG_LEAVEFN( "CActiveSelectWLanDlgPlugin::DoCancel " );
     }
@@ -232,6 +233,8 @@ void CActiveSelectWLanDlgPlugin::RunL()
     {
     CLOG_ENTERFN( "CActiveSelectWLanDlgPlugin::RunL " );  
     
+    DestroyAsyncWaitTrigger();
+
     if ( iWaitDialog )
         {
         iWaitDialog->ProcessFinishedL();     
@@ -265,12 +268,9 @@ void CActiveSelectWLanDlgPlugin::RunL()
 
                 iResultsListDialog->ExecuteLD( R_SELECT_WLAN_LIST_QUERY );
 
-                TInt interval = GetRefreshInterval();
-                CLOG_WRITEF( _L( "interval : %d" ),  interval );
-
-                if( interval )
+                if( iRefreshInterval )
                     {
-                    StartTimerL( interval );
+                    StartTimerL( iRefreshInterval );
                     }
                 }
             }
@@ -325,13 +325,7 @@ void CActiveSelectWLanDlgPlugin::RunL()
 void CActiveSelectWLanDlgPlugin::StartSearchWlanNetworkL()
     {    
     CLOG_ENTERFN( "CActiveSelectWLanDlgPlugin::StartSearchWlanNetworkL " );  
-    
-    DestroyWaitDialog();
 
-    iWaitDialog = new( ELeave )CAknWaitDialog
-                    ( REINTERPRET_CAST( CEikDialog**, &iWaitDialog ), ETrue );
-    iWaitDialog->ExecuteLD( R_SEARCHING_WLAN_WAIT_NOTE ); 
-    
     SetActive();    
 
 #ifdef __WINS__
@@ -340,10 +334,24 @@ void CActiveSelectWLanDlgPlugin::StartSearchWlanNetworkL()
 #else
     iWlanDataProv->RefreshScanInfo( iStatus );
 #endif
+ 
+    // Start wait dialog asynchronously with low priority.
+    // The reason for this is that sometimes WLAN scan results
+    // are already in the cache and returned fast.
+    // When this happens there is no point in displaying wait note.
+    iRefreshInterval = GetRefreshInterval();
+    CLOG_WRITEF( _L( "interval : %d" ),  iRefreshInterval );
+
+    if ( !iAsyncWaitTrigger )
+        {
+        TCallBack cb( StartWaitNoteL, this );
+        iAsyncWaitTrigger = new( ELeave ) CAsyncCallBack( cb, CActive::EPriorityLow );
+        }
+    iAsyncWaitTrigger->CallBack();
 
     CLOG_LEAVEFN( "CActiveSelectWLanDlgPlugin::StartSearchWlanNetworkL " );
     }
-    
+
 // ---------------------------------------------------------
 // CActiveSelectWLanDlgPlugin::GetRefreshInterval()
 // ---------------------------------------------------------
@@ -418,6 +426,38 @@ void CActiveSelectWLanDlgPlugin::DestroyResultsListDialog()
         }
 
     CLOG_LEAVEFN( "CActiveSelectWLanDlgPlugin::DestroyResultsListDialog " );
+    }
+
+// ---------------------------------------------------------
+// CActiveSelectWLanDlgPlugin::DestroyAsyncWaitTrigger()
+// ---------------------------------------------------------
+//
+void CActiveSelectWLanDlgPlugin::DestroyAsyncWaitTrigger()
+    {
+    if ( iAsyncWaitTrigger )
+        {
+        iAsyncWaitTrigger->Cancel();
+        delete  iAsyncWaitTrigger;
+        iAsyncWaitTrigger= NULL;
+        }
+    }
+
+// ---------------------------------------------------------
+// CActiveSelectWLanDlgPlugin::StartWaitNoteL()
+// ---------------------------------------------------------
+//
+TInt CActiveSelectWLanDlgPlugin::StartWaitNoteL( TAny* aObject )
+    {
+    CActiveSelectWLanDlgPlugin* myself = 
+            static_cast<CActiveSelectWLanDlgPlugin*>( aObject );
+    
+    myself->DestroyWaitDialog();
+    
+    myself->iWaitDialog = new( ELeave )CAknWaitDialog
+                        ( REINTERPRET_CAST( CEikDialog**, &(myself->iWaitDialog) ), ETrue );
+    myself->iWaitDialog->ExecuteLD( R_SEARCHING_WLAN_WAIT_NOTE );
+        
+    return 0;   
     }
 
 // End of File

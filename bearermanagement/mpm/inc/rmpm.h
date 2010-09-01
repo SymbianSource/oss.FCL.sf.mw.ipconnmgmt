@@ -63,6 +63,71 @@ _LIT_SECURITY_POLICY_C1( KMPMSortSnapReadPolicy, ECapability_None );
 // Write policy
 _LIT_SECURITY_POLICY_C1( KMPMSortSnapWritePolicy, ECapabilityNetworkControl );
 
+// Definitions for Reading/Writing user connection data
+// to publish and subscribe API
+//
+// UID of the category (note that uid is the same as sort snap category)
+const TUid KMPMUserConnectionCategory = { 0x101f6d3a };
+
+// Keys for this category
+const TUint KMPMPSKeyUserConnectionSnap = 10001;
+const TUint KMPMPSKeyUserConnectionIap = 10002;
+
+// Property types
+const TInt KMPMUserConnectionSnapType = RProperty::EInt;
+const TInt KMPMUserConnectionIapType = RProperty::EInt;
+
+// Read policy, no capabilities required
+// This format is used instead of _LIT_SECURITY_POLICY_PASS, which 
+// produces pclint warnings
+_LIT_SECURITY_POLICY_C1( KMPMUserConnectionReadPolicy, ECapability_None );
+
+// Write policy
+_LIT_SECURITY_POLICY_C1( KMPMUserConnectionWritePolicy, ECapabilityNetworkControl );
+
+// Definitions for Reading/Writing active connection data 
+// to publish and subscribe API
+//
+// UID of the category
+const TUid KMPMActiveConnectionCategory = { 0x101f6d3a };
+
+// Property types
+const TInt KMPMActiveConnectionIapType = RProperty::EInt;
+const TInt KMPMActiveConnectionSnapType = RProperty::EInt;
+const TInt KMPMActiveConnectionBearerType = RProperty::EInt;
+
+// Keys for active connection category
+
+/**
+ * Iap Id of the active connection.
+ * If set to zero then no active connection
+ */
+const TUint KMPMPSKeyActiveConnectionIap = 10003;
+
+/**
+ * Snap Id of the active connection.
+ * If set to zero then possible iap connection
+ */
+const TUint KMPMPSKeyActiveConnectionSnap = 10004;
+
+/**
+ * Possible values:
+ * 0,
+ * KCommDbBearerVirtual,
+ * KCommDbBearerWLAN,
+ * KCommDbBearerWcdma,
+ * KCommDbBearerUnknown,
+ */
+const TUint KMPMPSKeyActiveConnectionBearer = 10005;
+
+// Read policy, no capabilities required
+// This format is used instead of _LIT_SECURITY_POLICY_PASS, which 
+// produces pclint warnings
+_LIT_SECURITY_POLICY_C1( KMPMActiveConnectionReadPolicy, ECapability_None );
+
+// Write policy
+_LIT_SECURITY_POLICY_C1( KMPMActiveConnectionWritePolicy, ECapabilityNetworkControl );
+
 // MACROS
 _LIT( KPanicCategory, "MPM Client" );
 
@@ -117,7 +182,7 @@ NONSHARABLE_CLASS( TMpmSnapBuffer )
     public:
         // Zero values 
         inline void Reset();    
-        inline TInt Count() const;
+        inline const TInt Count() const;
 
     public:
         TUint   iCount;
@@ -275,7 +340,7 @@ protected:
     
 public:
     enum { EConnS60PolicyPref = 0x0f }; // TConnPref has defined up to 0x07.
-    inline TPolicyConnPref()
+    inline TPolicyConnPref::TPolicyConnPref()
     : TConnPref( TPolicyConnPref::EConnS60PolicyPref )
         {
         SetIapId( 0 );
@@ -391,7 +456,7 @@ public:
         EConnTypeExplicit
     };
     
-    inline TMpmConnPref()
+    inline TMpmConnPref::TMpmConnPref()
     : TConnPref( TMpmConnPref::EConnPrefMpm )
         {
         SetSnapPurpose( CMManager::ESnapPurposeUnknown );

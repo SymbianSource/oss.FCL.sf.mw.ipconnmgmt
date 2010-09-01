@@ -55,8 +55,7 @@ namespace CMManager
                                         */
         
         EVpnServicePolicyName = 30100,  /**<
-                                        * Deprecated
-                                        * Always leaves with code KErrNotSupported.
+                                        * Policy name.
                                         * (String - default: None)
                                         */
                                         
@@ -67,27 +66,13 @@ namespace CMManager
 
 
         EVpnIapId,                      /**<
-                                        * Provided for backward compatibility. 
-                                        * Use ECmNextLayerIapId instead.
-                                        *
                                         * Home IAP Id.
-                                        * 
-                                        * Setting will reset EVpnNetworkId and
-                                        * ECmNextLayerSNAPId to zero
-                                        * 
                                         * (TUint32 - default: None)
                                         */
 
         EVpnNetworkId,                  /**<
-                                        * Provided for backward compatibility. 
-                                        * Use ECmNextLayerSNAPId instead.
-                                        * 
-                                        * Network Id. 
-                                        * 
-                                        * Setting will reset EVpnIapId and 
-                                        * ECmNextLayerIapId to zero.
-                                        * 
-                                        * (TUint32 - default: None)
+                                        * Network Id.
+                                        * (TUint32 - default: None - read only)
                                         */
                                         
         EVpnServiceEnableLLMNR,         /**<

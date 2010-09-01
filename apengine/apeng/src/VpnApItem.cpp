@@ -21,7 +21,7 @@
 #include    <f32file.h>
 #include    <bautils.h>
 #include    <barsc.h>
-#include    <apengine.rsg>
+#include    <ApEngine.rsg>
 #include    <txtetext.h>
 #include    <data_caging_path_literals.hrh>
 

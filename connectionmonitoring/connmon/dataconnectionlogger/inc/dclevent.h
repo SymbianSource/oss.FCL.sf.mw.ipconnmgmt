@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2003-2010 Nokia Corporation and/or its subsidiary(-ies).
+* Copyright (c) 2003-2004 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -11,13 +11,14 @@
 *
 * Contributors:
 *
-* Description:
-* Data Connection Logger.
+* Description:  Data Connection Logger.
+*
 */
 
 #ifndef DCLEVENT_H
 #define DCLEVENT_H
 
+#include <cntdef.h>
 #include <logwrap.h>
 #include <logcli.h>
 

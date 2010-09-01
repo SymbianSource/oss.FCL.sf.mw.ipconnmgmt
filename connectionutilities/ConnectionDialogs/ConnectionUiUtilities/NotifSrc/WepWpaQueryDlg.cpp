@@ -20,7 +20,7 @@
 #include <aknnotewrappers.h>
 #include <StringLoader.h>
 #include <aknnotedialog.h>
-#include <connuiutilsnotif.rsg>
+#include <ConnUiUtilsNotif.rsg>
 #include <uikon/eiksrvui.h>
 
 #include "WepWpaQueryDlg.h"
@@ -61,8 +61,7 @@ CWepWpaQueryDlg::CWepWpaQueryDlg( TDes& aDataText,
 : CAknTextQueryDialog( aDataText ),
   iNotif( aNotif ), 
   iDialogType( aDialogType ), 
-  iHex( aHex ),
-  iExpiryTimer( NULL)
+  iHex( aHex )
     {
     }
 

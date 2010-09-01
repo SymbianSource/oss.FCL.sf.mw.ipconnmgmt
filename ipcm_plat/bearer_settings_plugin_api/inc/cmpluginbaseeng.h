@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2006-2010 Nokia Corporation and/or its subsidiary(-ies).
+* Copyright (c) 2006 Nokia Corporation and/or its subsidiary(-ies). 
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -11,8 +11,7 @@
 *
 * Contributors:
 *
-* Description:
-* IF implementation class for connection method plugins.
+* Description:  IF implementation class for connection method plugins.
 *
 */
 
@@ -24,27 +23,13 @@
 
 #include <e32std.h>
 #include <e32base.h>
-#include <ecom/ecom.h>
+#include <ecom/ecom.h>        // For REComSession
 #include <metadatabase.h>
 #include <commsdattypesv1_1.h>
-#include <cmmanagerdef.h>
 
-
-/**
- * Macro for getting element id from Iap Id.
- * @param iapRecId Record id of an Iap.
- */
 #define IAP_ELEMENT_ID( iapRecId )  (KCDTIdIAPRecord | \
                                      KCDMaskShowFieldType | \
                                      (iapRecId << 8))
-
-/**
- * Macros for getting/setting diffrerent type of values from/to the records(CommsDat)
- * @param record Pointer to the record which has the field requested/to be set.
- * @param fieldId Id of the field to get/set the value.
- * @param ***Val Value to be set.
- * @return Returns the requested value in get operation.
- */
 
 #define QUERY_HBUFC_FIELD( record, fieldId ) *STATIC_CAST(CommsDat::CMDBField<HBufC*>*, record->GetFieldByIdL( fieldId ))
 #define QUERY_UINT32_FIELD( record, fieldId ) *STATIC_CAST(CommsDat::CMDBField<TUint32>*, record->GetFieldByIdL( fieldId ))
@@ -56,22 +41,10 @@
 
 // CONSTANTS
 const TInt32 KExtensionBaseLevel = 1;
-const TUint32 KMaxProxyServerNameLength = 1024;
+const TUint32 KDefAttrsArrayGranSize = 32;
+const TUint32 KMaxProxyServerNameLength = 1000;
 
 const TUint32 KDummyBearerType = 1;
-
-/**
- * Record indexes for generic iap records in the Client instance table.
- */
-const TInt KIapRecordIndex = 0;         // Mandatory record
-const TInt KServiceRecordIndex = 1;     // Mandatory record
-const TInt KNetworkRecordIndex = 2;     // Mandatory record
-const TInt KWAPAPRecordIndex = 3;       // Mandatory record
-const TInt KWAPBearerRecordIndex = 4;   // Mandatory record
-const TInt KMetaDataRecordIndex = 5;    // Mandatory record
-const TInt KLocationRecordIndex = 6;    // Optional record
-const TInt KProxyRecordIndex = 7;       // Mandatory record (flag in record tells if in use)
-
 
 // DATA TYPES
 typedef enum
@@ -80,8 +53,8 @@ typedef enum
     ECmInt,
     ECmText,
     ECmText8
-    } TCMFieldTypes;
-
+    }TCMFieldTypes;
+    
 // Attributes that are related to bearer plugin creation
 enum TBearerCreationCommonAttributes
     {
@@ -90,851 +63,976 @@ enum TBearerCreationCommonAttributes
                                                 * bearer creation related
                                                 * attributes
                                                 */
-
+    
     ECmExtensionLevel,          /**<
-                                * Return the extension level of the given
+                                * Return the extension level of the given 
                                 * bearer type. 1 means the level 1st.
                                 * (TUint32 - default: none - read only)
                                 */
-
+    
     ECmBearerCreationCommonAttributesEnd = 9999 /**<
                                                 * Marks the end of bearer
                                                 * creation related attributes
                                                 */
     };
 
+class CCmPluginBaseEng;
+class CCmPluginBase;
+
 /**
- * Flags for Iap metadata to indicate:
- * EMetaHighlight: If it's set it indicates that a connection method is
- *                 highlighted in Agent dialog. Only one connection
- *                 method can have this flag set.
- * EMetaHiddenAgent: If it's set it indicates that an connection method is
- *                   hidden connection method in Agent dialog.
- * EMetaHotSpot: If it's set it indicates that an connection method is
- *               HotSpot connection method.
- */
+* Validation function called before data is stored.
+* @param aThis 'this' pointer of the plugin instance
+* @param aAttribute attribute to be set
+* @param aValue value to be checked
+* @return ETrue if value is stored.
+*/
+typedef TBool (*TValidationFunctionL)( CCmPluginBaseEng* aThis,
+                                      TUint32 aAttribute,
+                                      const TAny* aValue );
+
+/**
+* Structure of conversion table between CM attributes and
+* CommsDat ids. The first element must indicate the 
+* range of the conversion table. iAttribId is the lowest Id, 
+* iCommsDatId is the highest one. The last element is a
+* terminator. e.g. Proxy table:
+* static const TCmAttribConvTable SProxyConvTbl[] = 
+*   {
+        { ECMProxyUsageEnabled, ECMProxyRangeMax, NULL }
+        { ECMProxyUseProxyServer, KCDTIdUseProxyServer, NULL },
+        { ECmProxyPortNumber, KCDTIdPortNumber, &CheckPortNumberValidityL },
+        ...
+        { 0, 0 }
+    }
+*/
+typedef struct
+    {
+    TInt    iAttribId;
+    TInt    iCommsDatId;
+    TValidationFunctionL iValidFuncL;
+    TInt    iTitleId;
+    TInt    iMaxLength;
+    TUint32 iAttribFlags;   // see TCmConvAttribFlags
+    TInt    iDefSettingResId;
+    TInt    iEditorResId;
+    TInt    iDefValueResId;
+    TAny*   iNotUsed1;
+    TAny*   iNotUsed2;
+    }TCmAttribConvTable;
+    
+enum TCmConvAttribFlags
+    {
+    EConvNoZeroLength   = 0x00000001,   // Zero length NOT acceptable
+    EConvCompulsory     = 0x00000002,
+    EConv8Bits          = 0x00000004,
+    EConvReadOnly       = 0x00000008,
+    EConvNumber         = 0x00000010,
+    EConvIPv4           = 0x00000020,
+    EConvIPv6           = 0x00000040,
+    EConvPassword       = 0x00000080,
+    };
+
+typedef struct
+    {
+    CommsDat::CCDRecordBase*      *iRecord;
+    TBool*              iEnabled;
+    const TCmAttribConvTable* iConvTable;
+    }TCmAttrConvArrayItem;
+
+typedef struct
+    {
+    TInt                iAttribId;
+    TInt                iCommonAttribId;
+    }TCmCommonAttrConvArrayItem;
+    
 enum TCmMetaDataFields
     {
     EMetaHighlight    = 0x00000001,
-    EMetaHiddenAgent  = 0x00000002,
-    EMetaHotSpot      = 0x00000004
+    EMetaHiddenAgent  = 0x00000002
     };
+    
+// FUNCTION PROTOTYPES
+
+/**
+* TValidationFunctionL functions.
+*/
+
+/**
+* Function should be called if client tries to set attribute that is read-only
+* @param aThis 'this' pointer of the plugin instance
+* @param aAttribute not used
+* @param aValue not used
+* @leave KErrNotSupported in every cases
+*/
+IMPORT_C TBool ReadOnlyAttributeL( CCmPluginBaseEng* aThis, 
+                                  TUint32 aAttribute, 
+                                  const TAny* aValue );
+
+/**
+* Function to check if the passed IPv4 address is valid.
+* @param aThis 'this' pointer of the plugin instance
+* @param aAttribute attribute client wants to set
+* @param aValue TDesC* IPv4 address buffer to be checked
+*/
+IMPORT_C TBool CheckIPv4ValidityL( CCmPluginBaseEng* aThis, 
+                                  TUint32 aAttribute, 
+                                  const TAny* aValue );
+
+/**
+* Function to check if the passed IPv6 address is valid.
+* @param aThis 'this' pointer of the plugin instance
+* @param aAttribute attribute client wants to set
+* @param aValue TDesC* IPv6 address buffer to be checked
+*/
+IMPORT_C TBool CheckIPv6ValidityL( CCmPluginBaseEng* aThis, 
+                                  TUint32 aAttribute, 
+                                  const TAny* aValue );
+
+/**
+* Function to check if the passed port number is valid.
+* @param aThis 'this' pointer of the plugin instance
+* @param aAttribute attribute client wants to set
+* @param aValue TUint32 the port number to be check
+*/
+IMPORT_C TBool CheckPortNumberValidityL( CCmPluginBaseEng* aThis, 
+                                        TUint32 aAttribute, 
+                                        const TAny* aValue );
+
+/**
+* Function to check if the passed record is valid.
+* @param aThis 'this' pointer of the plugin instance
+* @param aAttribute attribute client wants to set
+* @param aValue TUint32 the record id to be checked
+*/
+IMPORT_C TBool CheckRecordIdValidityL( CCmPluginBaseEng* aThis, 
+                                      TUint32 aAttribute, 
+                                      const TAny* aValue );
+
+/**
+* Function to check if the passed WAPWspOption is valid.
+* @param aThis 'this' pointer of the plugin instance
+* @param aAttribute attribute client wants to set
+* @param TUint32 the WPSOption to be checked
+*/
+IMPORT_C TBool CheckWAPWspOptionValidityL( CCmPluginBaseEng* aThis, 
+                                          TUint32 aAttribute, 
+                                          const TAny* aValue );
+
+/**
+* @param aThis 'this' pointer of the plugin instance
+* @param aAttribute attribute client wants to set
+* @param TUint32 the WPSOption to be checked
+*/
+IMPORT_C TBool SetProxyServerNameL( CCmPluginBaseEng* aThis, 
+                                   TUint32 aAttribute, 
+                                   const TAny* aValue );
+                          
+/**
+* Miscellaneous utility functions.
+*/
+
+/**
+* Check if the passed IP address is '0.0.0.0' or empty string
+* @param aIpAddress IP address to be checked
+*/
+IMPORT_C TBool IsUnspecifiedIPv4Address( const TDesC& aIpv4Address );
+
+/**
+* Check if the passed IP address is one of these:
+* - empty string    -   
+* - '0:0:0:0:0:0:0:0' 
+* - 'fec0:000:0000:ffff::1'
+* - 'fec0:000:0000:ffff::2'
+* @param aIpAddress IP address to be checked
+*/
+IMPORT_C CMManager::TIPv6Types ClassifyIPv6Address( const TDesC& aIpv6Address );
 
 // FORWARD DECLARATIONS
-class CCmPluginBaseEng;
+class CCmDestinationImpl;
+class CCmManagerImpl;
 class CCDIAPMetadataRecord;
-
+class CCmTransactionHandler;
+class CCmPluginBasePrivate;
+        
 // CLASS DECLARATION
-/**
- * Initialisation instance for plugin creation. Used in plugin
- * construction phase.
- */
 NONSHARABLE_CLASS(TCmPluginInitParam)
     {
     public:
-        /**
-         * Constructor.
-         * @param aSessionRef Reference for open Session handle to CommsDat.
-         */
-        IMPORT_C TCmPluginInitParam( CommsDat::CMDBSession& aSessionRef );
-
+    
+        TCmPluginInitParam( CCmManagerImpl& aCmMgr );
+        
     public:
-        /**
-         * Reference to CommsDat session handle.
-         */
-        CommsDat::CMDBSession& iSessionRef;
-
-        /**
-         * Reserved for future.
-         */
-        TAny* iNotused1;
-        TAny* iNotused2;
-    };
-
-// CLASS DECLARATION
-/**
- * This defines the data object used for moving data between
- * cmm server and plugins.
- */
-NONSHARABLE_CLASS( CCmClientPluginInstance ): public CBase
-    {
-    public:
-        /**
-         * Two-phase constructor. Returns pointer to the new
-         * CCmClientPluginInstance object.
-         */
-        IMPORT_C static CCmClientPluginInstance* NewL();
-
-        /**
-         * Two-phase constructor. Returns pointer to the new
-         * CCmClientPluginInstance object.
-         */
-        IMPORT_C static CCmClientPluginInstance* NewLC();
-
-        /**
-         * Destructor
-         */
-        IMPORT_C ~CCmClientPluginInstance();
-
-    private:
-        /**
-         * Default constructor.
-         */
-        CCmClientPluginInstance();
-
-        /**
-         * Second phase constructor.
-         */
-        void ConstructL();
-
-    public:
-        /**
-         * Pointer array for generic record pointers. Those are copies
-         * from CommsDat versions for the client usage.
-         */
-        RPointerArray<CommsDat::CCDRecordBase> iGenRecordArray;
-
-        /**
-         * Pointer array for bearer specific record pointers. Those are copies
-         * from CommsDat versions for the client usage. These are asked from
-         * the different plugins.
-         */
-        RPointerArray<CommsDat::CCDRecordBase> iBearerSpecRecordArray;
-
-        /** Naming way of the CM. e.g. ENamingUnique */
-        CMManager::TNamingMethod iNamingMethod;
-
-        /** Boolean to keep the information if location is enabled */
-        TBool iLocationEnabled;
-
-        /** Iap Record id of this Connection Method */
-        TUint32 iIapId;
+    
+        CCmManagerImpl&     iCmMgr;
+        TUint32             iParentDest;// Parent destination
+        TAny*               iNotused1;
+        TAny*               iNotused2;
     };
 
 /**
- *  CCmPluginBaseEng is base class for every connection method plugin.
- *  It handles all the generic iap informations e.g. record handling
- *  and attribute reaquests to generic records.
+ *  CCmPluginBaseEng is base class for every connection method plugin
  *
- *  @lib cmmpluginbase.lib
- *  @since S60 v5.2
+ *  @lib cmmanager.lib
+ *  @since S60 v3.2
  */
 class CCmPluginBaseEng : public CBase
     {
     public:
-       /**
-        * Destructor.
+    
+        /** Destructor. */
+        IMPORT_C virtual ~CCmPluginBaseEng();
+        
+        /**
+        * Create a new instance of the given bearer type plugin.
+        * Used from framework to avoid using slow ECom framework.
+        * @param aInitParam initialization data
         */
-       IMPORT_C virtual ~CCmPluginBaseEng();
+        virtual CCmPluginBaseEng* 
+                CreateInstanceL( TCmPluginInitParam& aInitParam ) const = 0;
+        
+    public: // Attribute handlers
+    
+        /**
+        * Gets the value for a TInt attribute.
+        * @param aAttribute Identifies the attribute to be retrived.
+        * @return contains the requested TInt attribute.
+        */
+        IMPORT_C virtual TUint32 
+                        GetIntAttributeL( const TUint32 aAttribute ) const;
 
         /**
-         * Create a new instance of the given bearer type plugin.
-         * Used from CMM server to avoid using slow ECom framework.
-         * @param aInitParam initialization data
-         * @return Returns CCmPluginBaseEng type pointer which represents pure
-         * bearer instance for the CMM server.
-         */
-        virtual CCmPluginBaseEng* CreateInstanceL(
-                TCmPluginInitParam& aInitParam ) const = 0;
+        * Gets the value for a TBool attribute.
+        * @param aAttribute Identifies the attribute to be retrived.
+        * @return contains the requested TBool attribute.
+        */
+        IMPORT_C virtual TBool 
+                        GetBoolAttributeL( const TUint32 aAttribute ) const;
 
         /**
-         * Following GetBearerInfoXXXL methods return the values of the
-         * requested attributes. These values are bearerspecific so they
-         * don't vary between CMs with same bearer type.
-         * @param aAttribute An attribute identifier.
-         * @return Returns the value requested. If not found leaves with
-         * KErrNotFound error code.
-         */
-        IMPORT_C virtual TUint32 GetBearerInfoIntL(
-                TUint32 aAttribute ) const = 0;
-
-        IMPORT_C virtual TBool GetBearerInfoBoolL(
-                TUint32 aAttribute ) const = 0;
-
-        IMPORT_C virtual HBufC* GetBearerInfoStringL(
-                TUint32 aAttribute ) const = 0;
-
-        IMPORT_C virtual HBufC8* GetBearerInfoString8L(
-                TUint32 aAttribute ) const = 0;
+        * Gets the value for a String16 attribute.
+        * @param aAttribute Identifies the attribute to be retrived.
+        * @return copy of the requested attribute. Ownership is passed.
+        */
+        IMPORT_C virtual HBufC* 
+                        GetStringAttributeL( const TUint32 aAttribute ) const;
+        
+        /**
+        * Gets the value for a String8 attribute.
+        * @param aAttribute Identifies the attribute to be retrived.
+        * @return copy of the requested attribute. Ownership is passed.
+        */
+        IMPORT_C virtual HBufC8* 
+                        GetString8AttributeL( const TUint32 aAttribute ) const;
 
         /**
-         * Checks if the plug-in can handle the Connection Method identified
-         * with parameter aIapId.
-         * @param aIapId IAPId of the AP to be checked
-         * @return ETrue if plug-in can handle the IAP, otherwise EFalse.
-         */
-        virtual TBool CanHandleIapIdL( TUint32 aIapId ) const = 0;
+        * Sets the value for a TInt attribute.
+        * @param aAttribute Identifies the attribute to be set.
+        * @param aValue The value to be set.
+        * @return None.
+        */
+        IMPORT_C virtual void SetIntAttributeL( 
+                             const TUint32 aAttribute, TUint32 aValue );
 
         /**
-         * Checks if the plug-in can handle the given IAP record.
-         * @param aIapRecord IAP record to be checked
-         * @return ETrue if plug-in can handle the IAP, otherwise EFalse.
-         */
-        virtual TBool CanHandleIapIdL(
-                CommsDat::CCDIAPRecord* aIapRecord ) const = 0;
-
-    public: // Client interface
-        /**
-         * Loads all the records belonging to this Connection Method.
-         * @param aIapId Id of the IAP record. Identifies the CM
-         * related records to load.
-         */
-        IMPORT_C void LoadL( TUint32 aIapId );
+        * Sets the value for a TBool attribute.
+        * @param aAttribute Identifies the attribute to be set.
+        * @param aValue The value to be set.
+        * @return None.
+        */
+        IMPORT_C virtual void SetBoolAttributeL( 
+                             const TUint32 aAttribute, TBool aValue );
 
         /**
-         * Resets and loads all the records belonging to this Connection Method.
-         */
-        IMPORT_C void ReLoadL();
+        * Sets the value for a String16 attribute.
+        * @param aAttribute Identifies the attribute to be set.
+        * @param aValue The value to be set.
+        * @return None.
+        */
+        IMPORT_C virtual void SetStringAttributeL( 
+                             const TUint32 aAttribute, const TDesC16& aValue );
 
         /**
-         * Creates a new Connection Method in memory. Call UpdateL() to store
-         * it in CommsDat. No CommsDat transaction operation is needed for this.
-         * @param aCmId Predefined iapid to be used when saving to CommsDat.
-         *       0 means that CommsDat gives the id.
-         */
-        IMPORT_C void CreateNewL( TUint32 aCmId );
+        * Sets the value for a String8 attribute.
+        * @param aAttribute Identifies the attribute to be set.
+        * @param aValue The value to be set.
+        * @return None.
+        */
+        IMPORT_C virtual void SetString8AttributeL( 
+                             const TUint32 aAttribute, const TDesC8& aValue );
 
         /**
-         * Creates a copy of an existing Connection Method.
-         * @param aClientPluginInstance The source data to create the copy from.
-         * @return CCmPluginBaseEng type pointer to an object which represents
-         * the new plugin to the CMM server.
-         */
-        IMPORT_C CCmPluginBaseEng* CreateCopyL(
-                CCmClientPluginInstance* aClientPluginInstance );
-
+        * Restore the original value of the attribute from commsdat field.
+        * Base implementation can be used only with attributes 
+        * stored directly in commsdat.
+        * @param aAttribute attribute to be restored
+        */
+        IMPORT_C virtual void RestoreAttributeL( const TUint32 aAttribute );
+        
         /**
-         * Updates all records to commsdat. Data is copied from the client's copy
-         * to the original data.
-         * This method does not open/rollback/commit transaction to CommsDat.
-         * Caller must handle transactions.
-         */
-        IMPORT_C virtual void UpdateL(
-                CCmClientPluginInstance* aClientPluginInstance );
-
+        * Returns the CCmDestinationImpl* if this is an 
+        * embedded destination CM. Otherwise returns NULL.
+        * @return embedded destination object or NULL
+        */
+        IMPORT_C virtual CCmDestinationImpl* Destination() const;
+        
+        /**
+        * Update or if this is a new CM, creates CM in CommsDat. 
+        * - OpenTransactionLC()
+        * - PrepareToUpdateRecordsL()
+        * - UpdateChargeCardRecordL()
+        * - UpdateServiceRecordL()
+        * - UpdateIAPRecordL()
+        *   - UpdateLocationRecordL()
+        *   - BearerRecordIdLC()
+        *   - UpdateNetworkRecordL()
+        *   - UpdateWapRecordL()
+        *   - UpdateProxyRecordL()
+        *   - UpdateConnPrefSettingL()
+        * - UpdateAdditionalRecordsL()
+        * - CommitTransactionL()
+        * @return None.
+        */        
+        IMPORT_C virtual void UpdateL();     
+        
         /*
-         * Deletes all the records of this CM from the database.
-         * All the preventing conditions must be checked before calling this.
-         * This method does not open/rollback/commit transaction to CommsDat.
-         * Caller must handle transactions.
-         */
-        IMPORT_C virtual void DeleteL();
+        * Delete from the database if this CM has no more reference
+        * from the DN_IAP table.
+        * - IsMultipleReferencedL()
+        * - OpenTransactionLC()
+        * - PrepareToDeleteL()
+        * - Delete records (in this order)
+        *   - IAP
+        *   - Proxy
+        *   - Service
+        *   - ChargeCard
+        *   - Network
+        *   - Location
+        *   - WapAP
+        *   - WapBearer
+        * - DeleteAdditionalRecordsL()
+        * - CommitTransactionL()
+        * @param aForced forced delete doesn't check referencies
+        * @param aOneRefsAllowed ETrue if one reference from a destination is 
+        *           acceptable to delete this connection method.
+        */    
+        IMPORT_C virtual TBool DeleteL( TBool aForced,
+                                        TBool aOneRefAllowed = ETrue );
 
         /**
-         * Creates a copy of all plugin data( most of them are CommsDat data ) for a client.
-         * @param aClientPluginInstance An object where to copy the data.
-         */
-        IMPORT_C void GetPluginDataL( CCmClientPluginInstance* aClientPluginInstance );
+        * Performs the basic loading of records related
+        * to this connection method:
+        * - OpenTransactionLC();
+        * - PrepareToLoadRecordsL()
+        * - LoadIAPRecordL();
+        *       - load IAP
+        *       - load WAP (AP & IP Bearer)
+        *       - load proxy
+        *       - load charge card
+        *       - load network
+        *       - load location
+        * - LoadServiceSettingL();
+        * - LoadAdditionalRecordsL();
+        */
+        IMPORT_C virtual void LoadL( TUint32 aIapId );
 
         /**
-         * Following GetXXXXAttributeL methods return the values of the
-         * requested attributes. Attributes are returned from the client's
-         * copy of the data. These values are CM specific.
-         * @param aAttribute An attribute identifier.
-         * @param aClientPluginInstance Client's copy of the data where
-         * to get the return value.
-         * @return Returns the value requested. If not found leaves with
-         * KErrNotFound error code.
-         */
-        IMPORT_C TUint32 GetIntAttributeL(
-                TUint32 aAttribute,
-                CCmClientPluginInstance* aClientPluginInstance );
+        * Create a new connection method in memory.
+        * Call UpdateL() to store it in CommsDat.
+        * No transaction operation is performed.
+        * - Creates new WAP, IAP, Network records
+        * - CreateNewServiceRecordL()
+        * - CreateAdditionalRecordsL()
+        * - Loads default AP name from resource 
+        *       (R_CMMANAGERENG_DEFAULT_AP_NAME)
+        */
+        IMPORT_C virtual void CreateNewL();
+        
+        /**
+        * Create a copy of the connection method:
+        * - CreateInstanceL()
+        * - CreateNewL()
+        * - PrepareToCopyDataL()
+        * - Copies data:
+        *   - name
+        *   - bearer type
+        *   - records added to the convertion table
+        * - Calls CopyAdditionalDataL().
+        */
+        IMPORT_C virtual CCmPluginBaseEng* CreateCopyL() const;
+        
+        /*
+        * Returns true if the CM has more than one parent destination
+        */        
+        IMPORT_C virtual TInt NumOfConnMethodReferencesL();
 
-        IMPORT_C TBool GetBoolAttributeL(
-                TUint32 aAttribute,
-                CCmClientPluginInstance* aClientPluginInstance );
+    public:
+    
+        /**
+        * Returns a pointer to the cmmanager
+        * @return a pointer to the cmmanager
+        */
+        CCmManagerImpl& CmMgr() const { return iCmMgr; };
 
-        IMPORT_C HBufC* GetStringAttributeL(
-                TUint32 aAttribute,
-                CCmClientPluginInstance* aClientPluginInstance );
-
-        IMPORT_C HBufC8* GetString8AttributeL(
-                TUint32 aAttribute,
-                CCmClientPluginInstance* aClientPluginInstance );
+        IMPORT_C CommsDat::CMDBSession& Session() const;
 
         /**
-         * Following SetXXXXAttributeL methods set the given values
-         * identified with attributes. Attributes are set to the
-         * client's copy of the data.
-         * @param aAttribute An attribute identifier.
-         * @param aValue Value to set.
-         * @param aClientPluginInstance Client's copy of the data where
-         * to set the given value.
-         */
-        IMPORT_C void SetIntAttributeL(
-                TUint32 aAttribute,
-                TUint32 aValue,
-                CCmClientPluginInstance* aClientPluginInstance );
-
-        IMPORT_C void SetBoolAttributeL(
-                TUint32 aAttribute,
-                TBool aValue,
-                CCmClientPluginInstance* aClientPluginInstance );
-
-        IMPORT_C void SetStringAttributeL(
-                TUint32 aAttribute,
-                const TDesC16& aValue,
-                CCmClientPluginInstance* aClientPluginInstance );
-
-        IMPORT_C void SetString8AttributeL(
-                TUint32 aAttribute,
-                const TDesC8& aValue,
-                CCmClientPluginInstance* aClientPluginInstance );
+        * Launches the settings dialog of the plugin
+        *
+        * @since S60 3.2
+        * @return soft key selection
+        */
+        virtual TInt RunSettingsL() = 0;
 
         /**
-         * Requests CommsDat table ids to be observed for changes by the cmm
-         * server. This is only for generic iap related tables.
-         * @param aTableIdArray A reference to an array where iap related generic
-         * table ids are added.
-         */
-        IMPORT_C void GetGenericTableIdsToBeObservedL( RArray<TUint32>& aTableIdArray ) const;
-
-    public: // plugin interface
+        * Called on a newly created connection method to initialize it properly
+        * with user interaction (e.g. APN setting for a packet data-, WEP-key
+        * setting for a WLAN connection method, etc.).
+        * Note: each plug-in should set its name (i.e. ECmName) in this
+        * function call.
+        *
+        * @since S60 3.2
+        * @param aManuallyConfigure let's the plugin know if a plugin should 
+        *                           be configured manually or automatically
+        * @return ETrue if initialization was successful and wasn't cancelled.
+        * EFalse, if initialization process was cancelled (i.e. user pressed
+        * Cancel button).
+        */
+        virtual TBool InitializeWithUiL( TBool aManuallyConfigure ) = 0;
+        
         /**
-         * Creates a copy of all bearer specific CommsDat data for the client.
-         * Called as result of GetPluginDataL().
-         * @param aRecordArray An array where the copy the records. Only
-         * the bearer specific implementation knows the amount and order
-         * of these records in the array.
-         */
-        virtual void GetBearerSpecificRecordsL(
-                RPointerArray<CommsDat::CCDRecordBase>& aRecordArray ) = 0;
-
+        * Checks if the plug-in can handle the given AP.
+        * @param aIapId IAPId of the AP to be checked
+        * @return ETrue if plug-in can handle the IAP
+        */
+        virtual TBool CanHandleIapIdL( TUint32 aIapId ) const = 0;
+        
         /**
-         * Following GetBearerXXXXAttribute methods get only the
-         * fields in records in pointer arrays(parameters).
-         * @param aAttribute Identifier of the requested value.
-         * @param aGenRecordArray An array containing pointers to generic
-         * records of the Connection Method.
-         * @param aBearerSpecRecordArray An array containing pointers to bearer
-         * specific records of the Connection Method. aAttribute
-         * parameter should identify one field(integer, boolean string)
-         * in one of these records.
-         * @return Returns the requested value. In error case leaves with
-         * system-wide error code.
-         */
-
-        virtual TUint32 GetBearerIntAttributeL(
-                TUint32 aAttribute,
-                RPointerArray<CommsDat::CCDRecordBase>& aGenRecordArray,
-                RPointerArray<CommsDat::CCDRecordBase>& aBearerSpecRecordArray ) = 0;
-
-        virtual TBool GetBearerBoolAttributeL(
-                TUint32 aAttribute,
-                RPointerArray<CommsDat::CCDRecordBase>& aGenRecordArray,
-                RPointerArray<CommsDat::CCDRecordBase>& aBearerSpecRecordArray ) = 0;
-
-        virtual HBufC* GetBearerStringAttributeL(
-                TUint32 aAttribute,
-                RPointerArray<CommsDat::CCDRecordBase>& aGenRecordArray,
-                RPointerArray<CommsDat::CCDRecordBase>& aBearerSpecRecordArray ) = 0;
-
-        virtual HBufC8* GetBearerString8AttributeL(
-                TUint32 aAttribute,
-                RPointerArray<CommsDat::CCDRecordBase>& aGenRecordArray,
-                RPointerArray<CommsDat::CCDRecordBase>& aBearerSpecRecordArray ) = 0;
-
+        * Checks if the plug-in can handle the given AP.
+        * @param aIapRecord IAP record to be checked
+        * @return ETrue if plug-in can handle the IAP
+        */
+        virtual TBool CanHandleIapIdL( CommsDat::CCDIAPRecord* aIapRecord ) const = 0;
+        
         /**
-         * Following SetBearerXXXXAttribute methods set only the
-         * fields in records in pointer arrays(parameters). They are not
-         * allowed to update the original records in plugins.
-         * @param aAttribute Identifier of the field to set.
-         * @param aValue The value to set.
-         * @param aGenRecordArray An array containing pointers to generic
-         * records of the Connection Method.
-         * @param aBearerSpecRecordArray An array containing pointers to bearer
-         * specific records of the Connection Method. aAttribute
-         * parameter should identify one field(integer, boolean string)
-         * in one of these records.
-         * @return None.
-         */
-
-        virtual void SetBearerIntAttributeL(
-                TUint32 aAttribute,
-                TUint32 aValue,
-                RPointerArray<CommsDat::CCDRecordBase>& aGenRecordArray,
-                RPointerArray<CommsDat::CCDRecordBase>& aBearerSpecRecordArray ) = 0;
-
-        virtual void SetBearerBoolAttributeL(
-                TUint32 aAttribute,
-                TBool aValue,
-                RPointerArray<CommsDat::CCDRecordBase>& aGenRecordArray,
-                RPointerArray<CommsDat::CCDRecordBase>& aBearerSpecRecordArray ) = 0;
-
-        virtual void SetBearerStringAttributeL(
-                TUint32 aAttribute,
-                const TDesC16& aValue,
-                RPointerArray<CommsDat::CCDRecordBase>& aGenRecordArray,
-                RPointerArray<CommsDat::CCDRecordBase>& aBearerSpecRecordArray ) = 0;
-
-        virtual void SetBearerString8AttributeL(
-                TUint32 aAttribute,
-                const TDesC8& aValue,
-                RPointerArray<CommsDat::CCDRecordBase>& aGenRecordArray,
-                RPointerArray<CommsDat::CCDRecordBase>& aBearerSpecRecordArray ) = 0;
+        * Return the parent destination of this connection method.
+        * @return parent destination of this connection method
+        */
+        IMPORT_C CCmDestinationImpl* ParentDestination() const;
+        
+        /**
+        * Calls FeatureManager::FeatureSupported directly.
+        * @param aFeature feature ID
+        * @return feature support status
+        * @since 3.2
+        */
+        IMPORT_C static TBool FeatureSupported( TInt aFeature );
+                
+        /**
+        * Function should be overriden by virtual bearer type plugins.
+        * Returns if the passed IAP id is linked to that connection method.
+        * @param aIapId IAP id to be checked
+        * @return ETrue if the passed IAP id is linked to that connection method.
+        */
+        virtual TBool IsLinkedToIap( TUint32 /*aIapId*/ ){ return EFalse; }
+        
+        /**
+        * Function should be overriden by virtual bearer type plugins.
+        * Returns if the passed SNAP id is linked to that connection method.
+        * @param aSnapId SNAP id to be checked
+        * @return ETrue if the passed SNAP id is linked to that connection method.
+        */
+        virtual TBool IsLinkedToSnap( TUint32 /*aSnapId*/ ){ return EFalse; }
 
         /**
-         * Inherited class can make some preraration before CCmPluginBaseEng
-         * would start loading bearer specific records.
-         */
-        virtual void PreparePluginToLoadRecordsL() = 0;
+        * Increments the reference counter. Used by the object pool.
+        */
+        void IncrementRefCounter();
+        /**
+        * Increments the reference counter. Used by the object pool.
+        */
+        void DecrementRefCounter();
+        /**
+        * Returns the reference counter. Used by the object pool.
+        * @return TInt
+        */
+        TInt GetRefCounter();
 
         /**
-         * Gives the plugin a possibility to do some preparing operations
-         * if needed.
-         * @param aCopyInstance Client side data instance.
-         */
-        virtual void PrepareToCopyDataL( CCmPluginBaseEng* aCopyInstance ) = 0;
+        * Appends uids of connection methods - which were also created during connection method
+        * creation - to the array given as parameter 
+        * @param aIapIds the array the additonal cm uids are appended to
+        */        
+        IMPORT_C virtual void GetAdditionalUids( RArray<TUint32>& aIapIds );
+
+    protected: // Conversion table API
+    
+        IMPORT_C void AddConverstionTableL( 
+                            CommsDat::CCDRecordBase* *aRecord,
+                            TBool* aEnabled,
+                            const TCmAttribConvTable* aConvTable );
+                                            
+        IMPORT_C void AddCommonConversionTableL( 
+                                const TCmCommonAttrConvArrayItem* aConvTable );
+        
+        IMPORT_C void RemoveConversionTable( 
+                                        const TCmAttribConvTable* aConvTable );
+        
+        IMPORT_C void RemoveCommonConversionTable( 
+                                const TCmCommonAttrConvArrayItem* aConvTable );
+                                   
+    protected: // Resource handling
+    
+        /**
+        * Add file name to the resource file array.
+        * Open it and/or increment reference count.
+        * @param aName resource file name
+        */
+        IMPORT_C void AddResourceFileL( const TDesC& aName );
+        
+        /**
+        * Remove file name from the resource file name array.
+        * Close the resource file and/or decrement the reference count.
+        * @param aName resource file name
+        */
+        IMPORT_C void RemoveResourceFile( const TDesC& aName );
 
         /**
-         * Inherited class can make some preraration before CCmPluginBaseEng
-         * would start to update all the records.
-         * @param aGenRecordArray Reference to generic records pointer array.
-         * @param aBearerSpecRecordArray Reference to bearer specific records
-         * pointer array.
-         */
-        virtual void PreparePluginToUpdateRecordsL(
-                RPointerArray<CommsDat::CCDRecordBase>& aGenRecordArray,
-                RPointerArray<CommsDat::CCDRecordBase>& aBearerSpecRecordArray ) = 0;
-
-        /**
-         * Plugin can prepare to delete the Connection Method with this
-         * function. Called from DeleteL() before any record would be
-         * deleted. No records are deleted here.
-         */
-        virtual void PrepareToDeleteRecordsL(){};
-
-        /**
-         * Loads the service record. Service record type is known and loaded by
-         * plugin(bearer specific) part of the implementation even if the record
-         * is saved to the generic side. Service record is linked to IAP record.
-         */
-        virtual void LoadServiceRecordL() = 0;
-
-        /**
-         * Creates the service records.
-         */
-        virtual void CreateServiceRecordL() = 0;
-
-        /**
-         * Update service record.
-         * @param aGenRecordArray Reference to generic records pointer array.
-         * @param aBearerSpecRecordArray Reference to bearer specific records
-         * pointer array.
-         */
-        virtual void UpdateServiceRecordL(
-                RPointerArray<CommsDat::CCDRecordBase>& aGenRecordArray,
-                RPointerArray<CommsDat::CCDRecordBase>& aBearerSpecRecordArray ) = 0;
-
-        /**
-         * Copies the service record. Bearer specific part knows the type of it's
-         * service record.
-         * @return Returns the service record pointer.
-         */
-        virtual CommsDat::CCDRecordBase* CopyServiceRecordL() = 0;
-
-        /**
-         * Returns the service record id of the Connection Method.
-         * @return Returns the id of the service record id of the Connection Method.
-         */
-        virtual TUint32 ServiceRecordId() const = 0;
-
-        /**
-         * Returns the service record name of the Connection Method.
-         * @param aServiceName Name of the service record the CM's iap record
-         * points to.
-         */
-        virtual void ServiceRecordNameLC( HBufC* &aServiceName ) = 0;
-
-        /**
-         * Inherited class loads all the bearer specific records after
-         * loading generic records. Called from LoadL().
-         */
-        virtual void LoadBearerRecordsL() = 0;
-
-        /**
-         * Creates bearer specific records.
-         */
-        virtual void CreateBearerRecordsL(){};
-
-        /**
-         * Update bearer specific records.
-         * @param aGenRecordArray Reference to generic records pointer array.
-         * @param aBearerSpecRecordArray Reference to bearer specific records
-         */
-        virtual void UpdateBearerRecordsL(
-                RPointerArray<CommsDat::CCDRecordBase>& aGenRecordArray,
-                RPointerArray<CommsDat::CCDRecordBase>& aBearerSpecRecordArray ) = 0;
-
-        /**
-         * Plugin(generic part) can delete bearer specific records
-         * with this function. Called from DeleteL().
-         */
-        virtual void DeleteBearerRecordsL() = 0;
-
-        /**
-         * Resets the bearer specific records.
-         */
-        virtual void ResetBearerRecords() = 0;
-
-        /**
-         * Copies the bearer specific records to copy instance given as
-         * parameter.
-         * @param aCopyInstance Pointer to instance where to copy.
-         */
-        virtual void CopyBearerRecordsL( CCmPluginBaseEng* aCopyInstance ) = 0;
-
-        /**
-         * Returns the bearer record id of the Connection Method.
-         * @param aRecordId Id of the bearer record this CM's iap record
-         * points to.
-         */
-        virtual void BearerRecordIdL( TUint32& aRecordId ) = 0;
-
-        /**
-         * Returns the bearer record name of the Connection Method.
-         * @param aBearerName Name of the bearer record this CM's iap record
-         * points to.
-         */
-        virtual void BearerRecordNameLC( HBufC* &aBearerName ) = 0;
-
-        /**
-         * Requests CommsDat table ids to be observed for changes by the cmm
-         * server. If a table used is not mentioned to be modified a bearer
-         * shouldn't return this. Bearers do not reset the array before adding
-         * ids.
-         * @param aTableIdArray A reference to an array where plugin must add
-         * the ids of the tables it want's to be observed.
-         */
-        IMPORT_C virtual void GetBearerTableIdsToBeObservedL(
-                RArray<TUint32>& aTableIdArray ) const = 0;
-
+        * Read string from resource file. Resource file has to be
+        * opened prior this by calling AddResourceFileL().
+        */
+        IMPORT_C HBufC* AllocReadL( TInt aResourceId ) const;
+        
+            
     protected:
-        /**
-         * Constructor
-         */
+    
+        /** Constructor */
         IMPORT_C CCmPluginBaseEng( TCmPluginInitParam *aInitParam );
-
-        /**
-         * Second phase constructor
-         */
+        
+        /** Second phase constructor */
         IMPORT_C virtual void ConstructL();
+    
+        /** Open transaction */
+        void OpenTransactionLC();
+        
+        /**
+        * Commit transaction.
+        * @param aError - error id
+        */
+        void CommitTransactionL( TInt aError );
+        
+        /**
+        * Rollback transaction.
+        */
+        void RollbackTransaction();
+        
+        /** Make a reset on this class. */
+        IMPORT_C void Reset();
+        
+        /**
+        * Plug-in implementation can make its on
+        * cleanup in this function. 
+        * Always called from LoadL() and 
+        * should be called from plugin's destructor.
+        */
+        virtual void AdditionalReset() = 0;
+        
+        /**
+        * Check if there's connection established with
+        * this connection method (IAP id).
+        */
+        IMPORT_C virtual TBool CheckIfAlreadyConnected() const;
+        
+    protected:  // virtual loader function
+        
+        /**
+        * Inherited class can make some preraration
+        * before CCmPluginBaseEng would start loading
+        * records from tables.
+        */
+        IMPORT_C virtual void PrepareToLoadRecordsL();
 
         /**
-         * Checks if the ECmName attribute was set since the last update.
-         * If so, name is updated in passed record
-         * @param aSrcRecord record to be checked against
-         * @param aDestRecord record to be checked against aSrcRecord
-         */
-        IMPORT_C void CheckIfNameModifiedL(
-                CommsDat::CCDRecordBase* aSrcRecord,
-                CommsDat::CCDRecordBase* aDestRecord ) const;
+        * Inherited class can load any additional
+        * records after CCmPluginBaseEng finished.
+        */
+        virtual void LoadAdditionalRecordsL(){};
 
         /**
-         * Plugins can check DNS setting with this function.
-         * Suggested to be called from PrepareToUpdateRecordsL().
-         * It checked the DNS server addresses, moves secord into
-         * first if first is dynamic, and update DNSFromServer field
-         * according to address values.
-         * @param aIPv6 passed DNS server address are in IPv6 form
-         * @param aDNS1 first DNS server address
-         * @param aDNS1 secord DNS server address
-         * @param aDNSFromServer DNS address from server flag
-         */
-        IMPORT_C void CheckDNSServerAddressL(
-                TBool aIPv6,
-                CommsDat::CMDBField<TDesC>& aDNS1,
-                CommsDat::CMDBField<TDesC>& aDNS2,
-                CommsDat::CMDBField<TBool>& aDNSFromServer );
+        * Load service record. Default implementation can
+        * create only factory supported record instances.
+        */
+        IMPORT_C virtual void LoadServiceSettingL();
+
+    protected:  // virtual update functions
+    
+        /**
+        * Check if connection method data is valid, before
+        * it would be persisted to commsdat.
+        * If invalid data found, set its attribute id in
+        * iInvalidAttribute.
+        * Base class implementation must be called from
+        * overridden one.
+        */
+        IMPORT_C virtual void PrepareToUpdateRecordsL();
+        
+        /**
+        * Inherited class can update its additional
+        * records here.
+        */
+        virtual void UpdateAdditionalRecordsL(){};
 
         /**
-         * Copies the values and attributes of all fields from aSource-record
-         * into aDestination record.
-         * Does not copy the record element ID. Also, does not touch any field
-         * in aDestination-record that is NULL in aSource-record.
-         * @param aSource The record that is copied from.
-         * @param aDestination The record that is copied to.
-         */
-        IMPORT_C void CopyRecordFieldsL(
-                CommsDat::CMDBRecordBase& aSource,
-                CommsDat::CMDBRecordBase& aDestination );
+        * Update service record.
+        */
+        IMPORT_C virtual void UpdateServiceRecordL();
+
+        /**
+        * Return the service table name and record id 
+        * of this connection in the service table.
+        * @param - aServiceName name of the service table
+        *           this connection method points to.
+        * @param - aRecordId record id in the service table.
+        */
+        virtual void ServiceRecordIdLC( HBufC* &aServiceName, 
+                                       TUint32& aRecordId ) = 0;
+
+        /**
+        * Return the bearer table name and record id 
+        * of this connection in the bearer table.
+        * @param - aBearerName name of the bearer table
+        *           this connection method points to.
+        * @param - aRecordId record id in the bearer table.
+        */
+        virtual void BearerRecordIdLC( HBufC* &aBearerName, 
+                                       TUint32& aRecordId ) = 0;
+
+    protected:  // virtual delete function
+    
+        /**
+        * Plugin can prepare to delete the connection method
+        * with this function. Called from DeleteL() before
+        * any record would be deleted. Do NOT delete any
+        * record here.
+        */
+        virtual void PrepareToDeleteRecordsL(){};
+        
+        /**
+        * Plugin can delete additional, bearer specific record
+        * with this function. Called from DeleteL().
+        */
+        virtual void DeleteAdditionalRecordsL(){};
+
+    protected:  // virtual create function
+    
+        /**
+        * Plugin has to create and initialize its bearer specific object
+        * that points to the service record here. Pointer has to be stored in 
+        * iServiceRecord data member.
+        * Do NOT store service record in CommsDat yet.
+        */
+        virtual void CreateNewServiceRecordL() = 0;
+        
+        /**
+        * Plugin can create and initialize its bearer specific record(s) here.
+        * Do NOT store them in CommsDat yet.
+        */
+        virtual void CreateAdditionalRecordsL(){};
+        
+    protected:
+
+        /**
+        * Called from CreateCopyL().
+        * Plugin can prepare for copying every records
+        * added to the conversion tables.
+        *
+        * @param aDestInst copy attributes into this plugin instance
+        */
+        virtual void PrepareToCopyDataL( CCmPluginBaseEng& /*aDestInst*/ ) const {};
+                
+        /**
+        * Copy data of the connection method that is not 
+        * added to the conversion table. (e.g. bearer specific
+        * flags)
+        *
+        * @param aDestInst copy attributes into this plugin instance
+        */    
+        virtual void CopyAdditionalDataL( CCmPluginBaseEng& /*aDestInst*/ ) const {};
 
     private:
-        /**
-         * Handles all the Connection Method data copying to instance given as
-         * parameter. This is called from CreateCopyL().
-         * @ param aCopyInstance Pointer to plugin to copy the data.
-         */
-        void CopyDataL( CCmPluginBaseEng* aCopyInstance );
-
-        /**
-         * Handles all the Connection Method related record copying. Called from
-         * CopyDataL().
-         * @ param aCopyInstance Pointer to plugin to copy the data.
-         */
-        void CopyRecordsL( CCmPluginBaseEng* aCopyInstance );
-
-        /**
-         * Copies the record identified by aRecordIdentifier to copy instance.
-         * @param aRecordIdentifier Identifies the record which is copied copy.
-         * @param aCopyInstance Pointer to plugin to copy the data.
-         */
-        void CopyRecordDataL(
-                TUint32 aRecordIdentifier,
-                CCmPluginBaseEng* aCopyInstance );
-
-        /**
-         * Creates proxy record and sets the proxy settings enabled for this
-         * Connection Method.
-         */
+    
         void EnableProxyL( TBool aEnable );
-
-        /**
-         * Creates location record and sets the location enabled for this
-         * Connection Method.
-         */
+        void EnableChargeCardL( TBool aEnable );
         void EnableLocationL( TBool aEnable );
 
-        /**
-         * Calls all the loading methods.
-         */
+        // Loader functions
         void DoLoadL( TUint32 aIapId );
-
-        /**
-         * Loads IAP record.
-         * @param aIapId Identifies the IAP record to load.
-         */
         void LoadIAPRecordL( TUint32 aIapId );
-
-        /**
-         * Loads proxy record related to this IAP. This is called as a result
-         * of calling LoadL().
-         */
-        void LoadProxyRecordL();
-
-        /**
-         * Loads network record related to this IAP. This is called as a result
-         * of calling LoadL().
-         */
-        void LoadNetworkRecordL();
-
-        /**
-         * Loads location record related to this IAP. This is called as a result
-         * of calling LoadL().
-         */
-        void LoadLocationRecordL();
-
-        /**
-         * Loads WAP AP and WAP IP records related to this IAP. This is called as a result
-         * of calling LoadL().
-         */
+        void LoadChargeCardSettingL( TUint32 aChargeCardId );
+        void LoadProxySettingL();
+        void LoadNetworkSettingL();
+        void LoadLocationSettingL();
         void LoadWapRecordL();
-
-        /**
-         * Loads iap metadata record related to this IAP. This is called as a result
-         * of calling LoadL().
-         */
-        void LoadMetadataRecordL();
-
-        /**
-         * Following methods are called as a result of calling method UpdateL().
-         * Each method overwrites the original data in memory with the client copy
-         * of that data. Client data has all the possible changes set by client.
-         * After overwrite the data is written to CommsDat.
-         * @param aClientPluginInstance The client copy of the original data with the
-         * possible changes.
-         */
-        void UpdateIAPRecordL( CCmClientPluginInstance* aClientPluginInstance );
-        void UpdateProxyRecordL( CCmClientPluginInstance* aClientPluginInstance );
+        void LoadSeamlessnessRecordL();
+        
+        // Updater functions
+        void UpdateIAPRecordL();
+        void UpdateProxyRecordL();
+        void UpdateChargeCardRecordL();
         void UpdateConnPrefSettingL();
-        void UpdateNetworkRecordL( CCmClientPluginInstance* aClientPluginInstance );
-        void UpdateLocationRecordL( CCmClientPluginInstance* aClientPluginInstance );
-        void UpdateWapRecordL( CCmClientPluginInstance* aClientPluginInstance );
-        void UpdateMetadataRecordL( CCmClientPluginInstance* aClientPluginInstance );
-        void UpdateServiceRecordL( CCmClientPluginInstance* aClientPluginInstance );
-
+        void UpdateNetworkRecordL();
+        void UpdateLocationRecordL();
+        void UpdateWapRecordL();
+        void UpdateSeamlessnessRecordL();
+        
         /**
-        * Creates new wap records.
+        * No WAP record found in load process,
+        * but client wants to set start page.
         */
         void NewWapRecordL();
-
+        
         /**
-         * Searches the WAP records related to this iap. This is called as a
-         * result of LoadL().
-         * @return Returns pointer to WAP IP record. If it's not found NULL is
-         * returned.
-         */
-        CommsDat::CCDWAPIPBearerRecord* FindWAPRecordL();
-
-        /**
-        * Creates a new metadata record.
-        * @param aSetDef ETrue if setting default seamlessness value is needed
-        * @return Returns metadata record pointer.
+        * Create a new metadata record.
+        * @param aSetDef ETrue if setting default seamlessness valud is needed
+        * @return create metadata record point
         */
-        CCDIAPMetadataRecord* NewMetadataRecordL( TBool aSetDef );
+        CCDIAPMetadataRecord* NewSeamlessnessRecordL( TBool aSetDef );
+        
+        CommsDat::CCDWAPIPBearerRecord* FindWAPRecordL();
+        CCDIAPMetadataRecord* FindSeamlessnessRecordL();
 
         /**
-         * Searches the metadata record belonging to this iap. This is called as a
-         * result of LoadL().
-         * @return Returns pointer to WAP IP record. If it's not found NULL is
-         * returned.
-         */
-        CCDIAPMetadataRecord* FindMetadataRecordL(); //TODO, check comment, return value...
-
-        /**
-        * Set attribute flag on the given record.
-        * @param aRecord Record to be set.
-        * @param aAttribute Attribute to be set.
+        * Set attribute flag on the given record
+        * @param aRecord record to be set
+        * @param aAttribute e.g. ECDHidden
         * @param aSet ETrue to set, EFalse to clear
         */
-        void SetAttribute(
-                CommsDat::CCDRecordBase* aRecord,
-                TUint32 aAttribute,
-                TBool aSet );
-
+        void SetAttribute( CommsDat::CCDRecordBase* aRecord, 
+                           TUint32 aAttribute, 
+                           TBool aSet );
+                           
         /**
         * Copy the attributes of the source record to the destination.
         * @param aSrcRecord record of which attributes are copied
         * @param ADstRecord record of which attributes are set
         */
-        void CopyAttributes(
-                CommsDat::CCDRecordBase* aSrcRecord,
-                CommsDat::CCDRecordBase* aDstRecord );
-
+        void CopyAttributes( CommsDat::CCDRecordBase* aSrcRecord, 
+                             CommsDat::CCDRecordBase* aDstRecord );
 
         /**
-        * Returns the default location record id.
-        * @return Returns the default location record id.
+        * Find field element associated with the passed attribute.
+        * @param aAttribute aatribute to find
+        * @aType type of the attribute (e.g. bool, int or string)
+        */               
+        TValidationFunctionL FindFieldL( TUint32 aAttribute,
+                                           TCMFieldTypes aType,
+                                           CommsDat::CMDBElement* &aElement ) const;
+
+        
+        /**
+        * Return Location id
+        * @return location id
         */
         TUint32 GetLocationIdL() const;
-
-    private:
-
+        
         /**
-         * Gives a possibility to make some prerarations before
-         * starting to load bearer specific records.
-         */
-        void PrepareToLoadRecordsL();
-
-        /**
-         * Gives a possibility to make some prerarations before
-         * starting to update bearer specific records.
-         */
-        void PrepareToUpdateRecordsL(
-                CCmClientPluginInstance* aClientPluginInstance );
-
-        /**
-         * Returns the element id of the iap record.
-         * @return Returns the element id of the iap record.
-         */
-        CommsDat::TMDBElementId IAPRecordElementId() const;
-
-        /**
-         * Checks the protection attribute of the IAP.
-         * @return Returns ETrue if the IAP is protected. Otherwise returns
-         * EFalse.
-         */
-        TBool IsProtected() const;
-
-        /**
-         * Sets the name of the proxy server to proxy record. If name's
-         * length is 0, proxyport is set to 0 and proxyserver usage
-         * boolean is set to EFalse. If the name is longer than 0,
-         * boolean is set to ETrue.
-         * @param aProxyServer Address to be set.
-         * @param Record pointer where to set.
-         */
-        void SetProxyServerNameL(
-                const TDesC& aProxyServer,
-                CommsDat::CCDRecordBase* aProxyRecord );
-
-        /**
-         * Sets a name to IAP.
-         * @param aName Name to set.
-         * @param aClientPluginInstance Client copy of data where to set the
-         * name. UpdateL() updates the name to the CommsDat.
-         */
-        void SetNameL(
-                const TDesC& aName,
-                CommsDat::CCDRecordBase* aIapRecord,
-                const CMManager::TNamingMethod aNamingMethod );
-
-        /**
-         * Following methods are called as a result of SetNameL() to
-         * make a valid name of the given string.
-         */
-        HBufC* DoMakeValidNameL( const TDesC& aName, const TUint32& aIapId );
-        HBufC* EnsureMaxLengthLC( const TDesC& aName, TBool& aChanged );
-        TPtrC GetPrefix( const TDesC& aName );
-        TInt GetPostfix( const TDesC& aName, const TDesC& aPrefix );
-        TBool IsValidNameL( const TDesC& aNameText, const TUint32& aIapId );
-        HBufC* EscapeTextLC( const TDesC& aLiteral );
-        void SetDefaultNameL( const TDesC& aName );
-
-        /**
-        * Check if the passed IP address is '0.0.0.0' or empty string
-        * @param aIpAddress IP address to be checked
+        * Search for common attribute and convert it to plugin specific one.
+        * @param aAttribute common attribute id
+        * @return bearer specific attribute id
         */
-        TBool IsUnspecifiedIPv4Address( const TDesC& aIpv4Address );
+        TUint32 CheckForCommonAttribute( const TUint32 aAttribute ) const;
+        
+        /**
+        * Returns the common attribute for the bearer specific attribute.
+        * Panics if there is no matching common attribute.
+        * @param aAttribute bearer specific attribute
+        * @return common attribute
+        */
+        TUint32 CommonAttribute( const TUint32 aAttribute ) const;
+        
+    public: // Util functions
+
+        IMPORT_C CommsDat::TMDBElementId IAPRecordElementId() const;
+        
+        IMPORT_C TBool IsProtected() const;
+        
+        TBool SetProxyServerNameL( const TDesC& aProxyServer );
 
         /**
-        * Check if the passed IP address is one of these:
-        * - empty string    -
-        * - '0:0:0:0:0:0:0:0'
-        * - 'fec0:000:0000:ffff::1'
-        * - 'fec0:000:0000:ffff::2'
-        * @param aIpAddress IP address to be checked
+        * Return the coversion table item of the attribute
+        * @param aAttribute attribute of which conversion item is requested
+        * @return conversion table item
         */
-        CMManager::TIPv6Types ClassifyIPv6Address( const TDesC& aIpv6Address );
+        IMPORT_C const TCmAttribConvTable* ConvTableItem( TUint32 aAttribute );
 
-    public: // Data
+        /**
+        * Function to set up DNS addresses and DNS address from server flag.
+        * Can be used with both IPv4 and IPv6 attribute. 
+        * Passed bearer specific attributes must be defined in common conversion 
+        * table.
+        * @param aSrv1Attr first DNS server address attribute
+        * @param aSrv1 DNS first DNS server address
+        * @param aSrv2Attr second DNS server address
+        * @param aSrv2 DNS second DNS server address attribute
+        * @param aAddrFromSrvAttr DNS address from server flag attribute
+        * @param aIPv6 ETrue if passed addresses are in IPv6 form
+        */
+        IMPORT_C void SetDNSServerAddressL( TUint32 aSrv1Attr,
+                                            const TDesC& aSrv1,
+                                            TUint32 aSrv2Attr,
+                                            const TDesC& aSrv2,
+                                            TUint32 aAddrFromSrvAttr,
+                                            TBool aIPv6  );
 
-        // Required attribute for the framework
-        // (An identifier used during destruction)
-        TUid    iDtor_ID_Key;
-        TUint32 iBearerType;
+        /**
+        * Plugins can check DNS setting with this function.
+        * Suggested to be called from PrepareToUpdateRecordsL().
+        * It checked the DNS server addresses, moves secord into
+        * first if first is dynamic, and update DNSFromServer field
+        * according to address values.
+        * @param aIPv6 passed DNS server address are in IPv6 form
+        * @param aDNS1 first DNS server address
+        * @param aDNS1 secord DNS server address
+        * @param aDNSFromServer DNS address from server flag
+        */                                            
+        IMPORT_C void CheckDNSServerAddressL( TBool aIPv6,
+                                              CommsDat::CMDBField<TDesC>& aDNS1,
+                                              CommsDat::CMDBField<TDesC>& aDNS2,
+                                              CommsDat::CMDBField<TBool>& aDNSFromServer );
 
     protected:
+            
         /**
-         * Reference to cmm's session handle. Initialised at the construction
-         * phase.
-         */
-        CommsDat::CMDBSession& iSession;
+        * Checks if the ECmName attribute was set since the last update.
+        * If so, name is updated in passed record
+        * @param aRecord record to be checked against iIapRecord
+        */
+        IMPORT_C void CheckIfNameModifiedL( CommsDat::CCDRecordBase* aRecord ) const;
+        
+        /**
+        * Returns the global priority of the passed bearer type
+        * @param aServiceType bearer type of which priority is requested
+        * @return global bearer priority
+        */        
+        IMPORT_C TInt GlobalBearerPriority( const TDesC& aServiceType ) const;
+        
+        /**
+        * Returns the global UI priority of the passed bearer type
+        * @param aServiceType bearer type of which priority is requested
+        * @return global UI bearer priority
+        */
+        IMPORT_C TInt GlobalUiBearerPriority( const TDesC& aServiceType ) const;
+
+    private: // Util functions
+    
+        HBufC* DoMakeValidNameL( const TDesC& aName );
+        HBufC* EnsureMaxLengthLC( const TDesC& aName, 
+                                  TBool& aChanged );
+                                  
+        TPtrC GetPrefix( const TDesC& aName );
+        TInt GetPostfix( const TDesC& aName, const TDesC& aPrefix );
+
+        TBool IsValidNameL( const TDesC& aNameText );
+        HBufC* EscapeTextLC( const TDesC& aLiteral );
+        
+        void SetNameL( const TDesC& aName );
+        
+        TCmAttrConvArrayItem* ConversionTable( TUint32 aAttribute ) const;
+        CommsDat::CMDBElement& FieldByAttributeL( const TCmAttrConvArrayItem* aItem,
+                                        const TUint32 aAttribute,
+                                        TInt& aIndex ) const;
+        
+        /**
+        * Writes the passed text into the passed attribute.
+        * @param aAttribute The attribute to write into
+        * @param aValue The value to write
+        */
+        void GenericStringWriterL( const TUint32 aAttribute, 
+                                   const TDesC16& aValue );
+        
+        /**
+        * Returns the common attribute for the bearer specific attribute, if 
+        * it is mapped to any. Otherwise, it returns the original attribute.
+        * @param aAttribute bearer specific attribute
+        * @return common/original attribute
+        */
+        TUint32 MappedCommonAttribute( const TUint32 aAttribute ) const;        
+    public:
 
         /**
-         * Generic record pointers.
-         */
-        CommsDat::CCDIAPRecord*             iIapRecord;
-        CommsDat::CCDProxiesRecord*         iProxyRecord;
-        CommsDat::CCDRecordBase*            iServiceRecord;
-        CommsDat::CCDNetworkRecord*         iNetworkRecord;
-        CommsDat::CCDLocationRecord*        iLocationRecord;
-        CommsDat::CCDWAPAccessPointRecord*  iWapAPRecord;
-        CommsDat::CCDWAPIPBearerRecord*     iWapIPBearerRecord;
-        CCDIAPMetadataRecord*               iMetaDataRecord;
+        * Indicates if the Id is valid or if this is a new object which sitll
+        * haven't been updated. 
+        * Used by the object pool.
+        * @return TBool
+        */
+        TBool IdIsValid();
 
         /**
-         * IAP record id of the CM. 0 means that this is not stored to CommsDat
-         * yet. If in UpdateL phase iap record has an id but iIapId == 0 -->
-         * predefined iap id
-         */
-        TUint32 iCmId;
-
-    private:
+        * Sets iIdIsValid attribute
+        * Used by the object pool.
+        */
+        void SetIdValidity(TBool validity);
+        
         /**
-         * Naming method of the CM.
+        * Scans aDests for destinations that may be valid parents 
+        * for this plugin and removes those that may not. The function may be
+        * overriden by virtual bearer type plugins.
+        * @param aDests The array of destination IDs to be filtered.
+        */
+        virtual void FilterPossibleParentsL( RArray<TUint32>& /*aDests*/ ) {}
+        
+        /**
+         * Sets the predefined id for the plugin. This should only be
+         * used by cmmanager framework.
          */
-        CMManager::TNamingMethod iNamingMethod;
+        IMPORT_C void SetPreDefinedId( const TUint32 aPreDefId );
+
+    public:
 
         /**
-         * Table id of the iap metadata table.
-         */
-        CommsDat::TMDBElementId iMetadataTableId;
+        * Check if there is space to save record
+        * @return ETrue if space is available; otherwise leave with KLeaveWithoutAlert
+        */
+        IMPORT_C TBool CheckSpaceBelowCriticalLevelL() const;
 
-        /**
-         * Identifies if the location is enabled.
-         */
-        TBool iLocationEnabled;
+    public: // Data
+    
+        // Required attribute for the framework
+        // (An identifier used during destruction)
+        TUid iDtor_ID_Key;
+        
+    protected:
+
+        CCmManagerImpl&     iCmMgr;         //< Not owned    
+        TUint32             iParentDest;    // id of the parent destinaton
+        
+        // IAP id of the CM. 0 means that this is a newly
+        // created one.
+        TUint32         iIapId;
+        TUint32         iBearerType;        //< Should be set by plugin 
+                                            //< constructor
+        
+        CommsDat::CCDIAPRecord*           iIapRecord;         // created by base class
+        CommsDat::CCDProxiesRecord*       iProxyRecord;       // optional
+        CommsDat::CCDRecordBase*          iServiceRecord;     // created by plugin
+        CommsDat::CCDChargecardRecord*    iChargeCardRecord;  // optional
+        CommsDat::CCDNetworkRecord*       iNetworkRecord;     // created by base class
+        CommsDat::CCDLocationRecord*      iLocationRecord;    // optional
+        
+        TBool           iChargeCardEnabled;
+        TBool           iLocationEnabled;
+
+        TUint32         iInvalidAttribute;
+
+    private: // Data
+        
+        CCmPluginBasePrivate* iPriv;
+        //Reference counter for the object pool
+	    TInt                  iRefCounter;
+        //indicates if the Id is valid or not (for the object pool)
+        TBool                 iIdIsValid;
+        // Predefined connection method id(iap id)
+        TUint32               iPreDefIapId;
+	    friend class CCmPluginBase;
     };
-
+    
 #endif // CMPLUGINBASEENG_H

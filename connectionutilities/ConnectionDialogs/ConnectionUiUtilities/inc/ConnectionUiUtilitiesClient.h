@@ -135,6 +135,36 @@ class RConnectionUiUtilitiesSession : public RSessionBase
         void WLANNetworkUnavailableNote( TRequestStatus& aStatus );       
 
         /**
+        * Confirmation note is used after the connection has been successfully 
+        * established via destination and connection method.
+        * @param aDestId Id of used destination.
+        * @param aConnMId Id of used connection method.
+        * @param aStatus Status object of notifier.
+        */
+        void ConnectedViaDestAndConnMethodNote( const TUint32 aDestId, 
+                                                const TUint32 aConnMId,
+                                                TRequestStatus& aStatus );
+        /**
+        * Cancel ConnectedViaDestAndConnMethodNote notifier.
+        */
+        void CancelConnectedViaDestAndConnMethodNote();
+
+        /**
+        * Information note is used when "Automatically" roaming is enabled
+        * The actual connection establishment take places in the background
+        * (no wait note).
+        * @param aConnMId Id of used connection method.
+        * @param aStatus Status object of notifier.
+        */
+        void ChangingConnectionToNote( const TUint32 aConnMId,
+                                       TRequestStatus& aStatus );
+
+        /**
+        * Cancel ChangingConnectionToNote notifier.
+        */
+        void CancelChangingConnectionToNote();
+
+        /**
         * Notifier. Shows a query, "Connect to\n '%0U' via\n '%1U'?"
         * @param aResult Result of user selection, ETrue if user accepted
         * roaming, to more preferred method, EFlase otherwise
@@ -150,18 +180,19 @@ class RConnectionUiUtilitiesSession : public RSessionBase
         */
         void CancelConfirmMethodUsageQuery();
 
+
         /**
-        * This note is displayed when power-save feature of the WLAN station 
-        * is incompatible and thus battery consumption of the mobile will increase.
-        * @param aDisable ETrue if user wants to disable this note in the future.
+        * Confirmation note is used after the connection has been successfully 
+        * established via a connection method.
+        * @param aConnMId Id of used connection method.
         * @param aStatus Status object of notifier.
         */
-        void WlanPowerSaveTestNote( TBool& aDisable, TRequestStatus& aStatus );
-        
+        void ConnectedViaConnMethodNote( const TUint32 aConnMId,
+                                        TRequestStatus& aStatus );
         /**
-        * Cancel WlanPowerSaveTestNote notifier.
+        * Cancel ConnectedViaConnMethodNote notifier.
         */
-        void CancelWlanPowerSaveTestNote();
+        void CancelConnectedViaConnMethodNote();
         
         /**
         * Notifier. Prompts WAPI-PSK.
@@ -176,6 +207,36 @@ class RConnectionUiUtilitiesSession : public RSessionBase
         * Cancel EasyWapiDlg notifier.
         */                  
         void CancelEasyWapiDlg();
+
+        /**
+        * Pops up an information note: 
+        * "No WLAN networks are available at the moment. Connection not available."
+        */ 
+        void NoWLANNetworksAvailableNote( TRequestStatus& aStatus );                  
+        
+        /**
+        * Discreet popup. Shows "connecting via %U" discreet popup.
+        * @param aInfo Information about bearer.
+        */
+        void ConnectingViaDiscreetPopup( TPckgBuf< TConnUiConnectingViaDiscreetPopup>& aInfo, 
+                          TRequestStatus& aStatus );
+        
+        /**
+        * Cancel ConnectingViaDiscreetPopup notifier.
+        */                  
+        void CancelConnectingViaDiscreetPopup();                  
+
+        /**
+        * Discreet popup. Shows discreet popup about connection error.
+        * @param aErrCode Error code.
+        */
+        void ConnectionErrorDiscreetPopup( TPckgBuf< TInt >& aErrCode, 
+                          TRequestStatus& aStatus );
+        
+        /**
+        * Cancel ConnectionErrorDiscreetPopup notifier.
+        */                  
+        void CancelConnectionErrorDiscreetPopup();                  
 
     private:
 
@@ -199,6 +260,8 @@ class RConnectionUiUtilitiesSession : public RSessionBase
 
         TPckgBuf<TConnUiUiDestConnMethodNoteId> iPassedInfo;
 
+        // used for get response from notifier
+        TBuf8<8> iResponseStrNoWLANNetworksAvailableNote;
     };
 
 

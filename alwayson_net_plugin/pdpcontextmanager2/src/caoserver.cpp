@@ -197,20 +197,7 @@ CAOServer::~CAOServer()
 // CAOServer::CAOServer
 // ---------------------------------------------------------------------------
 //
-CAOServer::CAOServer():
-    iConnectionManager( NULL ),
-    iTimer( NULL ),
-    iRAUManager( NULL ),
-    iSettings( NULL ),
-    iGpds( NULL ),
-    iPointerStatePool( NULL ),
-    iAsyncReactivation( NULL ),
-    iFailure( MAOConnectionManager::EDisconnected ),
-    iActivationFailure( ETrue),
-    iCurrentState( NULL ),
-    iPDPPropertySubscriber( NULL ), 
-    iAsyncSetup( NULL ),
-    iCenRepObserver( NULL )
+CAOServer::CAOServer()
     {
     LOG_1( _L("CAOServer::CAOServer") );
     }
@@ -445,9 +432,9 @@ void CAOServer::CreatePDPPropertyAndSubscribeL()
     // Create property subscriber
     iPDPPropertySubscriber = CAOAsyncWrapper<CAOServer>::NewL(
         this,
-        &CAOServer::PDPPropertySubscriptionIssueRequest,
-        &CAOServer::PDPPropertySubscriptionRunL,
-        &CAOServer::PDPPropertySubscriptionDoCancel,
+        &PDPPropertySubscriptionIssueRequest,
+        &PDPPropertySubscriptionRunL,
+        &PDPPropertySubscriptionDoCancel,
         NULL );
         
     // Subscribe
@@ -963,16 +950,15 @@ void CAOServer::CurrentCellularDataUsageChangedL( const TInt aValue )
         &StateToDesC( CurrentState()->StateName() ) );
     
     if ( aValue != ECmCellularDataUsageDisabled )
-       {
+        {
+        TAOState* newState = NULL;
         	
         if ( CurrentState()->StateName() == TAOState::EStateDisabled )
             {
-              iCurrentState->HandleEnableAlwaysOnL();
+            newState = iCurrentState->HandleEnableAlwaysOnL();
             }
         else
             {
-            TAOState* newState = NULL;
-            
             // Behaviour is the same as if unconnect timer had expired
             iTimer->StopUnconnectTimer();
             newState = iCurrentState->HandleUnconnectTimerExpiredL();
