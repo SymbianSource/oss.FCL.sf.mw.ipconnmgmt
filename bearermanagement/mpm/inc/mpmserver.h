@@ -191,6 +191,7 @@ class CMPMDtmWatcher;
 class CMPMConfirmDlgRoaming;
 class CMPMConfirmDlgStarting;
 class CMPMDefaultConnection;
+class CMPMConnPermQueryTimer;
 
 // CLASS DECLARATION
 /**
@@ -861,6 +862,27 @@ class CMPMServer : public CPolicyServer,
         */
         void SetOfflineWlanQueryResponse( TOfflineWlanQueryResponse aResponse);
 
+        /**
+        * Starts the connection permission query timer.
+        * During the timer, no connection permission query can be initiated.
+        * @since 5.2
+        */
+        void StartConnPermQueryTimer();
+
+        /**
+        * Resets the connection permission query timer.
+        * @since 5.2
+        */
+        void ResetConnPermQueryTimer();
+
+        /**
+        * Returns true if the connection permission query timer is running.
+        * During the timer, no connection permission query can be initiated.
+        * @since 5.2
+        * @return ETrue if timer is running, EFalse otherwise.
+        */
+        TBool IsConnPermQueryTimerOn();
+
     private:
 
         /**
@@ -989,6 +1011,9 @@ class CMPMServer : public CPolicyServer,
 
         // TConnMonIapInfo Info about available IAPs
         TConnMonIapInfo iConnMonIapInfo;
+        
+        // Connection permission query cancellation delay timer
+        CMPMConnPermQueryTimer* iConnPermQueryTimer;
     };
 
 #include "mpmserver.inl"

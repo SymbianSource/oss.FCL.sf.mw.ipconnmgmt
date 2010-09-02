@@ -197,6 +197,9 @@ void CMPMConfirmDlgStarting::UserSelectedCancel( const TInt aError )
     {
     MPMLOGSTRING3( "CMPMConfirmDlgStarting<0x%x>::UserSelectedCancel:\
  Complete %d", iConnId, aError )
+    // User cancelled the connection permission query,
+    // don't try again until the timer expires.
+    iServer.StartConnPermQueryTimer();
     iIapSelection.ChooseIapComplete( aError, NULL );
     }
 

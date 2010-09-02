@@ -1,6 +1,6 @@
 <RCC>
     <qresource prefix="/xml" >
-        <file>prompt_home.docml</file>
-        <file>prompt_abroad.docml</file>
+        <file alias="prompt_home.docml">prompt_home.docml.bin</file>
+        <file alias="prompt_abroad.docml">prompt_abroad.docml.bin</file>
     </qresource>
 </RCC>

@@ -1,36 +1,41 @@
 /*
- * Copyright (c) 2010 Nokia Corporation and/or its subsidiary(-ies).
- * All rights reserved.
- * This component and the accompanying materials are made available
- * under the terms of "Eclipse Public License v1.0""
- * which accompanies this distribution, and is available
- * at the URL "http://www.eclipse.org/legal/epl-v10.html".
- *
- * Initial Contributors:
- * Nokia Corporation - initial contribution.
- *
- * Contributors:
- *
- * Description:  
- *   Data item for representing "Add Destination" button in UI.
- */
+* Copyright (c) 2010 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0""
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:  
+* Data item for representing "Add Destination" button in UI.
+*/
 
 // System includes
+
 #include <HbInputDialog>
 #include <HbAction>
 #include <HbMessageBox>
 #include <HbPopup>
+
 #include <cpitemdatahelper.h>
 #include <cmdestination_shim.h>
 #include <cmmanager_shim.h>
 
 // User includes
+
 #include "cpadddestinationentryitemdata.h"
 #include "cpdestinationgroup.h"
+
 #include "OstTraceDefinitions.h"
 #ifdef OST_TRACE_COMPILER_IN_USE
 #include "cpadddestinationentryitemdataTraces.h"
 #endif
+
 /*!
     \class  CpAddDestinationEntryItemData
     \brief  This class is a dummy destination. It does not contain 
@@ -48,17 +53,18 @@
 
 
 /*!
-            
     Constructor.
     
     @param[in] itemDataHelper Helper from Control Panel for making connections.
     @param[in] parent Parent object.
  */
-CpAddDestinationEntryItemData::CpAddDestinationEntryItemData(CpItemDataHelper &itemDataHelper,
-                                                             CpDestinationGroup *parent)
-    : CpSettingFormEntryItemData(CpSettingFormEntryItemData::ButtonEntryItem, itemDataHelper),
+CpAddDestinationEntryItemData::CpAddDestinationEntryItemData(
+    CpItemDataHelper &itemDataHelper,
+    CpDestinationGroup *parent) :
+    CpSettingFormEntryItemData(CpSettingFormEntryItemData::ButtonEntryItem, itemDataHelper),
     mParent(parent),
-    mDialog(0)
+    mDialog(0),
+    mOkAction(NULL)
 {
     OstTraceFunctionEntry0(CPADDDESTINATIONENTRYITEMDATA_CPADDDESTINATIONENTRYITEMDATA_ENTRY);
     OstTraceFunctionExit0(CPADDDESTINATIONENTRYITEMDATA_CPADDDESTINATIONENTRYITEMDATA_EXIT);
@@ -80,6 +86,7 @@ CpAddDestinationEntryItemData::~CpAddDestinationEntryItemData()
 void CpAddDestinationEntryItemData::onLaunchView()
 {
     OstTraceFunctionEntry0(CPADDDESTINATIONENTRYITEMDATA_ONLAUNCHVIEW_ENTRY);
+    
     mDialog = new HbInputDialog();
     mDialog->setAttribute(Qt::WA_DeleteOnClose);
     mDialog->lineEdit()->setMaxLength(CMManagerShim::CmNameLength);
@@ -89,10 +96,11 @@ void CpAddDestinationEntryItemData::onLaunchView()
     mOkAction = new HbAction(
         hbTrId("txt_common_button_ok"),
         mDialog);
-    bool connected = connect(mOkAction, 
-                             SIGNAL(triggered()), 
-                             this, 
-                             SLOT(setNewDestinationName()));
+    bool connected = connect(
+        mOkAction, 
+        SIGNAL(triggered()), 
+        this, 
+        SLOT(setNewDestinationName()));
     Q_ASSERT(connected);
     HbAction *cancelAction = new HbAction(
         hbTrId("txt_common_button_cancel"),
@@ -100,6 +108,7 @@ void CpAddDestinationEntryItemData::onLaunchView()
     mDialog->addAction(mOkAction);
     mDialog->addAction(cancelAction);
     mDialog->show();
+    
     OstTraceFunctionExit0(CPADDDESTINATIONENTRYITEMDATA_ONLAUNCHVIEW_EXIT);
 }
 
@@ -112,33 +121,37 @@ void CpAddDestinationEntryItemData::onLaunchView()
 void CpAddDestinationEntryItemData::setNewDestinationName()
 {
     OstTraceFunctionEntry0(CPADDDESTINATIONENTRYITEMDATA_SETNEWDESTINATIONNAME_ENTRY);
+    
     QString destinationName = mDialog->value().toString();
-    bool destinationNameInvalid = true;
-    CmManagerShim *cmm = NULL;
-    CmDestinationShim *destination = NULL;
+    bool destinationNameValid = false;
+    QSharedPointer<CmManagerShim> cmm;
+    QSharedPointer<CmDestinationShim> destination;
     
     try {
-        cmm = new CmManagerShim();
-        if (isDestinationNameValid(destinationName, cmm)) {
+        cmm = QSharedPointer<CmManagerShim>(new CmManagerShim());
+        if (isDestinationNameValid(destinationName, cmm.data())) {
             // Destination name OK. Create new destination.
-            destination = cmm->createDestination(destinationName);
-            destinationNameInvalid = false;
+            destination = QSharedPointer<CmDestinationShim>(
+                cmm->createDestination(destinationName));
+            destinationNameValid = true;
         }
     } catch (const std::exception&) {
-        OstTrace0( TRACE_NORMAL, DUP2_CPADDDESTINATIONENTRYITEMDATA_SETNEWDESTINATIONNAME, "CpAddDestinationEntryItemData::setNewDestinationName: exception caught" );
+        OstTrace0(
+            TRACE_NORMAL,
+            DUP2_CPADDDESTINATIONENTRYITEMDATA_SETNEWDESTINATIONNAME,
+            "CpAddDestinationEntryItemData::setNewDestinationName: exception caught");
         return;
     }
 
-    if (!destinationNameInvalid) {
+    if (destinationNameValid) {
         // Update view
         if (mParent != 0) {
-            mParent->addDestination(destinationName, destination->id());
+            mParent->addDestination(destinationName, destination);
         }                
     } else {
         showErrorNote();
     }
-    delete destination;
-    delete cmm;
+    
     OstTraceFunctionExit0(CPADDDESTINATIONENTRYITEMDATA_SETNEWDESTINATIONNAME_EXIT);
 }
 
@@ -163,9 +176,12 @@ CpBaseSettingView *CpAddDestinationEntryItemData::createSettingView() const
     @param[in] cmm Pointer to CmManagerShim for accessing data in commsdat.
     \return true if name is valid.
  */
-bool CpAddDestinationEntryItemData::isDestinationNameValid(const QString dest, CmManagerShim *cmm) const
+bool CpAddDestinationEntryItemData::isDestinationNameValid(
+    const QString dest,
+    CmManagerShim *cmm) const
 {
     OstTraceFunctionEntry0(CPADDDESTINATIONENTRYITEMDATA_ISDESTINATIONNAMEVALID_ENTRY);
+    
     bool retVal = true;
     
     if (dest.length() > 0) {
@@ -173,17 +189,17 @@ bool CpAddDestinationEntryItemData::isDestinationNameValid(const QString dest, C
         cmm->allDestinations(destinationList);
     
         for (int i = 0; i < destinationList.count(); i ++) {
-            CmDestinationShim *destination = cmm->destination(destinationList[i]);
+            QScopedPointer<CmDestinationShim> destination(
+                cmm->destination(destinationList[i]));
             if (0 == dest.compare(destination->name())) {
                 retVal = false;
-                delete destination;
                 break;
             }
-            delete destination;
         }
     } else {
         retVal = false;
     }
+    
     OstTraceFunctionExit0(CPADDDESTINATIONENTRYITEMDATA_ISDESTINATIONNAMEVALID_EXIT);
     return retVal;
 }
@@ -195,6 +211,7 @@ bool CpAddDestinationEntryItemData::isDestinationNameValid(const QString dest, C
 void CpAddDestinationEntryItemData::showErrorNote()
 {
     OstTraceFunctionEntry0(CPADDDESTINATIONENTRYITEMDATA_SHOWERRORNOTE_ENTRY);
+    
     // Destination name NOK. Inform user and ask again.
     HbMessageBox *note = new HbMessageBox(HbMessageBox::MessageTypeInformation);
     note->clearActions();
@@ -213,5 +230,6 @@ void CpAddDestinationEntryItemData::showErrorNote()
     Q_ASSERT(connected);                        
     note->addAction(errorOk);
     note->show();
+    
     OstTraceFunctionExit0(CPADDDESTINATIONENTRYITEMDATA_SHOWERRORNOTE_EXIT);
 }

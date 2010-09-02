@@ -42,6 +42,7 @@ Mobility Policy Manager server implementation.
 #include "mpmvpntogglewatcher.h"
 #include "mpmdatausagewatcher.h"
 #include "mpmpropertydef.h"
+#include "mpmconnpermquerytimer.h"
 
 static const TUint32 KUidKmdServer = 0x1000088A;
     
@@ -99,7 +100,8 @@ CMPMServer::CMPMServer()
       iConnUiUtils( NULL ),
       iOfflineMode( ECoreAppUIsNetworkConnectionAllowed ),
       iOfflineWlanQueryResponse( EOfflineResponseUndefined ),      
-      iRoamingToWlanPeriodic( NULL )
+      iRoamingToWlanPeriodic( NULL ),
+      iConnPermQueryTimer( NULL )
     {
     }
 
@@ -270,6 +272,8 @@ CMPMServer::~CMPMServer()
     delete iCommsDatAccess;
     
     delete iConnUiUtils;
+    
+    delete iConnPermQueryTimer;
     }
 
 // -----------------------------------------------------------------------------
@@ -383,19 +387,13 @@ void CMPMServer::AppendBMConnection( const TConnectionId aConnId,
         "CMPMServer::AppendBMConnection - aConnId = 0x%x, aSnap = %i",
         aConnId, aSnap )
 
-    // Set the Connection Id, SNAP, Iap Id and connection state
-    // 
-    TConnectionInfo connInfo;
-    connInfo.iConnId = aConnId;
-    connInfo.iSnap   = aSnap;
-    connInfo.iIapId  = aIapId;
-    connInfo.iState  = aState;
-    connInfo.iAppUid = aSession.AppUid();
-
-    // Package into TActiveBMConn //TODO Redundant.. remove the other one.
-    // 
+    // Set the Connection Id, SNAP, Iap Id and connection state, into TActiveBMConn
     TActiveBMConn conn;
-    conn.iConnInfo          = connInfo;
+    conn.iConnInfo.iConnId = aConnId;
+    conn.iConnInfo.iSnap   = aSnap;
+    conn.iConnInfo.iIapId  = aIapId;
+    conn.iConnInfo.iState  = aState;
+    conn.iConnInfo.iAppUid = aSession.AppUid();
 
     TInt index1 = iActiveBMConns.Find( conn, TActiveBMConn::MatchConnInfo );
 
@@ -1482,7 +1480,7 @@ void CMPMServer::StartForcedRoamingToWlanL( const TConnMonIapInfo& aIapInfo )
     MPMLOGSTRING( "CMPMServer::StartForcedRoamingToWlan" )
     
     // cancel the periodic object
-    if ( iRoamingToWlanPeriodic != NULL )
+    if ( iRoamingToWlanPeriodic )
         {
         iRoamingToWlanPeriodic->Cancel();
         }
@@ -1553,6 +1551,11 @@ TInt CMPMServer::StartForcedRoamingToConnectedWlanL( TAny* aUpdater )
     {
     MPMLOGSTRING( "CMPMServer::StartForcedRoamingToConnectedWlanL" );
     static_cast<CMPMServer*>( aUpdater )->StartForcedRoamingToWlanL( 
+            static_cast<CMPMServer*>( aUpdater )->iConnMonIapInfo );
+    // Added also execution of policy based roaming logic because
+    // connections that are in EStarting state, when WLAN signal
+    // gets weak, would remain in WLAN as long as signal is weak. 
+    static_cast<CMPMServer*>( aUpdater )->StartForcedRoamingFromWlanL(
             static_cast<CMPMServer*>( aUpdater )->iConnMonIapInfo );
     return 0;
     }
@@ -2016,6 +2019,61 @@ void CMPMServer::SetOfflineWlanQueryResponse( TOfflineWlanQueryResponse aRespons
     MPMLOGSTRING( "CMPMServer::SetOfflineWlanQueryResponse" )
 
     iOfflineWlanQueryResponse = aResponse;
+    }
+
+// ---------------------------------------------------------------------------
+// CMPMServer::StartConnPermQueryTimer
+// Starts the connection permission query timer.
+// ---------------------------------------------------------------------------
+//
+void CMPMServer::StartConnPermQueryTimer()
+    {
+    MPMLOGSTRING( "CMPMServer::StartConnPermQueryTimer" )
+
+    if ( !iConnPermQueryTimer )
+        {
+        TRAPD( err, iConnPermQueryTimer = CMPMConnPermQueryTimer::NewL( this ) );
+        if ( err == KErrNone )
+            {
+            iConnPermQueryTimer->StartTimer();
+            MPMLOGSTRING( "CMPMServer::StartConnPermQueryTimer: Ok." )
+            }
+        }
+    }
+
+// ---------------------------------------------------------------------------
+// CMPMServer::ResetConnPermQueryTimer
+// Resets the connection permission query timer.
+// ---------------------------------------------------------------------------
+//
+void CMPMServer::ResetConnPermQueryTimer()
+    {
+    MPMLOGSTRING( "CMPMServer::ResetConnPermQueryTimer" )
+
+    if ( iConnPermQueryTimer )
+        {
+        delete iConnPermQueryTimer;
+        iConnPermQueryTimer = NULL;
+        MPMLOGSTRING( "CMPMServer::ResetConnPermQueryTimer: Ok." )
+        }
+    }
+
+// ---------------------------------------------------------------------------
+// CMPMServer::IsConnPermQueryTimerOn
+// Tells if the connection permission query timer is on.
+// ---------------------------------------------------------------------------
+//
+TBool CMPMServer::IsConnPermQueryTimerOn()
+    {
+    MPMLOGSTRING( "CMPMServer::IsConnPermQueryTimerOn" )
+
+    TBool retval = EFalse;
+    if ( iConnPermQueryTimer )
+        {
+        retval = ETrue;
+        MPMLOGSTRING( "CMPMServer::IsConnPermQueryTimerOn: Yes." )
+        }
+    return retval;
     }
 
 // -----------------------------------------------------------------------------

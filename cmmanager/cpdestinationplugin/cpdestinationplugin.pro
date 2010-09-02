@@ -25,6 +25,8 @@ LIBS += -lcpframework \
 symbian*::LIBS += -lcmmanager
 RESOURCES = res/cpdestinationplugin.qrc
 
+DOCML += res/cpdestinationplugindialogs.docml
+
 # Sources
 HEADERS += inc/cpiapitem.h \
     inc/cpdestinationplugin.h \

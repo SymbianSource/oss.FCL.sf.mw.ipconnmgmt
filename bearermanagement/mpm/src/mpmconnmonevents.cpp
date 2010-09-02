@@ -51,7 +51,8 @@ CMPMConnMonEvents* CMPMConnMonEvents::NewL( CMPMServer& aServer )
 // 
 CMPMConnMonEvents::CMPMConnMonEvents( CMPMServer& aServer )
     : iMyServer( aServer ),
-      iDiscardAvailabilityNotification( EFalse )
+      iDiscardAvailabilityNotification( EFalse ),
+      iAvailabilityNotificationDiscarded( EFalse )
     {
     }
 
@@ -466,6 +467,7 @@ void CMPMConnMonEvents::IapAvailabilityChange( const TPrefIAPNotifCaller aCaller
     if ( ( iAvailableIAPs.Count() > 0 ) && 
          !DiscardAvailabilityNotification() )
         {
+        iAvailabilityNotificationDiscarded = EFalse;
         // Remove temporary blacklistings as fresh availability 
         // info is available.
         // 
@@ -479,6 +481,7 @@ void CMPMConnMonEvents::IapAvailabilityChange( const TPrefIAPNotifCaller aCaller
         }
     else
         {
+        iAvailabilityNotificationDiscarded = ETrue;
         MPMLOGSTRING2( "CMPMConnMonEvents::EventL - IAPs count: %d", 
             iAvailableIAPs.Count() )
         MPMLOGSTRING2( 
