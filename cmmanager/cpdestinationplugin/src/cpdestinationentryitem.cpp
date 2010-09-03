@@ -187,10 +187,10 @@ void CpDestinationEntryItemData::constructSettingView(CpBaseSettingView *view) c
         if (mDestinationId != 0) {
             CmDestinationShim *destination = mCmm->destination(mDestinationId);
             CMManagerShim::CmmProtectionLevel level = destination->protectionLevel();
-            if (level == CMManagerShim::ProtLevel3) {
-                apProtected = apList[i]->getBoolAttribute(CMManagerShim::CmProtected);
-            } else if (level == CMManagerShim::ProtLevel1) {
+            if (level == CMManagerShim::ProtLevel1) {
                 apProtected = true;
+            } else {
+                apProtected = apList[i]->getBoolAttribute(CMManagerShim::CmProtected);
             }
             delete destination;
         }
