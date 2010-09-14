@@ -207,6 +207,7 @@ void CMPMWlanQueryDialog::RunL()
             {
             iIapSelection.Session()->MyServer().SetOfflineWlanQueryResponse(
                     EOfflineResponseNo );
+            iIapSelection.Session()->MyServer().StartOfflineQueryTimer();
             MPMLOGSTRING2( "CMPMWlanQueryDialog::RunL offline query returned %d", 
                            iStatus.Int() )
             }
@@ -474,14 +475,22 @@ void CMPMWlanQueryDialog::StartWlanQueryL()
             iIapSelection.UserWlanSelectionDoneL( KErrPermissionDenied, iWlanIapId );
             }
         else
-            {
-            MPMLOGSTRING( "CMPMWlanQueryDialog::StartWlanQuery, starting offline note" )            
+            {         
             iWlanQueryState = EOffline;
-            iNotifier.StartNotifierAndGetResponse( iStatus, 
-                                                   KUidCOfflineWlanNoteDlg, 
-                                                   KNullDesC8(), 
-                                                   iOfflineReply );
-            SetActive();
+            if ( !iIapSelection.Session()->MyServer().IsOfflineQueryTimerOn() )
+                {
+                MPMLOGSTRING( "CMPMWlanQueryDialog::StartWlanQuery, starting offline query" )        
+                iNotifier.StartNotifierAndGetResponse( iStatus, 
+                                                       KUidCOfflineWlanNoteDlg, 
+                                                       KNullDesC8(), 
+                                                       iOfflineReply );
+                SetActive();
+                }
+            else
+                {
+                MPMLOGSTRING( "CMPMWlanQueryDialog::StartWlanQuery, offline note not shown as OfflineQueryTimer is active" )        
+                iIapSelection.UserWlanSelectionDoneL( KErrPermissionDenied, iWlanIapId );
+                }
             }
         }
     // if easy wlan iap and some wlan iap started, use existing connection

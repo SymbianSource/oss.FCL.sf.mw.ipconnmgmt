@@ -21,6 +21,7 @@ S60 MCPR states implementation
 */
 
 #include <cdblen.h>
+#include <comms-infras/mobilitymcpractivities.h>
 
 #include "s60mcprstates.h"
 
@@ -389,6 +390,99 @@ TBool TAwaitingServiceIdRequest::Accept()
         return EFalse;
         }
     }
+
+
+// -----------------------------------------------------------------------------
+// TAwaitingStopIAPNotification::Accept
+// -----------------------------------------------------------------------------
+//
+DEFINE_SMELEMENT( TAwaitingStopIAPNotification, NetStateMachine::MState, TContext )
+TBool TAwaitingStopIAPNotification::Accept()
+    {  
+    TUint32 iapId( 0 );
+    TCFS60MCPRMessage::TMPMStopIAPNotificationMsg* msg =
+            message_cast<TCFS60MCPRMessage::TMPMStopIAPNotificationMsg>(&iContext.iMessage);
+    if ( msg )
+        {
+        iapId = msg->iValue;
+        // Only accept the notification if it matches current service provider, or if the IAP is undefined
+        if ( iContext.Node().ServiceProvider() &&
+             (((RMetaServiceProviderInterface*)iContext.Node().ServiceProvider())->ProviderInfo().APId() == iapId ||
+             iapId == 0 ) )
+            {
+            return ETrue;
+            }
+#ifdef _DEBUG
+        else
+            {
+            S60MCPRLOGSTRING2("S60MCPR<%x>::TAwaitingStopIAPNotification() NO MATCH! IAP %d",(TInt*)this,iapId);
+            }
+#endif        
+        }    
+    return EFalse;
+    }
+
+// -----------------------------------------------------------------------------
+// TProcessError::DoL
+// -----------------------------------------------------------------------------
+//
+DEFINE_SMELEMENT( TSendStop, NetStateMachine::MStateTransition, TContext )
+void TSendStop::DoL() // codescanner::leave
+    {
+    __ASSERT_DEBUG(iContext.iNodeActivity, User::Panic(KS60MCprPanic, KPanicNoActivity));
+    __ASSERT_DEBUG(iContext.Node().ServiceProvider(), User::Panic(KS60MCprPanic, KPanicNoServiceProvider));    
+    
+    // Send TStop to current Service Provider.
+    iContext.iNodeActivity->PostRequestTo( 
+            iContext.Node().ServiceProvider()->RecipientId(), 
+            TCFServiceProvider::TStop( KErrDisconnected ).CRef() );
+    }
+
+// -----------------------------------------------------------------------------
+// TAwaitingStoppedOrError::Accept
+// -----------------------------------------------------------------------------
+//
+DEFINE_SMELEMENT( TAwaitingStoppedOrError, NetStateMachine::MState, TContext )
+TBool TAwaitingStoppedOrError::Accept()
+    {
+    __ASSERT_DEBUG(iContext.iNodeActivity, User::Panic(KS60MCprPanic, KPanicNoActivity));
+    
+    if ( iContext.iMessage.IsMessage<TCFServiceProvider::TStopped>() )
+        {
+        return ETrue;
+        }
+    
+    // Error is returned if S60MCPR leaves IPProtoMCPr before Stopped is received
+    if( iContext.iMessage.IsMessage<TEBase::TError>() )
+        {
+        // Ignore the error code. It's better than crashing.
+        // Propagating might lead to situation where self-posted message ends up to a dead node.
+        return ETrue;
+        }    
+    
+    // Rare scenario: if the stopping service provider is sending a TStateChange message, 
+    // and a mobility activity is ongoing, the message must be ignored in order to keep
+    // harmful connection stages such as KLinkLayerClosed from reaching the client    
+    TUint32 mobilityActivities = iContext.Node().CountActivities( ECFActivityMCprMobility );
+    TBool isStateChange = iContext.iMessage.IsMessage<TCFMessage::TStateChange>();
+    TBool isServProvider = 
+            iContext.iPeer &&
+            iContext.iPeer->Type() == TCFClientType::EServProvider &&
+            iContext.iPeer->Flags() & TCFClientType::EActive;
+    
+    S60MCPRLOGSTRING4("S60MCPR<%x>::TAwaitingStoppedOrError() M %d, SC %d, SP %d",(TInt*)this,
+            mobilityActivities, isStateChange, isServProvider );
+        
+    if ( isStateChange && isServProvider && mobilityActivities > 0 )
+        {
+        // Discard the message 
+        iContext.iMessage.ClearMessageId();
+        }
+
+    return EFalse;
+    }
+
+
 
 // -----------------------------------------------------------------------------
 // TRetrieveServiceId::DoL

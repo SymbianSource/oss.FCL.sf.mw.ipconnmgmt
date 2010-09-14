@@ -201,6 +201,8 @@ class CMPMDefaultConnection;
 class CMPMWlanQueryDialog;
 class CMPMDialog;
 class CMPMConnPermQueryTimer;
+class CMPMOfflineQueryTimer;
+class CMPMConnSelectionDlgTimer;
 
 // CLASS DECLARATION
 /**
@@ -966,7 +968,49 @@ class CMPMServer : public CPolicyServer
         * @return ETrue if timer is running, EFalse otherwise.
         */
         TBool IsConnPermQueryTimerOn();
+        
+        /**
+        * Starts the offline query timer.
+        * During the timer, offline query can not be initiated.
+        * @since 5.2
+        */
+        void StartOfflineQueryTimer();
 
+        /**
+        * Resets the offline query timer.
+        * @since 5.2
+        */
+        void ResetOfflineQueryTimer();
+
+        /**
+        * Returns true if the offline query timer is running.
+        * During the timer, offline query can not be initiated.
+        * @since 5.2
+        * @return ETrue if timer is running, EFalse otherwise.
+        */
+        TBool IsOfflineQueryTimerOn();
+        
+        /**
+        * Starts the connection selection dialog timer.
+        * During the timer, connection selection dialog can not be initiated.
+        * @since 5.2
+        */
+         void StartConnSelectionDlgTimer();
+
+        /**
+        * Resets the connection selection dialog timer.
+        * @since 5.2
+        */
+         void ResetConnSelectionDlgTimer();
+
+        /**
+        * Returns true if the connection selection dialog timer is running.
+        * During the timer, connection selection dialog can not be initiated.
+        * @since 5.2
+        * @return ETrue if timer is running, EFalse otherwise.
+        */
+         TBool IsConnSelectionDlgTimerOn();
+         
     private:
 
         /**
@@ -1001,6 +1045,7 @@ class CMPMServer : public CPolicyServer
          * @param aIapId Iap id for checking
          */
         void CheckIapForDisconnect( TInt aIapId );
+        
 
     private: // Data
         // Pointer to the ConnMonEvents object
@@ -1119,6 +1164,13 @@ class CMPMServer : public CPolicyServer
         
         // Connection permission query cancellation delay timer
         CMPMConnPermQueryTimer* iConnPermQueryTimer;
+        
+        // Offline query cancellation delay timer
+        CMPMOfflineQueryTimer* iOfflineQueryTimer;
+        
+        // Connection selection dialog cancellation delay timer         
+        CMPMConnSelectionDlgTimer* iConnSelectionDlgTimer;
+      
     };
 
 #include "mpmserver.inl"

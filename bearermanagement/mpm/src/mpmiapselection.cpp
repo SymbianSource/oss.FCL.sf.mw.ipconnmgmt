@@ -835,6 +835,13 @@ void CMPMIapSelection::HandleUserSelectionError( TInt aError  )
     ChooseIapComplete( aError, NULL );
     delete iDialog;
     iDialog = NULL;
+    // Start ConnSelectionDlgTimer if user has cancelled the connection
+    // selection dialog. During the timer interval dialog is not shown.
+    // 
+    if( aError == KErrCancel )
+        {
+        iSession->MyServer().StartConnSelectionDlgTimer();
+        }
     }
 
        
@@ -1022,13 +1029,22 @@ void CMPMIapSelection::ImplicitConnectionIapSelectionL()
     MPMLOGSTRING( "CMPMIapSelection::ImplicitConnectionIapSelectionL" )
     iSession->AvailableUnblacklistedIapsL( iStoredAvailableIaps, iSession->ConnectionId() );
 
-    // Create and initiate user dialog
+    // Create and initiate user dialog only if it hasnot 
+    // been cancelled in last 10s(KTimeout)
     //
-    iDialog = CMPMDialog::NewL( *this,
+    if ( !iSession->MyServer().IsConnSelectionDlgTimerOn() )
+        {
+       iDialog = CMPMDialog::NewL( *this,
                                 iStoredAvailableIaps,
                                 iChooseIapPref.BearerSet(),
                                 *iSession->MyServer().ConnectDialogQueue(),
                                 iSession->MyServer() );
+        }
+    else
+        {
+        MPMLOGSTRING( "CMPMIapSelection::ImplicitConnectionIapSelectionL, iConnSelectionDlgTimer running" )	
+        ChooseIapComplete( KErrCancel, NULL );        
+        }
     }
 
 // -----------------------------------------------------------------------------
@@ -1136,9 +1152,14 @@ void CMPMIapSelection::ChooseBestIAPL(
         ret = aAvailableIAPs.Find( destNetIaps[k].iIapId );
         if ( ret == KErrNotFound )
             {
-            MPMLOGSTRING2( "CMPMIapSelection::ChooseBestIAPL: \
-Remove unavailable IAP = %i", destNetIaps[k].iIapId )
-            destNetIaps.Remove( k );
+            TBool isTunDriver = iCommsDatAccess->IsTunDriverIap(
+                    destNetIaps[k].iIapId );
+            if ( !isTunDriver )
+                {
+                MPMLOGSTRING2( "CMPMIapSelection::ChooseBestIAPL: \
+                     Remove unavailable IAP = %i", destNetIaps[k].iIapId )
+                destNetIaps.Remove( k );
+                }
             }
         }
 
@@ -1154,11 +1175,14 @@ Remove unavailable IAP = %i", destNetIaps[k].iIapId )
             ret = aAvailableIAPs.Find( embeddedIaps[m].iIapId );
             if ( ret == KErrNotFound )
                 {
-                // Remove IapId because it's not available
-                // 
-                MPMLOGSTRING2( "CMPMIapSelection::ChooseBestIAPL: \
+                TBool isTunDriver = iCommsDatAccess->IsTunDriverIap( embeddedIaps[m].iIapId );
+                if ( !isTunDriver )
+                    {
+                    // Remove IapId because it's not available
+                    MPMLOGSTRING2( "CMPMIapSelection::ChooseBestIAPL: \
 Remove unavailable IAP = %i", embeddedIaps[m].iIapId )
-                              embeddedIaps.Remove( m );
+                                   embeddedIaps.Remove( m );
+                    }
                 }
             }
         }

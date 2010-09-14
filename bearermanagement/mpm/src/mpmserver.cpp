@@ -47,6 +47,8 @@ Mobility Policy Manager server implementation.
 #include "mpmpropertydef.h"
 #include "mpmofflinewatcher.h"
 #include "mpmconnpermquerytimer.h"
+#include "mpmofflinequerytimer.h"
+#include "mpmconnselectiondlgtimer.h"
 
 // ============================= LOCAL FUNCTIONS ===============================
 
@@ -381,6 +383,10 @@ CMPMServer::~CMPMServer()
     delete iCommsDatAccess;
     
     delete iConnPermQueryTimer;
+    
+    delete iOfflineQueryTimer; 
+    
+    delete iConnSelectionDlgTimer;
     }
 
 
@@ -1956,6 +1962,10 @@ TInt CMPMServer::StartForcedRoamingToConnectedWlanL( TAny* aUpdater )
         // cancel the periodic object        
         self->iRoamingToWlanPeriodic->Cancel();
         self->StartForcedRoamingToWlanL( self->iConnMonIapInfo );
+        // Added also execution of policy based roaming logic because
+        // connections that are in EStarting state, when WLAN signal
+        // gets weak, would remain in WLAN as long as signal is weak. 
+        self->StartForcedRoamingFromWlanL( self->iConnMonIapInfo );
         }
     return 0;
     }
@@ -1973,6 +1983,10 @@ TInt CMPMServer::StartForcedRoamingToConnectedHotspotWlanL( TAny* aUpdater )
         // cancel the periodic object
         self->iRoamingToHotspotWlanPeriodic->Cancel();
         self->StartForcedRoamingToWlanL( self->iConnMonIapInfo );
+        // Added also execution of policy based roaming logic because
+        // connections that are in EStarting state, when WLAN signal
+        // gets weak, would remain in WLAN as long as signal is weak. 
+        self->StartForcedRoamingFromWlanL( self->iConnMonIapInfo );
         }
     return 0;
     }
@@ -2379,6 +2393,116 @@ TBool CMPMServer::IsConnPermQueryTimerOn()
     return retval;
     }
 
+// ---------------------------------------------------------------------------
+// CMPMServer::StartOfflineQueryTimer
+// Starts the offline query timer.
+// ---------------------------------------------------------------------------
+//
+void CMPMServer::StartOfflineQueryTimer()
+    {
+    MPMLOGSTRING( "CMPMServer::StartOfflineQueryTimer" )
+
+    if ( !iOfflineQueryTimer )
+        {
+        TRAPD( err, iOfflineQueryTimer = CMPMOfflineQueryTimer::NewL( this ) );
+        if ( err == KErrNone )
+            {
+            iOfflineQueryTimer->StartTimer();
+            MPMLOGSTRING( "CMPMServer::StartOfflineQueryTimer: Ok." )
+            }
+        }
+    }
+
+// ---------------------------------------------------------------------------
+// CMPMServer::ResetOfflineQueryTimer
+// Resets the offline query timer.
+// ---------------------------------------------------------------------------
+//
+void CMPMServer::ResetOfflineQueryTimer()
+    {
+    MPMLOGSTRING( "CMPMServer::ResetOfflineQueryTimer" )
+
+    if ( iOfflineQueryTimer )
+        {
+        delete iOfflineQueryTimer;
+        iOfflineQueryTimer = NULL;
+        MPMLOGSTRING( "CMPMServer::ResetOfflineQueryTimer: Ok." )
+        }
+    }
+
+// ---------------------------------------------------------------------------
+// CMPMServer::IsOfflineQueryTimerOn
+// Tells if the offline query timer is on.
+// ---------------------------------------------------------------------------
+//
+TBool CMPMServer::IsOfflineQueryTimerOn()
+    {
+    MPMLOGSTRING( "CMPMServer::IsOfflineQueryTimerOn" )
+
+    TBool retval = EFalse;
+    if ( iOfflineQueryTimer )
+        {
+        retval = ETrue;
+        MPMLOGSTRING( "CMPMServer::IsOfflineQueryTimerOn: Yes." )
+        }
+    return retval;
+    }
+
+// ---------------------------------------------------------------------------
+// CMPMServer::StartConnSelectionDlgTimer
+// Starts the connection selection dialog timer.
+// ---------------------------------------------------------------------------
+//
+void CMPMServer::StartConnSelectionDlgTimer()
+    {
+    MPMLOGSTRING( "CMPMServer::StartConnSelectionDlgTimer" )
+
+    if ( !iConnSelectionDlgTimer )
+        {
+        TRAPD( err, iConnSelectionDlgTimer = CMPMConnSelectionDlgTimer::NewL( this ) );
+        if ( err == KErrNone )
+            {
+            iConnSelectionDlgTimer->StartTimer();
+            MPMLOGSTRING( "CMPMServer::StartConnSelectionDlgTimer: Ok." )
+            }
+        }
+    }
+
+// ---------------------------------------------------------------------------
+// CMPMServer::ResetConnSelectionDlgTimer
+// Resets the connection selection dialog timer.
+// ---------------------------------------------------------------------------
+//
+void CMPMServer::ResetConnSelectionDlgTimer()
+    {
+    MPMLOGSTRING( "CMPMServer::ResetConnSelectionDlgTimer" )
+
+    if ( iConnSelectionDlgTimer )
+        {
+        delete iConnSelectionDlgTimer;
+        iConnSelectionDlgTimer = NULL;
+        MPMLOGSTRING( "CMPMServer::ResetConnSelectionDlgTimer: Ok." )
+        }
+    }
+
+// ---------------------------------------------------------------------------
+// CMPMServer::IsConnSelectionDlgTimerOn
+// Tells if the connection selection dialog timer is on.
+// ---------------------------------------------------------------------------
+//
+TBool CMPMServer::IsConnSelectionDlgTimerOn()
+    {
+    MPMLOGSTRING( "CMPMServer::IsConnSelectionDlgTimerOn" )
+
+    TBool retval = EFalse;
+    if ( iConnSelectionDlgTimer )
+        {
+        retval = ETrue;
+        MPMLOGSTRING( "CMPMServer::IsConnSelectionDlgTimerOn: Yes." )
+        }
+    return retval;
+    }
+    
 // -----------------------------------------------------------------------------
 // CMPMServer::CheckIapForDisconnect
 // -----------------------------------------------------------------------------

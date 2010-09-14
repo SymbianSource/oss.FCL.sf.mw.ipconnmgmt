@@ -32,7 +32,8 @@ class CS60MetaConnectionProvider;
 
 enum TS60MCprActivities
     {
-    ECFActivityS60McprServiceIdMessage2Handler = ESock::ECFActivityCustom + 10
+    ECFActivityS60McprServiceIdMessage2Handler = ESock::ECFActivityCustom + 10,
+    ECFActivityS60McprStopIAP
     };
 
 /**

@@ -381,23 +381,14 @@ void CS60MetaConnectionProvider::PolicyNotification( TMpmNotification& aNotifica
             TMpmNotificationStopIAP& notification = 
                 static_cast<TMpmNotificationStopIAP&>( const_cast<TMpmNotification&>( aNotification ) );
 
-            // Allow TStop message only when ServiceProvider exists and the IAP matches or is unspecified. 
-            // 
-            if ( ServiceProvider() && 
-                    (((RMetaServiceProviderInterface*)ServiceProvider())->ProviderInfo().APId() == notification.iInfo.iIap ||
-                    notification.iInfo.iIap == 0 )) 
-                {
-                S60MCPRLOGSTRING2("S60MCPR<%x>::PolicyNotification() EMPMStopIAPNotification IAP %d",(TInt*)this,notification.iInfo.iIap);
-                PostToClients<TDefaultClientMatchPolicy>( TNodeCtxId( 0, Id() ),
-                                                          TCFServiceProvider::TStop( KErrDisconnected ).CRef(),
-                                                          TClientType( TCFClientType::EServProvider) );
-                }
-#ifdef _DEBUG
-            else
-                {
-                S60MCPRLOGSTRING2("S60MCPR<%x>::PolicyNotification() EMPMStopIAPNotification NO MATCH! IAP %d",(TInt*)this,notification.iInfo.iIap);
-                }
-#endif
+            S60MCPRLOGSTRING2("S60MCPR<%x>::PolicyNotification() EMPMStopIAPNotification IAP %d",(TInt*)this, notification.iInfo.iIap);
+           
+            // Send stop notification into meshmachine.
+            //
+            RNodeInterface ni;
+            ni.OpenPostMessageClose( NodeId(), 
+                                     NodeId(), 
+                                     TCFS60MCPRMessage::TMPMStopIAPNotificationMsg( notification.iInfo.iIap ).CRef() );
             break;
             }
         default:

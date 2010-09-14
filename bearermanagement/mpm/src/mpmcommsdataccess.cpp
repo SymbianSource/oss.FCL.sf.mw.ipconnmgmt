@@ -1787,6 +1787,34 @@ TWlanIapType CMPMCommsDatAccess::CheckWlanL( TUint32 aIapId ) const
     }
 
 // -----------------------------------------------------------------------------
+// CMPMCommsDatAccess::IsTunDriverIap
+// -----------------------------------------------------------------------------
+//
+TBool CMPMCommsDatAccess::IsTunDriverIap( TUint32 aIapId ) const
+    {
+    TBool isTunDriver = EFalse;
+    MPMLOGSTRING( "CMPMCommsDatAccess::IsTunDriverIap" )
+
+    CMDBSession* db = CMDBSession::NewLC( KCDVersion1_1 );
+    CCDIAPRecord* record = LoadIapRecordLC( aIapId, db );
+
+    TBuf<KMaxTextLength> bearerTypeName( record->iBearerType.GetL() );
+    TBuf<KMaxTextLength> serviceTypeName( record->iServiceType.GetL() );
+
+    if ( (bearerTypeName == TPtrC( KCDTypeNameVirtualBearer ) )
+            && ( serviceTypeName == TPtrC( KCDTypeNameLANService ) ) )
+        {
+        // TunDriver;
+        isTunDriver = ETrue;
+        }
+
+    CleanupStack::PopAndDestroy( record );
+    CleanupStack::PopAndDestroy( db );
+
+    return isTunDriver;
+    }
+
+// -----------------------------------------------------------------------------
 // CMPMCommsDatAccess::RemoveCategorisedIapsL
 // -----------------------------------------------------------------------------
 //

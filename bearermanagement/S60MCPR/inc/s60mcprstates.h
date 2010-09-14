@@ -172,6 +172,39 @@ namespace S60MCprStates
     virtual void DoL();
     DECLARE_SMELEMENT_FOOTER( TRetrieveServiceId )
 
+    /**
+     * STATE: Waits for StopIAPNotification message. 
+     * @return ETrue if message is accepted. 
+     */
+    DECLARE_SMELEMENT_HEADER( TAwaitingStopIAPNotification, 
+                              MeshMachine::TState<TContext>, 
+                              NetStateMachine::MState, 
+                              TContext )
+    virtual TBool Accept();
+    DECLARE_SMELEMENT_FOOTER( TAwaitingStopIAPNotification )
+
+    /**
+     * TRANSITION/ACTION: Sends Stop to Service Provider
+     */
+    DECLARE_SMELEMENT_HEADER( TSendStop, 
+                              MeshMachine::TStateTransition<TContext>, 
+                              NetStateMachine::MStateTransition, 
+                              TContext )
+    virtual void DoL();
+    DECLARE_SMELEMENT_FOOTER( TSendStop )
+    
+    
+    /**
+     * STATE: Waits for Stopped or Error
+     * @return ETrue if message is accepted. 
+     */
+    DECLARE_SMELEMENT_HEADER( TAwaitingStoppedOrError, 
+                              MeshMachine::TState<TContext>, 
+                              NetStateMachine::MState, 
+                              TContext )
+    virtual TBool Accept();
+    DECLARE_SMELEMENT_FOOTER( TAwaitingStoppedOrError )
+        
     class CS60ErrorRecoveryActivity : public MeshMachine::CNodeRetryActivity
         {
         public:

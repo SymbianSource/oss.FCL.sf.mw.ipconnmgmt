@@ -406,6 +406,31 @@ namespace S60MCprServiceIdRMessage2HandlerActivity
     } // S60MCprServiceIdRMessage2HandlerActivity
 
 // -----------------------------------------------------------------------------
+// S60MCprStopIAPActivity
+// -----------------------------------------------------------------------------
+//
+
+namespace S60MCprStopIAPActivity
+    {
+    DECLARE_DEFINE_NODEACTIVITY( ECFActivityS60McprStopIAP, 
+                                 MCprStopIAPActivity, 
+                                 TCFS60MCPRMessage::TMPMStopIAPNotificationMsg)
+
+    FIRST_NODEACTIVITY_ENTRY( S60MCprStates::TAwaitingStopIAPNotification, 
+                              MeshMachine::TNoTag )
+                              
+    NODEACTIVITY_ENTRY( KNoTag,
+                        S60MCprStates::TSendStop,
+                        S60MCprStates::TAwaitingStoppedOrError,
+                        MeshMachine::TNoTag )
+
+    LAST_NODEACTIVITY_ENTRY( KNoTag, 
+                             MeshMachine::TDoNothing )
+
+    NODEACTIVITY_END()
+    } // S60MCprStopIAPActivity
+
+// -----------------------------------------------------------------------------
 // S60MCprActivities - activitymap
 // -----------------------------------------------------------------------------
 //
@@ -419,6 +444,7 @@ namespace S60MCprActivities
     ACTIVITY_MAP_ENTRY(S60MCprMobilityActivity, MCprMobility) // in s60mcprmobilityactivity.cpp
     ACTIVITY_MAP_ENTRY(S60MCprConnectionGoneDownRecoveryActivity, MCprConnectionGoneDownRecovery)
     ACTIVITY_MAP_ENTRY(S60MCprServiceIdRMessage2HandlerActivity, S60MCprServiceIdLegacyRMessage2Handler)
+    ACTIVITY_MAP_ENTRY(S60MCprStopIAPActivity, MCprStopIAPActivity)
     ACTIVITY_MAP_END_BASE(MobilityMCprActivities, mobilityMCprActivities)
     }
 
