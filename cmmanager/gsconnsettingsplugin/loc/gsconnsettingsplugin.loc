@@ -90,11 +90,11 @@
 
 
 //d:Text of a list item in Connectivity Settings plugin main view's list
-//d:Item opens "Cellular data usage in home network" radio button setting page
+//d:Item opens "Cellular data usage in home country" radio button setting page
 //l:list_setting_pane_t1
 //w:
 //r: 5.2
-#define qtn_occ_sett_data_usage_home_nw "Cellular data usage in home network"
+#define qtn_occ_sett_data_usage_home_nw "Cellular data usage in home country"
 
 //d:Text in radio button list
 //l:list_set_graphic_pane_t1

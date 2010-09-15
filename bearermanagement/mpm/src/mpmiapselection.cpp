@@ -81,9 +81,9 @@ CMPMIapSelection::~CMPMIapSelection()
     {
     // stop confirm dialog in case one exists
     //
+    MPMLOGSTRING( "CMPMIapSelection::~CMPMIapSelection" )
     StopDisplayingStartingDlg();
     
-    delete iConfirmDlgStarting;
     delete iDialog;
     delete iWlanDialog;
     }
@@ -494,12 +494,12 @@ void CMPMIapSelection::CompleteExplicitSnapConnectionL()
     TConnectionId connId = iSession->ConnectionId();
 
     ChooseBestIAPL( iChooseIapPref, availableIAPList, iNextBestExists );
+    CleanupStack::PopAndDestroy( &availableIAPList );
     TUint32 validateIapId = iChooseIapPref.IapId();
     // Check if any suitable IAP's were found, if not then complete selection with error code
     if ( validateIapId == 0 )
         {
         ChooseIapComplete( KErrNotFound, NULL );
-        CleanupStack::PopAndDestroy( &availableIAPList );
         return;
         }
     
@@ -590,13 +590,9 @@ void CMPMIapSelection::CompleteExplicitSnapConnectionL()
                         EStarting,
                         *iSession );
                 ChooseIapComplete( KErrNone, &iChooseIapPref );
-
                 }
-
             }
         }
-
-    CleanupStack::PopAndDestroy( &availableIAPList );    
     }
 
 // -----------------------------------------------------------------------------
@@ -730,40 +726,20 @@ void CMPMIapSelection::ChooseIapComplete(
     {
     MPMLOGSTRING2( "CMPMIapSelection::ChooseIapComplete aError = %d", aError )
     
-    if ( ( aError == KErrNone ) &&
-        !( iChooseIapPref.NoteBehaviour() &
-           TExtendedConnPref::ENoteBehaviourConnDisableNotes ) )
-        {
-        TConnectionState state =
-            iSession->MyServer().CheckUsageOfIap( aPolicyPref->IapId(), 
-                                                  iSession->ConnectionId() );
-        TBool connectionAlreadyActive = (state == EStarted || state == EStarting || state == ERoaming);
-        if ( !connectionAlreadyActive &&
-                ( iSession->IsMMSIap( aPolicyPref->IapId() ) == EFalse ) )
-            {
-            CConnectionUiUtilities* connUiUtils( NULL );
-            TRAPD( popupError, connUiUtils = CConnectionUiUtilities::NewL() );
-            if ( popupError == KErrNone )
-        	    {
-            	connUiUtils->ConnectingViaDiscreetPopup( aPolicyPref->IapId() );
-               	delete connUiUtils;
-        	    }
-            }
-        }
-    
     if( iWlanDialog )
         {
         delete iWlanDialog;
         iWlanDialog = NULL;
         }
 
-    iSession->ChooseIapComplete( aError, aPolicyPref );
     // Set choose iap state to none
     iChooseIapState = ENoConnection;
     iNextBestExists = EFalse;
     iUserSelectionSnapId = 0;
     iUserSelectionIapId = 0;
     iImplicitState = EImplicitStart;
+
+	iSession->ChooseIapComplete( aError, aPolicyPref );
     }
 
 
@@ -1055,25 +1031,25 @@ void CMPMIapSelection::ImplicitConnectionL()
     {
     if( iImplicitState  == EImplicitStart )
         {
-        MPMLOGSTRING( "CMPMIapSelection::ImplicitConnectionIapSelectionL EImplicitStart" )
+        MPMLOGSTRING( "CMPMIapSelection::ImplicitConnectionL EImplicitStart" )
         iImplicitState = EImplicitWlanScan;
         ImplicitConnectionCheckWlanScanNeededL();
         }
     else if( iImplicitState  == EImplicitWlanScan )
         {
-        MPMLOGSTRING( "CMPMIapSelection::ImplicitConnectionIapSelectionL EImplicitWlanScan" )
+        MPMLOGSTRING( "CMPMIapSelection::ImplicitConnectionL EImplicitWlanScan" )
         iImplicitState = EImplicitUserSelection;
         ImplicitConnectionIapSelectionL();
         }
     else if( iImplicitState  == EImplicitUserSelection )
         {
-        MPMLOGSTRING( "CMPMIapSelection::ImplicitConnectionIapSelectionL EImplicitUserSelection" )
+        MPMLOGSTRING( "CMPMIapSelection::ImplicitConnectionL EImplicitUserSelection" )
         iImplicitState = EImplicitWlanQuery;
         ImplicitConnectionWlanNoteL();
         }
     else //EImplicitWlanQuery
         {
-        MPMLOGSTRING( "CMPMIapSelection::ImplicitConnectionIapSelectionL EImplicitWlanQuery" )
+        MPMLOGSTRING( "CMPMIapSelection::ImplicitConnectionL EImplicitWlanQuery" )
         CompleteImplicitConnectionL();
         }
     }

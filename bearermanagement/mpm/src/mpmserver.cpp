@@ -798,7 +798,9 @@ TUint32 CMPMServer::IsWlanConnectionStartedL( const CMPMCommsDatAccess* aCdbAcce
         if ( iActiveBMConns[i].iConnInfo.iState == EStarting ||
              iActiveBMConns[i].iConnInfo.iState == EStarted )
             {
-            if ( aCdbAccess->CheckWlanL( iActiveBMConns[i].iConnInfo.iIapId ) != ENotWlanIap )
+            TWlanIapType iapType( ENotWlanIap );             	
+            TRAPD ( leave, iapType = aCdbAccess->CheckWlanL( iActiveBMConns[i].iConnInfo.iIapId ) )             	
+            if ( ( leave == KErrNone ) && ( iapType != ENotWlanIap ) )
                 {
                 stopLoop = ETrue;
                 iapId = iActiveBMConns[i].iConnInfo.iIapId;
@@ -1961,11 +1963,21 @@ TInt CMPMServer::StartForcedRoamingToConnectedWlanL( TAny* aUpdater )
         {
         // cancel the periodic object        
         self->iRoamingToWlanPeriodic->Cancel();
-        self->StartForcedRoamingToWlanL( self->iConnMonIapInfo );
+        TRAPD( error, self->StartForcedRoamingToWlanL( self->iConnMonIapInfo ) )
+        if ( error )
+            {        	
+            MPMLOGSTRING2("CMPMServer::StartForcedRoamingToConnectedWlan error1 = %d, ", error )
+            return 0;
+            }
+            
         // Added also execution of policy based roaming logic because
         // connections that are in EStarting state, when WLAN signal
         // gets weak, would remain in WLAN as long as signal is weak. 
-        self->StartForcedRoamingFromWlanL( self->iConnMonIapInfo );
+        TRAP( error, self->StartForcedRoamingFromWlanL( self->iConnMonIapInfo ) )
+        if ( error )
+            {        	
+            MPMLOGSTRING2("CMPMServer::StartForcedRoamingToConnectedWlan error2 = %d, ", error )
+            }
         }
     return 0;
     }
@@ -1982,11 +1994,21 @@ TInt CMPMServer::StartForcedRoamingToConnectedHotspotWlanL( TAny* aUpdater )
         {        
         // cancel the periodic object
         self->iRoamingToHotspotWlanPeriodic->Cancel();
-        self->StartForcedRoamingToWlanL( self->iConnMonIapInfo );
+        TRAPD( error, self->StartForcedRoamingToWlanL( self->iConnMonIapInfo ) )
+        if ( error )
+            {        	
+            MPMLOGSTRING2("StartForcedRoamingToConnectedHotspotWlanL error1 = %d, ", error )
+            return 0;
+            }
+            
         // Added also execution of policy based roaming logic because
         // connections that are in EStarting state, when WLAN signal
         // gets weak, would remain in WLAN as long as signal is weak. 
-        self->StartForcedRoamingFromWlanL( self->iConnMonIapInfo );
+        TRAP( error, self->StartForcedRoamingFromWlanL( self->iConnMonIapInfo ) )
+        if ( error )
+            {        	
+            MPMLOGSTRING2("StartForcedRoamingToConnectedHotspotWlanL error2 = %d, ", error )
+            }
         }
     return 0;
     }
@@ -2027,8 +2049,9 @@ void CMPMServer::StartForcedRoamingFromWlanL( const TConnMonIapInfo& aIapInfo )
     // to a wlan not anymore listed in available iaps and not using mobility api
     for ( TInt index = 0; index < iActiveBMConns.Count(); index++ )
         {
-        if ( iCommsDatAccess->CheckWlanL( iActiveBMConns[index].iConnInfo.iIapId )
-            == EWlanIap )
+        TWlanIapType iapType( ENotWlanIap );
+        TRAPD( leave, iapType = iCommsDatAccess->CheckWlanL( iActiveBMConns[index].iConnInfo.iIapId ) )        	
+        if ( ( leave == KErrNone ) && ( iapType == EWlanIap ) )
             {
             // Check if used WLAN is still available
             TBool currentWlanIapAvailable = EFalse;

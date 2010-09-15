@@ -107,6 +107,7 @@ void CMPMServerSession::ConstructL()
 //
 CMPMServerSession::~CMPMServerSession()
     {
+    MPMLOGSTRING( "CMPMServerSession::~CMPMServerSession" )
 
 
     // Remove serverside objects for notification session.
@@ -3356,26 +3357,6 @@ void CMPMServerSession::ChooseIapComplete(
     {
     MPMLOGSTRING2( "CMPMServerSession::ChooseIapComplete aError = %d", aError )
 
-    // Show error popup if it's allowed per client request.
-	// Error popup shown to SNAP only if error discreet has not been shown for IAP.
-    if ( ChooseBestIapCalled() && (!( iIapSelection->MpmConnPref().NoteBehaviour() &
-            TExtendedConnPref::ENoteBehaviourConnDisableNotes ))
-              && ( aError != KErrNone )
-              && ( iErrorDiscreetPopupShown == EFalse ) )
-        {
-        CConnectionUiUtilities* connUiUtils = NULL;
-        TRAPD( error, connUiUtils = CConnectionUiUtilities::NewL() );
-        if ( error == KErrNone && connUiUtils )
-            {
-            // Note: Below function shows the discreet popup only if the error code
-            // belongs to the set of errors that are shown to the user.
-            // Otherwise the popup is not shown.
-            connUiUtils->ConnectionErrorDiscreetPopup( aError );
-            delete connUiUtils;
-            connUiUtils = NULL;
-            }
-        }
-    
     // Try to write back arguments and complete message.
     // 
     if ( !iChooseIapMessage.IsNull() )
@@ -3430,9 +3411,58 @@ Inconsistent state %d", KErrGeneral )
         MPMLOGSTRING( "CMPMServerSession::ChooseIapComplete Message completed" )
         iChooseIapMessage.Complete( aError );
         }
+
+    CConnectionUiUtilities* connUiUtils( NULL );
     
+    MPMLOGSTRING2( "CMPMServerSession::ChooseIapComplete: this = %X", this )
+    MPMLOGSTRING2( "CMPMServerSession::ChooseIapComplete: iIapSelection = %X", iIapSelection )
+
     // Enable showing error discreet popup for SNAP again
+    // Temp var used because session may get deleted during the showing of popup
+    TBool tempErrorDiscreetPopupShown = iErrorDiscreetPopupShown; 
     iErrorDiscreetPopupShown = EFalse;
+    
+    // NOTE: Be careful with discreet popups! It jams session at this point
+    // for a moment, BUT the session may be called meanwhile.
+    // This may/will lead to problems e.g. if session is being deleted => all (heap) objects
+    // deleted in destructor are gone!
+    // Show error popup if it's allowed per client request.
+	// Error popup shown to SNAP only if error discreet has not been shown for IAP.
+    if ( ChooseBestIapCalled() && (!( iIapSelection->MpmConnPref().NoteBehaviour() &
+            TExtendedConnPref::ENoteBehaviourConnDisableNotes ))
+              && ( aError != KErrNone )
+              && ( tempErrorDiscreetPopupShown == EFalse ) )
+        {
+        TRAPD( popupError, connUiUtils = CConnectionUiUtilities::NewL() );
+        if ( popupError == KErrNone )
+            {
+            // Note: Below function shows the discreet popup only if the error code
+            // belongs to the set of errors that are shown to the user.
+            // Otherwise the popup is not shown.
+            connUiUtils->ConnectionErrorDiscreetPopup( aError );
+            delete connUiUtils;
+            connUiUtils = NULL;
+            }
+        }
+    else if ( aPolicyPref &&
+                    ( aError == KErrNone ) &&
+                    !( iIapSelection->MpmConnPref().NoteBehaviour() &
+                            TExtendedConnPref::ENoteBehaviourConnDisableNotes ) )
+        {
+        TConnectionState state = iMyServer.CheckUsageOfIap( aPolicyPref->IapId(), iConnId );
+		TBool connectionAlreadyActive = (state == EStarted || state == EStarting || state == ERoaming);
+        if ( !connectionAlreadyActive &&
+                ( IsMMSIap( aPolicyPref->IapId() ) == EFalse ) )
+            {
+            TRAPD( popupError, connUiUtils = CConnectionUiUtilities::NewL() );
+            if ( popupError == KErrNone )
+                {
+                connUiUtils->ConnectingViaDiscreetPopup( aPolicyPref->IapId() );
+                delete connUiUtils;
+                connUiUtils = NULL;
+                }
+            }
+        }
     }
 
 
