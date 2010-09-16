@@ -36,7 +36,6 @@ using namespace CommsDat;
 class RCmConnectionMethodExt;
 class RCmDestinationExt;
 class CReaderBase;
-class CommsDat::CMDBSession;
 struct TCmGenConnSettings;
 class RCmManagerExt;
 

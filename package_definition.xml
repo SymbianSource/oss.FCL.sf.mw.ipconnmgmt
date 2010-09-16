@@ -5,10 +5,6 @@
    <component id="ipcm_plat_qt_build" name="IP Connectivity Management Qt Platform Interfaces" class="api" filter="s60" introduced="^4">
     <unit bldFile="ipcm_plat" qt:proFile="ipcm_plat.pro"/>
    </component>
-   <component id="access_point_engine_misc_api" name="Access Point Engine Misc API" class="api" filter="s60">
-    <meta rel="Api" href="ipcm_plat/access_point_engine_misc_api/access_point_engine_misc_api.metaxml"/>
-    <unit bldFile="ipcm_plat/access_point_engine_misc_api/group"/>
-   </component>
    <component id="bearer_settings_plugin_api" name="Bearer Settings Plugin API" class="api" filter="s60">
     <meta rel="Api" href="ipcm_plat/bearer_settings_plugin_api/bearer_settings_plugin_api.metaxml"/>
     <unit bldFile="ipcm_plat/bearer_settings_plugin_api/group"/>
@@ -61,14 +57,6 @@
     <meta rel="Api" href="ipcm_pub/connection_settings_api/connection_settings_api.metaxml"/>
     <unit bldFile="ipcm_pub/connection_settings_api/group"/>
    </component>
-   <component id="access_point_engine_api" name="Access Point Engine API" class="api" filter="s60">
-    <meta rel="Api" href="ipcm_pub/access_point_engine_api/access_point_engine_api.metaxml"/>
-    <unit bldFile="ipcm_pub/access_point_engine_api/group"/>
-   </component>
-   <component id="access_point_settings_handler_api" name="Access Point Settings Handler API" class="api" filter="s60">
-    <meta rel="Api" href="ipcm_pub/access_point_settings_handler_api/access_point_settings_handler_api.metaxml"/>
-    <unit bldFile="ipcm_pub/access_point_settings_handler_api/group"/>
-   </component>
    <component id="data_connection_log_counters_api" name="Data Connection Log Counters API" class="api" filter="s60">
     <meta rel="Api" href="ipcm_pub/data_connection_log_counters_api/data_connection_log_counters_api.metaxml"/>
     <unit bldFile="ipcm_pub/data_connection_log_counters_api/group"/>
@@ -93,14 +81,6 @@
   <collection id="alwayson_net_plugin" name="Always Online Net Plugin" level="server">
    <component id="pdpcontextmanager2" filter="s60" name="PDP Context Manager 2">
     <unit bldFile="alwayson_net_plugin/pdpcontextmanager2/group"/>
-   </component>
-  </collection>
-  <collection id="apengine" name="Access Point Engine" level="framework">
-   <component id="apeng" filter="s60" name="Access Point Engine">
-    <unit bldFile="apengine/apeng/group"/>
-   </component>
-   <component id="apsettingshandlerui" filter="s60" name="Access Point Settings Handler UI">
-    <unit bldFile="apengine/apsettingshandlerui/group"/>
    </component>
   </collection>
   <collection id="bearermanagement" name="Bearer Management" level="framework">

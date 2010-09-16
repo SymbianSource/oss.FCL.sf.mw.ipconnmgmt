@@ -694,6 +694,18 @@ public:
         {
         }
     /**
+    * Copy constructor.
+    */    
+    IMPORT_C TConnMonIapInfo( const TConnMonIapInfo& aConnMonIapInfo );
+
+    /**
+    * Assignment operator.
+    * 
+    * @param aConnMonIapInfo The object which is assigned.
+    */
+    IMPORT_C TConnMonIapInfo& operator=( const TConnMonIapInfo& aConnMonIapInfo );
+
+    /**
     * This method returns the number of IAPs contained in this class.
     *
     * @return Number of IAPs.

@@ -151,8 +151,7 @@ CpBaseSettingView *CpDestinationEntryItemData::createSettingView() const
     if (mDestinationId != 0 && mAps->count() > 1) {
         HbToolBar *tb = view->toolBar();
         HbIcon arrangeIcon("qtg_mono_sort");
-        HbAction *arrangeAction 
-            = tb->addAction(arrangeIcon, "", this, SLOT(activateArrangeMode()));
+        (void) tb->addAction(arrangeIcon, "", this, SLOT(activateArrangeMode()));
     }
     OstTraceFunctionExit0(CPDESTINATIONENTRYITEMDATA_CREATESETTINGVIEW_EXIT);
     return view;        
@@ -656,8 +655,7 @@ void CpDestinationEntryItemData::createArrangeModeView(HbView *view)
     // Toolbar
     HbToolBar *tb = view->toolBar();
     HbIcon okIcon("qtg_mono_tick");
-    HbAction *doneAction 
-        = tb->addAction(okIcon, "", this, SLOT(viewDone()));
+    (void) tb->addAction(okIcon, "", this, SLOT(viewDone()));
     OstTraceFunctionExit0(CPDESTINATIONENTRYITEMDATA_CREATEARRANGEMODEVIEW_EXIT);
 }
 

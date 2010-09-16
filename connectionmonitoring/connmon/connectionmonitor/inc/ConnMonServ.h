@@ -20,7 +20,6 @@
 
 #include <e32base.h>
 
-_LIT( KConnMonDLL, "ConnMon.dll" );
 _LIT( KConnMonStartupSemaphore, "ConnMonStartupSemaphore" );
 
 // Security policy

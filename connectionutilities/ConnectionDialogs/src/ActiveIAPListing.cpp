@@ -551,9 +551,9 @@ void CActiveIAPListing::BuildConnectionListL( TInt aResourceId,
     
     CRepository* cr = CRepository::NewLC( KCRUidProfileEngine );
 
-	TInt selectedProfile;
+	TInt selectedProfile( 0 );
 
-	TRAP_IGNORE( cr->Get( KProEngActiveProfile, selectedProfile ) );
+	(void) cr->Get( KProEngActiveProfile, selectedProfile );
 
 	// To get also VPN APs
     TUint bearerSet = iPrefs.iBearerSet | ECommDbBearerVirtual;

@@ -18,7 +18,7 @@
 #ifndef __CONNMON_IBY__
 #define __CONNMON_IBY__
 
-file=ABI_DIR\BUILD_DIR\CONNMON.DLL      SHARED_LIB_DIR\CONNMON.DLL
-file=ABI_DIR\BUILD_DIR\CONNMONEXE.EXE   PROGRAMS_DIR\CONNMONEXE.EXE
+file=ABI_DIR\BUILD_DIR\connmon.dll      SHARED_LIB_DIR\connmon.dll
+file=ABI_DIR\BUILD_DIR\connmonexe.exe   PROGRAMS_DIR\connmonexe.exe
 
 #endif

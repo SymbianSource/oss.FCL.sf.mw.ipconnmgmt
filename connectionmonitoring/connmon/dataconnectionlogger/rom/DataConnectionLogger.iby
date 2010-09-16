@@ -20,7 +20,7 @@
 
 #include <bldvariant.hrh>
 
-file=ABI_DIR\BUILD_DIR\Dataconnectionlogger.exe     PROGRAMS_DIR\Dataconnectionlogger.exe
+file=ABI_DIR\BUILD_DIR\dataconnectionlogger.exe     PROGRAMS_DIR\dataconnectionlogger.exe
 
 #ifndef __COMMDB_PROTECTION
 data=DATAZ_\private\101F6CFE\backup_registration.xml    private\101F6CFE\backup_registration.xml

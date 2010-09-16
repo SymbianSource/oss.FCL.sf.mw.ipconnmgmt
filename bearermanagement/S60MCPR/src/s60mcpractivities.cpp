@@ -21,6 +21,7 @@ S60 MCPR activities implementation
 */
 
 #include "s60mcpractivities.h"
+#include "s60mcpractivityids.h"
 
 using namespace Messages;
 using namespace MeshMachine;
@@ -183,6 +184,7 @@ namespace S60MCprMonitorDataClientStatusActivity
     DECLARE_DEFINE_NODEACTIVITY( ECFActivityMonitorProviderStatus, 
                                  MCprDataClientStatusChange, 
                                  TCFControlProvider::TDataClientStatusChange )
+ 
     SINGLE_NODEACTIVITY_ENTRY( S60MCprStates::THandleMPMAndCoreDataClientStatusChangeAndDestroyOrphans, 
                                CoreNetStates::TAwaitingDataClientStatusChange )
     NODEACTIVITY_END()
@@ -406,12 +408,78 @@ namespace S60MCprServiceIdRMessage2HandlerActivity
     } // S60MCprServiceIdRMessage2HandlerActivity
 
 // -----------------------------------------------------------------------------
+// S60MCprStopIAPActivity
+// -----------------------------------------------------------------------------
+//
+
+namespace S60MCprStopIAPActivity
+    {
+    DECLARE_DEFINE_NODEACTIVITY( ECFActivityS60McprStopIAP, 
+                                 MCprStopIAPActivity, 
+                                 TCFS60MCPRMessage::TMPMStopIAPNotificationMsg)
+
+    FIRST_NODEACTIVITY_ENTRY( S60MCprStates::TAwaitingStopIAPNotification, 
+                              MeshMachine::TNoTag )
+                              
+    NODEACTIVITY_ENTRY( KNoTag,
+                        S60MCprStates::TSendStop,
+                        S60MCprStates::TAwaitingStoppedOrError,
+                        MeshMachine::TNoTag )
+
+    LAST_NODEACTIVITY_ENTRY( KNoTag, 
+                             MeshMachine::TDoNothing )
+
+    NODEACTIVITY_END()
+    } // S60MCprStopIAPActivity
+
+// -----------------------------------------------------------------------------
+// S60MCprDataClientIdleActivity
+// -----------------------------------------------------------------------------
+//
+
+namespace S60MCprDataClientIdleActivity
+    {
+    DECLARE_DEFINE_CUSTOM_NODEACTIVITY( ECFActivityS60McprDataClientIdle,
+                                 MCprDataClientIdleActivity,
+                                 TCFControlProvider::TIdle,
+                                 MeshMachine::CNodeRetryActivity::NewL)
+                                 
+    FIRST_NODEACTIVITY_ENTRY( CoreNetStates::TAwaitingDataClientIdle,
+                              S60MCprStates::TStopActivityNotRunning )  
+    
+    LAST_NODEACTIVITY_ENTRY( S60MCprStates::KStopActivityNotRunning,
+                             CoreNetStates::THandleDataClientIdle )
+                             
+    NODEACTIVITY_END()
+    } // S60MCprDataClientIdleActivity
+                             
+// -----------------------------------------------------------------------------
+// S60MCprDataClientStatusChangeConsumeActivity
+// -----------------------------------------------------------------------------
+//
+
+namespace S60MCprDataClientStatusChangeConsumeActivity
+    {
+    DECLARE_DEFINE_NODEACTIVITY( ECFActivityS60DataClientStatusChangeConsumeActivity,
+                                        MCprDataClientStatusChangeConsumeActivity,
+                                        TCFControlProvider::TDataClientStatusChange)
+                                 
+    SINGLE_NODEACTIVITY_ENTRY( MeshMachine::TDoNothing,
+                               S60MCprStates::TAwaitingDataClientStatusChange ) 
+          
+    NODEACTIVITY_END()
+    } // S60MCprDataClientStatusChangeConsumeActivity
+                             
+
+
+// -----------------------------------------------------------------------------
 // S60MCprActivities - activitymap
 // -----------------------------------------------------------------------------
 //
 namespace S60MCprActivities
     {
     DEFINE_ACTIVITY_MAP(S60MCprActivityMap)
+    ACTIVITY_MAP_ENTRY(S60MCprDataClientStatusChangeConsumeActivity, MCprDataClientStatusChangeConsumeActivity)            
     ACTIVITY_MAP_ENTRY(S60MCprMonitorDataClientStatusActivity, MCprDataClientStatusChange)
 	ACTIVITY_MAP_ENTRY(S60MCprSelectActivity, S60MCprSelect) // in s60mcprsimpleselectactivity.cpp
     ACTIVITY_MAP_ENTRY(S60MCprSimpleSelectActivity, MCprSimpleSelect) // in s60mcprsimpleselectactivity.cpp
@@ -419,6 +487,8 @@ namespace S60MCprActivities
     ACTIVITY_MAP_ENTRY(S60MCprMobilityActivity, MCprMobility) // in s60mcprmobilityactivity.cpp
     ACTIVITY_MAP_ENTRY(S60MCprConnectionGoneDownRecoveryActivity, MCprConnectionGoneDownRecovery)
     ACTIVITY_MAP_ENTRY(S60MCprServiceIdRMessage2HandlerActivity, S60MCprServiceIdLegacyRMessage2Handler)
+    ACTIVITY_MAP_ENTRY(S60MCprStopIAPActivity, MCprStopIAPActivity)
+    ACTIVITY_MAP_ENTRY(S60MCprDataClientIdleActivity, MCprDataClientIdleActivity)
     ACTIVITY_MAP_END_BASE(MobilityMCprActivities, mobilityMCprActivities)
     }
 

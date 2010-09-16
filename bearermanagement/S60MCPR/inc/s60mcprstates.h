@@ -30,6 +30,7 @@ S60 MCPR's states.
 
 #include "s60mcpr.h"
 #include "s60mpmrequests.h"
+#include "s60mcpractivityids.h"
 
 /**
  * S60McprState namespace packages all S60 specific state, forks and 
@@ -58,6 +59,7 @@ namespace S60MCprStates
     const TInt KConsumeRejectedMsg = 11054;
     const TInt KInformMigrationCompleted = 11055;
     const TInt KRequestReConnectToCurrentSP = 11056;
+    const TInt KStopActivityNotRunning = 11057;
     
     /**
      * Execution context
@@ -172,6 +174,68 @@ namespace S60MCprStates
     virtual void DoL();
     DECLARE_SMELEMENT_FOOTER( TRetrieveServiceId )
 
+    /**
+     * STATE: Waits for StopIAPNotification message. 
+     * @return ETrue if message is accepted. 
+     */
+    DECLARE_SMELEMENT_HEADER( TAwaitingStopIAPNotification, 
+                              MeshMachine::TState<TContext>, 
+                              NetStateMachine::MState, 
+                              TContext )
+    virtual TBool Accept();
+    DECLARE_SMELEMENT_FOOTER( TAwaitingStopIAPNotification )
+
+    /**
+     * TRANSITION/ACTION: Sends Stop to Service Provider
+     */
+    DECLARE_SMELEMENT_HEADER( TSendStop, 
+                              MeshMachine::TStateTransition<TContext>, 
+                              NetStateMachine::MStateTransition, 
+                              TContext )
+    virtual void DoL();
+    DECLARE_SMELEMENT_FOOTER( TSendStop )
+    
+    
+    /**
+     * STATE: Waits for Stopped or Error
+     * @return ETrue if message is accepted. 
+     */
+    DECLARE_SMELEMENT_HEADER( TAwaitingStoppedOrError, 
+                              MeshMachine::TState<TContext>, 
+                              NetStateMachine::MState, 
+                              TContext )
+    virtual TBool Accept();
+    DECLARE_SMELEMENT_FOOTER( TAwaitingStoppedOrError )
+    
+    
+    /**
+     * STATE: Waits for TIdle
+     */
+    DECLARE_SMELEMENT_HEADER( TAwaitingDataClientIdle,
+                              MeshMachine::TState<TContext>, 
+                              NetStateMachine::MState, 
+                              TContext )
+    virtual TBool Accept();
+    DECLARE_SMELEMENT_FOOTER( TAwaitingDataClientIdle )
+
+    /**
+     * STATE: Waits for TDataClientStatusChange
+     */
+    DECLARE_SMELEMENT_HEADER( TAwaitingDataClientStatusChange,
+                              MeshMachine::TState<TContext>, 
+                              NetStateMachine::MState, 
+                              TContext )
+    virtual TBool Accept();
+    DECLARE_SMELEMENT_FOOTER( TAwaitingDataClientStatusChange )
+    
+    
+    /** 
+     * FORK/MUTEX: Waits for StopIAPActivity to complete
+     */
+    DECLARE_SERIALIZABLE_STATE( TStopActivityNotRunning,
+                                MeshMachine::TActivityIdMutex<ECFActivityS60McprStopIAP>,
+                                MeshMachine::TTag<S60MCprStates::KStopActivityNotRunning> )
+        
     class CS60ErrorRecoveryActivity : public MeshMachine::CNodeRetryActivity
         {
         public:

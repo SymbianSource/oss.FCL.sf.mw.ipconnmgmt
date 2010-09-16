@@ -11,7 +11,7 @@
 *
 * Contributors:
 *
-* Description: Builds DataConnectionLogger.exe.
+* Description: Builds dataconnectionlogger.exe.
 *
 */
 
@@ -19,7 +19,7 @@
 
 MACRO           EPOC_SDK=0x07010000
 
-TARGET          DataConnectionLogger.exe
+TARGET          dataconnectionlogger.exe
 TARGETTYPE      exe
 
 UID             0x1000008D 0x101F6CFE

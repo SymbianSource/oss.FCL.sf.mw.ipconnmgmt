@@ -41,6 +41,7 @@ class CCommsDatabase;
 class TConnectionPrefs;
 class CAknGlobalNote;
 class CConnectionStatusPopup;
+class CCellularDataConfirmation;
 
 // CLASS DECLARATION
 
@@ -478,6 +479,9 @@ NONSHARABLE_CLASS( CConnectionUiUtilitiesImpl ) : public CBase
         
         // Connection status (via, error) implementation
         CConnectionStatusPopup* iConnStatusPopup;
+        
+        // Cellular confirmation prompt
+        CCellularDataConfirmation* iCellularConfirmation;
         
     };
 

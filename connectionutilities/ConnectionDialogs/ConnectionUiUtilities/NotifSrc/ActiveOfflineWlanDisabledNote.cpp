@@ -20,9 +20,13 @@
 #include "ActiveOfflineWlanDisabledNote.h"
 
 #include <connuiutilsnotif.rsg>
-#include <AknGlobalNote.h>
+#include <hbdevicenotificationdialogsymbian.h>
 #include <StringLoader.h>
 
+// CONSTANTS
+
+// Empty string
+_LIT( KEmpty, "" );
 
 // ================= MEMBER FUNCTIONS =======================
 
@@ -60,10 +64,8 @@ void CActiveOfflineWlanDisabledNote::RunL()
         HBufC* stringLabel =  StringLoader::LoadLC( R_OFFLINE_NOT_POSSIBLE );
         CleanupStack::PushL( stringLabel );
                                           
-        CAknGlobalNote* globalNote = CAknGlobalNote::NewLC();
-        globalNote->ShowNoteL( EAknGlobalInformationNote, *stringLabel );
-
-        CleanupStack::PopAndDestroy( globalNote );
+        CHbDeviceNotificationDialogSymbian::NotificationL(
+                KEmpty, stringLabel->Des(), KEmpty);
         CleanupStack::PopAndDestroy( stringLabel );
         
         iNotif->SetCancelledFlag( ETrue );

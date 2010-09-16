@@ -30,7 +30,6 @@
 
 #include <e32base.h>
 #include <agentdialog.h>
-#include <AknNotifyStd.h>
 
 
 // ENUMERATIONS

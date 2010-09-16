@@ -457,7 +457,18 @@ void CCmmCache::CreateConnMethodL(
         }
     if ( !plugin )
         {
-        User::Leave( KErrArgument );
+        TInt index = RefreshPluginL( aBearerType );
+        if ( index < 0 || index >= iPlugins->Count() )
+            {
+            User::Leave( KErrArgument );
+            }
+        else
+            {
+            TCmPluginInitParam pluginParams( Session() );
+            plugin = ( *iPlugins )[index]->CreateInstanceL( pluginParams );
+            CleanupStack::PushL( plugin );
+            plugin->CreateNewL( aConnMethodId );
+            }
         }
 
 
@@ -1786,6 +1797,61 @@ void CCmmCache::NotifyPluginsForTableChangesL( const TUint32 aTableId )
         CleanupStack::PopAndDestroy( &tableIdArray );
         }
     OstTraceFunctionExit0( CCMMCACHE_NOTIFYPLUGINSFORTABLECHANGESL_EXIT );
+    }
+
+// ---------------------------------------------------------------------------
+// Try to load unknown plugin dynamically during running-time. Some plugin
+// (e.g., VPN) might be installed after CmManager starts up. So, try to load
+// it. Only one plugin can be possibly loaded in a time.
+// ---------------------------------------------------------------------------
+//
+TInt CCmmCache::RefreshPluginL( const TUint32 aBearerType )
+    {
+    OstTraceFunctionEntry0( CCMMCACHE_REFRESHPLUGIN_ENTRY );
+
+    TInt ret( KErrNotFound );
+    
+    // Get a list of all the bearer types.
+    RPointerArray<CImplementationInformation> implArray;
+    CmmCleanupResetAndDestroyPushL( implArray );
+    REComSession::ListImplementationsL( TUid::Uid( KCMPluginInterfaceUid ), implArray );
+
+    CCmPluginBaseEng* plugin = NULL;
+    for ( TInt i = 0; i < implArray.Count(); i++ )
+        {
+        TUid uid = ( implArray )[i]->ImplementationUid();
+        
+        if ( uid.iUid == aBearerType )
+            {
+            TCmPluginInitParam params( iTrans->Session() );
+            
+            TRAPD( err, plugin = STATIC_CAST( CCmPluginBaseEng*, REComSession::CreateImplementationL(
+                    uid,
+                    _FOFF( CCmPluginBaseEng, iDtor_ID_Key ),
+                    ( TAny* )&params ) ) );
+            
+            if ( !err )
+                {
+                CleanupStack::PushL( plugin );
+                
+                // We may not think the priority position in the plugin array for this newly loaded plugin
+                // and just simply append it in the end of the plugin array
+                iPlugins->AppendL( plugin );
+                
+                ret = iPlugins->Count() - 1;
+                
+                CleanupStack::Pop( plugin );
+                }
+ 
+            // Don't need to go further in the for loop
+            break;
+            }
+        }
+
+    CleanupStack::PopAndDestroy( &implArray );
+
+    OstTraceFunctionExit0( CCMMCACHE_REFRESHPLUGIN_EXIT );
+    return ret;
     }
 
 // ---------------------------------------------------------------------------

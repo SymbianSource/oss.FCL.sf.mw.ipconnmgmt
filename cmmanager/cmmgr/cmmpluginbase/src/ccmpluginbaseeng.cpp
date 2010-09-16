@@ -2471,6 +2471,11 @@ EXPORT_C TBool CCmPluginBaseEng::GetBoolAttributeL(
                     aClientPluginInstance->iBearerSpecRecordArray );
             }
         }
+    
+    if( retVal )
+        {
+        retVal = ETrue;
+        }
 
     OstTraceFunctionExit0( CCMPLUGINBASEENG_GETBOOLATTRIBUTEL_EXIT );
     return retVal;

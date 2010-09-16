@@ -24,7 +24,6 @@
 #include <StringLoader.h>
 #include <commdb.h>
 #include <aknnotewrappers.h>
-#include <AknGlobalNote.h>
 #include <aknradiobuttonsettingpage.h>
 #include <ConnectionUiUtilities.h>
 #include <AknsUtils.h>
@@ -45,6 +44,7 @@
 #include "ChangeConnectionDlg.h"
 #include "ActiveCChangeConnectionDlg.h"
 #include "connectionstatuspopup.h"
+#include "cellulardataconfirmation.h"
 
 #include <connectionuiutilities.rsg>
 #include <data_caging_path_literals.hrh>
@@ -89,7 +89,8 @@ CConnectionUiUtilitiesImpl::CConnectionUiUtilitiesImpl()
   iDummy( EFalse ),
   iDummySecMode( EWlanConnectionSecurityOpen ),
   iDummyExtSecMode( EWlanConnectionExtentedSecurityModeOpen ),
-  iConnStatusPopup( NULL )
+  iConnStatusPopup( NULL ),
+  iCellularConfirmation( NULL )
     {
     for ( TInt i = 0; i < KNumberOfWrappedDialogs; i++ )
         {
@@ -111,6 +112,7 @@ void CConnectionUiUtilitiesImpl::ConstructL()
                 FeatureManager::FeatureSupported( KFeatureIdProtocolWlan );
     FeatureManager::UnInitializeLib();
     iConnStatusPopup = CConnectionStatusPopup::NewL();
+    iCellularConfirmation = CCellularDataConfirmation::NewL();
     }
 
 
@@ -132,6 +134,7 @@ CConnectionUiUtilitiesImpl::~CConnectionUiUtilitiesImpl()
         }
 
     delete iConnStatusPopup;
+    delete iCellularConfirmation;
     }
 
 // ---------------------------------------------------------
@@ -163,6 +166,7 @@ void CConnectionUiUtilitiesImpl::LoadResourceFileL()
 TBool CConnectionUiUtilitiesImpl::AlwaysAskPageL( 
                                                 TCuuAlwaysAskResults& aResult )
     {
+    // Not used
     LoadResourceFileL();
     // options array
     CDesCArrayFlat* values = new( ELeave )CDesCArrayFlat( 1 );
@@ -370,6 +374,7 @@ TBool CConnectionUiUtilitiesImpl::SearchWLANNetwork( TWlanSsid& aSSID,
                                 TWlanConnectionExtentedSecurityMode& aExtSecurityMode, 
                                 TBool& aProtectedSetupSupported )
     {
+    // Used only in to-be-removed apengine
     TBool result( EFalse );
     
     if ( iIsWlanSupported )
@@ -518,6 +523,9 @@ void CConnectionUiUtilitiesImpl::GetConnectionNameL( const TUint32& aIAPId,
 //
 TBool CConnectionUiUtilitiesImpl::OffLineWlanNote()
     { 
+    // Maps to KUidCOfflineWlanNoteDlg
+    // Not used
+
     CLOG_ENTERFN( "CConnectionUiUtilitiesImpl::OffLineWlanNote" );    
 
     if ( iIsWlanSupported )
@@ -552,7 +560,7 @@ TBool CConnectionUiUtilitiesImpl::OffLineWlanNote()
 void CConnectionUiUtilitiesImpl::OffLineWlanNote( TRequestStatus& aStatus )
     { 
     CLOG_ENTERFN( "CConnectionUiUtilitiesImpl::OffLineWlanNote Async" );    
-
+    // Not used
     if ( iIsWlanSupported )
         {
         if ( iActiveWrapper[EOffLineWlan] )
@@ -573,6 +581,7 @@ void CConnectionUiUtilitiesImpl::OffLineWlanNote( TRequestStatus& aStatus )
 //
 void CConnectionUiUtilitiesImpl::CancelOffLineWlanNote()
     {
+    // Not used
     if ( iIsWlanSupported )    
         {
         if ( iActiveWrapper[EOffLineWlan] )
@@ -592,6 +601,8 @@ void CConnectionUiUtilitiesImpl::CancelOffLineWlanNote()
 //
 void CConnectionUiUtilitiesImpl::OffLineWlanDisabledNote()
     {
+    // Maps to KUidCOfflineWlanNoteDlg
+    // Not used
     if ( iIsWlanSupported )    
         {
         if ( !iActiveWrapper[EWlanDisabled] )
@@ -613,6 +624,7 @@ void CConnectionUiUtilitiesImpl::OffLineWlanDisabledNote()
 //
 TBool CConnectionUiUtilitiesImpl::EasyWepDlg( TDes* aKey, TBool& aHex )
     {
+    // Not used
     TInt status = KErrNone;
     
     if ( iIsWlanSupported )    
@@ -640,6 +652,7 @@ TBool CConnectionUiUtilitiesImpl::EasyWepDlg( TDes* aKey, TBool& aHex )
 //
 void CConnectionUiUtilitiesImpl::EasyWepDlgAsync( TRequestStatus& aStatus, TDes* aKey, TBool& aHex )
     {
+    // Not used
     if ( iIsWlanSupported )    
         {
         if ( !iActiveWrapper[EWlanEasyWep] )
@@ -675,6 +688,7 @@ void CConnectionUiUtilitiesImpl::CancelEasyWepDlg()
 //
 TBool CConnectionUiUtilitiesImpl::EasyWpaDlg( TDes* aKey )
     { 
+    // Not used
     TInt status = KErrNone;
     if ( iIsWlanSupported )    
         {
@@ -721,6 +735,7 @@ void CConnectionUiUtilitiesImpl::EasyWpaDlgAsync( TRequestStatus& aStatus, TDes*
 //
 void CConnectionUiUtilitiesImpl::CancelEasyWpaDlg()
     {
+    // Not used
     if ( iIsWlanSupported )    
         {
         iActiveWrapper[EWlanEasyWpa]->Cancel();         
@@ -733,6 +748,9 @@ void CConnectionUiUtilitiesImpl::CancelEasyWpaDlg()
 //
 void CConnectionUiUtilitiesImpl::WLANNetworkUnavailableNote()
     {
+    // Maps to KUidCOfflineWlanNoteDlg
+    // Not used
+
     if ( iIsWlanSupported )    
         {
         if ( !iActiveWrapper[EWlanNetwUnavail] )
@@ -771,6 +789,7 @@ TBool CConnectionUiUtilitiesImpl::SearchWLANNetworkSync( TWlanSsid& aSSID,
                                 TWlanConnectionSecurityMode& aSecurityMode, 
                                 TBool& aProtectedSetupSupported )
     {
+    // Not used
     TBool result( EFalse );
     
     if ( iIsWlanSupported )
@@ -883,6 +902,7 @@ void CConnectionUiUtilitiesImpl::SearchWLANNetworkAsync(
                                 TWlanConnectionExtentedSecurityMode& aExtSecurityMode, 
                                 TBool& aProtectedSetupSupported )
     {
+    // Not used
     CLOG_ENTERFN( "CConnectionUiUtilitiesImpl::SearchWLANNetworkAsync" );    
 
     if ( iIsWlanSupported )
@@ -916,8 +936,8 @@ void CConnectionUiUtilitiesImpl::ConfirmMethodUsageQuery(
                                                TMsgQueryLinkedResults& aResult,
                                                const TBool aHomeNetwork,
                                                TRequestStatus& aStatus )
-    { 
-    iNotif.ConfirmMethodUsageQuery( aResult, aHomeNetwork, aStatus );
+    {
+    TRAP_IGNORE( iCellularConfirmation->StartL( aResult, aHomeNetwork, aStatus ) );
     }
 
 // ---------------------------------------------------------
@@ -926,7 +946,7 @@ void CConnectionUiUtilitiesImpl::ConfirmMethodUsageQuery(
 //
 void CConnectionUiUtilitiesImpl::CancelConfirmMethodUsageQuery()
     {
-    iNotif.CancelConfirmMethodUsageQuery();
+    iCellularConfirmation->Cancel();
     }
 
     
@@ -938,6 +958,7 @@ void CConnectionUiUtilitiesImpl::WlanPowerSaveTestNote(
                                                     TBool&          aDisable,
                                                     TRequestStatus& aStatus )
     {
+    // Not used
     iNotif.WlanPowerSaveTestNote( aDisable, aStatus );
     }
 
@@ -957,6 +978,7 @@ void CConnectionUiUtilitiesImpl::CancelWlanPowerSaveTestNote()
 //
 TBool CConnectionUiUtilitiesImpl::EasyWapiDlg( TDes* aKey )
     { 
+    // Not used
     TInt status( KErrNone );
     
     if ( iIsWlanSupported )    

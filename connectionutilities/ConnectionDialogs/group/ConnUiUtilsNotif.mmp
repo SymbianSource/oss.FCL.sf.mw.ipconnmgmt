@@ -69,8 +69,6 @@ SOURCE      NoteDlgSuppressingSwitch.cpp
 SOURCE      wlanpowersavetest.cpp
 SOURCE      wlanpowersavetestnotif.cpp
 SOURCE      easywapidlgnotif.cpp
-SOURCE      cellulardataconfirmation.cpp 
-SOURCE      devicedialogobserver.cpp
 
 SOURCEPATH  ../src
 SOURCE      ConnectionInfo.cpp
@@ -92,11 +90,15 @@ MW_LAYER_SYSTEMINCLUDE
 SYSTEMINCLUDE   /epoc32/include/libc 
 SYSTEMINCLUDE   /epoc32/include/uikon
 
+// Hb orbit headers
+SYSTEMINCLUDE /epoc32/include/mw/hb/hbcore
+SYSTEMINCLUDE /epoc32/include/mw/hb/hbwidgets
+
+
 LIBRARY     euser.lib eikdlg.lib eiksrv.lib cone.lib eikcore.lib eikcoctl.lib
 LIBRARY     bafl.lib avkon.lib AknSkins.lib Ecom.lib 
 LIBRARY     eiksrvui.lib
 LIBRARY     commonengine.lib
-LIBRARY     AKNNOTIFY.LIB
 LIBRARY     AknIcon.lib
 LIBRARY     egul.lib
 LIBRARY	    centralrepository.lib 
@@ -114,7 +116,7 @@ LIBRARY     HbWidgets.lib
 #if defined(ARMCC)
 DEFFILE ../ConnectionUiUtilities/EABI/ConnUiUtilsNotif.DEF
 #elif defined( WINSCW )
-    DEFFILE ../ConnectionUiUtilities/BWinsCw/ConnUiUtilsNotif.DEF
+DEFFILE ../ConnectionUiUtilities/BWinsCw/ConnUiUtilsNotif.DEF
 #endif
 
 DEBUGLIBRARY flogger.lib
