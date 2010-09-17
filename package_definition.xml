@@ -138,9 +138,6 @@
    </component>
   </collection>
   <collection id="connectionmonitoring" name="Connection Monitoring" level="server">
-   <component id="connectionmonitorui" filter="s60" name="Connection Monitor UI">
-    <unit bldFile="connectionmonitoring/connectionmonitorui/group"/>
-   </component>
    <component id="connmon" filter="s60" name="Connection Monitor">
     <!-- either split into two components, or #include from a common bld.inf -->
     <unit bldFile="connectionmonitoring/connmon/connectionmonitor/group"/>
