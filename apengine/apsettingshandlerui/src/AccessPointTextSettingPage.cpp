@@ -40,8 +40,6 @@ CAccessPointTextSettingPage::CAccessPointTextSettingPage
                                           TBool aIsLatin )
     :CAknTextSettingPage( aResourceID, aText, aTextSettingPageFlags )
     {
-    APSETUILOGGER_ENTERFN( EOther,"TxtSetPage::CAccessPointTextSettingPage<->")
-    iIsLatin = aIsLatin;
     }
 
 
@@ -63,8 +61,6 @@ CAccessPointTextSettingPage::CAccessPointTextSettingPage
     :CAknTextSettingPage( aSettingTitleText, aSettingNumber, aControlType,
     aEditorResourceId, aSettingPageResourceId, aText, aTextSettingPageFlags )
     {
-    APSETUILOGGER_ENTERFN( EOther,"TxtSetPage::CAccessPointTextSettingPage<->")
-    iIsLatin = aIsLatin;
     }
 
 // ---------------------------------------------------------
@@ -73,22 +69,6 @@ CAccessPointTextSettingPage::CAccessPointTextSettingPage
 //
 void CAccessPointTextSettingPage::ConstructL()
     {
-    APSETUILOGGER_ENTERFN( EOther,"TxtSetPage::ConstructL")
-    
-    CAknTextSettingPage::ConstructL();
-    FeatureManager::InitializeLibL();
-    TBool avkonElaf = FeatureManager::FeatureSupported( KFeatureIdAvkonELaf );
-    FeatureManager::UnInitializeLib();
-    if ( avkonElaf && iIsLatin )
-        {
-        CAknInputLanguageInfo* inputLangInfo =
-                AknInputLanguageInfoFactory::CreateInputLanguageInfoL();
-        TextControl()->SetAknEditorLocalLanguage
-                                ( inputLangInfo->UrlLanguage() );
-        delete inputLangInfo;
-        }
-    
-    APSETUILOGGER_LEAVEFN( EOther,"TxtSetPage::ConstructL")
     }
 
 // End of File

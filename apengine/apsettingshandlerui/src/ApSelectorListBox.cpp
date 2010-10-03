@@ -50,16 +50,7 @@ _LIT( KFileIcons, "z:ApSettings.mbm" );
 CApSelectorListbox* CApSelectorListbox::NewL
 ( const CCoeControl* aParent )
     {
-    APSETUILOGGER_ENTERFN( EListbox,"SelListbox::NewL")
-    
-    CApSelectorListbox* listbox =
-        new ( ELeave ) CApSelectorListbox();
-    CleanupStack::PushL( listbox );
-    listbox->ConstructL( aParent, EAknListBoxSelectionList );
-    CleanupStack::Pop();    // listbox
-    
-    APSETUILOGGER_LEAVEFN( EListbox,"SelListbox::NewL")
-    return listbox;
+    return NULL;
     }
 
 
@@ -89,32 +80,7 @@ CApSelectorListbox::~CApSelectorListbox()
 TKeyResponse CApSelectorListbox::OfferKeyEventL
 ( const TKeyEvent& aKeyEvent, TEventCode aType )
     {
-    APSETUILOGGER_ENTERFN( EListbox,"SelListbox::OfferKeyEventL")
-    
-    TKeyResponse retval;
-    if (    aKeyEvent.iCode == EKeyOK &&
-            !( aKeyEvent.iModifiers & EModifierShift )
-       )
-        {
-        // Enter pressed (not Shift-Enter). This will report an
-        // EEnterKeyPressed event sent to the observer (the view), which may
-        // delete this listbox. The code which processes keypresses by
-        // default, will continue (on the already deleted listbox), and
-        // will crash. So we grab this keypress here, and generate the
-        // same event, but after that, quit immediately!
-        ReportListBoxEventL( MEikListBoxObserver::EEventEnterKeyPressed );
-        // By now the listbox may have been deleted!
-        // Do not access it after this point!
-        retval = EKeyWasConsumed;
-        }
-    else
-        {
-        retval = CAknSingleGraphicStyleListBox::OfferKeyEventL
-            ( aKeyEvent, aType );
-        }
-    
-    APSETUILOGGER_LEAVEFN( EListbox,"SelListbox::OfferKeyEventL")
-    return retval;
+    User::Leave( KErrNotSupported );
     }
 
 
@@ -125,16 +91,6 @@ TKeyResponse CApSelectorListbox::OfferKeyEventL
 //
 void CApSelectorListbox::FocusChanged( TDrawNow aDrawNow )
     {
-    APSETUILOGGER_ENTERFN( EListbox,"SelListbox::FocusChanged")
-    
-    // Do nothing until the listbox is fully constructed
-    // The dialogpage sets the focus before calling ConstructL
-    if ( iView )
-        {
-        CAknSingleGraphicStyleListBox::FocusChanged( aDrawNow );
-        }
-    
-    APSETUILOGGER_LEAVEFN( EListbox,"SelListbox::FocusChanged")
     }
 
 
@@ -145,79 +101,6 @@ void CApSelectorListbox::FocusChanged( TDrawNow aDrawNow )
 //
 void CApSelectorListbox::LoadIconsL()
     {
-    APSETUILOGGER_ENTERFN( EListbox,"SelListbox::LoadIconsL")
-
-    CArrayPtr< CGulIcon >* icons = new( ELeave ) CAknIconArray( KGranularity );
-    CleanupStack::PushL( icons );
-
-    MAknsSkinInstance* skinInstance = AknsUtils::SkinInstance();
-
-    TParse mbmFile;
-    User::LeaveIfError( mbmFile.Set( KFileIcons, &KDC_APP_BITMAP_DIR, NULL ) );
-
-    icons->AppendL( AknsUtils::CreateGulIconL( 
-                                skinInstance, 
-                                KAknsIIDQgnPropWmlGprs,
-                                mbmFile.FullName(), 
-                                EMbmApsettingsQgn_prop_wml_gprs, 
-                                EMbmApsettingsQgn_prop_wml_gprs_mask ) );
-
-    icons->AppendL( AknsUtils::CreateGulIconL( 
-                                skinInstance, 
-                                KAknsIIDQgnPropWmlCsd,
-                                mbmFile.FullName(), 
-                                EMbmApsettingsQgn_prop_wml_csd, 
-                                EMbmApsettingsQgn_prop_wml_csd_mask ) );
-
-    icons->AppendL( AknsUtils::CreateGulIconL( 
-                                skinInstance, 
-                                KAknsIIDQgnPropWmlHscsd,
-                                mbmFile.FullName(), 
-                                EMbmApsettingsQgn_prop_wml_hscsd, 
-                                EMbmApsettingsQgn_prop_wml_hscsd_mask ) );
-
-    icons->AppendL( AknsUtils::CreateGulIconL( 
-                                skinInstance, 
-                                KAknsIIDQgnPropWmlSms,
-                                mbmFile.FullName(), 
-                                EMbmApsettingsQgn_prop_wml_sms, 
-                                EMbmApsettingsQgn_prop_wml_sms_mask ) );
-
-    icons->AppendL( AknsUtils::CreateGulIconL( 
-                                skinInstance, 
-                                KAknsIIDQgnPropWlanBearer,
-                                mbmFile.FullName(), 
-                                EMbmApsettingsQgn_prop_wlan_bearer, 
-                                EMbmApsettingsQgn_prop_wlan_bearer_mask ) );
-                                            
-
-    icons->AppendL( AknsUtils::CreateGulIconL( 
-                                skinInstance, 
-                                KAknsIIDQgnPropWlanBearer,
-                                mbmFile.FullName(), 
-                                EMbmApsettingsQgn_prop_wlan_easy, 
-                                EMbmApsettingsQgn_prop_wlan_easy_mask ) );
-                                            
-
-    FeatureManager::InitializeLibL();
-    TBool protsupported = FeatureManager::FeatureSupported( 
-                                           KFeatureIdSettingsProtection );
-    FeatureManager::UnInitializeLib();
-    if ( protsupported )
-        {
-        icons->AppendL( AknsUtils::CreateGulIconL( 
-                                skinInstance, 
-                                KAknsIIDQgnIndiSettProtectedAdd,
-                                mbmFile.FullName(), 
-                                EMbmApsettingsQgn_indi_sett_protected_add, 
-                                EMbmApsettingsQgn_indi_sett_protected_add_mask ) );
-        }
-
-    ItemDrawer()->ColumnData()->SetIconArray( icons );
-
-    CleanupStack::Pop(); // icons
-    
-    APSETUILOGGER_LEAVEFN( EListbox,"SelListbox::LoadIconsL")
     }
 
 
@@ -227,11 +110,7 @@ void CApSelectorListbox::LoadIconsL()
 //
 TUint32 CApSelectorListbox::Uid4Item( TInt aItem ) const
     {
-    APSETUILOGGER_ENTERFN( EListbox,"SelListbox::Uid4Item<->")
-    
-    CApSelectorListboxModel* lbmodel =
-        STATIC_CAST( CApSelectorListboxModel*, Model()->ItemTextArray() );
-    return lbmodel->At( aItem )->Uid();
+    return 0;
     }
 
 
@@ -241,19 +120,7 @@ TUint32 CApSelectorListbox::Uid4Item( TInt aItem ) const
 //
 TUint32 CApSelectorListbox::CurrentItemUid() const
     {
-    APSETUILOGGER_ENTERFN( EListbox,"SelListbox::CurrentItemUid")
-    
-    CApSelectorListboxModel* lbmodel =
-        STATIC_CAST( CApSelectorListboxModel*, Model()->ItemTextArray() );
-    TInt idx = CurrentItemIndex();
-    TUint32 retval( 0 );
-    if ( idx >= 0 )
-        {
-        retval = lbmodel->At( idx )->Uid();
-        }
-    
-    APSETUILOGGER_LEAVEFN( EListbox,"SelListbox::CurrentItemUid")
-    return retval;
+    return 0;
     }
 
 
@@ -264,14 +131,7 @@ TUint32 CApSelectorListbox::CurrentItemUid() const
 //
 const TDesC& CApSelectorListbox::CurrentItemNameL()
     {
-    APSETUILOGGER_ENTERFN( EListbox,"SelListbox::CurrentItemNameL")
-    
-    CApSelectorListboxModel* lbmodel = new( ELeave )CApSelectorListboxModel;
-    lbmodel = 
-        STATIC_CAST( CApSelectorListboxModel*, Model()->ItemTextArray() );
-    
-    APSETUILOGGER_LEAVEFN( EListbox,"SelListbox::CurrentItemNameL")
-    return lbmodel->At( CurrentItemIndex() )->Name();
+    User::Leave( KErrNotSupported );
     }
 
 
@@ -281,17 +141,6 @@ const TDesC& CApSelectorListbox::CurrentItemNameL()
 //
 void CApSelectorListbox::HandleResourceChange(TInt aType)
     {
-    APSETUILOGGER_ENTERFN( EListbox,"SelListbox::HandleResourceChange")
-    
-    if ( aType == KAknsMessageSkinChange )
-        {
-        TRAP_IGNORE( LoadIconsL() );
-        SizeChanged();
-        }
-        
-    CAknSingleGraphicStyleListBox::HandleResourceChange( aType );
-    
-    APSETUILOGGER_LEAVEFN( EListbox,"SelListbox::HandleResourceChange")
     }
 
 // End of File

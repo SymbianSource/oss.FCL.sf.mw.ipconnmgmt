@@ -587,6 +587,12 @@ private:
      * changed in commsdat.
      */
     void NotifyPluginsForTableChangesL( const TUint32 aTableId );
+    
+    /**
+     * Try to load unknown plugin dynamically during running-time
+     * Return the index number if loaded successfully; otherwise, return -1
+     */
+    TInt RefreshPluginL( const TUint32 aBearerType );
 
 private:
     // Monitors changes in the database.

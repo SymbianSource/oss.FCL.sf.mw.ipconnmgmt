@@ -97,4 +97,6 @@ EXPORTS
 	?NewL@CConnMonWlanNetwork@@SAPAV1@ABV?$TBuf@$0CA@@@IIIIIABV?$TBuf8@$05@@ABVTDesC16@@@Z @ 96 NONAME ; class CConnMonWlanNetwork * CConnMonWlanNetwork::NewL(class TBuf<32> const &, unsigned int, unsigned int, unsigned int, unsigned int, unsigned int, class TBuf8<6> const &, class TDesC16 const &)
 	?SecurityModeV2@CConnMonWlanNetwork@@QAEIXZ @ 97 NONAME ; unsigned int CConnMonWlanNetwork::SecurityModeV2(void)
 	?IsProtectedSetupSupported@CConnMonWlanNetwork@@QAEHXZ @ 98 NONAME ; int CConnMonWlanNetwork::IsProtectedSetupSupported(void)
+	??0TConnMonIapInfo@@QAE@ABV0@@Z @ 99 NONAME ; TConnMonIapInfo::TConnMonIapInfo(class TConnMonIapInfo const &)
+	??4TConnMonIapInfo@@QAEAAV0@ABV0@@Z @ 100 NONAME ; class TConnMonIapInfo & TConnMonIapInfo::operator=(class TConnMonIapInfo const &)
 

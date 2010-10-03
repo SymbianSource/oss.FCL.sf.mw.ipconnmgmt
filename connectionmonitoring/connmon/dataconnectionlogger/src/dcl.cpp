@@ -963,8 +963,8 @@ void CEngine::LogDataChangeEventL( TLogId aConnectionId, const TDesC& aRemote )
 
                 CleanupStack::Pop( eventUpdate );
                 }
+            break; // for
             }
-        break; // for
         }
     LOGEXITFN("CEngine::LogDataChangeEventL()")
     }

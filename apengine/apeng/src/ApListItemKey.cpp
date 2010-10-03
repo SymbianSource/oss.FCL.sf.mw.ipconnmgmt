@@ -32,7 +32,6 @@
 //
 void TApListItemNameKey::SetPtr( CApListItemList* aPtr )
     {
-    iList = aPtr;
     }
 
 
@@ -42,13 +41,7 @@ void TApListItemNameKey::SetPtr( CApListItemList* aPtr )
 //
 TInt TApListItemNameKey::Compare( TInt aLeft,TInt aRight ) const
     {
-    TInt retval = 
-        iList->At( aLeft )->Name().CompareC( iList->At( aRight )->Name() );
-    if ( !iAscending )
-        {
-        retval *= -1;
-        }
-    return retval;
+    return 0;
     }
 
 
@@ -58,8 +51,7 @@ TInt TApListItemNameKey::Compare( TInt aLeft,TInt aRight ) const
 //
 TAny* TApListItemNameKey::At( TInt anIndex ) const
     {
-    TAny* ptr = MUTABLE_CAST( TDesC16*, &(iList->At( anIndex )->Name()));
-    return ptr;
+    return NULL;
     }
 
 
@@ -71,8 +63,6 @@ TAny* TApListItemNameKey::At( TInt anIndex ) const
 TApListItemNameKey::TApListItemNameKey(  TBool aAscending )
 :TKeyArrayFix( 0, ECmpCollated )
         {
-        iList = NULL;
-        iAscending = aAscending;
         }
 
 
@@ -91,7 +81,6 @@ TApListItemNameKey::TApListItemNameKey(  TBool aAscending )
 //
 void TApListItemUidKey::SetPtr( CApListItemList* aPtr )
     {
-    iList = aPtr;
     }
 
 
@@ -101,23 +90,7 @@ void TApListItemUidKey::SetPtr( CApListItemList* aPtr )
 //
 TInt TApListItemUidKey::Compare( TInt aLeft,TInt aRight ) const
     {
-    TInt retval( 1 );
-    if ( iList->At( aLeft )->Uid() < iList->At( aRight )->Uid() )
-        {
-        retval = -1;
-        }
-    else
-        {
-        if ( iList->At( aLeft )->Uid() == iList->At( aRight )->Uid() )
-            {
-            retval = 0;
-            }
-        }
-    if ( !iAscending )
-        {
-        retval *= -1;
-        }
-    return retval;
+    return 0;
     }
 
 
@@ -127,8 +100,7 @@ TInt TApListItemUidKey::Compare( TInt aLeft,TInt aRight ) const
 //
 TAny* TApListItemUidKey::At( TInt anIndex ) const
     {
-    TAny* ptr = MUTABLE_CAST( TUint32*, &(iList->At( anIndex )->iUid) );
-    return ptr;
+    return NULL;
     }
 
 
@@ -140,8 +112,6 @@ TAny* TApListItemUidKey::At( TInt anIndex ) const
 TApListItemUidKey::TApListItemUidKey(  TBool aAscending )
 :TKeyArrayFix( 0, ECmpCollated )
         {
-        iList = NULL;
-        iAscending = aAscending;
         }
 
 

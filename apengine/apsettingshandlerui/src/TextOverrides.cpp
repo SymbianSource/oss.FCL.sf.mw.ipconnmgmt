@@ -32,15 +32,7 @@
 //
 CTextOverrides* CTextOverrides::NewL( )
     {
-    APSETUILOGGER_ENTERFN( EOther,"TxtOverride::NewL")
-    
-    CTextOverrides* db = new( ELeave ) CTextOverrides();
-    CleanupStack::PushL( db );
-    db->ConstructL( );
-    CleanupStack::Pop(); // db
-    
-    APSETUILOGGER_LEAVEFN( EOther,"TxtOverride::NewL")
-    return db;
+    return NULL;
     }
 
 
@@ -48,15 +40,6 @@ CTextOverrides* CTextOverrides::NewL( )
 // Destructor
 CTextOverrides::~CTextOverrides()
     {
-    APSETUILOGGER_ENTERFN( EOther,"TxtOverride::~CTextOverrides")
-    
-    if ( iTxtArray )
-        {
-        iTxtArray->ResetAndDestroy();
-        }
-    delete iTxtArray;
-    
-    APSETUILOGGER_LEAVEFN( EOther,"TxtOverride::~CTextOverrides")
     }
 
 
@@ -72,15 +55,6 @@ CTextOverrides::CTextOverrides()
 //
 void CTextOverrides::ConstructL( )
     {
-    APSETUILOGGER_ENTERFN( EOther,"TxtOverride::ConstructL")
-    
-    iTxtArray = new( ELeave ) CArrayPtrFlat<HBufC>( KTxtOverrideGran );
-    for (TInt i=0; i<=KTTextIdMax; i++ )
-        {
-        iTxtArray->AppendL( NULL);
-        }
-    
-    APSETUILOGGER_LEAVEFN( EOther,"TxtOverride::ConstructL")
     }
 
 
@@ -91,15 +65,6 @@ void CTextOverrides::ConstructL( )
 void CTextOverrides::SetTextOverrideL( TTextID aText2Change,
                                                 const TDesC& aNewText )
     {
-    APSETUILOGGER_ENTERFN( EOther,"TxtOverride::SetTextOverrideL")
-    
-    ValidateIdL( aText2Change );
-
-    HBufC* a = aNewText.AllocL();
-    iTxtArray->Delete( aText2Change );
-    iTxtArray->InsertL( aText2Change, a );
-
-    APSETUILOGGER_LEAVEFN( EOther,"TxtOverride::SetTextOverrideL")
     }
 
 
@@ -109,16 +74,7 @@ void CTextOverrides::SetTextOverrideL( TTextID aText2Change,
 //
 const TDesC& CTextOverrides::TextOverrideL( TTextID aTextId )
     {
-    APSETUILOGGER_ENTERFN( EOther,"TxtOverride::TextOverrideL")
-    
-    ValidateIdL( aTextId );
-    if ( !IsTextOverridenL( aTextId ) )
-        {
-        User::Leave( KTxtNotOverriden );
-        }
-    
-    APSETUILOGGER_LEAVEFN( EOther,"TxtOverride::TextOverrideL")
-    return *iTxtArray->At( aTextId );
+    User::Leave( KErrNotSupported );
     }
 
 
@@ -128,21 +84,7 @@ const TDesC& CTextOverrides::TextOverrideL( TTextID aTextId )
 //
 TBool CTextOverrides::IsTextOverridenL( TTextID aTextId )
     {
-    APSETUILOGGER_ENTERFN( EOther,"TxtOverride::IsTextOverridenL")
-    
-    TBool retval( EFalse );
-    ValidateIdL( aTextId );
-    if ( iTxtArray->At( aTextId ) )
-        {
-        retval = ETrue;
-        }
-    else
-        {
-        retval = EFalse;
-        }
-    
-    APSETUILOGGER_LEAVEFN( EOther,"TxtOverride::IsTextOverridenL")
-    return retval;
+    return EFalse;
     }
 
 
@@ -152,14 +94,6 @@ TBool CTextOverrides::IsTextOverridenL( TTextID aTextId )
 //
 void CTextOverrides::ValidateIdL( TTextID aTextId )
     {
-    APSETUILOGGER_ENTERFN( EOther,"TxtOverride::ValidateIdL")
-    
-    if ( ( aTextId < KTTextIdMin ) || ( aTextId > KTTextIdMax ) )
-        {
-        User::Leave( KErrInvalidTextId );
-        }
-    
-    APSETUILOGGER_LEAVEFN( EOther,"TxtOverride::ValidateIdL")
     }
 
 

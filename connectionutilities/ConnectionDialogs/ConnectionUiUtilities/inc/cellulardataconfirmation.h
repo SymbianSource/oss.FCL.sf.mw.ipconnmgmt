@@ -21,20 +21,18 @@
 #include <e32base.h>
 #include <ConnectionUiUtilities.h>
 #include <hb/hbcore/hbdevicedialogsymbian.h>
-#include "ConnectionDialogsNotifBase.h"
 #include "ConnectionUiUtilitiesCommon.h"
 
 class CDeviceDialogObserver;
 
 
-NONSHARABLE_CLASS ( CCellularDataConfirmation ) : public CConnectionDialogsNotifBase
+NONSHARABLE_CLASS ( CCellularDataConfirmation ) : public CBase
     {
     public:
         /**
         * Two-phased constructor.
         */
-        static CCellularDataConfirmation* NewL( 
-                                const TBool aResourceFileResponsible );
+        static CCellularDataConfirmation* NewL( );
         
         /**
         * Destructor
@@ -43,17 +41,13 @@ NONSHARABLE_CLASS ( CCellularDataConfirmation ) : public CConnectionDialogsNotif
         
         /**
         * Start the Notifier
-        * @param  aBuffer    Buffer
-        * @param  aReplySlot Identifies which message argument to use for the 
-        *                    reply. This message argument will refer to a 
-        *                    modifiable descriptor, a TDes8 type, into which
-        *                    data can be returned. 
-        * @param  aMessage   Message
-        * return -
+        * @param aResult Result of user selection
+        * @param aHomeNetwork Home or foreign network.
+        * @param aStatus Status object of notifier
         */
-        void StartL( const TDesC8& aBuffer, 
-                    TInt aReplySlot, 
-                    const RMessagePtr2& aMessage );
+        void StartL( TMsgQueryLinkedResults& aResult,
+                const TBool aHomeNetwork,
+                TRequestStatus& aStatus );
         
         /**
         * Cancel() the notifier
@@ -61,13 +55,6 @@ NONSHARABLE_CLASS ( CCellularDataConfirmation ) : public CConnectionDialogsNotif
         * return -
         */
         void Cancel();
-        
-        /**
-        * RegisterL register the client notifier function
-        * @param  -
-        * return TNotifierInfo
-        */
-        TNotifierInfo RegisterL();
         
         /**
         * CompleteL the notifier is complete
@@ -88,19 +75,29 @@ NONSHARABLE_CLASS ( CCellularDataConfirmation ) : public CConnectionDialogsNotif
         */
         CCellularDataConfirmation();
     
+        /**
+         * Second-phase constructor
+         */
+        void ConstructL();
+
+        
     private:
         /** Pointer to the device dialog interface for handling the dialog */
         CHbDeviceDialogSymbian* iDialog;
         /** The observer to handle the data received from the orbit dialog */
         CDeviceDialogObserver* iObserver;
-        /* The choice selected by the user from the dialog */
-        TMsgQueryLinkedResults iChoice;
+
         /* Information if request was already completed, in case the
          * observer receives the data signal and the signal about closing the
          * dialog.
          */
         TBool iCompleted;
         
+        /** Request status. Not owned. */
+        TRequestStatus* iStatus;
+        
+        /** Result of query. Not owned. */
+        TMsgQueryLinkedResults* iResult;
     
     };
 

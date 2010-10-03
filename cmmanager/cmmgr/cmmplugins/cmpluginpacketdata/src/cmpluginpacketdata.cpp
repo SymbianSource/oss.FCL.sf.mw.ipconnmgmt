@@ -216,7 +216,7 @@ TBool CCmPDCoverageCheck::IsPhoneOfflineL() const
         CRepository* repository = CRepository::NewLC( KCRUidCoreApplicationUIs );
         TInt connAllowed( ECoreAppUIsNetworkConnectionAllowed );
 
-        repository->Get( KCoreAppUIsNetworkConnectionAllowed, connAllowed );
+        (void) repository->Get( KCoreAppUIsNetworkConnectionAllowed, connAllowed );
         CleanupStack::PopAndDestroy( repository );
 
         if ( !connAllowed )

@@ -11,7 +11,7 @@
 *
 * Contributors:
 *
-* Description:  Builds ConnMon.dll.
+* Description:  Builds connmon.dll.
 *
 */
 
@@ -19,7 +19,7 @@
 
 MACRO           EPOC_SDK=0x07010000
 
-TARGET          ConnMon.dll
+TARGET          connmon.dll
 TARGETTYPE      dll
 UID             0x1000008d 0x101F6CEE
 

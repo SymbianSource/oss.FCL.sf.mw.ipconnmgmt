@@ -49,8 +49,6 @@ PRJ_MMPFILES
 //gnumakefile DisconnectDlgIcons.MK
 //gnumakefile ConnUiUtilsIcons.MK
 
-./connectiondialogswrapper.mmp
-
 ./CConnDlgClient.mmp
 ./CConnDlgPlugin.mmp
 

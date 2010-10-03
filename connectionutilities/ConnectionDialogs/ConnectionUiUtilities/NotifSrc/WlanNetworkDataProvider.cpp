@@ -355,7 +355,7 @@ TBool CWlanNetworkDataProvider::IsPhoneOfflineL() const
         CRepository* repository = CRepository::NewLC( 
                                                     KCRUidCoreApplicationUIs );
         TInt connAllowed = 1;
-        repository->Get( KCoreAppUIsNetworkConnectionAllowed, connAllowed );
+        (void) repository->Get( KCoreAppUIsNetworkConnectionAllowed, connAllowed );
         CleanupStack::PopAndDestroy();  // repository
         if ( !connAllowed )
             {

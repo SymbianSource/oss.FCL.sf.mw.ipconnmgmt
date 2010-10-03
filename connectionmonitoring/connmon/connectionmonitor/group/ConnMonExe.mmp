@@ -11,13 +11,13 @@
 *
 * Contributors:
 *
-* Description:  Builds ConnMonExe.exe.
+* Description:  Builds connmonexe.exe.
 *
 */
 
 #include <platform_paths.hrh>
 
-target          ConnMonExe.exe
+target          connmonexe.exe
 targettype      exe
 
 uid             0x1000008c 0x101F6CF0

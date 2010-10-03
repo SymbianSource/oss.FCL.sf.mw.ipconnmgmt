@@ -46,14 +46,7 @@
 //
 EXPORT_C CApNetworks* CApNetworks::NewLC( CCommsDatabase& aDb )
     {
-    CLOG( ( ENetworks, 0, _L( "-> CApNetworks::NewLC" ) ) );
-
-    CApNetworks* db = new( ELeave ) CApNetworks;
-    CleanupStack::PushL( db );
-    db->ConstructL( aDb );
-
-    CLOG( ( ENetworks, 1, _L( "<- CApNetworks::NewLC" ) ) );
-    return db;
+    return NULL;
     }
 
 
@@ -64,15 +57,6 @@ EXPORT_C CApNetworks* CApNetworks::NewLC( CCommsDatabase& aDb )
 //
 EXPORT_C CApNetworks::~CApNetworks()
     {
-    CLOG( ( ENetworks, 0, _L( "-> CApNetworks::~CApNetworks" ) ) );
-
-    if ( iApList )
-        {
-        iApList->ResetAndDestroy();
-        delete iApList;
-        }
-
-    CLOG( ( ENetworks, 1, _L( "<- CApNetworks::~CApNetworks" ) ) );
     }
 
 
@@ -97,13 +81,6 @@ EXPORT_C CApNetworks::CApNetworks()
 EXPORT_C void CApNetworks::ConstructL( CCommsDatabase& aDb )
 
     {
-    CLOG( ( ENetworks, 0, _L( "-> CApNetworks::ConstructL" ) ) );
-
-    iApList = new( ELeave )CApNetworkItemList();
-    iDb = &aDb;
-    DoUpdateL();
-
-    CLOG( ( ENetworks, 1, _L( "<- CApNetworks::ConstructL" ) ) );
     }
 
 
@@ -114,9 +91,7 @@ EXPORT_C void CApNetworks::ConstructL( CCommsDatabase& aDb )
 //
 EXPORT_C TUint32 CApNetworks::Count() const
     {
-    CLOG( ( ENetworks, 0, _L( "<-> CApNetworks::Count" ) ) );
-
-    return iApList->Count( );
+    return 0;
     }
 
 
@@ -126,17 +101,7 @@ EXPORT_C TUint32 CApNetworks::Count() const
 //
 EXPORT_C const TDesC& CApNetworks::NameL( TUint32 aUid ) const
     {
-    CLOG( ( ENetworks, 0, _L( "-> CApNetworks::NameL" ) ) );
-
-    CApNetworkItem* item = 
-        CONST_CAST( CApNetworkItem*, iApList->ItemForUid( aUid ) );
-    if ( item == NULL )
-        {
-        User::Leave( KErrNotFound );
-        }
-
-    CLOG( ( ENetworks, 1, _L( "<- CApNetworks::NameL" ) ) );
-    return (item->Name() );
+    User::Leave( KErrNotSupported );
     }
 
 
@@ -150,23 +115,7 @@ EXPORT_C const TDesC& CApNetworks::NameL( TUint32 aUid ) const
 //
 EXPORT_C TInt CApNetworks::AllListItemDataL( CApNetworkItemList& aList )
     {
-    CLOG( ( ENetworks, 0, _L( "-> CApNetworks::AllListItemDataL" ) ) );
-
-    aList.ResetAndDestroy();
-
-    CApNetworkItem* item=NULL;
-
-    TInt i;
-    TInt count = iApList->Count();
-    for ( i=0; i<count; i++ )
-        {
-        item = CApNetworkItem::NewLC( ( *iApList )[i] );
-        aList.AppendL( item );
-        CleanupStack::Pop( item ); // item owned by aList !
-        }
-    CLOG( ( ENetworks, 1, _L( "<- CApNetworks::AllListItemDataL" ) ) );
-
-    return aList.Count();
+    return 0;
     }
 
 
@@ -184,81 +133,7 @@ EXPORT_C TInt CApNetworks::AllListItemDataL( CApNetworkItemList& aList )
 //
 TInt CApNetworks::DoUpdateL()
     {
-    CLOG( ( ENetworks, 0, _L( "-> CApNetworks::DoUpdateL" ) ) );
-
-    TInt err( KErrNone );
-
-    TBool OwnTransaction = ApCommons::StartPushedTransactionLC( *iDb );
-
-    CCommsDbTableView* networkt =  iDb->OpenTableLC( TPtrC(NETWORK) );
-
-    err = networkt->GotoFirstRecord();
-
-    if ( ( err == KErrNone ) || ( err == KErrNotFound ) )
-        { // even if it is empty, we must clear the list.
-        // otherwise, Leave
-        // fill up list. First empty it
-        iApList->ResetAndDestroy();
-        iCount = 0;
-        TUint32 temp( 0 );
-        TInt length( 0 );
-
-        CApNetworkItem* item = NULL;
-        CApNetworkItemList* tmpnetlist = new( ELeave )CApNetworkItemList();
-        HBufC* tmp = NULL;
-        CleanupStack::PushL( tmpnetlist );
-        
-        if ( err == KErrNone )
-            { // now get the names and UIDs
-            TBool goon( ETrue );
-            do
-                {
-                err = ApCommons::ReadUintL( networkt, TPtrC(COMMDB_ID), temp );
-
-                networkt->ReadColumnLengthL( TPtrC(COMMDB_NAME), length );
-                tmp = HBufC::NewLC( length );
-                TPtr tmpptr( tmp->Des() );
-                networkt->ReadTextL( TPtrC(COMMDB_NAME), tmpptr );
-                item = CApNetworkItem::NewLC( );
-                item->SetUid( temp );
-                item->SetNameL( tmpptr );
-                tmpnetlist->AppendL( item );
-                CleanupStack::Pop( item ); // item owned by list !
-
-                err = networkt->GotoNextRecord();
-                if ( err == KErrNotFound )
-                    {
-                    goon = EFalse;
-                    }
-                else
-                    {
-                    User::LeaveIfError( err );
-                    }
-                CleanupStack::PopAndDestroy( tmp );
-                }
-                while ( goon );
-            }
-        // and now move items to real array
-        CleanupStack::Pop( tmpnetlist );
-        delete iApList;
-        iApList = tmpnetlist;
-        }
-    else
-        {
-        User::Leave( err );
-        }
-
-    CleanupStack::PopAndDestroy( networkt );
-    
-    if ( OwnTransaction )
-        {
-        ApCommons::CommitTransaction( *iDb );
-        CleanupStack::Pop(); // RollbackTransactionOnLeave
-        }
-    
-
-    CLOG( ( ENetworks, 1, _L( "<- CApNetworks::DoUpdateL" ) ) );
-    return err;
+    return KErrNotFound;
     }
 
 

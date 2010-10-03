@@ -30,8 +30,6 @@
 CActiveApDbNotifier::CActiveApDbNotifier( CActiveApDb& aDb )
 : CActive( EPriorityStandard )
     {
-    iActiveDb = &aDb;
-    CActiveScheduler::Add( this );
     }
 
 // ---------------------------------------------------------
@@ -40,7 +38,6 @@ CActiveApDbNotifier::CActiveApDbNotifier( CActiveApDb& aDb )
 //
 CActiveApDbNotifier::~CActiveApDbNotifier()
     {
-    Cancel();
     }
 
 // ---------------------------------------------------------
@@ -49,31 +46,6 @@ CActiveApDbNotifier::~CActiveApDbNotifier()
 //
 void CActiveApDbNotifier::RunL()
     {
-    if ( iStatus == KErrCancel )
-        {
-        // Do nothing.
-        }
-    else
-        {
-        // first store status, because re-schedule will be earlier 
-        // than notifying clients. Reason:
-        // clients can leave but re-schedule MUST happen anyway,
-        // to keep the notifier alive even if any client leaves
-        TRequestStatus tempstatus( iStatus );
-
-        if ( iStatus == RDbNotifier::EClose )
-            {
-            // Finish if the database is closed.
-            NotifyChange();
-            }
-        else
-            {
-            // Reschedule automatically (as long as the database is open).
-            NotifyChange();
-            }
-        // and now let clients handle their stuff...
-        TRAP_IGNORE( iActiveDb->HandleDbEventL( tempstatus.Int() ) );
-        }
     }
 
 
@@ -83,7 +55,6 @@ void CActiveApDbNotifier::RunL()
 //
 void CActiveApDbNotifier::DoCancel()
     {
-    Stop();
     }
 
 
@@ -93,7 +64,6 @@ void CActiveApDbNotifier::DoCancel()
 //
 void CActiveApDbNotifier::Stop()
     {
-    iActiveDb->Database()->CancelRequestNotification();
     }
 
 // ---------------------------------------------------------
@@ -102,7 +72,6 @@ void CActiveApDbNotifier::Stop()
 //
 void CActiveApDbNotifier::Start()
     {
-    NotifyChange();
     }
 
 // ---------------------------------------------------------
@@ -111,11 +80,6 @@ void CActiveApDbNotifier::Start()
 //
 void CActiveApDbNotifier::NotifyChange()
     {
-    if ( !IsActive() )
-        {
-        iActiveDb->Database()->RequestNotification( iStatus );
-        SetActive();
-        }
     }
 
 // End of File

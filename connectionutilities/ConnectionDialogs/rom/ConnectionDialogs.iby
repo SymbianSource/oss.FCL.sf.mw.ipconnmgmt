@@ -18,8 +18,9 @@
 #ifndef __CONNECTIONDIALOGS_IBY__
 #define __CONNECTIONDIALOGS_IBY__
 
-
-ECOM_PLUGIN(connectiondialogswrapper.DLL,10207374.rsc)
+// Dialog wrapper is not used anymore as dialogs and
+// avkon notifier API has been deprecated.
+// ECOM_PLUGIN(connectiondialogswrapper.DLL,10207374.rsc)
 
 
 #endif

@@ -34,18 +34,7 @@ CApMultiLineDataQueryDialog* CApMultiLineDataQueryDialog::NewL(
                            TDes&  aText1, TDes&  aText2,
                            TTone aTone )
     {
-    APSETUILOGGER_ENTERFN( EOther,"MultiQuery::NewL")
-    
-    CApMultiLineDataQueryDialog* self = 
-        new (ELeave) CApMultiLineDataQueryDialog(aTone);
-    CleanupStack::PushL(self);
-
-    self->SetDataL( aText1, aText2 );
-
-    CleanupStack::Pop(self);
-    
-    APSETUILOGGER_LEAVEFN( EOther,"MultiQuery::NewL")
-    return self;
+    return NULL;
     }
 
 
@@ -56,7 +45,6 @@ CApMultiLineDataQueryDialog* CApMultiLineDataQueryDialog::NewL(
 CApMultiLineDataQueryDialog::CApMultiLineDataQueryDialog( const TTone& aTone )
 : CAknMultiLineDataQueryDialog( aTone )
     {
-    APSETUILOGGER_ENTERFN( EOther,"MultiQuery::CApMultiLineDataQueryDialog<->")
     }
 
 
@@ -66,12 +54,6 @@ CApMultiLineDataQueryDialog::CApMultiLineDataQueryDialog( const TTone& aTone )
 //
 void CApMultiLineDataQueryDialog::UpdateLeftSoftKeyL()
     {
-    APSETUILOGGER_ENTERFN( EOther,"MultiQuery::UpdateLeftSoftKeyL")
-    
-    CAknMultiLineDataQueryDialog::UpdateLeftSoftKeyL();
-    MakeLeftSoftkeyVisible( ETrue );
-    
-    APSETUILOGGER_LEAVEFN( EOther,"MultiQuery::UpdateLeftSoftKeyL")
     }
 
 // End of File

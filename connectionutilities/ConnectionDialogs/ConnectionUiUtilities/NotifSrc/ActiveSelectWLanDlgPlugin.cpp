@@ -19,12 +19,11 @@
 // INCLUDE FILES
 #include <AknWaitDialog.h>
 #include <connuiutilsnotif.rsg>
-#include <AknGlobalNote.h>
+#include <hbdevicenotificationdialogsymbian.h>
 #include <StringLoader.h>
 #include <centralrepository.h>
 #include <AknSgcc.h>
 #include <AknCapServerClient.h>
-//#include <aknnotewrappers.h>
 
 #include "ActiveSelectWLanDlgPlugin.h"
 #include "SelectWLANDlg.h"
@@ -33,6 +32,9 @@
 
 
 // CONSTANTS
+
+// Empty string
+_LIT( KEmpty, "" );
 
 /**
 * For iPeriodic Timer, 10 seconds
@@ -291,7 +293,12 @@ void CActiveSelectWLanDlgPlugin::RunL()
             CleanupStack::PopAndDestroy( stringLabel );
 ***/
 
-//// 3.1 solution: prevent deadlock, does not work in 3.0 because of avkon 
+//// 10.1 solution: ditch avkon altogether
+            CHbDeviceNotificationDialogSymbian::NotificationL(
+                    KEmpty, stringLabel->Des(), KEmpty);
+            CleanupStack::PopAndDestroy( stringLabel );
+            
+/*** 3.1 solution: prevent deadlock, does not work in 3.0 because of avkon 
             RAknUiServer* globalNote = CAknSgcClient::AknSrv();
             if ( globalNote->Handle() )
                 {
@@ -300,7 +307,7 @@ void CActiveSelectWLanDlgPlugin::RunL()
                 }
             CleanupStack::PopAndDestroy( stringLabel );
 
-//// End of 3.1 solution
+*** End of 3.1 solution ***/
 
 /*** 3.0 solution
             CAknInformationNote* myLocalGlobalNote = new ( ELeave ) 

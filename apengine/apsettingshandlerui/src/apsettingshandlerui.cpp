@@ -45,22 +45,7 @@ EXPORT_C CApSettingsHandler* CApSettingsHandler::NewLC(
                                          TInt aBearerFilter,
                                          TInt aSortType )
     {
-    APSETUILOGGER_CREATE;
-    APSETUILOGGER_ENTERFN( EAPI,"Handler::NewLC")
-    
-    CApSettingsHandler* db = 
-            new( ELeave ) CApSettingsHandler( aStartWithSelection,
-                                              aListType,
-                                              aSelMenuType );
-    CleanupStack::PushL( db );
-
-    
-
-    db->ConstructL( aIspFilter, aBearerFilter, aSortType );
-    
-    APSETUILOGGER_LEAVEFN( EAPI,"Handler::NewLC")
-    
-    return db;
+    return NULL;
     }
 
 
@@ -80,20 +65,7 @@ EXPORT_C CApSettingsHandler* CApSettingsHandler::NewLC(
                                             TInt aSortType
                                             )
     {
-    APSETUILOGGER_CREATE;
-    APSETUILOGGER_ENTERFN( EAPI,"Handler::NewLC2")
-    
-    CApSettingsHandler* db = 
-            new( ELeave ) CApSettingsHandler( aStartWithSelection,
-                                              aListType,
-                                              aSelMenuType );
-    CleanupStack::PushL( db );
-
-    db->ConstructL( aDb, aIspFilter, aBearerFilter, aSortType );
-    
-    APSETUILOGGER_LEAVEFN( EAPI,"Handler::NewLC2")
-    
-    return db;
+    return NULL;
     }
 
 
@@ -112,22 +84,7 @@ EXPORT_C CApSettingsHandler* CApSettingsHandler::NewLC(
                                          TInt aReqIpvType
                                          )
     {
-    APSETUILOGGER_CREATE;
-    APSETUILOGGER_ENTERFN( EAPI,"Handler::NewLC3")
-    
-    CApSettingsHandler* db = 
-        new( ELeave ) CApSettingsHandler( aStartWithSelection,
-                                          aListType,
-                                          aSelMenuType,
-                                          aReqIpvType
-                                          );
-    CleanupStack::PushL( db );
-
-    db->ConstructL( aIspFilter, aBearerFilter, aSortType );
-    
-    APSETUILOGGER_LEAVEFN( EAPI,"Handler::NewLC3")
-    
-    return db;
+    return NULL;
     }
 
 
@@ -148,22 +105,7 @@ EXPORT_C CApSettingsHandler* CApSettingsHandler::NewLC(
                                             TInt aReqIpvType
                                             )
     {
-    APSETUILOGGER_CREATE;
-    APSETUILOGGER_ENTERFN( EAPI,"Handler::NewLC4")
-    
-    CApSettingsHandler* db = 
-        new( ELeave ) CApSettingsHandler( aStartWithSelection,
-                                          aListType,
-                                          aSelMenuType,
-                                          aReqIpvType
-                                          );
-    CleanupStack::PushL( db );
-
-    db->ConstructL( aDb, aIspFilter, aBearerFilter, aSortType );
-    
-    APSETUILOGGER_LEAVEFN( EAPI,"Handler::NewLC4")
-    
-    return db;
+    return NULL;
     }
 
 
@@ -185,23 +127,7 @@ EXPORT_C CApSettingsHandler* CApSettingsHandler::NewLC(
                                         TVpnFilterType aVpnFilterType
                                             )
     {
-    APSETUILOGGER_CREATE;
-    APSETUILOGGER_ENTERFN( EAPI,"Handler::NewLC5")
-
-    CApSettingsHandler* db = 
-        new( ELeave ) CApSettingsHandler( aStartWithSelection,
-                                          aListType,
-                                          aSelMenuType,
-                                          aReqIpvType
-                                          );
-    CleanupStack::PushL( db );
-
-    db->ConstructL( aIspFilter, aBearerFilter, 
-                    aSortType, aVpnFilterType );
-    
-    APSETUILOGGER_LEAVEFN( EAPI,"Handler::NewLC5")
-    
-    return db;
+    return NULL;
     }
 
 
@@ -221,23 +147,7 @@ EXPORT_C CApSettingsHandler* CApSettingsHandler::NewLC(
                                             TVpnFilterType aVpnFilterType
                                             )
     {
-    APSETUILOGGER_CREATE;
-    APSETUILOGGER_ENTERFN( EAPI,"Handler::NewLC6")
-    
-    CApSettingsHandler* db = 
-        new( ELeave ) CApSettingsHandler( aStartWithSelection,
-                                          aListType,
-                                          aSelMenuType,
-                                          aReqIpvType
-                                          );
-    CleanupStack::PushL( db );
-    
-    db->ConstructL( aDb, aIspFilter, aBearerFilter, 
-                    aSortType, aVpnFilterType );
-    
-    APSETUILOGGER_LEAVEFN( EAPI,"Handler::NewLC6")
-    
-    return db;
+    return NULL;
     }
 
 
@@ -262,35 +172,13 @@ EXPORT_C CApSettingsHandler* CApSettingsHandler::NewLC(
                                         TBool aIncludeEasyWlan
                                         )
     {
-    APSETUILOGGER_CREATE;
-    APSETUILOGGER_ENTERFN( EAPI,"Handler::NewLC7")
-    
-    CApSettingsHandler* db = 
-        new( ELeave ) CApSettingsHandler( aStartWithSelection,
-                                          aListType,
-                                          aSelMenuType,
-                                          aReqIpvType
-                                          );
-    CleanupStack::PushL( db );
-    
-    db->ConstructL( aDb, aIspFilter, aBearerFilter, 
-                    aSortType, aVpnFilterType, aIncludeEasyWlan );
-    
-    APSETUILOGGER_LEAVEFN( EAPI,"Handler::NewLC7")
-    return db;    
+    return NULL;    
     }
 
 
 // Destructor
 EXPORT_C CApSettingsHandler::~CApSettingsHandler()
     {
-    APSETUILOGGER_DELETE;
-
-    APSETUILOGGER_WRITE( EAPI,"Handler:: deleting implementation");
-    
-    delete iImpl;
-    
-    APSETUILOGGER_WRITE( EAPI,"Handler::~finished");
     }
 
 
@@ -308,7 +196,6 @@ iBearerFilter( EApBearerTypeAll ),
 iReqIpvType( EIPv4 ),
 iEventStore( KApUiEventNone )
     {
-    iHelpMajor = KHelpUidApSettingsHandler;
     }
 
 
@@ -329,7 +216,6 @@ iBearerFilter( EApBearerTypeAll ),
 iReqIpvType( aReqIpvType ),
 iEventStore( KApUiEventNone )
     {
-    iHelpMajor = KHelpUidApSettingsHandler;
     }
 
 
@@ -342,12 +228,6 @@ EXPORT_C void CApSettingsHandler::ConstructL(   TInt aIspFilter,
                                                 TInt aBearerFilter,
                                                 TInt aSortType )
     {
-    APSETUILOGGER_ENTERFN( EAPI,"Handler::ConstructL")
-    
-    DoConstructL( NULL, aIspFilter, aBearerFilter, 
-                  aSortType, EVpnFilterBoth, EFalse );
-    
-    APSETUILOGGER_LEAVEFN( EAPI,"Handler::ConstructL")
     }
 
 
@@ -361,12 +241,6 @@ EXPORT_C void CApSettingsHandler::ConstructL(   CActiveApDb& aDb,
                                                 TInt aBearerFilter,
                                                 TInt aSortType )
     {
-    APSETUILOGGER_ENTERFN( EAPI,"Handler::ConstructL2")
-    
-    DoConstructL( &aDb, aIspFilter, aBearerFilter, 
-                  aSortType, EVpnFilterBoth, EFalse );
-    
-    APSETUILOGGER_LEAVEFN( EAPI,"Handler::ConstructL2")
     }
 
 
@@ -382,12 +256,6 @@ EXPORT_C void CApSettingsHandler::ConstructL(
                                              TVpnFilterType aVpnFilterType
                                             )
     {
-    APSETUILOGGER_ENTERFN( EAPI,"Handler::ConstructL3")
-    
-    DoConstructL( NULL, aIspFilter, aBearerFilter, 
-                  aSortType, aVpnFilterType, EFalse );
-    
-    APSETUILOGGER_LEAVEFN( EAPI,"Handler::ConstructL3")
     }
 
 
@@ -404,12 +272,6 @@ EXPORT_C void CApSettingsHandler::ConstructL(
                                              TVpnFilterType aVpnFilterType
                                              )
     {
-    APSETUILOGGER_ENTERFN( EAPI,"Handler::ConstructL4")
-    
-    DoConstructL( &aDb, aIspFilter, aBearerFilter, 
-                  aSortType, aVpnFilterType, EFalse );
-    
-    APSETUILOGGER_LEAVEFN( EAPI,"Handler::ConstructL4")
     }
 
 
@@ -428,12 +290,6 @@ EXPORT_C void CApSettingsHandler::ConstructL(
                                         TBool aIncludeEasyWlan
                                         )
     {
-    APSETUILOGGER_ENTERFN( EAPI,"Handler::ConstructL5")
-    
-    DoConstructL( &aDb, aIspFilter, aBearerFilter, 
-                  aSortType, aVpnFilterType, aIncludeEasyWlan );
-    
-    APSETUILOGGER_LEAVEFN( EAPI,"Handler::ConstructL5")
     }
 
 
@@ -445,11 +301,6 @@ EXPORT_C void CApSettingsHandler::SetFilterL(   TInt aIspFilter,
                                                 TInt aBearerFilter,
                                                 TInt aSortType )
     {
-    APSETUILOGGER_ENTERFN( EAPI,"Handler::SetFilterL")
-    
-    iImpl->SetFilterL( aIspFilter, aBearerFilter, aSortType ); 
-    
-    APSETUILOGGER_LEAVEFN( EAPI,"Handler::SetFilterL")   
     }
 
 
@@ -462,12 +313,6 @@ EXPORT_C void CApSettingsHandler::SetFilterL(   TInt aIspFilter,
 EXPORT_C void CApSettingsHandler::SetTextOverrideL( TTextID aText2Change,
                                                     const TDesC& aNewText )
     {
-    APSETUILOGGER_ENTERFN( EAPI,"Handler::SetTextOverrideL")
-    
-    __ASSERT_DEBUG( iImpl, Panic( ENullPointer ) );
-    iImpl->SetTextOverrideL( aText2Change, aNewText );
-    
-    APSETUILOGGER_LEAVEFN( EAPI,"Handler::SetTextOverrideL")
     }
 
 
@@ -477,10 +322,7 @@ EXPORT_C void CApSettingsHandler::SetTextOverrideL( TTextID aText2Change,
 //
 EXPORT_C const TDesC& CApSettingsHandler::TextOverrideL( TTextID aTextId )
     {
-    APSETUILOGGER_ENTERFN( EAPI,"Handler::TextOverrideL<->")
-    
-    __ASSERT_DEBUG( iImpl, Panic( ENullPointer ) );
-    return iImpl->TextOverrideL( aTextId );
+    User::Leave( KErrNotSupported );
     }
 
 
@@ -492,13 +334,7 @@ EXPORT_C const TDesC& CApSettingsHandler::TextOverrideL( TTextID aTextId )
 EXPORT_C TInt CApSettingsHandler::RunSettingsL( TUint32 aHighLight,
                                                 TUint32& aSelected )
     {
-    APSETUILOGGER_ENTERFN( EAPI,"Handler::RunSettingsL")
-    
-    iImpl->RunSettingsL( aHighLight, aSelected );
-    
-    APSETUILOGGER_LEAVEFN( EAPI,"Handler::RunSettingsL")
-    
-    return iImpl->EventStore();
+    return 0;
     }
 
 
@@ -509,8 +345,7 @@ EXPORT_C TInt CApSettingsHandler::RunSettingsL( TUint32 aHighLight,
 //
 EXPORT_C TInt CApSettingsHandler::Cvt()
     {
-    APSETUILOGGER_ENTERFN( EAPI,"Handler::Cvt<->")
-    return KErrNone;
+    return KErrNotSupported;
     }
 
 
@@ -521,12 +356,8 @@ EXPORT_C TInt CApSettingsHandler::Cvt()
 TInt CApSettingsHandler::DoRunSettingsL( TUint32 /*aHighLight*/,
                                          TUint32& /*aSelected*/ )
     {
-    APSETUILOGGER_ENTERFN( EAPI,"Handler::DoRunSettingsL@Deprecated")
-    
-    //  Deprecated as moved to iImpl
-    __ASSERT_DEBUG( EFalse, Panic( ENullPointer ) );
     User::Leave(KErrNotSupported);
-    return KErrNone;
+    return KErrNotSupported;
     }
 
 
@@ -536,13 +367,7 @@ TInt CApSettingsHandler::DoRunSettingsL( TUint32 /*aHighLight*/,
 //
 EXPORT_C TInt CApSettingsHandler::RunViewerL( TUint32 aUid )
     {
-    APSETUILOGGER_ENTERFN( EAPI,"Handler::RunViewerL")
-    
-    iImpl->RunViewerL( aUid );    
-    
-    APSETUILOGGER_LEAVEFN( EAPI,"Handler::RunViewerL")
-    
-    return iImpl->EventStore();
+    return 0;
     }
 
 
@@ -553,12 +378,8 @@ EXPORT_C TInt CApSettingsHandler::RunViewerL( TUint32 aUid )
 //
 TInt CApSettingsHandler::DoRunViewerL( TUint32 /*aUid*/ )
     {
-    APSETUILOGGER_ENTERFN( EAPI,"Handler::DoRunViewerL@Deprecated")
-    
-    //  Deprecated as moved to iImpl
-    __ASSERT_DEBUG( EFalse, Panic( ENullPointer ) );
     User::Leave(KErrNotSupported);
-    return KErrNone;
+    return KErrNotSupported;
     }
 
 
@@ -570,10 +391,6 @@ TInt CApSettingsHandler::DoRunViewerL( TUint32 /*aUid*/ )
 void CApSettingsHandler::HandleApDeleteCmdL( TUint32 /*aUid*/, 
                                              TBool /*aIsLast*/ )
     {
-    APSETUILOGGER_ENTERFN( EAPI,"Handler::HandleApDeleteCmdL@Deprecated")
-    
-    //  Deprecated as moved to iImpl
-    __ASSERT_DEBUG( EFalse, Panic( ENullPointer ) );
     User::Leave(KErrNotSupported);
     }
 
@@ -585,12 +402,8 @@ void CApSettingsHandler::HandleApDeleteCmdL( TUint32 /*aUid*/,
 TUint32 CApSettingsHandler::HandleApBlankNewL( TInt /*aBearers*/, 
                                                TInt /*aIsps*/ )
     {
-    APSETUILOGGER_ENTERFN( EAPI,"Handler::HandleApBlankNewL@Deprecated")
-    
-    //  Deprecated as moved to iImpl
-    __ASSERT_DEBUG( EFalse, Panic( ENullPointer ) );
     User::Leave(KErrNotSupported);
-    return KErrNone;
+    return KErrNotSupported;
     }
 
 
@@ -601,10 +414,6 @@ TUint32 CApSettingsHandler::HandleApBlankNewL( TInt /*aBearers*/,
 //
 TUint32 CApSettingsHandler::HandleApUseOldNewL()
     {
-    APSETUILOGGER_ENTERFN( EAPI,"Handler::HandleApUseOldNewL@Deprecated")
-    
-    //  Deprecated as moved to iImpl
-    __ASSERT_DEBUG( EFalse, Panic( ENullPointer ) );
     User::Leave(KErrNotSupported);
     return KErrNone;
     }
@@ -618,12 +427,8 @@ TUint32 CApSettingsHandler::HandleApUseOldNewL()
 TUint32 CApSettingsHandler::EditAfterCreateL( TUint32 /*aUid*/,
                                               CApAccessPointItem* /*aItem*/ )
     {
-    APSETUILOGGER_ENTERFN( EAPI,"Handler::EditAfterCreateL@Deprecated")
-    
-    //  Deprecated as moved to iImpl
-    __ASSERT_DEBUG( EFalse, Panic( ENullPointer ) );
     User::Leave(KErrNotSupported);
-    return KErrNone;  
+    return KErrNotSupported;  
     }
 
 
@@ -639,22 +444,6 @@ void CApSettingsHandler::DoConstructL( CActiveApDb* aDb,
                                        TVpnFilterType aVpnFilterType,
                                        TBool aIncludeEasyWlan )
     {
-    APSETUILOGGER_ENTERFN( EAPI,"Handler::DoConstructL")
-    
-    // must place it to a temp variable, otherwise CodeScanner reports 
-    // it as a bad practice putting up member to Cleanupstack, but 
-    // we have NO NewL so we must use this.
-    CApSettingsHandlerImpl* tmp = CApSettingsHandlerImpl::NewLC( 
-                                           *aDb, iStartWithSelection,
-                                           iListType, iSelMenuType,
-                                           aIspFilter, aBearerFilter, 
-                                           aSortType, iReqIpvType,
-                                           aVpnFilterType, aIncludeEasyWlan,
-                                           ETrue );
-    CleanupStack::Pop(tmp);   // will soon be a member, need to pop
-    iImpl = tmp;                                           
-    
-    APSETUILOGGER_LEAVEFN( EAPI,"Handler::DoConstructL")
     }
 
 
@@ -667,10 +456,6 @@ void CApSettingsHandler::DoConstructL( CActiveApDb* aDb,
 void CApSettingsHandler::DoRunSetPageSettingsL( TUint32 /*aHighLight*/,
                                                 TUint32& /*aSelected*/ )
     {
-    APSETUILOGGER_ENTERFN( EAPI,"Handler::DoRunSetPageSettingsL@Deprecated")
-    
-    //  Deprecated as moved to iImpl
-    __ASSERT_DEBUG( EFalse, Panic( ENullPointer ) );
     User::Leave(KErrNotSupported);
     }
 
@@ -683,10 +468,6 @@ void CApSettingsHandler::DoRunSetPageSettingsL( TUint32 /*aHighLight*/,
 void CApSettingsHandler::DoRunListSettingsL( TUint32 /*aHighLight*/,
                                              TUint32& /*aSelected*/ )
     {
-    APSETUILOGGER_ENTERFN( EAPI,"Handler::DoRunListSettingsL@Deprecated")
-    
-    //  Deprecated as moved to iImpl
-    __ASSERT_DEBUG( EFalse, Panic( ENullPointer ) );
     User::Leave(KErrNotSupported);
     }
 
@@ -698,12 +479,8 @@ void CApSettingsHandler::DoRunListSettingsL( TUint32 /*aHighLight*/,
 //
 TUint32 CApSettingsHandler::DoHandleApUseOldNewL( TUint32 /*aSelected*/ )
     {
-    APSETUILOGGER_ENTERFN( EAPI,"Handler::DoHandleApUseOldNewL@Deprecated")
-    
-    //  Deprecated as moved to iImpl
-    __ASSERT_DEBUG( EFalse, Panic( ENullPointer ) );
     User::Leave(KErrNotSupported);
-    return KErrNone;
+    return KErrNotSupported;
     }
 
 
@@ -714,12 +491,8 @@ TUint32 CApSettingsHandler::DoHandleApUseOldNewL( TUint32 /*aSelected*/ )
 //
 TUint32 CApSettingsHandler::SelectApToCopyL()
     {
-    APSETUILOGGER_ENTERFN( EAPI,"Handler::SelectApToCopyL@Deprecated")
-    
-    //  Deprecated as moved to iImpl
-    __ASSERT_DEBUG( EFalse, Panic( ENullPointer ) );
     User::Leave(KErrNotSupported);
-    return KErrNone;
+    return KErrNotSupported;
     }
 
 
@@ -730,12 +503,8 @@ TUint32 CApSettingsHandler::SelectApToCopyL()
 //
 TUint32 CApSettingsHandler::DoHandleApBlankNewL( TInt /*aBearers*/, TInt /*aIsps*/ )
     {
-    APSETUILOGGER_ENTERFN( EAPI,"Handler::DoHandleApBlankNewL@Deprecated")
-    
-    //  Deprecated as moved to iImpl
-    __ASSERT_DEBUG( EFalse, Panic( ENullPointer ) );
     User::Leave(KErrNotSupported);
-    return KErrNone;
+    return KErrNotSupported;
     }
 
 
@@ -747,10 +516,6 @@ TUint32 CApSettingsHandler::DoHandleApBlankNewL( TInt /*aBearers*/, TInt /*aIsps
 //
 void CApSettingsHandler::HandleNetworkDeleteCmdL( TUint32 /*aUid*/ )
     {
-    APSETUILOGGER_ENTERFN( EAPI,"Handler::HandleNetworkDeleteCmdL@Deprecated")
-    
-    //  Deprecated as moved to iImpl
-    __ASSERT_DEBUG( EFalse, Panic( ENullPointer ) );
     User::Leave(KErrNotSupported);
     }
 
@@ -762,12 +527,8 @@ void CApSettingsHandler::HandleNetworkDeleteCmdL( TUint32 /*aUid*/ )
 //
 TInt CApSettingsHandler::GetVariantL()
     {
-    APSETUILOGGER_ENTERFN( EAPI,"Handler::GetVariantL@Deprecated")
-    
-    //  Deprecated as moved to iImpl
-    __ASSERT_DEBUG( EFalse, Panic( ENullPointer ) );
     User::Leave(KErrNotSupported);
-    return KErrNone;
+    return KErrNotSupported;
     }
 
 
@@ -777,12 +538,8 @@ TInt CApSettingsHandler::GetVariantL()
 //
 TInt CApSettingsHandler::ConfirmDeleteL( TUint32 /*aUid*/, TBool /*aIsLast*/ )
     {
-    APSETUILOGGER_ENTERFN( EAPI,"Handler::ConfirmDeleteL@Deprecated")
-    
-    //  Deprecated as moved to iImpl
-    __ASSERT_DEBUG( EFalse, Panic( ENullPointer ) );
     User::Leave(KErrNotSupported);
-    return KErrNone;
+    return KErrNotSupported;
     }
 
 
@@ -794,10 +551,6 @@ TInt CApSettingsHandler::ConfirmDeleteL( TUint32 /*aUid*/, TBool /*aIsLast*/ )
 void CApSettingsHandler::HandleRunSettingsL( TUint32 /*aHighLight*/, 
                                              TUint32& /*aSelected*/ )
     {
-    APSETUILOGGER_ENTERFN( EAPI,"Handler::HandleRunSettingsL@Deprecated")
-    
-    //  Deprecated as moved to iImpl
-    __ASSERT_DEBUG( EFalse, Panic( ENullPointer ) );
     User::Leave(KErrNotSupported);
     }
 
@@ -810,10 +563,6 @@ void CApSettingsHandler::HandleRunSettingsL( TUint32 /*aHighLight*/,
 void CApSettingsHandler::ChooseBearerTypeL( TInt /*aBearers*/, 
                                             CApAccessPointItem& /*aItem*/ )
     {
-    APSETUILOGGER_ENTERFN( EAPI,"Handler::ChooseBearerTypeL@Deprecated")
-    
-    //  Deprecated as moved to iImpl
-    __ASSERT_DEBUG( EFalse, Panic( ENullPointer ) );
     User::Leave(KErrNotSupported);
     }
 
@@ -826,12 +575,8 @@ void CApSettingsHandler::ChooseBearerTypeL( TInt /*aBearers*/,
 //
 TUint32 CApSettingsHandler::HandleDuplicateL( TUint32 /*aUid*/ )
     {
-    APSETUILOGGER_ENTERFN( EAPI,"Handler::HandleDuplicateL@Deprecated")
-    
-    //  Deprecated as moved to iImpl
-    __ASSERT_DEBUG( EFalse, Panic( ENullPointer ) );    
     User::Leave(KErrNotSupported);
-    return KErrNone;
+    return KErrNotSupported;
     }
 
 

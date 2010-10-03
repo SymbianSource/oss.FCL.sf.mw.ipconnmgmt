@@ -42,20 +42,6 @@
     void ApEngineLogger::Write
     ( TInt32 aMask, TInt aLevel, TRefByValue<const TDesC16> aFmt, ... )
         {
-        if( (aMask & APENGINE_LOG_MASK) && (aLevel <= APENGINE_LOG_LEVEL) )
-            {
-            VA_LIST list;
-            VA_START( list, aFmt );
-            RFileLogger::WriteFormat
-                (
-                KApEngineLogDir,
-                KApEngineLogFile,
-                EFileLoggingModeAppend,
-                aFmt,
-                list
-                );
-            VA_END( list );
-            }
         }
 
 
@@ -68,17 +54,6 @@
       TRefByValue<const TDesC16> aFmt, 
       VA_LIST& aList )
         {
-        if( (aMask & APENGINE_LOG_MASK) && (aLevel <= APENGINE_LOG_LEVEL) )
-            {
-            RFileLogger::WriteFormat
-                (
-                KApEngineLogDir,
-                KApEngineLogFile,
-                EFileLoggingModeAppend,
-                aFmt,
-                aList
-                );
-            }
         }
 
 
@@ -89,20 +64,6 @@
     void ApEngineLogger::Write
     ( TInt32 aMask, TInt aLevel, TRefByValue<const TDesC8> aFmt, ... )
         {
-        if( (aMask & APENGINE_LOG_MASK) && (aLevel <= APENGINE_LOG_LEVEL) )
-            {
-            VA_LIST list;
-            VA_START( list, aFmt );
-            RFileLogger::WriteFormat
-                (
-                KApEngineLogDir,
-                KApEngineLogFile,
-                EFileLoggingModeAppend,
-                aFmt,
-                list
-                );
-            VA_END( list );
-            }
         }
 
 
@@ -114,17 +75,6 @@
     ( TInt32 aMask, TInt aLevel, 
       TRefByValue<const TDesC8> aFmt, VA_LIST& aList )
         {
-        if( (aMask & APENGINE_LOG_MASK) && (aLevel <= APENGINE_LOG_LEVEL) )
-            {
-            RFileLogger::WriteFormat
-                (
-                KApEngineLogDir,
-                KApEngineLogFile,
-                EFileLoggingModeAppend,
-                aFmt,
-                aList
-                );
-            }
         }
 
 
@@ -142,18 +92,5 @@
             TInt aLen
             )
         {
-        if( (aMask & APENGINE_LOG_MASK) && (aLevel <= APENGINE_LOG_LEVEL) )
-            {
-            RFileLogger::HexDump
-                (
-                KApEngineLogDir,
-                KApEngineLogFile,
-                EFileLoggingModeAppend,
-                aHeader,
-                aMargin,
-                aPtr,
-                aLen
-                );
-            }
         }
 #endif // __TEST_APENGINE_LOG__

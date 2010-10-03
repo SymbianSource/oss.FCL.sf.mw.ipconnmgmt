@@ -1313,9 +1313,6 @@ TWlanIapType CMPMCommsDatAccess::CheckWlanL( TUint32 aIapId ) const
                 {
                 MPMLOGSTRING( "CMPMCommsDatAccess::CheckWlanL: IAP is WLAN" )
                 wlan = EWlanIap;
-                TInt ssidLength( 0 );
-                commsDbWlanTableView->ReadColumnLengthL( TPtrC( NU_WLAN_SSID ), 
-                                                     ssidLength );
                 }
             else
                 {

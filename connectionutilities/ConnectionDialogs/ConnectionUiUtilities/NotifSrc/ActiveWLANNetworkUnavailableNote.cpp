@@ -20,11 +20,15 @@
 #include "ActiveWLANNetworkUnavailableNote.h"
 
 #include <connuiutilsnotif.rsg>
-#include <AknGlobalNote.h>
+#include <hbdevicenotificationdialogsymbian.h>
 #include <StringLoader.h>
 
 
 // CONSTANTS
+
+// Empty string
+_LIT( KEmpty, "" );
+
 
 // ================= MEMBER FUNCTIONS =======================
 
@@ -70,10 +74,8 @@ void CActiveWLANNetworkUnavailableNote::RunL()
                                    R_WLAN_NETWORK_UNAVAILABLE );
             }
                                           
-        CAknGlobalNote* globalNote = CAknGlobalNote::NewLC();
-        globalNote->ShowNoteL( EAknGlobalErrorNote, *stringLabel );
-
-        CleanupStack::PopAndDestroy( globalNote );
+        CHbDeviceNotificationDialogSymbian::NotificationL(
+                KEmpty, stringLabel->Des(), KEmpty);
         CleanupStack::PopAndDestroy( stringLabel );                    
         }
     

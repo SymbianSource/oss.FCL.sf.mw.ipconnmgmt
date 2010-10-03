@@ -1320,4 +1320,49 @@ EXPORT_C void CConnMonBearerGroupChange::BearerGroups(
     aBearerGroups2 = iBearerGroups2;
     }
 
+// -----------------------------------------------------------------------------
+// TConnMonIapInfo Copy constructor
+// -----------------------------------------------------------------------------
+//
+EXPORT_C TConnMonIapInfo::TConnMonIapInfo( const TConnMonIapInfo& aConnMonIapInfo )
+	  :iCount( 0 )
+    {
+    if ( aConnMonIapInfo.iCount <= KConnMonMaxIAPCount )
+        {
+        iCount = aConnMonIapInfo.iCount;
+        for ( TInt i=0; i < iCount; i++ )
+            {
+            iIap[ i ] = aConnMonIapInfo.iIap[ i ];   
+            }       
+        }
+    else
+        {
+        LOGIT1("Client [%d]: TConnMonIapInfo iCount out of range", this)              	
+        }
+    }
+
+// -----------------------------------------------------------------------------
+// TConnMonIapInfo::operator=
+// -----------------------------------------------------------------------------
+//
+EXPORT_C TConnMonIapInfo& TConnMonIapInfo::operator=( const TConnMonIapInfo& aConnMonIapInfo )
+    {
+    if ( this != &aConnMonIapInfo )
+        {
+        if ( aConnMonIapInfo.iCount <= KConnMonMaxIAPCount )
+            {
+            iCount = aConnMonIapInfo.iCount;
+            for ( TInt i=0; i < iCount; i++ )
+                {
+                iIap[ i ] = aConnMonIapInfo.iIap[ i ];   
+                }       
+            }
+        else
+            {
+            LOGIT1("Client [%d]: TConnMonIapInfo iCount out of range", this)              	
+            }
+        }
+    return *this;
+    }
+
 // End-of-file

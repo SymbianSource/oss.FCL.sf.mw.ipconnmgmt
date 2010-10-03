@@ -2196,6 +2196,13 @@ void CConnMonSession::ServicePluginL( const RMessage2& aMessage )
                                 }
                             }
                         }
+                    else // ( rc != KErrNone )
+                        {
+                        if ( ptrData )
+                            {
+                            delete ptrData;
+                            }
+                        }
                     break;
                     }
                 case EReqPluginGetQuery:
@@ -2416,6 +2423,8 @@ TInt CConnMonSession::SetPluginThreshold( const TInt aType, const TUint aValue )
     if ( globalThBefore != globalThAfter )
         {
         // Global threshold has changed -> send to plug-in engines
+        // Dead code in else-clause is for possible future use. Static analysis exception added.
+        // coverity[dead_error_line]
         if ( internal )
             {
             if ( aValue == 1 )
@@ -2615,7 +2624,7 @@ TInt CConnMonSession::AdjustThresholdToAllowedRange(
 
             // This method gets the bearer only for an internal connection. This is OK
             // since data volume events are not supported for external connections.
-            iCmServer->Iap()->GetBearer( aConnId, bearer, bearerInfo );
+            (void) iCmServer->Iap()->GetBearer( aConnId, bearer, bearerInfo );
 
             // Set minimum
             if ( bearer == EBearerWLAN || bearer == EBearerLAN )
@@ -2630,7 +2639,7 @@ TInt CConnMonSession::AdjustThresholdToAllowedRange(
                 {
                 minimum = KMinimumWCDMADataThreshold;
                 }
-
+            
             // Check threshold
             if ( aThreshold < minimum )
                 {

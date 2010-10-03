@@ -885,6 +885,23 @@ void CMPMServerSession::HandleServerApplicationMigratesToCarrierL(
                                   ERoaming,
                                   *this );
 
+    TWlanIapType iapType = MyServer().CommsDatAccess()->CheckWlanL( iMigrateIap );
+
+    // If this is a cellular IAP, we must check the current cellular data usage setting in case it
+    // has changed to disabled mode while MPM was waiting for a migrate confirmation. If cellular
+    // data usage has been disabled, terminate the connection attempt with KErrPermissionDenied.
+    if ( iapType == ENotWlanIap )
+        {
+        TInt cellularUsage = MyServer().DataUsageWatcher()->CellularDataUsage();
+        if ( cellularUsage == ECmCellularDataUsageDisabled )
+            {
+            MPMLOGSTRING( "Trying to migrate to cellular IAP, but cellular data usage is disabled, stopping" )
+            iMigrateState = EMigrateNone;
+            RoamingConfirmationCompletedL( KErrPermissionDenied, EMsgQueryThisTime, EFalse );
+            return;
+            }
+        }
+
     iMigrateState = EMigrateUserConfirmation;
 
     // Confirm only if this IAP is not already in use
@@ -910,13 +927,13 @@ void CMPMServerSession::HandleServerApplicationMigratesToCarrierL(
                     reconnect = ETrue;
                     }
 
-        //Display confirm dialog only if we are moving to cellular IAP
-        if ( MyServer().CommsDatAccess()->CheckWlanL( iMigrateIap ) == ENotWlanIap )
+        // Display confirm dialog only if we are moving to cellular IAP
+        if ( iapType == ENotWlanIap )
             {
             // Check that connection preferences don't deny queries, and
             // enough time has elapsed from the last query cancelled by the user.
             if ( !( iIapSelection->MpmConnPref().NoteBehaviour() & TExtendedConnPref::ENoteBehaviourConnDisableQueries ) &&
-                 !MyServer().IsConnPermQueryTimerOn() )
+                    !MyServer().IsConnPermQueryTimerOn() )
                 {
                 if ( MyServer().RoamingWatcher()->RoamingStatus() == EMPMInternationalRoaming )
                     {
@@ -1719,7 +1736,7 @@ void CMPMServerSession::HandleServerRegisterPrefIAPNotifL(
     availableIAPs = GetAvailableIAPs();
 
     MPMLOGSTRING2( "CMPMServerSession::HandleServerRegisterPrefIAPNotifL \
-- IAPs count: %d", availableIAPs.iCount)
+- available IAPs count: %d", availableIAPs.iCount)
 
 #ifdef _DEBUG
     for (TUint i = 0; i < availableIAPs.Count(); i++)
@@ -1739,12 +1756,6 @@ void CMPMServerSession::HandleServerRegisterPrefIAPNotifL(
         PrefIAPNotificationL( availableIAPs, EBearerMan );
         }
 
-    // In case the mobility application register to preferred IAP notification
-    // we have to make sure we get availability every once in a while.
-    // 
-    RArray<TUint> iapPath;
-    CleanupClosePushL( iapPath );
-    CleanupStack::PopAndDestroy( &iapPath );
     aMessage.Complete( KErrNone );
     }
 

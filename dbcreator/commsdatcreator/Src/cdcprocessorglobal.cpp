@@ -227,12 +227,16 @@ void CProcessorGlobal::ProcessTagL( TBool /*aFieldIDPresent*/ )
                 CleanupStack::PushL( defaultGPRS );
                 
                 defaultGPRS->iRecordName.SetL( KDefaultGPRSRecordName );
-                
-                defaultGPRS->FindL( *db );			    
+
+                if ( !defaultGPRS->FindL( *db ) )
+                    {
+                    CLOG_WRITE( "! Error : CProcessorGlobal::ProcessTagL: Default AP not found" );
+                    User::Leave( KErrNotFound );
+                    }
                 
                 defaultGPRS->iAPN.SetL( *ptrTag );
                 
-                defaultGPRS->ModifyL( *db );				    				    				   
+                defaultGPRS->ModifyL( *db );
                 
                 CleanupStack::PopAndDestroy( defaultGPRS );
                 
@@ -320,7 +324,11 @@ void CProcessorGlobal::ProcessTagL( TBool /*aFieldIDPresent*/ )
                     bearerRecord->iRecordName.SetL( KModemBearerPacketData );	
                     }				
                 
-                bearerRecord->FindL( *iSession ); // CHECK: Leaves if record not found				
+                if( !bearerRecord->FindL( *iSession ) )
+                    {
+                    CLOG_WRITE( "! Error : CProcessorGlobal::ProcessTagL: Modem bearer record not found" );
+                    User::Leave( KErrNotFound );
+                    }
                 
                 // Convert input parameter
                 TLex lex( *ptrTag );
@@ -371,7 +379,11 @@ void CProcessorGlobal::ProcessTagL( TBool /*aFieldIDPresent*/ )
                     // Open the record "WlanBearer"
                     bearerRecord->iRecordName.SetL( KLANBearerWlan );	
                     
-                    User::LeaveIfError( bearerRecord->FindL( *iSession ) );
+                    if( !bearerRecord->FindL( *iSession ) )
+                        {
+                        CLOG_WRITE( "! Error : CProcessorGlobal::ProcessTagL: LAN bearer record not found" );
+                        User::Leave( KErrNotFound );
+                        }
                     
                     // Convert the input paramater to UINT
                     TLex lex( *ptrTag );
@@ -496,19 +508,22 @@ void CProcessorGlobal::ProcessAPL()
                         
     globalSettings->iRecordName.SetL( KGlobalSettingsRecordName );
 
-    if( globalSettings->FindL( *db ) )
+    if( !globalSettings->FindL( *db ) )
         {
-        //Gprs attach mode
-        if ( iAttachWhenNeeded )
-            {
-            CLOG_WRITE( "GPRS attach mode : attach when needed\n" )
-            globalSettings->iGPRSAttachMode = RPacketService::EAttachWhenNeeded;
-            }
-        else
-            {
-            CLOG_WRITE( "GPRS attach mode : attach when available\n" )
-            globalSettings->iGPRSAttachMode = RPacketService::EAttachWhenPossible;
-            }
+        CLOG_WRITE( "! Error : CProcessorGlobal::ProcessAPL: Global settings not found" );
+        User::Leave( KErrNotFound );
+        }
+
+    //Gprs attach mode
+    if ( iAttachWhenNeeded )
+        {
+        CLOG_WRITE( "GPRS attach mode : attach when needed\n" )
+        globalSettings->iGPRSAttachMode = RPacketService::EAttachWhenNeeded;
+        }
+    else
+        {
+        CLOG_WRITE( "GPRS attach mode : attach when available\n" )
+        globalSettings->iGPRSAttachMode = RPacketService::EAttachWhenPossible;
         }
         
     globalSettings->ModifyL( *db );
@@ -677,7 +692,11 @@ void CProcessorGlobal::SaveGlobalWlanParameterL( const TUint32 aTableType, const
 	    
 	   	settingsTypeField->SetL( aTableType );
 	    			   			    
-	    deviceSettingsTable->FindL( *iSession );
+	    if( !deviceSettingsTable->FindL( *iSession ) )
+            {
+            CLOG_WRITE( "! Error : CProcessorGlobal::SaveGlobalWlanParameterL: Table not found" );
+            User::Leave( KErrNotFound );
+            }
 	    
 	    // Convert the input parameter to integer
     	TLex lex( *aValue );

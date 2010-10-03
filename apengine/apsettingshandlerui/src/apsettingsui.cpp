@@ -47,22 +47,7 @@ EXPORT_C CApSettingsUi* CApSettingsUi::NewLC(
                                         TVpnFilterType aVpnFilterType
                                             )
     {
-    APSETUILOGGER_CREATE;
-    APSETUILOGGER_ENTERFN( EAPI,"SettingsUi::NewLC")
-
-    CApSettingsUi* db = 
-        new( ELeave ) CApSettingsUi( aStartWithSelection,
-                                          aListType,
-                                          aSelMenuType,
-                                          aReqIpvType
-                                          );
-    CleanupStack::PushL( db );
-    
-
-    db->ConstructL( aIspFilter, aBearerFilter, 
-                    aSortType, aVpnFilterType );
-    APSETUILOGGER_LEAVEFN( EAPI,"SettingsUi::NewLC")    
-    return db;
+    return NULL;
     }
 
 
@@ -70,9 +55,6 @@ EXPORT_C CApSettingsUi* CApSettingsUi::NewLC(
 // Destructor
 EXPORT_C CApSettingsUi::~CApSettingsUi()
     {
-    APSETUILOGGER_DELETE;
-
-    delete iImpl;    
     }
 
 
@@ -102,23 +84,6 @@ EXPORT_C void CApSettingsUi::ConstructL( TInt aIspFilter,
                                          TVpnFilterType aVpnFilterType
                                         )
     {
-    APSETUILOGGER_ENTERFN( EAPI,"SettingsUi::ConstructL");
-
-    // must place it to a temp variable, otherwise CodeScanner reports 
-    // it as a bad practice putting up member to Cleanupstack, but 
-    // we have NO NewL so we must use this.
-    CApSettingsHandlerImpl* tmp = CApSettingsHandlerImpl::NewLC( 
-                                     iStartWithSelection,
-                                     iListType, iSelMenuType,
-                                     aIspFilter, aBearerFilter, 
-                                     aSortType, iReqIpvType,
-                                     aVpnFilterType,
-                                     EFalse );
-                                     
-    CleanupStack::Pop( tmp );   // soon will be a member, need to pop
-    iImpl = tmp;
-    
-    APSETUILOGGER_LEAVEFN( EAPI,"SettingsUi::ConstructL")    
     }
 
 
@@ -130,14 +95,7 @@ EXPORT_C void CApSettingsUi::ConstructL( TInt aIspFilter,
 EXPORT_C TInt CApSettingsUi::RunSettingsL( TUint32 aHighLight,
                                                 TUint32& aSelected )
     {
-    APSETUILOGGER_ENTERFN( EAPI,"SettingsUi::RunSettingsL")
-    __ASSERT_DEBUG( iImpl, Panic( ENullPointer ) );
-
-    iImpl->RunSettingsL( aHighLight, aSelected );
-    
-    APSETUILOGGER_LEAVEFN( EAPI,"SettingsUi::RunSettingsL")
-    
-    return iImpl->EventStore();
+    return 0;
     }
 
 

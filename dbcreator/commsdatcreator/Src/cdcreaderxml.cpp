@@ -742,73 +742,70 @@ TInt CReaderXML::ReadLineL()
         {
         TPtrC8 ptrBuf8;
         ptrBuf8.Set( buf );
-
-        if (result == KErrNone || result == KErrEof)
-            {          
-            switch ( iCharSet )
-                {
-                case ECharSetUnicode:
-                    {                     
-                    //simply copy to a Unicode descriptor
-                    TPtrC16 ptrBuf16( ( TText16* )ptrBuf8.Ptr(), \
-                                        ptrBuf8.Length() / KAsciiUnicodeRatio );
+         
+        switch ( iCharSet )
+            {
+            case ECharSetUnicode:
+                {                     
+                //simply copy to a Unicode descriptor
+                TPtrC16 ptrBuf16( ( TText16* )ptrBuf8.Ptr(), \
+                                    ptrBuf8.Length() / KAsciiUnicodeRatio );
                                         
-                    TPtrC16 ptrLine;
-                    result = ExtractLine(ptrBuf16, ptrLine);  
+                TPtrC16 ptrLine;
+                result = ExtractLine(ptrBuf16, ptrLine);  
                     
-                    if ( result == KErrNone ) 
-                        {
-                        delete iLine;
-                        iLine = NULL;
-                        iLine = ptrLine.AllocL();
+                if ( result == KErrNone ) 
+                    {
+                    delete iLine;
+                    iLine = NULL;
+                    iLine = ptrLine.AllocL();
+                    
+                    //Increment the file position
+                    iFilePos += iLine->Length() * KAsciiUnicodeRatio;
+                    }
+                
+                break;
+                } 
+            case ECharSetAscii:
+            case ECharSetUtf8:
+            default:
+                {                    
+                //conversion to Unicode is needed
+                HBufC16* hBuf16 = HBufC16::NewLC( KMaxLineSize );
+                TPtr16 ptrBuf16( hBuf16->Des() );
+                
+                if( iCharSet == ECharSetUtf8 )
+                    {
+                    CnvUtfConverter::ConvertToUnicodeFromUtf8
+                                                ( ptrBuf16, ptrBuf8 );
+                    }
+                else
+                    {
+                    ptrBuf16.Copy( ptrBuf8 );
+                    }
+                    
+                TPtrC16 ptrLine;
+                result = ExtractLine(ptrBuf16, ptrLine); 
+                    
+                if ( result == KErrNone ) 
+                    {
+                    delete iLine;
+                    iLine = NULL;
+                    iLine = ptrLine.AllocL();
                         
-                        //Increment the file position
-                        iFilePos += iLine->Length() * KAsciiUnicodeRatio;
-                        }
+                    // Increment the file position
+                    // Line in unicode format converted back to UTF-8
+                    // for getting the right lenght and osition in file
+                    CnvUtfConverter::ConvertFromUnicodeToUtf8( 
+                                        buf, iLine->Des() );
+                    iFilePos += buf.Length();
+                    }
                     
-                    break;
-                    } 
-                case ECharSetAscii:
-                case ECharSetUtf8:
-                default:
-                    {                    
-                    //conversion to Unicode is needed
-                    HBufC16* hBuf16 = HBufC16::NewLC( KMaxLineSize );
-                    TPtr16 ptrBuf16( hBuf16->Des() );
+                CleanupStack::PopAndDestroy( hBuf16 ); 
                     
-                    if( iCharSet == ECharSetUtf8 )
-                        {
-                        CnvUtfConverter::ConvertToUnicodeFromUtf8
-                                                    ( ptrBuf16, ptrBuf8 );
-                        }
-                    else
-                        {
-                        ptrBuf16.Copy( ptrBuf8 );
-                        }
-                    
-                    TPtrC16 ptrLine;
-                    result = ExtractLine(ptrBuf16, ptrLine); 
-                    
-                    if ( result == KErrNone ) 
-                        {
-                        delete iLine;
-                        iLine = NULL;
-                        iLine = ptrLine.AllocL();
-                        
-                        // Increment the file position
-                        // Line in unicode format converted back to UTF-8
-                        // for getting the right lenght and osition in file
-                        CnvUtfConverter::ConvertFromUnicodeToUtf8( 
-                                            buf, iLine->Des() );
-                        iFilePos += buf.Length();
-                        }
-                    
-                    CleanupStack::PopAndDestroy( hBuf16 ); 
-                    
-                    break;
-                    }//case
-                }//switch
-            }//if
+                break;
+                }//case
+            }//switch
         }//if
 
     return result;

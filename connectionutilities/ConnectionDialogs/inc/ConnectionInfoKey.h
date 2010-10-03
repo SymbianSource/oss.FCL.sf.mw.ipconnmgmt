@@ -51,13 +51,6 @@ NONSHARABLE_CLASS( CConnectionInfoKey ) : public TKeyArrayFix
         virtual TInt Compare( TInt aLeft, TInt aRight ) const;
 
         /**
-        * At function
-        * @param nIndex Index of the element ot be returned
-        * @return TAny* The element at the given index
-        */
-        virtual TAny* At( TInt anIndex ) const;
-
-        /**
         * TConnectionInfoKey constructor
         * @return -
         */

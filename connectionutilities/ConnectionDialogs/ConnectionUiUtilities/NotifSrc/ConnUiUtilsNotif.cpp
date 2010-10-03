@@ -28,7 +28,6 @@
 #include "WLANNetworkUnavailableNoteNotif.h"
 #include "wlanpowersavetestnotif.h"
 #include "easywapidlgnotif.h"
-#include "cellulardataconfirmation.h"
 
 // CONSTANTS
 
@@ -110,11 +109,6 @@ LOCAL_C void CreateNotifiersL(
     CleanupStack::PushL( serNotify );
     aNotifiers->AppendL( serNotify );
     CleanupStack::Pop( serNotify );      
-
-    serNotify = CCellularDataConfirmation::NewL( resourceFileResponsible );
-    CleanupStack::PushL( serNotify );
-    aNotifiers->AppendL( serNotify );
-    CleanupStack::Pop( serNotify );     
     
     serNotify = CWlanPowerSaveQueryNotif::NewL( resourceFileResponsible );
     CleanupStack::PushL( serNotify );

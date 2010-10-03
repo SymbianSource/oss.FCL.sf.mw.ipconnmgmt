@@ -3090,6 +3090,7 @@ EXPORT_C void CConnMonWlanProbeRawBuffersPckg::UnpackToL(
         if ( err != KErrNone )
             {
             LOGIT2("UnpackToL: error <%d> reading data, stopping. i %d", err, i)
+            delete net;
             break;
             }
 

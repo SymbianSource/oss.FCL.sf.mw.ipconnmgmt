@@ -49,11 +49,6 @@ EXPORT_C CApListItemList::CApListItemList()
 //
 EXPORT_C CApListItemList::~CApListItemList()
     {
-    CLOG( ( EApList, 0, _L( "-> CApListItemList::~CApListItemList" ) ) );
-
-    ResetAndDestroy();
-
-    CLOG( ( EApList, 1, _L( "<- CApListItemList::~CApListItemList" ) ) );
     }
 
 // ---------------------------------------------------------
@@ -62,22 +57,6 @@ EXPORT_C CApListItemList::~CApListItemList()
 //
 EXPORT_C CApListItem* CApListItemList::ItemForUid( TUint32 aUid ) const
     {
-    CLOG( ( EApList, 0, _L( "-> CApListItemList::ItemForUid" ) ) );
-
-    // This method cannot return "const CApListItem*", because all methods
-    // of CApListItem are non-const -> if the returned item was const, it
-    // would be unusable.
-    TInt i;
-    TInt count = Count();
-    for ( i = 0; i < count; i++ )
-        {
-        if ( At( i )->Uid() == aUid )
-            {
-            return At( i );
-            }
-        }
-
-    CLOG( ( EApList, 0, _L( "-> CApListItemList::ItemForUid" ) ) );
     return NULL;
     }
 

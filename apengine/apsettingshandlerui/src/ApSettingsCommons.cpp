@@ -49,25 +49,7 @@ void Panic( TApSettingsHandlerUiPanicCodes aPanic )
 //
 TInt AskQueryL( TInt aResId, TDesC* aVar )
     {
-    APSETUILOGGER_ENTERFN( EOther,"Commons::AskQueryL")
-    
-    HBufC* temp;
-    if ( aVar )
-        {
-        temp = StringLoader::LoadL( aResId, *aVar );
-        CleanupStack::PushL( temp );
-        }
-    else
-        {
-        temp = CEikonEnv::Static()->AllocReadResourceLC( aResId );
-        }
-    CAknQueryDialog* qd = 
-            CAknQueryDialog::NewL( CAknQueryDialog::EConfirmationTone );
-    TInt retval = qd->ExecuteLD( R_CONFIRMATION_QUERY, *temp );
-    CleanupStack::PopAndDestroy();  // temp
-    
-    APSETUILOGGER_LEAVEFN( EOther,"Commons::AskQueryL")
-    return retval;
+    return 0;
     }
 
 
@@ -78,73 +60,14 @@ TInt AskQueryL( TInt aResId, TDesC* aVar )
 //
 TInt ShowNoteL( TInt aResId, TDesC* aVar )
     {
-    APSETUILOGGER_ENTERFN( EOther,"Commons::ShowNoteL")
-    
-    HBufC* temp;
-    if ( aVar )
-        {
-        temp = StringLoader::LoadL( aResId, *aVar );
-        CleanupStack::PushL( temp );
-        }
-    else
-        {
-        temp = CEikonEnv::Static()->AllocReadResourceLC( aResId );
-        }
-    CAknNoteDialog* dlg =
-        new ( ELeave ) CAknNoteDialog
-                (
-                 REINTERPRET_CAST( CEikDialog**, &dlg ),
-                 CAknNoteDialog::ENoTone,
-                 CAknNoteDialog::EShortTimeout
-                );
-    dlg->PrepareLC( R_GENERAL_NOTE );
-    dlg->SetTextL( *temp );
-    TInt retval = dlg->RunLD();
-    CleanupStack::PopAndDestroy();  // temp
-    
-    APSETUILOGGER_LEAVEFN( EOther,"Commons::ShowNoteL")
-    return retval;
+    return 0;
     }
 
 
 #ifdef __TEST_OOMDEBUG
     TInt GetTestStateL()
         {
-        APSETUILOGGER_ENTERFN( EOther,"Commons::GetTestStateL")
-        
-        TInt retval( 0 );
-        RFs fs;
-        User::LeaveIfError( fs.Connect() );
-        CleanupClosePushL<RFs>( fs );
-        TUint att;
-        if ( fs.Att( KTestFileName, att ) == KErrNone )
-            {
-            RFile file;
-            TInt err = file.Open( fs, KTestFileName,
-                                  EFileShareAny | EFileStreamText |
-                                  EFileRead
-                                );
-            if ( err == KErrNone )
-                {
-                TBuf8<256> buf;
-                err = file.Read( buf );
-                if ( err == KErrNone )
-                    {
-                    TInt val;
-                    TLex8 lex( buf );
-                    err = lex.Val( val );
-                    if ( err == KErrNone )
-                        {
-                        retval = val;
-                        }
-                    }
-                }
-            file.Close();
-            }
-        CleanupStack::PopAndDestroy(); // fs, will also close it
-        
-        APSETUILOGGER_LEAVEFN( EOther,"Commons::GetTestStateL")
-        return retval;
+        return 0;
         }
 #endif // __TEST_OOMDEBUG
 

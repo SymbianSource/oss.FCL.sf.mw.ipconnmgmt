@@ -136,18 +136,4 @@ TInt CConnectionInfoKey::Compare( TInt aLeft, TInt aRight ) const
     return retval;
     }
 
-
-// ---------------------------------------------------------
-// CConnectionInfoKey::At( TInt anIndex ) const
-// ---------------------------------------------------------
-//
-TAny* CConnectionInfoKey::At( TInt anIndex ) const
-    {
-    TDesC16 tem( iPtr->At( anIndex )->Name() );
-    TAny* ptr = ( TAny* )&tem;
-
-    return ptr;
-    }
-
-
 // End of File

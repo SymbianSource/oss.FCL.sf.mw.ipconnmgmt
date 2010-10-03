@@ -31,7 +31,7 @@
 #include <data_caging_path_literals.hrh>
 #include <uikon/eiksrvui.h>
 #include <utf.h>
-#include <AknGlobalNote.h>
+#include <hbdevicenotificationdialogsymbian.h>
 
 #include "ConnUiUtilsNotif.hrh"
 #include "SelectWLANDlg.h"
@@ -53,6 +53,8 @@ _LIT( KDriveZ, "z:" );
 // Name of the MBM file containing icons
 _LIT( KFileIcons, "ConnectionUiUtilities.mbm" );
 
+// Empty string
+_LIT( KEmpty, "" );
 
 LOCAL_D const TInt KIconsGranularity = 4;
 
@@ -232,16 +234,8 @@ TBool CSelectWLANDlg::OkToExitL( TInt aButtonId )
                     HBufC* stringLabel = StringLoader::LoadLC( 
                                                     R_INFO_NO_NETWORKS_FOUND );
 
-                    //RAknUiServer* globalNote = CAknSgcClient::AknSrv();
-                    //if ( globalNote->Handle() )
-                    //    {
-                    //    globalNote->ShowGlobalNoteL( *stringLabel, 
-                    //                            EAknGlobalInformationNote );
-                    //    }
-                        
-                    CAknGlobalNote* globalNote = CAknGlobalNote::NewLC();
-                    globalNote->ShowNoteL( EAknGlobalInformationNote, *stringLabel );
-                    CleanupStack::PopAndDestroy( globalNote );
+                    CHbDeviceNotificationDialogSymbian::NotificationL(
+                            KEmpty, stringLabel->Des(), KEmpty);
                         
                     CleanupStack::PopAndDestroy( stringLabel );
                     // set network prefs because we still need ssid

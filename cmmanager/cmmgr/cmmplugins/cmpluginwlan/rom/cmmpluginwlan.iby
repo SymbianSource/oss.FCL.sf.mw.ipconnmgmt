@@ -18,8 +18,11 @@
 #ifndef CMMPLUGINWLAN_IBY__
 #define CMMPLUGINWLAN_IBY__
 
+#ifdef __PROTOCOL_WLAN
+
 ECOM_PLUGIN(cmpluginwlan.dll,10281BB2.rsc)
 
+#endif // __PROTOCOL_WLAN
 
 #endif // CMMPLUGINWLAN_IBY__
 

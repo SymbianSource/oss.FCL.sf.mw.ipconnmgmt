@@ -460,9 +460,16 @@ HBufC* CCmmDestinationInstance::GetLocalisedDestinationNameL()
             break;
         case CMManager::ESnapPurposeIntranet:
             {
-            _LIT( KDestinationTextId, "txt_occ_dblist_intranet");
-            resolvedText = CCmManagerTextResolver::ResolveTextL( KDestinationTextId );
-            isLocalised = ETrue;
+            // Intranet is handled in a special way. If localised metadata is OFF
+            // destination's network record name is returned
+            TUint32 localized( 0 );
+            GetMetadataL( CMManager::ESnapMetadataDestinationIsLocalised, localized );
+            if ( localized )
+                {
+                _LIT( KDestinationTextId, "txt_occ_dblist_intranet");
+                resolvedText = CCmManagerTextResolver::ResolveTextL( KDestinationTextId );
+                isLocalised = ETrue;
+                }
             }
             break;
         default:
@@ -1631,15 +1638,10 @@ void CCmmDestinationInstance::SetMetadataLocalizationL( const TUint32 aMetadata 
         User::Leave( KErrArgument );
         }
 
-    TUint32 temp = ~(
-            CMManager::ESnapMetadataInternet |
-            CMManager::ESnapMetadataDestinationIsLocalised |
-            CMManager::ESnapMetadataPurpose );
     if ( aMetadata == CMManager::ENotLocalisedDest )
         {
-        // Clear old ESnapMetadataInternet-bit,
-        // ESnapMetadataDestinationIsLocalised-bits and ESnapMetadataPurpose-bits.
-        iMetadataRecord->iMetadata = iMetadataRecord->iMetadata & temp;
+        // Clear old ESnapMetadataDestinationIsLocalised-bits.
+        iMetadataRecord->iMetadata = iMetadataRecord->iMetadata & ~( CMManager::ESnapMetadataDestinationIsLocalised );
         }
     else
         {
@@ -1647,6 +1649,11 @@ void CCmmDestinationInstance::SetMetadataLocalizationL( const TUint32 aMetadata 
             {
             User::Leave( KErrAlreadyExists );
             }
+
+        TUint32 temp = ~(
+                CMManager::ESnapMetadataInternet |
+                CMManager::ESnapMetadataDestinationIsLocalised |
+                CMManager::ESnapMetadataPurpose );
 
         // Clear old ESnapMetadataInternet-bit,
         // ESnapMetadataDestinationIsLocalised-bits and ESnapMetadataPurpose-bits.

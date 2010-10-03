@@ -55,19 +55,7 @@ CApNetSelPopupList* CApNetSelPopupList::NewL( CApSettingsModel& aModel,
                                        CDesCArrayFlat* aItemArray,
                                        TBool aNeedsNone )
     {
-    APSETUILOGGER_ENTERFN( EListbox,"NetSelPopup::NewL")
-    
-    CApNetSelPopupList* self = 
-        new ( ELeave ) CApNetSelPopupList(
-                                         aModel, aHandler,
-                                         aCurrentSelectionIndex,
-                                         aPreferredUid, aItemArray,
-                                         aEventStore, aNeedsNone
-                                         );
-//  till that point, object is only partially constructed!
-    
-    APSETUILOGGER_LEAVEFN( EListbox,"NetSelPopup::NewL")
-    return self;
+    return NULL;
     }
 
 
@@ -77,46 +65,12 @@ CApNetSelPopupList* CApNetSelPopupList::NewL( CApSettingsModel& aModel,
 //
 void CApNetSelPopupList::ConstructL()
     {
-    APSETUILOGGER_ENTERFN( EListbox,"NetSelPopup::ConstructL")
-
-    FeatureManager::InitializeLibL();
-    iHelpSupported = FeatureManager::FeatureSupported( KFeatureIdHelp );
-    iProtectionSupported = FeatureManager::FeatureSupported( 
-                                           KFeatureIdSettingsProtection );
-    FeatureManager::UnInitializeLib();
-    
-    CAknRadioButtonSettingPage::ConstructL();
-    iList = ListBoxControl();
-    iModel = new( ELeave )CApNetSelectorListboxModel();
-    iList->Model()->SetItemTextArray( iModel );
-    FillListBoxWithDataL();
-    iDataModel->Database()->AddObserverL( this );
-    
-    APSETUILOGGER_LEAVEFN( EListbox,"NetSelPopup::ConstructL")
     }
 
 
 // Destructor
 CApNetSelPopupList::~CApNetSelPopupList()
     {
-    APSETUILOGGER_ENTERFN( EListbox,"NetSelPopup::~CApNetSelPopupList")
-    
-    if ( iDataModel )
-        {
-        if ( iDataModel->Database() )
-            {
-            // must remove observer here as there is a chance that we do not exit
-            // through the standard way but through Leave(KErrLeaveWithoutAlert)...
-            iDataModel->Database()->RemoveObserver( this );            
-            }
-        }
-    if ( iModel )
-        {
-        iModel->ResetAndDestroy();
-        delete iModel;
-        }
-    
-    APSETUILOGGER_LEAVEFN( EListbox,"NetSelPopup::~CApNetSelPopupList")
     }
 
 
@@ -151,25 +105,6 @@ iNeedUnlock( EFalse )
 //
 void CApNetSelPopupList::SetHighlighted()
     {
-    APSETUILOGGER_ENTERFN( EListbox,"NetSelPopup::SetHighlighted")
-    
-    if ( iPreferredUid )
-        {
-        TInt err( KErrNone );
-        TInt idx = iModel->Item4Uid( iPreferredUid, err );
-        // if UID exists, set as current, else set 0 as current.
-        if ( err == KErrNone )
-            {
-            iList->SetCurrentItemIndexAndDraw( idx );
-            iPreferredUid = 0;
-            }
-        else
-            {
-            iList->SetCurrentItemIndexAndDraw( 0 );
-            }
-        }
-    
-    APSETUILOGGER_LEAVEFN( EListbox,"NetSelPopup::SetHighlighted")
     }
 
 
@@ -179,11 +114,6 @@ void CApNetSelPopupList::SetHighlighted()
 //
 void CApNetSelPopupList::GetHelpContext(TCoeHelpContext& aContext) const
     {
-    APSETUILOGGER_ENTERFN( EListbox,"NetSelPopup::GetHelpContext")
-    
-    aContext.iMajor = iHandler->iHelpMajor;
-    
-    APSETUILOGGER_LEAVEFN( EListbox,"NetSelPopup::GetHelpContext")
     }
 
 
@@ -194,35 +124,6 @@ void CApNetSelPopupList::GetHelpContext(TCoeHelpContext& aContext) const
 //
 void CApNetSelPopupList::HandleApDbEventL( TEvent anEvent )
     {
-    APSETUILOGGER_ENTERFN( EListbox,"NetSelPopup::HandleApDbEventL")
-    
-    switch ( anEvent )
-        {
-        case EDbChanged:
-            {
-            FillListBoxWithDataL();
-            break;
-            }
-        case EDbClosing:
-            {
-            break;
-            }
-        case EDbAvailable:
-            {
-            if ( iNeedUnlock )
-                {
-                FillListBoxWithDataL();
-                }
-            break;
-            }
-        default:
-            {
-            __ASSERT_DEBUG( EFalse, Panic( EUnknownCase ) );
-            break;
-            }
-        }
-    
-    APSETUILOGGER_LEAVEFN( EListbox,"NetSelPopup::HandleApDbEventL")
     }
 
 
@@ -234,11 +135,6 @@ void CApNetSelPopupList::HandleApDbEventL( TEvent anEvent )
 //
 void CApNetSelPopupList::ActivateL()
     {
-    APSETUILOGGER_ENTERFN( EListbox,"NetSelPopup::ActivateL")
-    
-    CAknRadioButtonSettingPage::ActivateL();
-    
-    APSETUILOGGER_LEAVEFN( EListbox,"NetSelPopup::ActivateL")
     }
 
 
@@ -250,16 +146,6 @@ void CApNetSelPopupList::ActivateL()
 //
 void CApNetSelPopupList::SelectCurrentItemL()
     {
-    APSETUILOGGER_ENTERFN( EListbox,"NetSelPopup::SelectCurrentItemL")
-    
-    CAknRadioButtonSettingPage::SelectCurrentItemL();
-    TInt idx = iList->CurrentItemIndex();
-    if ( idx >= 0 )
-        {
-        *iSelected = iModel->At( idx )->Uid();
-        }
-    
-    APSETUILOGGER_LEAVEFN( EListbox,"NetSelPopup::SelectCurrentItemL")
     }
 
 
@@ -271,29 +157,7 @@ void CApNetSelPopupList::SelectCurrentItemL()
 //
 TBool CApNetSelPopupList::OkToExitL( TInt aButtonId )
     {
-    APSETUILOGGER_ENTERFN( EListbox,"NetSelPopup::OkToExitL")
-    
-    // Translate the button presses into commands for the appui & current
-    // view to handle.
-    // This is a very good thing, that aButtonId is a TInt,
-    // but the caller ( CAknSettingPage ) simply uses a TBool.
-    // The value of ETrue means the button usually for Yes, Ok, Options, etc
-    // and EFalse means Back, Cancel, etc.
-    // so we must act according to a boolean value and not
-    // according to the real button id...
-    TBool IsAccepted = aButtonId;
-
-    if ( IsAccepted )
-        {
-        TInt idx = iList->CurrentItemIndex();
-        if ( idx >= 0 )
-            {
-            *iSelected = iModel->At( idx )->Uid();
-            }
-        }
-    
-    APSETUILOGGER_LEAVEFN( EListbox,"NetSelPopup::OkToExitL")
-    return ETrue;
+    return EFalse;
     }
 
 
@@ -305,60 +169,6 @@ TBool CApNetSelPopupList::OkToExitL( TInt aButtonId )
 //
 void CApNetSelPopupList::FillListBoxWithDataL()
     {
-    APSETUILOGGER_ENTERFN( EListbox,"NetSelPopup::FillListBoxWithDataL")
-    
-    iPreferredLine = iList->CurrentItemIndex();
-    if ( iPreferredLine < 0 )
-        {
-        iPreferredLine = 0;
-        }
-
-    if ( !iPreferredUid )
-        { // if not specified explicitly, get current and use as 'preferred'
-        if ( iPreferredLine >= 0 )
-            {
-            if ( iModel->Count() )
-                {
-                iPreferredUid = iModel->At( iPreferredLine )->Uid();
-                }
-            }
-        }
-
-    TBool isLocked(EFalse);
-    iNeedUnlock = EFalse;
-
-    iDataModel->NetWorkListDataL( isLocked, *iModel );
-
-    if ( isLocked )
-        {
-        iNeedUnlock = ETrue;
-        }
-
-    iList->View()->SetDisableRedraw( ETrue );
-
-    if ( iNeedsNone )
-        {
-        HBufC* buf = iEikonEnv->AllocReadResourceLC( R_APUI_VIEW_AP_NONE );
-        CApNetworkItem* NoneItem = CApNetworkItem::NewLC();
-        NoneItem->SetUid( KApNoneUID );
-        NoneItem->SetNameL( *buf );
-        iModel->InsertL( 0, NoneItem );
-        // as InsertL passes ownership of item to array,
-        // remove from cleanupstack
-        CleanupStack::Pop(); // NoneItem, as ownership is passed to array
-        CleanupStack::PopAndDestroy(); // buf, as item has copied it...
-        }
-
-    iList->HandleItemAdditionL();
-
-    SetSelectedL();
-
-    SetHighlighted();
-
-    iList->View()->SetDisableRedraw( EFalse );
-    iList->HandleItemAdditionL();
-
-    APSETUILOGGER_LEAVEFN( EListbox,"NetSelPopup::FillListBoxWithDataL")
     }
 
 
@@ -368,28 +178,6 @@ void CApNetSelPopupList::FillListBoxWithDataL()
 //
 void CApNetSelPopupList::SetSelectedL()
     {
-    APSETUILOGGER_ENTERFN( EListbox,"NetSelPopup::SetSelectedL")
-    
-    TInt i( 0 );
-    for( i=0; i<iModel->Count(); i++ )
-        {
-        if ( iModel->At( i )->Uid() == TUint32( *iSelected ) )
-            {
-            iList->SetCurrentItemIndexAndDraw( i );
-            HandleListBoxEventL(iList,
-                                MEikListBoxObserver::EEventItemSingleClicked);
-          /*  HandleListBoxEventL(iList,
-                                            MEikListBoxObserver::EEventItemDoubleClicked);*/
-            return; //exit here
-            }
-        }
-    iList->SetCurrentItemIndexAndDraw( 0 );//set something that does no harm...
-    HandleListBoxEventL(iList,
-        MEikListBoxObserver::EEventItemSingleClicked ); // simulate selection...
-    /*HandleListBoxEventL(iList,
-        MEikListBoxObserver::EEventItemDoubleClicked);*/
-    
-    APSETUILOGGER_LEAVEFN( EListbox,"NetSelPopup::SetSelectedL")
     }
 
 
@@ -402,34 +190,6 @@ void CApNetSelPopupList::SetSelectedL()
 void CApNetSelPopupList::DynInitMenuPaneL( TInt aResourceId,
                                         CEikMenuPane* aMenuPane )
     {
-    APSETUILOGGER_ENTERFN( EListbox,"NetSelPopup::DynInitMenuPaneL")
-    
-    CAknSettingPage::DynInitMenuPaneL( aResourceId, aMenuPane );
-    if ( aResourceId == R_APSETTINGSUI_MENU_NETWORK )
-        {
-        if ( Need2DeleteSelect( aResourceId ) )
-            {
-            aMenuPane->DeleteMenuItem( EApSelCmdSelect );
-            }
-        if ( Need2DeleteOpenDelete( aResourceId ) )
-            {
-            aMenuPane->DeleteMenuItem( EApSelCmdDelete );
-            }
-        if ( iProtectionSupported )
-            {
-            if ( CApProtHandler::IsTableProtectedL( 
-                  iDataModel->Database()->Database() ) )
-                {            
-                aMenuPane->DeleteMenuItem( EApSelCmdNew );                
-                }
-            }
-		if ( !iHelpSupported )
-			{
-			aMenuPane->DeleteMenuItem( EAknCmdHelp );
-			}        
-        }
-
-    APSETUILOGGER_LEAVEFN( EListbox,"NetSelPopup::DynInitMenuPaneL")
     }
 
 
@@ -440,121 +200,6 @@ void CApNetSelPopupList::DynInitMenuPaneL( TInt aResourceId,
 //
 void CApNetSelPopupList::ProcessCommandL( TInt aCommandId )
     {
-    APSETUILOGGER_ENTERFN( EListbox,"NetSelPopup::ProcessCommandL")
-    
-    if ( MenuShowing() )
-        {
-        HideMenu();
-        }
-
-    switch ( aCommandId )
-        {
-        case EAknSoftkeyOptions:
-            {
-            DisplayMenuL();
-            break;
-            }
-        case EAknSoftkeyBack:
-            {
-            AttemptExitL( EFalse );
-            break;
-            }
-        case EAknSoftkeyCancel:
-            {
-            *iEventStore |= KApUiEventShutDownRequested;
-            AttemptExitL( EFalse );
-            break;
-            }
-        case EApSelCmdSelect:
-            {
-            *iEventStore |= KApUiEventSelected;
-            AttemptExitL( ETrue );
-            break;
-            }
-        case EApSelCmdNew:
-            {
-            // create a new network group here
-            if ( HandleCreateNewNetworkGroupL() )
-                {
-                SetHighlighted();
-                }
-            break; 
-            }
-        case EApSelCmdDelete:
-            {
-            // As it might have been started by the Clear key,
-            // we must check if there is any...
-            TInt cnt = iModel->Count();
-            if ( ( iNeedsNone & ( cnt > 1 ) ) || ( !iNeedsNone && cnt ) )
-                {
-                // as we must be standing on an item, it must exists...
-                // So no problem on iModel->At( ...)
-                if ( iList->CurrentItemIndex() < ( iModel->Count()-1 ) )
-                    {// move to next one if possible
-                    iPreferredUid = iModel->At(
-                            iList->CurrentItemIndex()+1 )->Uid();
-                    }
-                else
-                    { // if it is the last, move to previous if possible.
-                    // if not, set to 0
-                    if ( iModel->Count()> 1 )
-                        {// move to prev. one if possible
-                        iPreferredUid = iModel->At(
-                            iList->CurrentItemIndex()-1 )->Uid();
-                        }
-                    else
-                        {
-                        iPreferredUid = 0;
-                        }
-                    }
-                iHandler->HandleNetworkDeleteCmdL(
-                            iModel->At( iList->CurrentItemIndex() )->Uid() );
-                }
-            break;
-            }
-        case EAknCmdHelp:
-            {
-			if ( iHelpSupported )
-				{
-				iDataModel->LaunchHelpL();	
-				}
-            break;
-            }
-        default:
-            {
-            // silently ignore it
-            break;
-            }
-        }
-    // check if user wants to Exit....
-    if ( *iEventStore & KApUiEventExitRequested )
-        {
-        AttemptExitL( EFalse );
-        }
-    else
-        {
-        switch ( aCommandId )
-            {
-            case EApSelCmdExit:
-                {
-                *iEventStore |= KApUiEventExitRequested;
-                AttemptExitL( EFalse );
-                break;
-                }
-            case EEikCmdExit:
-                {
-                *iEventStore |= KApUiEventShutDownRequested;
-                AttemptExitL( EFalse );
-                break;
-                }
-            default:
-                {
-                break;
-                }
-            }
-        }
-    
-    APSETUILOGGER_LEAVEFN( EListbox,"NetSelPopup::ProcessCommandL")
     }
 
 
@@ -567,37 +212,7 @@ void CApNetSelPopupList::ProcessCommandL( TInt aCommandId )
 TKeyResponse CApNetSelPopupList::OfferKeyEventL( const TKeyEvent& aKeyEvent,
                                               TEventCode aType)
     {
-    APSETUILOGGER_ENTERFN( EListbox,"NetSelPopup::OfferKeyEventL")
-    TKeyResponse retval;
-    if ( aType == EEventKey )
-        {
-        if ( ( aKeyEvent.iCode == EKeyDelete ) ||
-            ( aKeyEvent.iCode == EKeyBackspace ) )
-            {
-            ProcessCommandL( EApSelCmdDelete );
-            retval = EKeyWasConsumed;
-            }
-        else
-            {
-            if ( aKeyEvent.iCode == EKeyOK )
-                { // process only if command is available...
-                ProcessCommandL( EApSelCmdSelect );
-                retval = EKeyWasConsumed;
-                }
-            else
-                {
-                retval = CAknRadioButtonSettingPage::OfferKeyEventL(
-                                        aKeyEvent, aType );
-                }
-            }
-        }
-    else
-        {
-        retval = CAknRadioButtonSettingPage::OfferKeyEventL( aKeyEvent, aType );
-        }
-    
-    APSETUILOGGER_LEAVEFN( EListbox,"NetSelPopup::OfferKeyEventL")
-    return retval;
+    User::Leave( KErrNotSupported );
     }
 
 
@@ -608,9 +223,7 @@ TKeyResponse CApNetSelPopupList::OfferKeyEventL( const TKeyEvent& aKeyEvent,
 //
 TBool CApNetSelPopupList::Need2DeleteSelect( TInt aResourceId )
     {
-    APSETUILOGGER_ENTERFN( EListbox,"NetSelPopup::Need2DeleteSelect<->")
-    return ( ( aResourceId == R_APSETTINGSUI_MENU_SELECT_NORMAL ) &&
-             ( iList->Model()->NumberOfItems() == 0 ) );
+    return EFalse;
     }
 
 
@@ -621,19 +234,7 @@ TBool CApNetSelPopupList::Need2DeleteSelect( TInt aResourceId )
 //
 TBool CApNetSelPopupList::Need2DeleteOpenDelete( TInt aResourceId )
     {
-    APSETUILOGGER_ENTERFN( EListbox,"NetSelPopup::Need2DeleteOpenDelete<->")
-    
-    return ( ( aResourceId == R_APSETTINGSUI_MENU_NETWORK ) &&
-             (
-               (
-                 ( iList->Model()->NumberOfItems() == 0) && 
-                 ( iNeedsNone == EFalse )
-               )
-               ||
-               ( ( iNeedsNone ) &&
-                 ( iModel->At( iList->CurrentItemIndex() )->Uid() 
-                                  == KApNoneUID )
-             ) ) );
+    return EFalse;
     }
 
 
@@ -644,36 +245,7 @@ TBool CApNetSelPopupList::Need2DeleteOpenDelete( TInt aResourceId )
 //
 TBool CApNetSelPopupList::HandleCreateNewNetworkGroupL()
     {
-    APSETUILOGGER_ENTERFN( EListbox,"NetSelPopup::HandleCreateNewNetworkGroupL")
-    
-    TBool retval( EFalse );
-
-    // must be prepared for the worst case...
-    TBuf<KModifiableLongTextLength> textToChange;    
-
-    TInt TextSettingPageFlags( EAknSettingPageNoOrdinalDisplayed );
-
-    CAccessPointTextSettingPage* dlg =
-        new( ELeave )CAccessPointTextSettingPage( 
-                        R_TEXT_SETTING_PAGE_NETW_NAME, 
-                        textToChange,
-                        TextSettingPageFlags,
-                        EFalse );
-
-    if ( dlg->ExecuteLD( CAknSettingPage::EUpdateWhenAccepted ) )
-        {
-        CApNetworkItem* network = CApNetworkItem::NewLC();
-        network->SetUid( 0 ); // will be assigned when written toi disk
-        network->SetNameL( textToChange );
-        iDataModel->DataHandler()->CreateNetworkL( *network );
-        iPreferredUid = network->Uid();
-        CleanupStack::PopAndDestroy( network );
-        retval = ETrue;
-        }
-    *iEventStore |= KApUiEventEdited;
-    
-    APSETUILOGGER_LEAVEFN( EListbox,"NetSelPopup::HandleCreateNewNetworkGroupL")
-    return retval;
+    return EFalse;
     }
 
 // End of File

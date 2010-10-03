@@ -28,7 +28,6 @@
 //
 CFeatureManagerWrapper::CFeatureManagerWrapper() : CBase()
     {
-    APSETUILOGGER_ENTERFN( EOther,"FeatureWrapper::CFeatureManagerWrapper<->")
     }
 
 // ---------------------------------------------------------
@@ -37,14 +36,6 @@ CFeatureManagerWrapper::CFeatureManagerWrapper() : CBase()
 //
 CFeatureManagerWrapper::~CFeatureManagerWrapper() 
     {
-    APSETUILOGGER_ENTERFN( EOther,"FeatureWrapper::~CFeatureManagerWrapper")
-    
-    if ( iIsFeatureMgrInitialized )
-        {
-        FeatureManager::UnInitializeLib();    
-        }
-    
-    APSETUILOGGER_LEAVEFN( EOther,"FeatureWrapper::~CFeatureManagerWrapper")
     }
 
 
@@ -54,12 +45,6 @@ CFeatureManagerWrapper::~CFeatureManagerWrapper()
 //
 void CFeatureManagerWrapper::ConstructL()
     {
-    APSETUILOGGER_ENTERFN( EOther,"FeatureWrapper::ConstructL")
-    
-    FeatureManager::InitializeLibL();
-    iIsFeatureMgrInitialized = ETrue ;
-    
-    APSETUILOGGER_LEAVEFN( EOther,"FeatureWrapper::ConstructL")
     }
 
 
@@ -69,16 +54,7 @@ void CFeatureManagerWrapper::ConstructL()
 //
 CFeatureManagerWrapper*  CFeatureManagerWrapper::NewL()
     {
-    APSETUILOGGER_ENTERFN( EOther,"FeatureWrapper::NewL")
-    
-    CFeatureManagerWrapper* self = new ( ELeave ) CFeatureManagerWrapper;
-    
-    CleanupStack::PushL( self );
-    self->ConstructL();
-    CleanupStack::Pop( self );
-
-    APSETUILOGGER_LEAVEFN( EOther,"FeatureWrapper::NewL")
-    return self;
+    return NULL;
     }
 
 //End of file.

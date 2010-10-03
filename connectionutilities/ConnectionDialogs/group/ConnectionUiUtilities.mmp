@@ -45,6 +45,8 @@ SOURCE ChangeConnectionDlg.cpp
 SOURCE ActiveCChangeConnectionDlg.cpp
 SOURCE ActiveWrapper.cpp
 SOURCE connectionstatuspopup.cpp
+SOURCE cellulardataconfirmation.cpp
+SOURCE devicedialogobserver.cpp
 
 SOURCEPATH ../src
 SOURCE ConnectionInfo.cpp
@@ -71,7 +73,6 @@ SYSTEMINCLUDE /epoc32/include/mw/hb/hbwidgets
 
 LIBRARY euser.lib cone.lib eikcore.lib eikcoctl.lib avkon.lib eikdlg.lib 
 LIBRARY bafl.lib commonengine.lib commdb.lib AknSkins.lib FeatMgr.lib 
-LIBRARY AknNotify.lib
 LIBRARY Ecom.lib
 LIBRARY	centralrepository.lib 
 LIBRARY	aknlayout.lib 

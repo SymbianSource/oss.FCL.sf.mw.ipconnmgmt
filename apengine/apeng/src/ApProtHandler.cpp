@@ -42,13 +42,7 @@
 //
 EXPORT_C TBool CApProtHandler::IsTableProtectedL( CCommsDatabase* aDb )
     {
-    CLOG( ( EProtection, 0, _L( "-> CApProtHandler::IsTableProtectedL" ) ) );
-
-    TBool retval( EFalse );
-    retval = IsTableProtectedL( aDb, TPtrC(WAP_ACCESS_POINT) );
-
-    CLOG( ( EProtection, 1, _L( "<- CApProtHandler::IsTableProtectedL" ) ) );
-    return retval;
+    return EFalse;
     }
 
 
@@ -59,13 +53,7 @@ EXPORT_C TBool CApProtHandler::IsTableProtectedL( CCommsDatabase* aDb )
 EXPORT_C TBool CApProtHandler::IsApProtectedL( CCommsDatabase* aDb,
                                                      TUint32 aUid )
     {
-    CLOG( ( EProtection, 0, _L( "-> CApProtHandler::IsApProtectedL" ) ) );
-
-    TBool retval( EFalse );
-    retval = IsRecordProtectedL( aDb, TPtrC(WAP_ACCESS_POINT), aUid );
-    
-    CLOG( ( EProtection, 1, _L( "<- CApProtHandler::IsApProtectedL" ) ) );
-    return retval;
+    return EFalse;
     }
 
 
@@ -76,19 +64,6 @@ EXPORT_C TBool CApProtHandler::IsApProtectedL( CCommsDatabase* aDb,
 EXPORT_C void CApProtHandler::ProtectItemL( CCommsDatabase* aDb,
                                              TUint32 aUid )
     {
-    CLOG( ( EProtection, 0, _L( "-> CApProtHandler::ProtectItemL" ) ) );
-
-    if ( ApCommons::GetVariantL() & KApUiEditOnlyVPNs )
-        {
-        User::Leave( KErrNotSupported );
-        }
-#ifdef __TEST_CDMA_WRITE_PROTECT
-    User::Leave( KErrNotSupported );
-#endif // __TEST_CDMA_WRITE_PROTECT
-
-    ProtectRecordL( aDb, TPtrC(WAP_ACCESS_POINT), aUid );
-    
-    CLOG( ( EProtection, 1, _L( "<- CApProtHandler::ProtectItemL" ) ) );
     }
 
 
@@ -99,19 +74,6 @@ EXPORT_C void CApProtHandler::ProtectItemL( CCommsDatabase* aDb,
 EXPORT_C void CApProtHandler::UnprotectItemL( CCommsDatabase* aDb,
                                                TUint32 aUid )
     {
-    CLOG( ( EProtection, 0, _L( "-> CApProtHandler::UnprotectItemL" ) ) );
-
-    if ( ApCommons::GetVariantL() & KApUiEditOnlyVPNs )
-        {
-        User::Leave( KErrNotSupported );
-        }
-#ifdef __TEST_CDMA_WRITE_PROTECT
-    User::Leave( KErrNotSupported );
-#endif // __TEST_CDMA_WRITE_PROTECT
-
-    UnprotectRecordL( aDb, TPtrC(WAP_ACCESS_POINT), aUid );
-    
-    CLOG( ( EProtection, 1, _L( "<- CApProtHandler::UnprotectItemL" ) ) );
     }
 
 
@@ -122,19 +84,6 @@ EXPORT_C void CApProtHandler::UnprotectItemL( CCommsDatabase* aDb,
 //
 EXPORT_C void CApProtHandler::ProtectTableL( CCommsDatabase* aDb )
     {
-    CLOG( ( EProtection, 0, _L( "-> CApProtHandler::ProtectTableL" ) ) );
-
-    if ( ApCommons::GetVariantL() & KApUiEditOnlyVPNs )
-        {
-        User::Leave( KErrNotSupported );
-        }
-#ifdef __TEST_CDMA_WRITE_PROTECT
-    User::Leave( KErrNotSupported );
-#endif // __TEST_CDMA_WRITE_PROTECT
-
-    ProtectTableL( aDb, TPtrC(WAP_ACCESS_POINT) );
-    
-    CLOG( ( EProtection, 1, _L( "<- CApProtHandler::ProtectTableL" ) ) );
     }
 
 
@@ -144,19 +93,6 @@ EXPORT_C void CApProtHandler::ProtectTableL( CCommsDatabase* aDb )
 //
 EXPORT_C void CApProtHandler::UnprotectTableL( CCommsDatabase* aDb )
     {
-    CLOG( ( EProtection, 0, _L( "-> CApProtHandler::UnprotectTableL" ) ) );
-
-    if ( ApCommons::GetVariantL() & KApUiEditOnlyVPNs )
-        {
-        User::Leave( KErrNotSupported );
-        }
-#ifdef __TEST_CDMA_WRITE_PROTECT
-    User::Leave( KErrNotSupported );
-#endif // __TEST_CDMA_WRITE_PROTECT
-
-    UnprotectTableL( aDb, TPtrC(WAP_ACCESS_POINT) );
-
-    CLOG( ( EProtection, 1, _L( "<- CApProtHandler::UnprotectTableL" ) ) );
     }
 
 
@@ -166,41 +102,7 @@ EXPORT_C void CApProtHandler::UnprotectTableL( CCommsDatabase* aDb )
 //
 EXPORT_C TBool CApProtHandler::IsPreferencesProtectedL( CCommsDatabase* aDb )
     {
-    CLOG( ( EProtection, 0, 
-        _L( "-> CApProtHandler::IsPreferencesProtectedL" ) ) );
-
-    CCommsDatabase* db = aDb;
-    if ( !aDb )
-        {
-        // create DB object
-        db = CCommsDatabase::NewL( ETrue );
-        CleanupStack::PushL( db );
-        }
-
-    CCommsDbProtectConnectPrefTableView* table = 
-        STATIC_CAST( CCommsDbProtectConnectPrefTableView*, 
-                     db->OpenConnectionPrefTableLC());
-
-    TInt err = table->GotoFirstRecord();
-    if ( err != KErrNotFound )
-        {
-        User::LeaveIfError( err );
-        }
-
-    RDbRowSet::TAccess access;
-    User::LeaveIfError( table->GetTableAccess( access ) ); 
-    CleanupStack::PopAndDestroy( table ); 
-    if ( !aDb )
-        {
-        CleanupStack::PopAndDestroy( db ); //db
-        }
-    
-    //access is EUpdatable if record is updatable
-    TBool retval( !(access == RDbRowSet::EUpdatable) );
-
-    CLOG( ( EProtection, 1, 
-        _L( "<- CApProtHandler::IsPreferencesProtectedL" ) ) );
-    return retval;
+    return EFalse;
     }
 
 
@@ -210,39 +112,6 @@ EXPORT_C TBool CApProtHandler::IsPreferencesProtectedL( CCommsDatabase* aDb )
 //
 EXPORT_C void CApProtHandler::ProtectPreferencesL( CCommsDatabase* aDb )
     {
-    CLOG( ( EProtection, 0, _L( "-> CApProtHandler::ProtectPreferencesL" ) ) );
-
-    if ( ApCommons::GetVariantL() & KApUiEditOnlyVPNs )
-        {
-        User::Leave( KErrNotSupported );
-        }
-#ifdef __TEST_CDMA_WRITE_PROTECT
-    User::Leave( KErrNotSupported );
-#endif // __TEST_CDMA_WRITE_PROTECT
-
-    CCommsDatabase* db = aDb;
-    if ( !aDb )
-        {
-        // create DB object
-        db = CCommsDatabase::NewL( ETrue );
-        CleanupStack::PushL( db );
-        }
-
-    CCommsDbProtectConnectPrefTableView* table = 
-        STATIC_CAST( CCommsDbProtectConnectPrefTableView*, 
-                     db->OpenConnectionPrefTableLC());
-
-    User::LeaveIfError( table->GotoFirstRecord() );
-    User::LeaveIfError( table->ProtectTable() );
-    
-    CleanupStack::PopAndDestroy( table ); 
-
-    if ( !aDb )
-        {
-        CleanupStack::PopAndDestroy( db ); //db
-        }
-
-    CLOG( ( EProtection, 1, _L( "<- CApProtHandler::ProtectPreferencesL" ) ) );
     }
 
 
@@ -253,39 +122,6 @@ EXPORT_C void CApProtHandler::ProtectPreferencesL( CCommsDatabase* aDb )
 //
 EXPORT_C void CApProtHandler::UnprotectPreferencesL( CCommsDatabase* aDb )
     {
-    CLOG( ( EProtection, 0, 
-        _L( "-> CApProtHandler::UnprotectPreferencesL" ) ) );
-
-    if ( ApCommons::GetVariantL() & KApUiEditOnlyVPNs )
-        {
-        User::Leave( KErrNotSupported );
-        }
-#ifdef __TEST_CDMA_WRITE_PROTECT
-    User::Leave( KErrNotSupported );
-#endif // __TEST_CDMA_WRITE_PROTECT
-
-    CCommsDatabase* db = aDb;
-    if ( !aDb )
-        {
-        // create DB object
-        db = CCommsDatabase::NewL( ETrue );
-        CleanupStack::PushL( db );
-        }
-    CCommsDbProtectConnectPrefTableView* table = 
-        STATIC_CAST( CCommsDbProtectConnectPrefTableView*, 
-                     db->OpenConnectionPrefTableLC());
-
-    User::LeaveIfError( table->GotoFirstRecord() );
-    User::LeaveIfError( table->UnprotectTable() );
-    
-    CleanupStack::PopAndDestroy( table );
-    if ( !aDb )
-        {
-        CleanupStack::PopAndDestroy( db ); //db
-        }
-    
-    CLOG( ( EProtection, 1, 
-        _L( "<- CApProtHandler::UnprotectPreferencesL" ) ) );
     }
 
 
@@ -297,37 +133,6 @@ EXPORT_C void CApProtHandler::UnprotectPreferencesL( CCommsDatabase* aDb )
 EXPORT_C void CApProtHandler::RemoveProtectedAccessPointsL(
                                           CCommsDatabase* aDb)
     {
-    CLOG( ( EProtection, 0, 
-        _L( "-> CApProtHandler::RemoveProtectedAccessPointsL" ) ) );
-
-    if ( ApCommons::GetVariantL() & KApUiEditOnlyVPNs )
-        {
-        User::Leave( KErrNotSupported );
-        }
-#ifdef __TEST_CDMA_WRITE_PROTECT
-    User::Leave( KErrNotSupported );
-#endif // __TEST_CDMA_WRITE_PROTECT
-
-    CCommsDatabase* db;
-    if ( !aDb )
-        {
-        // create DB object
-        db = CCommsDatabase::NewL( ETrue );
-        CleanupStack::PushL( db );
-        }
-    else
-        {
-        db = aDb;
-        }
-    DoRemoveProtectedAccessPointsL( *db );
-
-    if ( !aDb )
-        {
-        CleanupStack::PopAndDestroy( db ); // db
-        }
-
-    CLOG( ( EProtection, 1, 
-        _L( "<- CApProtHandler::RemoveProtectedAccessPointsL" ) ) );
     }
 
 // ================== OTHER MEMBER FUNCTIONS ===============
@@ -344,47 +149,7 @@ TBool CApProtHandler::IsRecordProtectedL( CCommsDatabase* aDb,
                                             const TDesC& aTable,
                                             TUint32 aUid )
     {
-    CLOG( ( EProtection, 0, _L( "-> CApProtHandler::IsRecordProtectedL" ) ) );
-
-    CCommsDatabase* db = aDb;
-    if ( !aDb )
-        {
-        // create DB object
-        db = CCommsDatabase::NewL( ETrue );
-        CleanupStack::PushL( db );
-        }
-
-    TBool ownTransaction = ApCommons::StartPushedTransactionLC( *db, ETrue );
-
-    CCommsDbProtectTableView* view =
-        (CCommsDbProtectTableView*)db->OpenViewMatchingUintLC
-                                             (
-                                              aTable,
-                                              TPtrC(COMMDB_ID),
-                                              aUid
-                                             );
-
-    TInt err = view->GotoFirstRecord();
-    User::LeaveIfError( err );
-
-    TInt prot( EFalse );
-    User::LeaveIfError( view->GetRecordAccess( prot ) );
-
-    CleanupStack::PopAndDestroy( view ); // view
-
-    if ( ownTransaction )
-        {
-        ApCommons::CommitTransaction( *db );
-        CleanupStack::Pop(); // RollbackTransactionOnLeave
-        }
-
-    if ( !aDb )
-        {
-        CleanupStack::PopAndDestroy( db ); // db
-        }
-        
-    CLOG( ( EProtection, 1, _L( "<- CApProtHandler::IsRecordProtectedL" ) ) );
-    return prot;
+    return EFalse;
     }
 
 
@@ -396,52 +161,6 @@ TBool CApProtHandler::IsRecordProtectedL( CCommsDatabase* aDb,
 void CApProtHandler::ProtectRecordL( CCommsDatabase* aDb,
                                     const TDesC& aTable, TUint32 aUid )
     {
-    CLOG( ( EProtection, 0, _L( "-> CApProtHandler::ProtectRecordL" ) ) );
-
-    if ( ApCommons::GetVariantL() & KApUiEditOnlyVPNs )
-        {
-        User::Leave( KErrNotSupported );
-        }
-#ifdef __TEST_CDMA_WRITE_PROTECT
-    User::Leave( KErrNotSupported );
-#endif // __TEST_CDMA_WRITE_PROTECT
-
-    CCommsDatabase* db = aDb;
-    if ( !aDb )
-        {
-        // create DB object
-        db = CCommsDatabase::NewL( ETrue );
-        CleanupStack::PushL( db );
-        }
-    TBool ownTransaction = ApCommons::StartPushedTransactionLC( *db, ETrue );
-
-    CCommsDbProtectTableView* view =
-        (CCommsDbProtectTableView*)db->OpenViewMatchingUintLC
-                                                (
-                                                 aTable,
-                                                 TPtrC(COMMDB_ID),
-                                                 aUid
-                                                );
-
-    TInt err = view->GotoFirstRecord();
-    User::LeaveIfError( err );
-
-    User::LeaveIfError( view->ProtectRecord() );
-
-    CleanupStack::PopAndDestroy( view ); // view
-
-    if ( ownTransaction )
-        {
-        ApCommons::CommitTransaction( *db );
-        CleanupStack::Pop(); // RollbackTransactionOnLeave
-        }
-
-    if ( !aDb )
-        {
-        CleanupStack::PopAndDestroy( db ); // db
-        }
-    
-    CLOG( ( EProtection, 1, _L( "<- CApProtHandler::ProtectRecordL" ) ) );
     }
 
 
@@ -453,52 +172,6 @@ void CApProtHandler::ProtectRecordL( CCommsDatabase* aDb,
 void CApProtHandler::UnprotectRecordL( CCommsDatabase* aDb,
                                       const TDesC& aTable, TUint32 aUid )
     {
-    CLOG( ( EProtection, 0, _L( "-> CApProtHandler::UnprotectRecordL" ) ) );
-
-    if ( ApCommons::GetVariantL() & KApUiEditOnlyVPNs )
-        {
-        User::Leave( KErrNotSupported );
-        }
-#ifdef __TEST_CDMA_WRITE_PROTECT
-    User::Leave( KErrNotSupported );
-#endif // __TEST_CDMA_WRITE_PROTECT
-
-    CCommsDatabase* db = aDb;
-    if ( !aDb )
-        {
-        // create DB object
-        db = CCommsDatabase::NewL( ETrue );
-        CleanupStack::PushL( db );
-        }
-    TBool ownTransaction = ApCommons::StartPushedTransactionLC( *db, ETrue );
-
-    CCommsDbProtectTableView* view =
-        (CCommsDbProtectTableView*)db->OpenViewMatchingUintLC
-                                             (
-                                              aTable,
-                                              TPtrC(COMMDB_ID),
-                                              aUid
-                                             );
-
-    TInt err = view->GotoFirstRecord();
-    User::LeaveIfError( err );
-
-    User::LeaveIfError( view->UnprotectRecord() );
-
-    CleanupStack::PopAndDestroy( view ); // view
-
-    if ( ownTransaction )
-        {
-        ApCommons::CommitTransaction( *db );
-        CleanupStack::Pop(); // RollbackTransactionOnLeave
-        }
-
-    if ( !aDb )
-        {
-        CleanupStack::PopAndDestroy( db ); // db
-        }
-
-    CLOG( ( EProtection, 1, _L( "<- CApProtHandler::UnprotectRecordL" ) ) );
     }
 
 
@@ -511,51 +184,7 @@ void CApProtHandler::UnprotectRecordL( CCommsDatabase* aDb,
 TBool CApProtHandler::IsTableProtectedL( CCommsDatabase* aDb,
                                                const TDesC& aTable )
     {
-    CLOG( ( EProtection, 0, 
-        _L( "-> CApProtHandler::IsTableProtectedL(table)" ) ) );
-
-    TBool retval( EFalse );
-    CCommsDatabase* db = aDb;
-    if ( !aDb )
-        {
-        // create DB object
-        db = CCommsDatabase::NewL( ETrue );
-        CleanupStack::PushL( db );
-        }
-    TBool ownTransaction = ApCommons::StartPushedTransactionLC( *db, ETrue );
-
-    CCommsDbProtectTableView* view =
-        (CCommsDbProtectTableView*)db->OpenTableLC( aTable );
-
-    RDbRowSet::TAccess aAccessType( RDbRowSet::EUpdatable );
-    
-    User::LeaveIfError( view->GetTableAccess( aAccessType) );
-    
-    if ( aAccessType == RDbRowSet::EUpdatable )
-        {
-        retval = EFalse;
-        }
-    else
-        { // EReadOnly, EInsertOnly
-        retval = ETrue;
-        }
-
-    CleanupStack::PopAndDestroy( view ); // view
-
-    if ( ownTransaction )
-        {
-        ApCommons::CommitTransaction( *db );
-        CleanupStack::Pop(); // RollbackTransactionOnLeave
-        }
-
-    if ( !aDb )
-        {
-        CleanupStack::PopAndDestroy( db ); // db
-        }
-    
-    CLOG( ( EProtection, 1, 
-        _L( "<- CApProtHandler::IsTableProtectedL(table)" ) ) );
-    return retval;
+    return EFalse;
     }
 
 
@@ -566,42 +195,6 @@ TBool CApProtHandler::IsTableProtectedL( CCommsDatabase* aDb,
 void CApProtHandler::ProtectTableL( CCommsDatabase* aDb,
                                      const TDesC& aTable )
     {
-    CLOG( ( EProtection, 0, 
-        _L( "-> CApProtHandler::ProtectTableL(table)" ) ) );
-
-    if ( ApCommons::GetVariantL() & KApUiEditOnlyVPNs )
-        {
-        User::Leave( KErrNotSupported );
-        }
-#ifdef __TEST_CDMA_WRITE_PROTECT
-    User::Leave( KErrNotSupported );
-#endif // __TEST_CDMA_WRITE_PROTECT
-
-    CCommsDatabase* db = aDb;
-    if ( !aDb )
-        {
-        // create DB object
-        db = CCommsDatabase::NewL( ETrue );
-        CleanupStack::PushL( db );
-        }
-
-    CCommsDbProtectTableView* view =
-        (CCommsDbProtectTableView*)db->OpenTableLC( aTable );
-
-    TInt err = view->GotoFirstRecord();
-    User::LeaveIfError( err );
-
-    User::LeaveIfError( view->ProtectTable() );
-
-    CleanupStack::PopAndDestroy( view ); // view
-
-    if ( !aDb )
-        {
-        CleanupStack::PopAndDestroy( db ); //db
-        }
-
-    CLOG( ( EProtection, 1, 
-        _L( "<- CApProtHandler::ProtectTableL(table)" ) ) );
     }
 
 
@@ -613,59 +206,6 @@ void CApProtHandler::ProtectTableL( CCommsDatabase* aDb,
 void CApProtHandler::UnprotectTableL( CCommsDatabase* aDb,
                                        const TDesC& aTable )
     {
-    CLOG( ( EProtection, 0, 
-        _L( "-> CApProtHandler::UnprotectTableL(table)" ) ) );
-
-    if ( ApCommons::GetVariantL() & KApUiEditOnlyVPNs )
-        {
-        User::Leave( KErrNotSupported );
-        }
-#ifdef __TEST_CDMA_WRITE_PROTECT
-    User::Leave( KErrNotSupported );
-#endif // __TEST_CDMA_WRITE_PROTECT
-
-    CCommsDatabase* db = aDb;
-    if ( !aDb )
-        {
-        // create DB object
-        db = CCommsDatabase::NewL( ETrue );
-        CleanupStack::PushL( db );
-        }
-//    Follow related error rep. and act accordingly:
-//    JBAH-58FCHH
-//    TBool ownTransaction = ApCommons::StartPushedTransactionLC( *db, ETrue );
-
-    CCommsDbProtectTableView* view =
-        (CCommsDbProtectTableView*)db->OpenTableLC( aTable );
-
-
-    TInt err = view->GotoFirstRecord();
-    // If not found, no problem, Unprotect will be carried out correctly
-    // But if no GotoFirstRecord, and no records, it will Panic...
-    if ( err != KErrNotFound )
-        {
-        User::LeaveIfError( err );
-        }
-
-    User::LeaveIfError( view->UnprotectTable() );
-
-    CleanupStack::PopAndDestroy( view ); // view
-
-
-/*
-    if ( ownTransaction )
-        {
-        ApCommons::CommitTransaction( *db );
-        CleanupStack::Pop(); // RollbackTransactionOnLeave
-        }
-*/
-    if ( !aDb )
-        {
-        CleanupStack::PopAndDestroy( db ); // db
-        }
-
-    CLOG( ( EProtection, 1, 
-        _L( "<- CApProtHandler::UnprotectTableL(table)" ) ) );
     }
 
 
@@ -675,14 +215,7 @@ void CApProtHandler::UnprotectTableL( CCommsDatabase* aDb,
 //
 TBool CApProtHandler::GetProtectionStateL( CCommsDbTableView& aTable )
     {
-    CLOG( ( EProtection, 0, _L( "-> CApProtHandler::GetProtectionStateL" ) ) );
-
-    TInt aAccess( 0 );
-    User::LeaveIfError(
-        ( (CCommsDbProtectTableView*) &aTable )->GetRecordAccess( aAccess ) );
-    
-    CLOG( ( EProtection, 1, _L( "<- CApProtHandler::GetProtectionStateL" ) ) );
-    return aAccess;
+    return 0;
     }
 
 
@@ -694,56 +227,6 @@ TBool CApProtHandler::GetProtectionStateL( CCommsDbTableView& aTable )
 void CApProtHandler::DoRemoveProtectedAccessPointsL(
                                           CCommsDatabase& aDb)
     {
-    CLOG( ( EProtection, 0, 
-        _L( "-> CApProtHandler::DoRemoveProtectedAccessPointsL" ) ) );
-
-    if ( ApCommons::GetVariantL() & KApUiEditOnlyVPNs )
-        {
-        User::Leave( KErrNotSupported );
-        }
-#ifdef __TEST_CDMA_WRITE_PROTECT
-    User::Leave( KErrNotSupported );
-#endif // __TEST_CDMA_WRITE_PROTECT
-
-    // TRANSACTION STARTING IS REMOVED UNTIL ERROR 
-    // JBAH-58FCHH IS CORRECTED BY SYMBIAN
-    // start a transaction, just to make sure
-//    TBool ownTransaction = ApCommons::StartPushedTransactionLC( aDb, ETrue );
-    
-    // make AP table updatable
-    UnprotectTableL( &aDb );
-
-    // remove all protected AP
-    // first get a list of current AP-s
-    CApListItemList* list = new( ELeave )CApListItemList();
-    CleanupStack::PushL( list );
-    CApDataHandler* handler = CApDataHandler::NewLC( aDb );
-    CApSelect* sel = 
-        CApSelect::NewLC( aDb, KEApIspTypeAll, EApBearerTypeAllBearers,
-                         KEApSortNameAscending);
-    sel->AllListItemDataL( *list );
-    // now get protected ones and delete them
-    TInt count( list->Count() );
-    for( TInt i = 0; i<count; i++)
-        {
-        if ( list->At( i )->IsReadOnly() )
-            {
-            UnprotectItemL( &aDb, list->At( i )->Uid() );
-            handler->RemoveAPL( list->At( i )->Uid() );
-            }
-        }
-    CleanupStack::PopAndDestroy( 3, list ); // sel, handler, list
-
-/*
-    if ( ownTransaction )
-        {
-        ApCommons::CommitTransaction( *aDb );
-        CleanupStack::Pop(); // RollbackTransactionOnLeave
-        }
-*/
-    
-    CLOG( ( EProtection, 1, 
-        _L( "<- CApProtHandler::DoRemoveProtectedAccessPointsL" ) ) );
     }
 
 
