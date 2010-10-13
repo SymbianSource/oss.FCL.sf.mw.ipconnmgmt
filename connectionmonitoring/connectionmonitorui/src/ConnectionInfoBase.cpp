@@ -34,11 +34,7 @@
 
 const TUint KUpArrowChar = 0x2191; ///< ASCII code of UpArrow
 const TUint KDownArrowChar = 0x2193; ///< ASCII code of DownArrow
-
-#ifndef _DEBUG
-const TUint KHiddenDhcpServerUid = 0x101fd9c5; ///< Hidden DHCP server UID (dhcpserv.exe)
-const TUint KHiddenDnsServerUid = 0x10000882; ///< Hidden DNS server UID (dnd.exe)
-#endif
+const TUint KBannedServerUID = 0x101fd9c5; // Banned DHCP server UID
 
 const TInt KFeedsServerUid         = 0x1020728E;
 const TInt KDownloadMgrServerUid   = 0x10008D60;
@@ -86,7 +82,6 @@ CConnectionInfoBase::CConnectionInfoBase(
     iConnectionStatus = EConnectionUninitialized;
     iConnectionId = aConnectionId;
     iConnectionBearerType = aConnectionBearerType;
-    iClientBuf().iCount = 0;
     CMUILOGGER_WRITE( "CConnectionInfoBase constuctor - end " );
     }
 
@@ -497,291 +492,160 @@ void CConnectionInfoBase::RefreshDuration()
 TInt CConnectionInfoBase::RefreshAppNamesL()
     {
     CMUILOGGER_ENTERFN( "CConnectionInfoBase::RefreshAppNamesL" );
-
+    
     TInt sharings( 0 );
-
-    if ( IsAlive() )
+    
+if ( IsAlive() )
+    {
+    if ( iAppNames )
         {
-        if ( iAppNames )
+        iAppNames->Reset();
+        HBufC* actAppName = NULL;
+        // Check whether it is an internal or external (modem) connection
+        // External (modem) connections does not need application name
+        if ( iConnectionBearerType < EBearerExternalCSD )
             {
-            // Check whether it is an internal or external (modem) connection
-            // External (modem) connections does not need application name
-            if ( iConnectionBearerType >= EBearerExternalCSD )
+            TInt count( 0 );
+            TConnMonClientEnumBuf clientBuf;
+            iActiveWrapper->StartGetConnSharings( iConnectionId,
+                                                  iConnectionMonitor,
+                                                  clientBuf );
+            
+            TInt err( iActiveWrapper->iStatus.Int() );
+            CMUILOGGER_WRITE_F( "RefreshSharings status: %d", err );
+            
+            if ( !err )
                 {
-                CMUILOGGER_WRITE( "External (modem) connections does not need application name" );
-                return sharings;
+                count = clientBuf().iCount;
                 }
-            else
+                
+            CMUILOGGER_WRITE_F( "clientBuf().iCount: %d", count );
+                
+#ifndef __WINS__ // Appl. uid is always zero in emulator
+
+            RApaLsSession appSess;
+            TApaAppInfo appInfo;
+
+            // The connection could be shared by several applications
+            User::LeaveIfError( appSess.Connect() );
+                    
+            TUint i;
+            for ( i = 0; i < count; i++ )
                 {
-                TInt count( 0 );
-                TConnMonClientEnumBuf clientBuf;
-                iActiveWrapper->StartGetConnSharings( iConnectionId,
-                                                      iConnectionMonitor,
-                                                      clientBuf );
+                actAppName = NULL;
+                appInfo.iCaption.Zero();
 
-                TInt err( iActiveWrapper->iStatus.Int() );
-                CMUILOGGER_WRITE_F( "RefreshSharings status: %d", err );
+                TInt result = appSess.GetAppInfo( appInfo, 
+                                                  clientBuf().iUid[i] );
 
-                if ( !err )
+                //================================
+                CMUILOGGER_WRITE_F( "result: %d", result ); 
+                CMUILOGGER_WRITE_F( "iClientInfo.iUid[i].iUid: %x", 
+                                    clientBuf().iUid[i].iUid );
+                
+                if ( result != KErrNone )
                     {
-                    count = clientBuf().iCount;
-                    }
-                CMUILOGGER_WRITE_F( "clientBuf().iCount: %d", count );
+                    TInt resId = 0;
+                    switch ( clientBuf().iUid[i].iUid )
+                        {
+                        case KMessagingServerUid: // Messaging
+                            {
+                            resId = R_QTN_CMON_SHARING_APP_MSG_SERVER;
+                            break;
+                            }
+                        case KDownloadMgrServerUid: // Downloads
+                            {
+                            resId = R_QTN_CMON_SHARING_APP_DL_MG;
+                            break;
+                            }
+                        case KFeedsServerUid: // Web Feeds
+                            {
+                            resId = R_QTN_CMON_SHARING_APP_RSS_SERVER;
+                            break;
+                            }
+                        case KJavaVMUid: // Application
+                            {
+                            resId = R_QTN_CMON_SHARING_APP_JAVA_MIDLET;
+                            break;
+                            }
+                        case KBannedServerUID:
+                            {   // Forget about DHCP server!
+                            break;
+                            }
+                        case KSUPLServerUid:
+                            {
+                            resId = R_QTN_CMON_SHARING_APP_SUPL;
+                            break;
+                            }
+                        default: // (unknown)
+                            {
+                            resId = R_QTN_CMON_SHARING_APP_UNKNOWN;
+                            break;
+                            }
+                        }
 
-                if ( IsTheSameUids( clientBuf ) )
-                    {
-                    // Same client list, use cached application names.
-                    CMUILOGGER_WRITE( "Client list unchanged, use cached names" );
-                    CMUILOGGER_WRITE_F( "sharings: %d", iAppNames->Count() );
-                    return iAppNames->Count();
+                    if ( resId )
+                        {
+                        actAppName = StringLoader::LoadL( resId );
+                        }
                     }
                 else
                     {
-                    CMUILOGGER_WRITE( "Client list changed, update names" );
-                    CopyUidsToBuf ( clientBuf );
+                    actAppName =  HBufC::NewL( appInfo.iCaption.Length() );
+                    TPtr actAppNameBuf = actAppName->Des();
+                    actAppNameBuf.Append( appInfo.iCaption );
                     }
 
-                iAppNames->Reset();
-                HBufC* actAppName = NULL;
-
-#ifndef __WINS__ // Appl. uid is always zero in emulator
-
-                RApaLsSession appSess;
-                TApaAppInfo appInfo;
-
-                // The connection could be shared by several applications
-                User::LeaveIfError( appSess.Connect() );
-
-                TUint i;
-                for ( i = 0; i < count; i++ )
+                if ( actAppName )
                     {
-                    actAppName = NULL;
-                    appInfo.iCaption.Zero();
-
-                    TInt result = appSess.GetAppInfo( appInfo,
-                            clientBuf().iUid[i] );
-
-                    //================================
-                    CMUILOGGER_WRITE_F( "result: %d", result );
-                    CMUILOGGER_WRITE_F( "iClientInfo.iUid[i].iUid: %x",
-                            clientBuf().iUid[i].iUid );
-
-                    if ( result != KErrNone )
-                        {
-                        TInt resId = 0;
-                        switch ( clientBuf().iUid[i].iUid )
-                            {
-                            case KMessagingServerUid: // Messaging
-                                {
-                                resId = R_QTN_CMON_SHARING_APP_MSG_SERVER;
-                                break;
-                                }
-                            case KDownloadMgrServerUid: // Downloads
-                                {
-                                resId = R_QTN_CMON_SHARING_APP_DL_MG;
-                                break;
-                                }
-                            case KFeedsServerUid: // Web Feeds
-                                {
-                                resId = R_QTN_CMON_SHARING_APP_RSS_SERVER;
-                                break;
-                                }
-                            case KJavaVMUid: // Application
-                                {
-                                resId = R_QTN_CMON_SHARING_APP_JAVA_MIDLET;
-                                break;
-                                }
-#ifndef _DEBUG
-                            // Hide DHCP & DNS from UI in release build.
-                            case KHiddenDhcpServerUid:
-                            case KHiddenDnsServerUid:
-                                {
-                                break;
-                                }
-#endif
-                            case KSUPLServerUid:
-                                {
-                                resId = R_QTN_CMON_SHARING_APP_SUPL;
-                                break;
-                                }
-                            default: // (unknown)
-                                {
-                                resId = R_QTN_CMON_SHARING_APP_UNKNOWN;
-                                break;
-                                }
-                            }
-
-                        if ( resId && resId != R_QTN_CMON_SHARING_APP_UNKNOWN  )
-                            {
-                            actAppName = StringLoader::LoadL( resId );
-                            }
-                        else if ( resId ) // Try to find application process name from system.
-                            {
-                            TFileName name;
-                            TFindProcess find;
-                            TBool name_solved( EFalse );
-                            while ( find.Next( name ) == KErrNone )
-                                {
-                                RProcess ph;
-                                TInt err2( KErrNone );
-                                err2 = ph.Open( name );
-
-                                if ( err2 )
-                                    {
-                                    ph.Close();
-                                    }
-                                else
-                                    {
-                                    TUidType procUid = ph.Type();
-                                    ph.Close();
-
-                                    // There are three UIDs in procUid. The last one is the second
-                                    // UID defined in MMP file and clientBuf().iUid[i].iUid is also
-                                    // the same kind of UID. So, we only need to compare them to
-                                    // find application name.
-                                    if ( procUid[2].iUid == clientBuf().iUid[i].iUid )
-                                        {
-                                        // Name is in format "app_name[uid]001", so cut rest of
-                                        // string starting from "[".
-                                        TInt index = name.LocateReverse('[');
-                                        if ( index >= 1 )
-                                            {
-                                            name.SetLength( index );
-                                            }
-
-                                        actAppName = HBufC::NewL( name.Length() );
-                                        TPtr actAppNameBuf = actAppName->Des();
-                                        actAppNameBuf.Append( name );
-
-#ifdef _DEBUG
-                                        CMUILOGGER_WRITE( "--------------------" );
-                                        CMUILOGGER_WRITE( " Application is Found:" );
-                                        CMUILOGGER_WRITE_F( "Client Uid: %x", clientBuf().iUid[i].iUid );
-                                        CMUILOGGER_WRITE_F( "Proc Uid: %x", procUid[2].iUid );
-                                        CMUILOGGER_WRITE_F( "App Name: %S", &name);
-                                        CMUILOGGER_WRITE( "--------------------" );
-#endif
-
-                                        name_solved = ETrue;
-                                        break;
-                                        }
-                                    }
-                                }
-
-                            if ( !name_solved )
-                                {
-                                actAppName = StringLoader::LoadL( R_QTN_CMON_SHARING_APP_UNKNOWN );
-                                }
-                            }
-                        }
-                    else
-                        {
-                        actAppName = HBufC::NewL( appInfo.iCaption.Length() );
-                        TPtr actAppNameBuf = actAppName->Des();
-                        actAppNameBuf.Append( appInfo.iCaption );
-                        }
-
-                    if ( actAppName )
-                        {
-                        iAppNames->AppendL( actAppName->Des() );
-                        delete actAppName;
-                        }
+                    iAppNames->AppendL( actAppName->Des() );        
+                    delete actAppName;
                     }
+                }
 
                 iAppNames->Sort();
                 appSess.Close();
 #else
-                TInt countBan( 0 );
+            TInt countBan( 0 );
 
-#ifndef _DEBUG
-                if ( !err )
+            if ( !err )
+                {
+                // remove the DHCP server is not actually 
+                // an owner of the connection
+                for ( TUint tmp = 0; tmp < count; ++tmp )
                     {
-                    // Remove DHCP and DNS from the client list. 
-                    for ( TUint tmp = 0; tmp < count; tmp++ )
+                    TUid uid = clientBuf().iUid[tmp];
+            
+                    if ( uid.iUid == KBannedServerUID )
                         {
-                        TUid uid = clientBuf().iUid[tmp];
-
-                        if ( uid.iUid == KHiddenDhcpServerUid || uid.iUid == KHiddenDnsServerUid )
-                            {
-                            countBan++;
-                            }
+                        ++countBan;
                         }
-                    }
-#endif
+                    } // end
+                }
 
-                _LIT( KStrApplication, "Application" );
-                // Give a dummy name for all applications.
-                for ( TInt i = 0; i < ( count - countBan ); i++ )
-                    {
-                    iAppNames->AppendL( KStrApplication );
-                    }
+            _LIT( KStrApplication, "Application" );
+            // Give a dummy name of the application
+            for ( TInt i = 0; i < ( count - countBan ); i++ )
+                {
+                iAppNames->AppendL( KStrApplication );
+                }
 
 #endif // __WINS__
-                } // End of else in if ( iConnectionBearerType > EBearerExternalCSD )
-            sharings = iAppNames->Count();
-            CMUILOGGER_WRITE_F( "sharings: %d", sharings );
-            } // End of if ( iAppNames )
-        } // End of if ( IsAlive() )
 
+            }
+        /* modem connections does not need application name
+        else 
+            {
+            }
+        */
+        sharings = iAppNames->Count();
+        }
+    }
+        
     CMUILOGGER_LEAVEFN( "CConnectionInfoBase::RefreshAppNamesL" );
     return sharings;
     }
 
-// ---------------------------------------------------------
-// CConnectionInfoBase::IsTheSameUids
-// ---------------------------------------------------------
-//
-TBool CConnectionInfoBase::IsTheSameUids( TConnMonClientEnumBuf& aClients )
-    {
-    TBool ret( EFalse );
-
-    if ( iClientBuf().iCount != aClients().iCount )
-        {
-        return ret;
-        }
-    else
-        {
-        TInt count = aClients().iCount;
-        for ( TInt i = 0; i < count; i++ )
-            {
-            // Is the current value inside aClients found from iClientBuf.
-            TBool found( EFalse );
-            for ( TInt j = 0; j < count; j++ )
-                {
-                if ( aClients().iUid[i].iUid == iClientBuf().iUid[j].iUid )
-                    {
-                    found = ETrue;
-                    break;
-                    }
-                }
-
-            if ( !found )
-                {
-                return ret;
-                }
-            }
-
-        // If we reach this point, aClients contents are identical with iClientBuf.
-        ret = ETrue;
-        }
-
-    return ret;
-    }
-
-// ---------------------------------------------------------
-// CConnectionInfoBase::CopyUidsToBuf
-// ---------------------------------------------------------
-//
-void CConnectionInfoBase::CopyUidsToBuf( TConnMonClientEnumBuf& aClients )
-    {
-    TInt count = aClients().iCount;
-
-    for ( TInt i = 0; i < count; i++ )
-        {
-        iClientBuf().iUid[i].iUid = aClients().iUid[i].iUid;
-        }
-    iClientBuf().iCount = count;
-    }
 
 // ---------------------------------------------------------
 // CConnectionInfoBase::ToDetailsListBoxItemTextL

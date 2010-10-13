@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2006-2010 Nokia Corporation and/or its subsidiary(-ies). 
+* Copyright (c) 2006 Nokia Corporation and/or its subsidiary(-ies). 
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -712,17 +712,10 @@ void CCmManagerImpl::StartCommsDatNotifierL()
     // Two instances of class CCmCommsDatNotifier are created here and
     // referred by all watchers in CmManager. One is to watch change in Iap Table
     // and the other is to watch change in Snap Table.
+    iCommsDatIapNotifier = CCmCommsDatNotifier::NewL( KCDTIdIAPRecord );
     
-    if ( iCommsDatIapNotifier == NULL )
-        {
-        iCommsDatIapNotifier = CCmCommsDatNotifier::NewL( KCDTIdIAPRecord );
-        }
-    
-    if ( iCommsDatSnapNotifier == NULL )
-        {
-        TUint32 snapTableId = GetSnapTableIdL();
-        iCommsDatSnapNotifier = CCmCommsDatNotifier::NewL( snapTableId );
-        }
+    TUint32 snapTableId = GetSnapTableIdL();
+    iCommsDatSnapNotifier = CCmCommsDatNotifier::NewL( snapTableId );
     }
 
 //=============================================================================

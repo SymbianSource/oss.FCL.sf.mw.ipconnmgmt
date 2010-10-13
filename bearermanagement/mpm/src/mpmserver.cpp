@@ -47,8 +47,6 @@ Mobility Policy Manager server implementation.
 #include "mpmpropertydef.h"
 #include "mpmofflinewatcher.h"
 #include "mpmconnpermquerytimer.h"
-#include "mpmofflinequerytimer.h"
-#include "mpmconnselectiondlgtimer.h"
 
 // ============================= LOCAL FUNCTIONS ===============================
 
@@ -383,10 +381,6 @@ CMPMServer::~CMPMServer()
     delete iCommsDatAccess;
     
     delete iConnPermQueryTimer;
-    
-    delete iOfflineQueryTimer; 
-    
-    delete iConnSelectionDlgTimer;
     }
 
 
@@ -559,33 +553,32 @@ void CMPMServer::RemoveBMConnection( const TConnectionId aConnId,
     MPMLOGSTRING2( "CMPMServer::RemoveBMConnection - aConnId = 0x%x", 
         aConnId )
 
+    TInt count = iActiveBMConns.Count();
+    
+    // Decrement by one, because count is n, 
+    // but indexes in array are 0 .. n-1.
+    // 
+    count--;
+
     // This time we are browsing the array from the end to the beginning, 
     // because removing one element from array affects index numbering.
-    // Decrement i by one, because count is n, but indexes in array are 0 .. n-1
-    for ( TInt i = iActiveBMConns.Count() - 1; i >= 0; i-- )
+    // 
+    for ( TInt i = count; i >= 0; i-- )
         {
         if ( iActiveBMConns[i].iConnInfo.iConnId == aConnId )
             {
-            
-            TInt closeIapId = iActiveBMConns[i].iConnInfo.iIapId;
-            if ( !closeIapId )
-                {
-                TRAP_IGNORE( closeIapId = aSession.IapSelectionL()->MpmConnPref().IapId() );
-                }
-
             // If Connection Id found, remove it. 
+            //
             iActiveBMConns.Remove( i );
-            
+
             // Update active connection
             if ( aSession.ChooseBestIapCalled() )
                 {
                 UpdateActiveConnection( aSession );
                 }
-            
-            CheckIapForDisconnect( closeIapId );
             }
         }
-    
+
 #ifdef _DEBUG
     // Dump array of active connections to log in order to support testing.
     // 
@@ -604,6 +597,7 @@ TUint32 CMPMServer::GetBMIap( const TConnectionId aConnId )
     TUint32 connectionIapId( 0 );
 
     // Set the Connection Id and SNAP
+    // 
     TConnectionInfo connInfo;
     connInfo.iConnId = aConnId;
 
@@ -615,6 +609,7 @@ TUint32 CMPMServer::GetBMIap( const TConnectionId aConnId )
     if ( ( index1 != KErrNotFound ) && ( index1 < iActiveBMConns.Count() ) )
         {
         // If connInfo found, set the Iap Id as connectionIapId
+        //
         connectionIapId = iActiveBMConns[index1].iConnInfo.iIapId;
         }
 
@@ -883,13 +878,23 @@ void CMPMServer::RemoveBMIAPConnection( const TUint32       aIapId,
         "CMPMServer::RemoveBMIAPConnection - aIapId = %i, aConnId = 0x%x", 
         aIapId, aConnId )
 
+    TActiveBMConn conn;
+    conn.iConnInfo.iIapId = aIapId;
+
     // The IAP connection lifetime is determined by the two calls 
     // IAPConnectionStarted and IAPConnectionStopped. 
+    //
+    TInt count = iActiveBMConns.Count();
+
+    // Decrement by one, because count is n, 
+    // but indexes in array are 0 .. n-1.
+    // 
+    count--;
 
     // This time we are browsing the array from the end to the beginning, 
     // because removing one element from array affects index numbering.
-    // Decrement i by one, because count is n, but indexes in array are 0 .. n-1
-    for ( TInt i = iActiveBMConns.Count() - 1; i >= 0; i-- )
+    // 
+    for ( TInt i = count; i >= 0; i-- )
         {
         if ( iActiveBMConns[i].iConnInfo.iIapId == aIapId )
             {
@@ -982,7 +987,7 @@ void CMPMServer::NotifyBMPrefIapL( const TConnMonIapInfo& aIapInfo,
 #endif // _DEBUG
 
     // Read info for forced roaming from Commdat
-    TUint32 maxOpenTransAttempts ( KMaxOpenTransAttempts ) ;
+    TUint32 maxOpenTransAttempts ( KMaxOpenTransAttempts );
     TUint32 retryAfter ( KRetryAfter );
     TInt err;
     // CommDat reading might fail because CommDat session could be locked by another process at the moment
@@ -2247,7 +2252,7 @@ Connection Id = 0x%x", aConnId );
 // Stop all cellular connections except MMS
 // ---------------------------------------------------------------------------
 //
-void CMPMServer::StopCellularConns( TBool aSilentOnly )
+void CMPMServer::StopCellularConns()
     {
     MPMLOGSTRING( "CMPMServer::StopCellularConns" )
 
@@ -2276,14 +2281,7 @@ void CMPMServer::StopCellularConns( TBool aSilentOnly )
                 if (!(err == KErrNone && iapId == mmsIap))
                     {
                     // Stop the conn / IAP.
-                    if ( aSilentOnly )
-                        {
-                        CheckIapForDisconnect( iapId );
-                        }
-                    else
-                        {
-                        StopConnections( iapId );
-                        }
+                    StopConnections( iapId );
                     stoppedIaps.Append( iapId );
                     }
                 }
@@ -2415,189 +2413,6 @@ TBool CMPMServer::IsConnPermQueryTimerOn()
         }
     return retval;
     }
-
-// ---------------------------------------------------------------------------
-// CMPMServer::StartOfflineQueryTimer
-// Starts the offline query timer.
-// ---------------------------------------------------------------------------
-//
-void CMPMServer::StartOfflineQueryTimer()
-    {
-    MPMLOGSTRING( "CMPMServer::StartOfflineQueryTimer" )
-
-    if ( !iOfflineQueryTimer )
-        {
-        TRAPD( err, iOfflineQueryTimer = CMPMOfflineQueryTimer::NewL( this ) );
-        if ( err == KErrNone )
-            {
-            iOfflineQueryTimer->StartTimer();
-            MPMLOGSTRING( "CMPMServer::StartOfflineQueryTimer: Ok." )
-            }
-        }
-    }
-
-// ---------------------------------------------------------------------------
-// CMPMServer::ResetOfflineQueryTimer
-// Resets the offline query timer.
-// ---------------------------------------------------------------------------
-//
-void CMPMServer::ResetOfflineQueryTimer()
-    {
-    MPMLOGSTRING( "CMPMServer::ResetOfflineQueryTimer" )
-
-    if ( iOfflineQueryTimer )
-        {
-        delete iOfflineQueryTimer;
-        iOfflineQueryTimer = NULL;
-        MPMLOGSTRING( "CMPMServer::ResetOfflineQueryTimer: Ok." )
-        }
-    }
-
-// ---------------------------------------------------------------------------
-// CMPMServer::IsOfflineQueryTimerOn
-// Tells if the offline query timer is on.
-// ---------------------------------------------------------------------------
-//
-TBool CMPMServer::IsOfflineQueryTimerOn()
-    {
-    MPMLOGSTRING( "CMPMServer::IsOfflineQueryTimerOn" )
-
-    TBool retval = EFalse;
-    if ( iOfflineQueryTimer )
-        {
-        retval = ETrue;
-        MPMLOGSTRING( "CMPMServer::IsOfflineQueryTimerOn: Yes." )
-        }
-    return retval;
-    }
-
-// ---------------------------------------------------------------------------
-// CMPMServer::StartConnSelectionDlgTimer
-// Starts the connection selection dialog timer.
-// ---------------------------------------------------------------------------
-//
-void CMPMServer::StartConnSelectionDlgTimer()
-    {
-    MPMLOGSTRING( "CMPMServer::StartConnSelectionDlgTimer" )
-
-    if ( !iConnSelectionDlgTimer )
-        {
-        TRAPD( err, iConnSelectionDlgTimer = CMPMConnSelectionDlgTimer::NewL( this ) );
-        if ( err == KErrNone )
-            {
-            iConnSelectionDlgTimer->StartTimer();
-            MPMLOGSTRING( "CMPMServer::StartConnSelectionDlgTimer: Ok." )
-            }
-        }
-    }
-
-// ---------------------------------------------------------------------------
-// CMPMServer::ResetConnSelectionDlgTimer
-// Resets the connection selection dialog timer.
-// ---------------------------------------------------------------------------
-//
-void CMPMServer::ResetConnSelectionDlgTimer()
-    {
-    MPMLOGSTRING( "CMPMServer::ResetConnSelectionDlgTimer" )
-
-    if ( iConnSelectionDlgTimer )
-        {
-        delete iConnSelectionDlgTimer;
-        iConnSelectionDlgTimer = NULL;
-        MPMLOGSTRING( "CMPMServer::ResetConnSelectionDlgTimer: Ok." )
-        }
-    }
-
-// ---------------------------------------------------------------------------
-// CMPMServer::IsConnSelectionDlgTimerOn
-// Tells if the connection selection dialog timer is on.
-// ---------------------------------------------------------------------------
-//
-TBool CMPMServer::IsConnSelectionDlgTimerOn()
-    {
-    MPMLOGSTRING( "CMPMServer::IsConnSelectionDlgTimerOn" )
-
-    TBool retval = EFalse;
-    if ( iConnSelectionDlgTimer )
-        {
-        retval = ETrue;
-        MPMLOGSTRING( "CMPMServer::IsConnSelectionDlgTimerOn: Yes." )
-        }
-    return retval;
-    }
-    
-// -----------------------------------------------------------------------------
-// CMPMServer::CheckIapForDisconnect
-// -----------------------------------------------------------------------------
-//
-void CMPMServer::CheckIapForDisconnect( TInt aIapId )
-    {
-    MPMLOGSTRING2( "CMPMServer::CheckIapForDisconnect - aIapId = 0x%x", 
-        aIapId )
-
-    // Fix for case ou1cimx1#468999: stop sessions to cellular iap
-    // when there is only silent connections to it, and cellular usage is set
-    // to always ask
-    
-    // Check iap type and usage policy
-    TMPMBearerType bearerType( EMPMBearerTypeNone );
-    TRAP_IGNORE( bearerType = CommsDatAccess()->GetBearerTypeL( aIapId ) );
-
-    TBool closeIap = ( bearerType == EMPMBearerTypePacketData
-                && DataUsageWatcher()->CellularDataUsage() == ECmCellularDataUsageConfirm ); 
-    
-    // No need to put iapSessions to CleanupStack; there are no leaves
-    RPointerArray<CMPMServerSession> iapSessions;
-    if ( closeIap )
-        {
-        // Check for non-silent sessions to iap
-        // closeIap is left true also when there are no sessions using the iap
-        for ( TInt i = 0; i < iActiveBMConns.Count(); i++ )
-            {
-
-            CMPMServerSession* session
-                = GetServerSession( iActiveBMConns[i].iConnInfo.iConnId );
-
-            TInt sessionIapId = iActiveBMConns[i].iConnInfo.iIapId;
-            if ( !sessionIapId )
-                {
-                TRAP_IGNORE( sessionIapId = session->IapSelectionL()->MpmConnPref().IapId() );
-                }
-
-            if ( sessionIapId == aIapId )
-                {
-                iapSessions.Append( session ); // Don't mind if Append fails
-                
-                TBool silent( ETrue );
-                TRAP_IGNORE( silent = session->IapSelectionL()->MpmConnPref().NoteBehaviour()
-                                      & TExtendedConnPref::ENoteBehaviourConnDisableNotes );
-                if ( !silent )
-                    {
-                    // Non-silent session to iap found
-                    closeIap = EFalse;
-                    break; // for
-                    }
-                }
-            }
-        }
-    
-    if ( closeIap )
-        {
-        MPMLOGSTRING2( "CMPMServer::CheckIapForDisconnect - stopping silent sessions to iap 0x%x", 
-            aIapId )
-        // Stop all (silent) sessions to iap
-        for ( TInt i = 0; i < iapSessions.Count(); i++)
-            {
-            MPMLOGSTRING2( "CMPMServer::CheckIapForDisconnect - stopping connId 0x%x",
-                    iapSessions[i]->ConnectionId());
-            iapSessions[i]->StopConnection();
-            }
-        }
-
-    iapSessions.Close();
-    
-    }
-
 
 // -----------------------------------------------------------------------------
 // TMPMBlackListConnId::Append

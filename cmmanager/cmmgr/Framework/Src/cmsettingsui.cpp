@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2006-2010 Nokia Corporation and/or its subsidiary(-ies). 
+* Copyright (c) 2006 Nokia Corporation and/or its subsidiary(-ies). 
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -15,10 +15,7 @@
 *
 */
 
-//This include contains full path because there is 
-//an other version of the same file available in the public
-//SDK and we want to make sure that the internal header is used.
-#include <platform/mw/cmsettingsui.h> 
+#include <cmsettingsui.h>
 #include "cmsettingsuiimpl.h"
 #include <cmcommonconstants.h>
 
@@ -84,31 +81,4 @@ EXPORT_C CCmSettingsUi::TResult CCmSettingsUi::RunSettingsL()
 EXPORT_C TBool CCmSettingsUi::SelectDestinationDlgL( TUint32& aDestinationId )
     {
     return iImpl->SelectDestinationDlgL( aDestinationId );
-    }
-    
-//-----------------------------------------------------------------------------
-//  CCmSettingsUi::AddCmL()
-//-----------------------------------------------------------------------------
-//    
-
-EXPORT_C TUint32 CCmSettingsUi::AddCmL( TUint32& aDestUid, TUint32 aBearerType )
-    {
-    return iImpl->AddCmL( aDestUid, aBearerType );
-    }
-
-//-----------------------------------------------------------------------------
-//  CCmSettingsUi::EditCmL()
-//-----------------------------------------------------------------------------
-//
-
-EXPORT_C CCmSettingsUi::TResult CCmSettingsUi::EditCmL( TUint32 aCmId )
-    {
-    if ( iImpl->EditCmL( aCmId ) == KDialogUserExit )
-        {
-        return EExit;
-        }
-     else
-        {
-        return EBack;
-        }
     }

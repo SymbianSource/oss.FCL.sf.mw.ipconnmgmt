@@ -357,6 +357,30 @@ namespace S60MCprMobilityActivity
         activity.PostToOriginators(msg);
         activity.ClearPostedTo();
         activity.SetHandshakingFlag();
+        
+        
+#ifdef _DEBUG
+        // Purely for debugging purposes
+        CS60MetaConnectionProvider& node = (CS60MetaConnectionProvider&)iContext.Node();
+        if ( node.IsGoneDownRecoveryOngoing() )
+            {
+            S60MCPRLOGSTRING1("S60MCPR<%x>::TInformMigrationAvailableAndSetHandshakingFlag::DoL() Start mobility handshake while gone down recovery is active",(TInt*)&iContext.Node())
+            // During the handshake, there is four different paths that 
+            // needs to be considered for reseting the gone down recovery
+            // flag. These are:
+            // 1) Migration is done successfully
+            // 2) Application rejects the migration
+            // 3) While migrating, a new preferred carrier is found       
+            // 4) Operation is cancelled or an error occurs
+            //
+            // For 1) and 2) the flag needs to be reset, where as for 3) we
+            // can keep the flag set until the "loop" is exited with a valid
+            // reselection (essentially this will be same as 1) but only
+            // after a couple of retrials). For the last option 4) the
+            // connection is tear down and reseting the flag is not needed.
+            }
+#endif
+        
         }
 
     
@@ -373,6 +397,15 @@ namespace S60MCprMobilityActivity
         CS60MetaConnectionProvider& node = (CS60MetaConnectionProvider&)iContext.Node();
         CS60MobilityActivity& activity = static_cast<CS60MobilityActivity&>(*iContext.iNodeActivity);
         node.Policy()->ApplicationIgnoredTheCarrierL( activity.iPreferredAPId );
+        if (node.IsGoneDownRecoveryOngoing() )
+            {
+            // Too bad... Old link has gone down, and application rejected
+            // the new one. Nothing but problems ahead, but who cares, if
+            // the application doesn't. So reset the gone down recovery flag
+            // and assume that everybody is happy with the choise.
+            S60MCPRLOGSTRING1("S60MCPR<%x>::TSendMigrationRejected::DoL() Application rejected the carrier during gone down recovery -> reset flag",(TInt*)&iContext.Node())
+            node.ClearGoneDownRecoveryOngoing();
+            }
         }
 
 
@@ -449,6 +482,15 @@ namespace S60MCprMobilityActivity
         {
         S60MCPRLOGSTRING1("S60MCPR<%x>::TInformMigrationCompleted::DoL()",(TInt*)&iContext.Node())
         __ASSERT_DEBUG(iContext.iNodeActivity, User::Panic(KS60MCprPanic, KPanicNoActivity));
+        CS60MetaConnectionProvider& node = (CS60MetaConnectionProvider&)iContext.Node();
+        if ( node.IsGoneDownRecoveryOngoing() )
+            {
+            // Now we are on a safe side, since the reselect has been done
+            // IPCPr can and will complete NoBearer requests to the new
+            // interface instead of the old one. Reset the flag.
+            S60MCPRLOGSTRING1("S60MCPR<%x>::TInformMigrationCompleted::DoL() New bearer selected while in gone down recovery -> reset flag",(TInt*)&iContext.Node())
+            node.ClearGoneDownRecoveryOngoing();
+            }
         iContext.iNodeActivity->PostToOriginators(TCFMobilityProvider::TMigrationComplete().CRef());
         iContext.iNodeActivity->ClearPostedTo();
         }
@@ -471,6 +513,16 @@ namespace S60MCprMobilityActivity
         // 
         CS60MobilityActivity& activity = static_cast<CS60MobilityActivity&>(*iContext.iNodeActivity);
         activity.ClearHandshakingFlag();
+        
+        if ( node.IsGoneDownRecoveryOngoing() )
+            {
+            // Migration either errored or was cancelled while in gone down
+            // recovery. Node will be destroyed, so there is no point in
+            // such, but reset the flag anyway..
+            S60MCPRLOGSTRING1("S60MCPR<%x>::TCancelAvailabilityRequest::DoL() Error in migration while in gone down recovery -> reset flag",(TInt*)&iContext.Node())
+            node.ClearGoneDownRecoveryOngoing();
+            }
+        
         // At last we must set the activity in error since we're ready to go down.
         //
         iContext.iNodeActivity->SetError( KErrCancel );

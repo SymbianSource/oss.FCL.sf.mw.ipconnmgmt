@@ -76,8 +76,7 @@ CMPMServerSession::CMPMServerSession(CMPMServer& aServer)
       iStoredIapInfo(),
       iIapSelection( NULL ),
       iMigrateState( EMigrateNone ),
-      iDisconnectDialogShown( EFalse ),
-      iErrorDiscreetPopupShown( EFalse )
+      iDisconnectDialogShown( EFalse )
     {
     }
 
@@ -107,12 +106,11 @@ void CMPMServerSession::ConstructL()
 //
 CMPMServerSession::~CMPMServerSession()
     {
-    MPMLOGSTRING( "CMPMServerSession::~CMPMServerSession" )
+    MPMLOGSTRING( "CMPMServerSession::~CMPMServerSession - start" )
 
-
-    // Remove serverside objects for notification session.
-    // 
-    iMyServer.RemoveSession( this );
+    delete iDisconnectDlg;
+    delete iConfirmDlgRoaming;
+    delete iIapSelection;
 
     if (UserConnection())
         {
@@ -137,11 +135,11 @@ User connection deactivated" )
     
     // Make sure the connection is removed from server's information array.
     iMyServer.RemoveBMConnection( iConnId, *this );
+    
+    // Remove server's objects releated to session.
+    iMyServer.RemoveSession( this );
 
-    delete iDisconnectDlg;
-    delete iConfirmDlgRoaming;
-    delete iIapSelection;
-
+    MPMLOGSTRING( "CMPMServerSession::~CMPMServerSession - end" )
     }
 
 
@@ -1472,10 +1470,6 @@ ChooseBestIap has not been called yet" )
             connUiUtils->ConnectionErrorDiscreetPopup( error );
             delete connUiUtils;
             connUiUtils = NULL;
-            
-            // Error discreet popup has been shown. This is needed so that we
-            // dont show it again for SNAP.
-            iErrorDiscreetPopupShown = ETrue;
             }
         }
 
@@ -1647,8 +1641,8 @@ Unknown state %d", state )
         // KErrConnectionTerminated is received when user disconnects
         // connection from Settings/Connection mgr.
         //       
-        if ( ( error == KErrCancel ) || ( error == KErrTimedOut ) || ( error == KErrConnectionTerminated )
-                || ( error == KErrDisconnected && iMyServer.IsPhoneOffline() ) )
+    if ( ( error == KErrCancel ) || ( error == KErrTimedOut ) || ( error == KErrConnectionTerminated )
+            || ( error == KErrDisconnected && iMyServer.IsPhoneOffline() ) )
             {
             neededAction = EPropagateError;
 
@@ -3357,6 +3351,26 @@ void CMPMServerSession::ChooseIapComplete(
     {
     MPMLOGSTRING2( "CMPMServerSession::ChooseIapComplete aError = %d", aError )
 
+    // Show error popup if it's allowed per client request.
+	// No error popup shown to SNAP.
+    if ( ChooseBestIapCalled() && (!( iIapSelection->MpmConnPref().NoteBehaviour() &
+            TExtendedConnPref::ENoteBehaviourConnDisableNotes ))
+            && ( aError != KErrNone ) 
+            && ( iIapSelection->MpmConnPref().SnapId() == 0 ) )
+        {
+        CConnectionUiUtilities* connUiUtils = NULL;
+        TRAPD( error, connUiUtils = CConnectionUiUtilities::NewL() );
+        if ( error == KErrNone && connUiUtils )
+            {
+            // Note: Below function shows the discreet popup only if the error code
+            // belongs to the set of errors that are shown to the user.
+            // Otherwise the popup is not shown.
+            connUiUtils->ConnectionErrorDiscreetPopup( aError );
+            delete connUiUtils;
+            connUiUtils = NULL;
+            }
+        }
+    
     // Try to write back arguments and complete message.
     // 
     if ( !iChooseIapMessage.IsNull() )
@@ -3410,58 +3424,6 @@ Inconsistent state %d", KErrGeneral )
             }
         MPMLOGSTRING( "CMPMServerSession::ChooseIapComplete Message completed" )
         iChooseIapMessage.Complete( aError );
-        }
-
-    CConnectionUiUtilities* connUiUtils( NULL );
-    
-    MPMLOGSTRING2( "CMPMServerSession::ChooseIapComplete: this = %X", this )
-    MPMLOGSTRING2( "CMPMServerSession::ChooseIapComplete: iIapSelection = %X", iIapSelection )
-
-    // Enable showing error discreet popup for SNAP again
-    // Temp var used because session may get deleted during the showing of popup
-    TBool tempErrorDiscreetPopupShown = iErrorDiscreetPopupShown; 
-    iErrorDiscreetPopupShown = EFalse;
-    
-    // NOTE: Be careful with discreet popups! It jams session at this point
-    // for a moment, BUT the session may be called meanwhile.
-    // This may/will lead to problems e.g. if session is being deleted => all (heap) objects
-    // deleted in destructor are gone!
-    // Show error popup if it's allowed per client request.
-	// Error popup shown to SNAP only if error discreet has not been shown for IAP.
-    if ( ChooseBestIapCalled() && (!( iIapSelection->MpmConnPref().NoteBehaviour() &
-            TExtendedConnPref::ENoteBehaviourConnDisableNotes ))
-              && ( aError != KErrNone )
-              && ( tempErrorDiscreetPopupShown == EFalse ) )
-        {
-        TRAPD( popupError, connUiUtils = CConnectionUiUtilities::NewL() );
-        if ( popupError == KErrNone )
-            {
-            // Note: Below function shows the discreet popup only if the error code
-            // belongs to the set of errors that are shown to the user.
-            // Otherwise the popup is not shown.
-            connUiUtils->ConnectionErrorDiscreetPopup( aError );
-            delete connUiUtils;
-            connUiUtils = NULL;
-            }
-        }
-    else if ( aPolicyPref &&
-                    ( aError == KErrNone ) &&
-                    !( iIapSelection->MpmConnPref().NoteBehaviour() &
-                            TExtendedConnPref::ENoteBehaviourConnDisableNotes ) )
-        {
-        TConnectionState state = iMyServer.CheckUsageOfIap( aPolicyPref->IapId(), iConnId );
-		TBool connectionAlreadyActive = (state == EStarted || state == EStarting || state == ERoaming);
-        if ( !connectionAlreadyActive &&
-                ( IsMMSIap( aPolicyPref->IapId() ) == EFalse ) )
-            {
-            TRAPD( popupError, connUiUtils = CConnectionUiUtilities::NewL() );
-            if ( popupError == KErrNone )
-                {
-                connUiUtils->ConnectingViaDiscreetPopup( aPolicyPref->IapId() );
-                delete connUiUtils;
-                connUiUtils = NULL;
-                }
-            }
         }
     }
 
@@ -3573,14 +3535,30 @@ void CMPMServerSession::MigrateDoneL( TInt aError )
 //
 TBool CMPMServerSession::UseUserConnPref()
     {
-    if ((iAppUid != iMyServer.CsIdWatcher()->ConnectScreenId()) &&
-        iMyServer.UserConnection())
+    if ( ( iAppUid != iMyServer.CsIdWatcher()->ConnectScreenId() ) &&
+         iMyServer.UserConnection() )
         {
         MPMLOGSTRING( "CMPMServerSession::UseUserConnPref - User connection active" );
+
+        // If user connection is blacklisted for this connection, don't use it.
+        RArray<TUint32> blacklistedIaps;
+        CleanupClosePushL( blacklistedIaps );
+        iMyServer.GetBlacklistedIAP( iConnId, blacklistedIaps );
+        TInt blacklistedIapFoundError = blacklistedIaps.Find( iMyServer.UserConnPref()->IapId() );
+        CleanupStack::PopAndDestroy( &blacklistedIaps );
         
+        if ( blacklistedIapFoundError != KErrNotFound )
+            {
+            MPMLOGSTRING( "CMPMServerSession::UseUserConnPref -\
+ User connection blacklisted -> don't use user connection" );
+            return EFalse;
+            }
+
         // Check whether default connection will be used
         if ( iIapSelection->MpmConnPref().ConnType() == TMpmConnPref::EConnTypeDefault )
             {
+            MPMLOGSTRING( "CMPMServerSession::UseUserConnPref -\
+ Default connection -> use user connection" );
             return ETrue;
             }
         else if ( ( iIapSelection->MpmConnPref().ConnType() ==
@@ -3588,7 +3566,7 @@ TBool CMPMServerSession::UseUserConnPref()
                   PrefsAllowWlan() )
             {            
             MPMLOGSTRING( "CMPMServerSession::UseUserConnPref -\
- Prompt from the user" );
+ Prompt from the user -> use user connection" );
             // Prompt from the user -> use user connection
             return ETrue;
             }
@@ -3607,6 +3585,8 @@ TBool CMPMServerSession::UseUserConnPref()
 
             if ( ( error == KErrNone ) && ( isInternetSnap ) && PrefsAllowWlan() )
                 {
+                MPMLOGSTRING( "CMPMServerSession::UseUserConnPref -\
+ Application preferencies in Internet SNAP -> use user connection" );
                 // Iap belongs to internet snap -> use user connection
                 return ETrue;
                 }

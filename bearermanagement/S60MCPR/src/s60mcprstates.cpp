@@ -214,6 +214,19 @@ void TProcessError::DoL() // codescanner::leave
 
     ASSERT( error != KErrNone );
     
+    // Special handling for GoneDown errors. In this phase it is necessary
+    // to make sure that we are actually in GoneDown recovery, not in 
+    // start recovery. So check activity instead of error code
+    if (iContext.iNodeActivity->ActivityId() == ECFActivityConnectionGoneDownRecovery)
+        {
+        // We are requesting error recovery from MPM for GoneDown error
+        // Set the flag indicating that lower layer is not in a valid state
+        // so that we can discard NoBearer request coming from data clients
+        // for the time being.
+        S60MCPRLOGSTRING1("S60MCPR<%x>::TProcessError::DoL() Setting GoneDown recovery flag",(TInt*)&iContext.Node())
+        node.SetGoneDownRecoveryOngoing();
+        }    
+    
     // Create the callback that will eventually create the message that completes this state.
     CProcessErrorCb* cb = new( ELeave ) CProcessErrorCb( node, iContext.iNodeActivity );  // codescanner::leave
     CleanupStack::PushL( cb );  // codescanner::leave
@@ -223,6 +236,20 @@ void TProcessError::DoL() // codescanner::leave
     // After this we wait for cancellation/error/completion.
     }
 
+// -----------------------------------------------------------------------------
+// THandleNoBearerDuringGoneDownRecovery::DoL
+// -----------------------------------------------------------------------------
+//
+DEFINE_SMELEMENT( THandleNoBearerDuringGoneDownRecovery, NetStateMachine::MStateTransition, TContext )
+void THandleNoBearerDuringGoneDownRecovery::DoL() // codescanner::leave
+    { 
+    // As this is a single triple activity, there is no real activity
+    // instance available. Therefore, we need to live with the info
+    // available in the context.
+    S60MCPRLOGSTRING1("S60MCPR<%x>::THandleNoBearerDuringGoneDownRecovery::DoL() Return error",(TInt*)&iContext.Node())
+    TEBase::TError errorMsg ( iContext.iMessage.MessageId(), KErrNotReady );
+    iContext.PostToSender( errorMsg );
+    }
 
 // -----------------------------------------------------------------------------
 // TAwaitingSelectNextLayerCompletedOrError::Accept
@@ -482,7 +509,59 @@ TBool TAwaitingStoppedOrError::Accept()
     return EFalse;
     }
 
+// -----------------------------------------------------------------------------
+// TAwaitingDataClientIdle::Accept
+// -----------------------------------------------------------------------------
+//
+DEFINE_SMELEMENT( TAwaitingDataClientIdle, NetStateMachine::MState, TContext )
+TBool TAwaitingDataClientIdle::Accept()
+    {
+    if (!iContext.iMessage.IsMessage<TCFControlProvider::TIdle>())
+        {
+        return EFalse;
+        }
+    __ASSERT_DEBUG(iContext.iPeer, User::Panic(KS60MCprPanic, KPanicPeerMessage));
+    iContext.iPeer->ClearFlags(TCFClientType::EActive);
+    return ETrue;
+    }
 
+// -----------------------------------------------------------------------------
+// TAwaitingDataClientStatusChange::Accept
+// -----------------------------------------------------------------------------
+//
+DEFINE_SMELEMENT( TAwaitingDataClientStatusChange, NetStateMachine::MState, TContext )
+TBool TAwaitingDataClientStatusChange::Accept()
+    {
+    // Consume the received DataClientStatusChange if a DataClientIdle activity is running
+    if (iContext.iMessage.IsMessage<TCFControlProvider::TDataClientStatusChange>() &&
+        (iContext.Node().CountActivities( ECFActivityS60McprDataClientIdle ) > 0))
+        {
+        return ETrue;
+        }
+    return EFalse;
+    }
+
+// -----------------------------------------------------------------------------
+// TAwaitingNoBearerInGoneDownRecovery::Accept
+// -----------------------------------------------------------------------------
+//
+DEFINE_SMELEMENT( TAwaitingNoBearerInGoneDownRecovery, NetStateMachine::MState, TContext )
+TBool TAwaitingNoBearerInGoneDownRecovery::Accept()
+    {
+    if ( iContext.iMessage.IsMessage<TCFControlProvider::TNoBearer>() )
+        {
+        // Get MCPR to check gone down flag status 
+        CS60MetaConnectionProvider& node = (CS60MetaConnectionProvider&)iContext.Node();
+        if ( node.IsGoneDownRecoveryOngoing() )
+            {
+            // We have received a NoBearer while recovering from a GoneDown error
+            // Needs special handling -> accept
+            S60MCPRLOGSTRING1("S60MCPR<%x>::TAwaitingNoBearerInGoneDownRecovery::Accept() return true", (TInt*)&iContext.Node())
+            return ETrue;
+            }
+        }
+    return EFalse;
+    }
 
 // -----------------------------------------------------------------------------
 // TRetrieveServiceId::DoL

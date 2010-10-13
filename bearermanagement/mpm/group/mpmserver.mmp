@@ -58,8 +58,6 @@ SOURCE            mpmdatausagewatcher.cpp
 SOURCE            mpmofflinewatcher.cpp
 SOURCE            mpmexpirytimer.cpp
 SOURCE            mpmconnpermquerytimer.cpp
-SOURCE            mpmofflinequerytimer.cpp
-SOURCE            mpmconnselectiondlgtimer.cpp
 
 USERINCLUDE       ../inc
 

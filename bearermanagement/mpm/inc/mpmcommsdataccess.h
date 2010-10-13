@@ -300,14 +300,6 @@ class CMPMCommsDatAccess : public CBase
         TWlanIapType CheckWlanL( TUint32 aIapId ) const;
 
         /**
-        * Checks if given IAP is TUN driver IAP.
-        * @since S^3
-        * @param aIapId IAP Id.
-        * @return True if given IAP is TUN driver IAP, false otherwise.
-        */
-		TBool IsTunDriverIap( TUint32 aIapId ) const;
-
-        /**
         * Removes categorised IAPs from the list of available IAPs.
         * @since 3.2
         * @param aIAPList List of IAPs

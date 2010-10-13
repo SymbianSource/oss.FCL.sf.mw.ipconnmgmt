@@ -68,7 +68,8 @@ CS60MetaConnectionProvider::CS60MetaConnectionProvider( CMetaConnectionProviderF
                                                         const TProviderInfo& aProviderInfo, 
                                                         const MeshMachine::TNodeActivityMap& aActivityMap )
     :   CMobilityMetaConnectionProvider( aFactory, aProviderInfo, aActivityMap ),
-        iDataClientStatusStarted( EFalse )
+        iDataClientStatusStarted( EFalse ),
+        iGoneDownRecoveryOngoing( EFalse )
     {
     LOG_NODE_CREATE(KS60MCprTag, CS60MetaConnectionProvider);
     }
@@ -283,6 +284,34 @@ void CS60MetaConnectionProvider::ClearHandshakingFlag()
     iIsHandshakingNow = EFalse;
     }
 
+// -----------------------------------------------------------------------------
+// CS60MetaConnectionProvider::IsGoneDownRecoveryOngoing
+// -----------------------------------------------------------------------------
+//
+TBool CS60MetaConnectionProvider::IsGoneDownRecoveryOngoing() const
+    {
+    return iGoneDownRecoveryOngoing;
+    }
+
+
+// -----------------------------------------------------------------------------
+// CS60MetaConnectionProvider::SetGoneDownRecoveryOngoing
+// -----------------------------------------------------------------------------
+//
+void CS60MetaConnectionProvider::SetGoneDownRecoveryOngoing()
+    {
+    iGoneDownRecoveryOngoing = ETrue;
+    }
+
+
+// -----------------------------------------------------------------------------
+// CS60MetaConnectionProvider::ClearGoneDownRecoveryOngoing
+// -----------------------------------------------------------------------------
+//
+void CS60MetaConnectionProvider::ClearGoneDownRecoveryOngoing()
+    {
+    iGoneDownRecoveryOngoing = EFalse;
+    }
 
 // -----------------------------------------------------------------------------
 // CS60MetaConnectionProvider::PolicyNotification

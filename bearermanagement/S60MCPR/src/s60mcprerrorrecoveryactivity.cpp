@@ -113,6 +113,31 @@ namespace S60MCprErrorRecoveryActivity
             iContext.iNodeActivity->SetError( KErrGeneral );
             }
 
+#ifdef _DEBUG
+        // Purely for debugging purposes
+        CS60MetaConnectionProvider& node = (CS60MetaConnectionProvider&)iContext.Node();
+        if ( node.IsGoneDownRecoveryOngoing() )
+            {
+            // This transition is done in both connection start recovery and in
+            // gone down recovery. If we are running gone down recovery, there
+            // are two possible options what can happen next:
+            // 1) If we are running mobility activity, the error can be ignored
+            //    if there is another carrier available. In this case MPM will
+            //    send a preffered carrier available soon after.
+            // 2) In all other cases, the only way forward is error propagation
+            //    (see gone down activity for further info). In this case, the
+            //    gone down error is sent to clients and connection will be 
+            //    teared down.
+            //
+            // In both cases, the GoneDownRecoveryOngoing flag is not cleared.
+            // For case 1) above, it will be cleared after the connection has
+            // roamed, and for option 2) it is pretty much irrelevant (we can
+            // probably avoid a couple of race conditions by leaving the flag
+            // active for the time being.
+            S60MCPRLOGSTRING1("S60MCPR<%x>::TNoTagOrIgnoreErrorOrErrorTag::TransitionTag() MPM response while GoneDown recovery active",(TInt*)&iContext.Node());
+            }
+#endif
+        
         // Error transition
         //
         if ( !msg )

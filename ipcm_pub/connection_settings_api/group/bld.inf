@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2006-2010 Nokia Corporation and/or its subsidiary(-ies). 
+* Copyright (c) 2006 Nokia Corporation and/or its subsidiary(-ies). 
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -12,7 +12,7 @@
 * Contributors:
 *
 * Description:  File that exports the files belonging to 
-*               Connection Settings API
+:                Connection Settings API
 *
 */
 
@@ -41,4 +41,3 @@ PRJ_EXPORTS
 ../inc/cmmanager.h     MW_LAYER_PUBLIC_EXPORT_PATH(cmmanager.h)
 ../inc/cmsettingsui.h     MW_LAYER_PUBLIC_EXPORT_PATH(cmsettingsui.h)
 ../inc/cmgenconnsettings.h     MW_LAYER_PUBLIC_EXPORT_PATH(cmgenconnsettings.h)
-../inc/cmplugintundriverdef.h     MW_LAYER_PUBLIC_EXPORT_PATH(cmplugintundriverdef.h)

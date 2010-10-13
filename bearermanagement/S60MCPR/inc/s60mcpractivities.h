@@ -30,12 +30,6 @@ S60 MCPR's activities.
 // Forward declarations
 class CS60MetaConnectionProvider;
 
-enum TS60MCprActivities
-    {
-    ECFActivityS60McprServiceIdMessage2Handler = ESock::ECFActivityCustom + 10,
-    ECFActivityS60McprStopIAP
-    };
-
 /**
  * S60MCprActivities namespace contains the 
  * definition of S60MCPR's activity map. 
