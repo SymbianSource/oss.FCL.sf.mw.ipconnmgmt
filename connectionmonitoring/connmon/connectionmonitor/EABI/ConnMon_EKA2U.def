@@ -164,4 +164,5 @@ EXPORTS
 	_ZN15TConnMonIapInfoC1ERKS_ @ 163 NONAME
 	_ZN15TConnMonIapInfoC2ERKS_ @ 164 NONAME
 	_ZN15TConnMonIapInfoaSERKS_ @ 165 NONAME
+	_ZNK18RConnectionMonitor16SetBoolAttributeEjjjiR14TRequestStatus @ 166 NONAME
 

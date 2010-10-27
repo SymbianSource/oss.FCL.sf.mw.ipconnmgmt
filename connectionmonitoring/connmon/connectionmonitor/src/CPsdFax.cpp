@@ -441,7 +441,7 @@ TInt CPsdFax::GetStartTime( const TUint aConnectionId, TTime& aTime )
 
 
 // -----------------------------------------------------------------------------
-// CPsdFax::Stop
+// CPsdFax::Stop (sync)
 // -----------------------------------------------------------------------------
 //
 TInt CPsdFax::Stop( const TUint aConnectionId )
@@ -466,6 +466,55 @@ TInt CPsdFax::Stop( const TUint aConnectionId )
     return err;
     }
 
+// -----------------------------------------------------------------------------
+// CPsdFax::Stop (async)
+// -----------------------------------------------------------------------------
+//
+TInt CPsdFax::Stop( const TUint aConnectionId, TRequestStatus& aStatus )
+    {
+    LOGENTRFN("CPsdFax::Stop(TUint, TRequestStatus)")
+    TInt err( KErrNone );
+
+    // Check if connection ID is valid and connection is open
+    TInt index = ConnectionIndex( aConnectionId );
+    if ( index == KErrNotFound || !iConnectionData[index]->IsOpen() )
+        {
+        LOGIT1("CPsdFax::Stop() connection not found, index %d", index)
+        err = KErrNotFound;
+        }
+    else
+        {
+        // Stop connection
+        iConnectionData[index]->Stop( aStatus );
+        }
+
+    LOGEXITFN1("CPsdFax::Stop(TUint, TRequestStatus)", err)
+    return err;
+    }
+
+// -----------------------------------------------------------------------------
+// CPsdFax::CleanupConnectionInfo
+// -----------------------------------------------------------------------------
+//
+TInt CPsdFax::CleanupConnectionInfo( const TUint aConnectionId )
+    {
+    LOGENTRFN("CPsdFax::CleanupConnectionInfo()")
+    TInt err( KErrNone );
+
+    TInt index = ConnectionIndex( aConnectionId );
+    if ( index != KErrNotFound )
+        {
+        iConnectionData[index]->CleanupConnectionInfo();
+        }
+    else
+        {
+        LOGIT1("CleanupConnectionInfo: connection ID %d not found", aConnectionId)
+        err = KErrNotFound;
+        }
+
+    LOGEXITFN1("CPsdFax::CleanupConnectionInfo()", err)
+    return err;
+    }
 
 // -----------------------------------------------------------------------------
 // CPsdFax::DeleteConnections
@@ -836,7 +885,7 @@ TInt CPsdFaxConnectionData::GetDataVolumes( TUint& aDLVolume, TUint& aULVolume )
     }
 
 // -----------------------------------------------------------------------------
-// CPsdFaxConnectionData::Stop
+// CPsdFaxConnectionData::Stop (sync)
 // -----------------------------------------------------------------------------
 //
 TInt CPsdFaxConnectionData::Stop()
@@ -868,6 +917,43 @@ TInt CPsdFaxConnectionData::Stop()
 
     LOGEXITFN1("CPsdFaxConnectionData::Stop()", err)
     return err;
+    }
+
+// -----------------------------------------------------------------------------
+// CPsdFaxConnectionData::Stop (async)
+// -----------------------------------------------------------------------------
+//
+void CPsdFaxConnectionData::Stop( TRequestStatus& aStatus )
+    {
+    LOGENTRFN("CPsdFaxConnectionData::Stop(TRequestStatus)")
+    iContext.Deactivate( aStatus );
+    LOGEXITFN("CPsdFaxConnectionData::Stop(TRequestStatus)")
+    }
+
+// -----------------------------------------------------------------------------
+// CPsdFaxConnectionData::CleanupConnectionInfo
+// -----------------------------------------------------------------------------
+//
+void CPsdFaxConnectionData::CleanupConnectionInfo()
+    {
+    LOGENTRFN("CPsdFaxConnectionData::CleanupConnectionInfo()")
+
+    // Remove from server tables if status notifier is not active.
+    if ( iStatusNotifier && !iStatusNotifier->IsActive() )
+        {
+        // Remove from server tables
+        RemoveFromServer();
+
+        // Close the context
+        CloseContext();
+
+        // Delete all old connection objects. This method should be used
+        // carefully because it will delete ConnectionData and statusnotifier
+        // objects. Get out fast from Stop()
+        iFaxModule->DeleteConnections();
+        }
+
+    LOGEXITFN("CPsdFaxConnectionData::CleanupConnectionInfo()")
     }
 
 // -----------------------------------------------------------------------------

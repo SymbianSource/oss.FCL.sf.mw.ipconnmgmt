@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2005 Nokia Corporation and/or its subsidiary(-ies). 
+* Copyright (c) 2005-2010 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -124,6 +124,18 @@ void CMPMDtmWatcher::RunL()
     // Request notification from ETel about MS class change
     iPacketService.NotifyMSClassChange( iStatus, iMsClass );
     SetActive();
+    }
+
+
+// -----------------------------------------------------------------------------
+// CMPMDtmWatcher::RunError
+// -----------------------------------------------------------------------------
+//
+TInt CMPMDtmWatcher::RunError( TInt aError )
+    {
+    MPMLOGSTRING2( "CMPMDtmWatcher::RunError, ERROR: %d", aError );
+    aError = aError;
+    return KErrNone;
     }
 
 

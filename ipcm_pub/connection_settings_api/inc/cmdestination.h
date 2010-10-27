@@ -201,6 +201,10 @@ NONSHARABLE_CLASS( RCmDestination )
 
         /**
         * Embeds an existing destination into this destination.
+        * A destination can only hold one embedded destination.
+        * Trying to add a second one will fail with KErrNotSupported.
+        * Also, an already embedded destination can't contain an embedded
+        * destination itself, preventing chains of three destinations or more.
         * @param RCmDestination - Destination to be embedded
         * @return TInt - index in the Connection Method list
         */

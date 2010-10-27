@@ -15,7 +15,6 @@
 *
 */
 
-#include "../access_point_engine_misc_api/group/bld.inf"
 #include "../bearer_settings_plugin_api/group/bld.inf"
 #include "../commsdat_wlan_api/group/bld.inf"
 #include "../connection_monitor_extension_api/group/bld.inf"

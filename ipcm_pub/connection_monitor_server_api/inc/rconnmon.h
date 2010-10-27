@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2002-2009 Nokia Corporation and/or its subsidiary(-ies).
+* Copyright (c) 2002-2010 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -333,7 +333,8 @@ enum TConnMonAsyncRequest
     EConnMonGetUintAttribute,
     EConnMonGetBoolAttribute,
     EConnMonGetStringAttribute,
-    EConnMonGetPckgAttribute
+    EConnMonGetPckgAttribute,
+    EConnMonSetBoolAttribute,
     };
 
 /**
@@ -477,6 +478,7 @@ enum TConnMonRequests
     EReqCancelAsyncRequest            = 13,
     EReqReceiveEvent                  = 14,
     EReqCancelReceiveEvent            = 15,
+    EReqSetAsyncBoolAttribute         = 16,
 
     EReqPluginCreateSubSession        = 500,
     EReqPluginCloseSubSession         = 501,
@@ -1738,6 +1740,24 @@ public:
             const TUint aSubConnectionId,
             const TUint aAttribute,
             const TBool aValue ) const;
+    
+    /**
+    * Sets the value for a TBool attribute.
+    *
+    * This method can be used to stop a connection (KConnectionStop).
+    * @param aConnectionId Connection ID.
+    * @param aSubConnectionId Subconnection ID. If set to 0, method applies to
+    * connection.
+    * @param aAttribute Identifies the attribute to be set.
+    * @param aValue The value to be set.
+    * @param aStatus KErrNone if successful, a system-wide error code if not.
+    */            
+    IMPORT_C void SetBoolAttribute(
+            const TUint aConnectionId,
+            const TUint aSubConnectionId,
+            const TUint aAttribute,
+            const TBool aValue,
+            TRequestStatus& aStatus ) const;
 
     /**
     * Sets the value for a string attribute.

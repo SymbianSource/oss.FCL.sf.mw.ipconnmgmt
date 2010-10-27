@@ -909,6 +909,7 @@ CPolicyServer::TCustomResult CConnMonServer::CustomSecurityCheckL(
     switch ( aMsg.Function() )
         {
         case EReqSetBoolAttribute:
+        case EReqSetAsyncBoolAttribute:
             {
             switch ( aMsg.Int2() )
                 {

@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2008-2009 Nokia Corporation and/or its subsidiary(-ies). 
+* Copyright (c) 2008-2010 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -48,25 +48,34 @@ public:
     virtual ~CMpmDataUsageWatcher();
 
     /**
-     * Start to listen for events.
-     */
+    * Start to listen for events.
+    */
     void StartL();
-    
+
+    /**
+    * Current cellular data usage.
+    * See TCmCellularDataUsage
+    */
+    TInt CellularDataUsage() const;
+
+protected: // from CActive
+
     /**
     * Active object's RunL.
     */
     void RunL();
 
     /**
+    * Handles a leave occurring in RunL.
+    * @param aError Leave code of RunL method.
+    * @return KErrNone
+    */
+    TInt RunError( TInt aError );
+
+    /**
     * Active object's DoCancel.
     */
     void DoCancel();
-    
-    /**
-    * Current cellular data usage.
-    * See TCmCellularDataUsage
-    */
-    TInt CellularDataUsage() const;
 
 private:
 

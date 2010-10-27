@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2008 Nokia Corporation and/or its subsidiary(-ies). 
+* Copyright (c) 2008-2010 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -112,6 +112,18 @@ TBool CMPMDialogBase::IsFirst()
         {
         return iQueue.At( 0 ) == this;
         }
+    }
+
+// -----------------------------------------------------------------------------
+// CMPMDialog::RunError
+// Default implementation will cause the Error() function from active scheduler
+// to be executed.
+// -----------------------------------------------------------------------------
+//
+TInt CMPMDialogBase::RunError( TInt aError )
+    {
+    MPMLOGSTRING2( "CMPMDialogBase::RunError, ERROR: %d", aError )
+    return aError;
     }
 
 //  End of File

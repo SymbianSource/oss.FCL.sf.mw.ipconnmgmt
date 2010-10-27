@@ -34,8 +34,36 @@
 #include "ConnMonBearerNotifier.h"
 #include "log.h"
 #include "cellulardatausagekeyupdater.h"
+#include "connmonasyncstopdaemon.h"
 
 // ============================ MEMBER FUNCTIONS ===============================
+
+// -----------------------------------------------------------------------------
+// TAsyncStopQueueElement::TAsyncStopQueueElement
+// -----------------------------------------------------------------------------
+//
+TAsyncStopQueueElement::TAsyncStopQueueElement( const RMessage2& aMessage )
+        :
+        iMessage( aMessage ),
+        iStatus( 0 ),
+        iIdCount( 0 ),
+        iStopCount( 0 )
+    {
+    }
+
+// -----------------------------------------------------------------------------
+// TAsyncStopQueueElement::Add
+// Add a connection ID to the ID array. Does nothing if the array is already full. 
+// -----------------------------------------------------------------------------
+//
+void TAsyncStopQueueElement::Add( TUint aConnectionId )
+    {
+    if ( iIdCount < KMaxConnectionCount )
+        {
+        iId[iIdCount] = aConnectionId;
+        iIdCount++;
+        }
+    }
 
 // -----------------------------------------------------------------------------
 // TConnInfo::TConnInfo
@@ -61,7 +89,8 @@ TConnInfo::TConnInfo(
         iActivityNotifier( 0 ),
         iActivity( 0 ),
         iBearerInfo( aBearerInfo ),
-        iBearerNotifier( 0 )
+        iBearerNotifier( 0 ),
+        iAsyncStopStatus( EConnMonAsyncStopNotStarted )
     {
     }
 
@@ -88,6 +117,7 @@ void TConnInfo::Reset()
     iActivityNotifier = 0;
     iActivity         = 0;
     iBearerNotifier   = 0;
+    iAsyncStopStatus  = EConnMonAsyncStopNotStarted;
     }
 
 // -----------------------------------------------------------------------------
@@ -341,6 +371,9 @@ void CConnMonIAP::ConstructL()
 CConnMonIAP::~CConnMonIAP()
     {
     LOGENTRFN("CConnMonIAP::~CConnMonIAP()")
+            
+    iAsyncStopQueue.Close();
+    
     // Delele dial up modules.
     delete iCsdFax;
     iCsdFax = NULL;
@@ -1869,6 +1902,357 @@ TInt CConnMonIAP::SetUintAttribute(
         const TUint /*aValue*/ )
     {
     return KErrNotSupported;
+    }
+
+// -----------------------------------------------------------------------------
+// CConnMonIAP::AsyncConnectionStopL
+// Checks parameter validity first. If all ok creates an active object that
+// completes the connection stop in a separate thread. 
+// -----------------------------------------------------------------------------
+//
+TInt CConnMonIAP::AsyncConnectionStopL( const RMessage2& aMessage )
+    {
+    LOGENTRFN("CConnMonIAP::AsyncConnectionStopL()")
+    TInt result( KErrGeneral );
+    TUint connectionId( aMessage.Int0() );
+    
+    TInt index = Index( connectionId );
+    if ( index < 0 )
+        {
+        LOGIT1("AsyncConnectionStopL: unknown connection index %d", connectionId)
+        result = KErrNotFound;
+        }
+    else
+        {
+        // Check if value is true or false
+        if ( !( aMessage.Int3() ) )
+            {
+            LOGIT("AsyncConnectionStopL: boolean value was false, quitting")
+            result = KErrNone;
+            }
+        else
+            {
+            if ( iConnInfos[index].iAsyncStopStatus != EConnMonStopCompleted )
+                {
+                TInt threadStartError( KErrNone );
+                if ( iConnInfos[index].iAsyncStopStatus == EConnMonAsyncStopNotStarted )
+                    {
+                    threadStartError = StartAsyncStopThreadL( index );
+                    }
+                if ( threadStartError == KErrNone )
+                    {
+                    // Associate this connection into this stop request
+                    TAsyncStopQueueElement request( aMessage );
+                    request.Add( connectionId );
+                    iAsyncStopQueue.Append( request );
+                    result = KRequestPending;
+                    }
+                else
+                    {
+                    result = threadStartError;
+                    }
+                }
+            else
+                {
+                // Connection has already been closed, but not yet removed from connection table
+                result = KErrNone;
+                }
+            }
+        }
+    LOGEXITFN1("CConnMonIAP::AsyncConnectionStopL()", result)
+    return result;
+    }
+
+// -----------------------------------------------------------------------------
+// CConnMonIAP::AsyncConnectionStopAllL
+// Checks parameter validity first. If all ok creates an active object for each
+// connection that completes the connection stop in a separate thread. If any
+// errors occur, returns the first encountered error code.
+// -----------------------------------------------------------------------------
+//
+TInt CConnMonIAP::AsyncConnectionStopAllL( const RMessage2& aMessage )
+    {
+    LOGENTRFN("CConnMonIAP::AsyncConnectionStopAllL()")
+
+    TInt result( KErrNone );
+    // Check if value is true or false
+    if ( !( aMessage.Int3() ) )
+        {
+        LOGIT("AsyncConnectionStopAllL: boolean value was false, quitting")
+        result = KErrNone;
+        }
+    else
+        {
+        TAsyncStopQueueElement request( aMessage );
+        TInt count = iConnInfos.Count();
+        result = KErrNone;
+        
+        for ( TInt i = 0; i < count; i++ )
+            {
+            if ( iConnInfos[i].iAsyncStopStatus != EConnMonStopCompleted )
+                {
+                TInt threadStartError( KErrNone );
+                if ( iConnInfos[i].iAsyncStopStatus == EConnMonAsyncStopNotStarted )
+                    {
+                    threadStartError = StartAsyncStopThreadL( i );
+                    }
+                if ( threadStartError == KErrNone )
+                    {
+                    // Associate this connection into this stop request
+                    request.Add( iConnInfos[i].iConnectionId );
+                    }
+                else
+                    {
+                    // Thread start failed
+                    if ( result == KErrNone )
+                        {
+                        // Keep only the first error that occurs
+                        result = threadStartError;
+                        }
+                    LOGIT2("AsyncConnectionStopAllL: Error starting stop thread for conn. id %d <%d>",
+                            iConnInfos[i].iConnectionId, threadStartError)
+                    }
+                }
+            }
+        // If one or more async connection stop threads have been started, and
+        // no errors have been encountered, set request to pending and add to
+        // queue to wait for thread(s) to complete.
+        if ( request.iIdCount > 0 )
+            {
+            if ( result == KErrNone )
+                {
+                iAsyncStopQueue.Append( request );
+                result = KRequestPending;
+                }
+            }
+        }
+    LOGEXITFN1("CConnMonIAP::AsyncConnectionStopAllL()", result)
+    return result;
+    }
+
+// -----------------------------------------------------------------------------
+// CConnMonIAP::StartAsyncStopThread
+// Starts a new thread to asynchronously stop a connection. Returns KErrNone if
+// thread started successfully.
+// -----------------------------------------------------------------------------
+//
+TInt CConnMonIAP::StartAsyncStopThreadL( TInt aIndex )
+    {
+    LOGENTRFN("CConnMonIAP::StartAsyncStopThreadL()")
+    TInt err( KErrNone );
+    
+    if ( aIndex < 0 || aIndex >= iConnInfos.Count() )
+        {
+        return KErrArgument;
+        }
+
+    iConnInfos[aIndex].iAsyncStopStatus = EConnMonAsyncStopStarted;
+    if ( iConnInfos[aIndex].iBearer < EBearerExternalCSD )
+        {
+        // Stop an internal connection
+        LOGIT("StartAsyncStopThreadL: connection type internal")
+
+        // Cancel data volume and activity notifiers before stopping
+        if ( iConnInfos[aIndex].iDLDataNotifier != 0 )
+            {
+            iConnInfos[aIndex].iDLDataNotifier->Cancel();
+            }
+        if ( iConnInfos[aIndex].iULDataNotifier != 0 )
+            {
+            iConnInfos[aIndex].iULDataNotifier->Cancel();
+            }
+        if ( iConnInfos[aIndex].iDataVolumeAO != 0 )
+            {
+            iConnInfos[aIndex].iDataVolumeAO->Cancel();
+            }
+        if ( iConnInfos[aIndex].iActivityNotifier != 0 )
+            {
+            iConnInfos[aIndex].iActivityNotifier->Cancel();
+            }
+
+        // Create and start a oneshot active object that starts and waits for
+        // the async stop thread to complete
+        CConnMonAsyncStopDaemon* asyncStopDaemon = CConnMonAsyncStopDaemon::NewL( this );
+        err = asyncStopDaemon->Start(
+                iConnInfos[aIndex].iConnectionId,
+                iConnInfos[aIndex].iIapId,
+                iConnInfos[aIndex].iNetId );
+        if ( err )
+            {
+            // Error, cleanup the active object since it did not start
+            delete asyncStopDaemon;
+            }
+        }
+    else if ( iConnInfos[aIndex].iBearer == EBearerExternalGPRS     ||
+              iConnInfos[aIndex].iBearer == EBearerExternalEdgeGPRS ||
+              iConnInfos[aIndex].iBearer == EBearerExternalWCDMA    ||
+              iConnInfos[aIndex].iBearer == EBearerExternalCDMA2000 ||
+              ( !iConnInfos[aIndex].iBearerInfo.iInternal &&
+                ( iConnInfos[aIndex].iBearerInfo.iBearer == EBearerInfoHSDPA ||
+                  iConnInfos[aIndex].iBearerInfo.iBearer == EBearerInfoHSUPA ||
+                  iConnInfos[aIndex].iBearerInfo.iBearer == EBearerInfoHSxPA ) ) )
+        {
+        // Stop an external PSD connection
+        LOGIT("StartAsyncStopThreadL: connection type external PSD")
+        if ( iPsdFax )
+            {
+            CConnMonAsyncStopDaemon* asyncStopDaemon = CConnMonAsyncStopDaemon::NewL( this );
+            err = asyncStopDaemon->Start(
+                    iConnInfos[aIndex].iConnectionId,
+                    iPsdFax );
+            if ( err )
+                {
+                // Error, cleanup the active object since it did not start
+                delete asyncStopDaemon;
+                }
+            }
+        else
+            {
+            err = KErrNotFound;
+            }
+        }
+    else if ( iConnInfos[aIndex].iBearer == EBearerExternalCSD   ||
+              iConnInfos[aIndex].iBearer == EBearerExternalHSCSD ||
+              iConnInfos[aIndex].iBearer == EBearerExternalWcdmaCSD )
+        {
+        LOGIT("AsyncConnectionStopL: Error, connection type external CSD not supported")
+        err = KErrNotSupported;
+        }
+    else
+        {
+        LOGIT("AsyncConnectionStopL: Error, unknown bearer")
+        err = KErrNotSupported;
+        }
+
+    LOGEXITFN1("CConnMonIAP::StartAsyncStopThreadL()", err)
+    return err;
+    }
+
+// -----------------------------------------------------------------------------
+// CConnMonIAP::CompleteAsyncStopReqs
+// Called when an asynchronous connection stop has completed.
+// This method will go through all pending async connection stop requests and
+// mark this connections status to those requests that are waiting for it.
+// Those requests that were only waiting for this connection anymore, are
+// completed.
+// -----------------------------------------------------------------------------
+//
+void CConnMonIAP::CompleteAsyncStopReqs( const TUint aConnectionId, const TInt aError )
+    {
+    LOGENTRFN("CConnMonIAP::CompleteAsyncStopReqs()")
+
+    // Mark the internal status of the connection to stopped
+    TInt index = Index( aConnectionId );
+    LOGIT3("Connection %d (index %d) marked as stopped <%d>", aConnectionId, index, aError)
+    if ( index >= 0 )
+        {
+        iConnInfos[index].iAsyncStopStatus = EConnMonStopCompleted;
+        }
+
+#ifdef _DEBUG    
+    LOGIT1("iAsyncStopQueue contents (%d:)", iAsyncStopQueue.Count() )
+    for ( TInt i = 0; i < iAsyncStopQueue.Count(); i++ )
+        {
+        LOGIT1("iIdCount   = %d", iAsyncStopQueue[i].iIdCount)
+        LOGIT1("iStopCount = %d", iAsyncStopQueue[i].iStopCount)
+        LOGIT1("iStatus    = %d", iAsyncStopQueue[i].iStatus)
+        for ( TInt j = 0; j < iAsyncStopQueue[i].iIdCount; j++ )
+            {
+            LOGIT1(".       id = %02d", iAsyncStopQueue[i].iId[j])
+            }
+        }
+#endif // _DEBUG
+
+    // Go through all pending async stop requests. If a request has been
+    // cancelled, it has been removed from this array already.
+    for ( TInt i = 0; i < iAsyncStopQueue.Count(); i++ )
+        {
+        // Go through all connections related to this request
+        for ( TInt j = 0; j < iAsyncStopQueue[i].iIdCount; j++ )
+            {
+            // Was this request waiting for the connection that was just stopped
+            if ( iAsyncStopQueue[i].iId[j] == aConnectionId )
+                {
+                iAsyncStopQueue[i].iStopCount++;
+                // Set iAsyncStopQueue[i].iId[j] to 0 if tracking is needed
+
+                // Store the first encountered error
+                if ( aError && iAsyncStopQueue[i].iStatus == KErrNone )
+                    {
+                    iAsyncStopQueue[i].iStatus = aError;
+                    }
+                }
+            }
+        // Have all connections stopped that this request is waiting for
+        if ( iAsyncStopQueue[i].iStopCount >= iAsyncStopQueue[i].iIdCount )
+            {
+            LOGIT3("Completing request at index %d, id count %d <%d>",
+                    i, iAsyncStopQueue[i].iIdCount, iAsyncStopQueue[i].iStatus)
+            iAsyncStopQueue[i].iMessage.Complete( iAsyncStopQueue[i].iStatus );
+            iAsyncStopQueue.Remove( i );
+            i--;
+            }
+        }
+    LOGEXITFN("CConnMonIAP::CompleteAsyncStopReqs()")
+    }
+
+// -----------------------------------------------------------------------------
+// CConnMonIAP::CleanupConnectionInfo
+// If the stopped connection is still in the connection info array and
+// connection up/down notifier isn't running, removes the obsolete information
+// and notifiers from the connection info array.
+// -----------------------------------------------------------------------------
+//
+TInt CConnMonIAP::CleanupConnectionInfo( const TUint& aConnectionId )
+    {
+    LOGENTRFN("CConnMonIAP::CleanupConnectionInfo()")
+    TInt err( KErrNone );
+    
+    TInt index = Index( aConnectionId );
+    if ( index < 0 )
+        {
+        LOGIT("CleanupConnectionInfo: ID no longer in connection table")
+        err = KErrNotFound;
+        }
+    else
+        {
+        // If conn up/down notifier is active, let the event remove connection later.
+        if ( !iConnUpDownNotifier || !iConnUpDownNotifier->IsActive() )
+            {
+            err = RemoveConnection( iConnInfos[index] );
+            }
+        else
+            {
+            LOGIT("CleanupConnectionInfo: iConnUpDownNotifier active, letting event do cleanup")
+            err = KErrNone;
+            }
+        }
+    LOGEXITFN1("CConnMonIAP::CleanupConnectionInfo()", err)
+    return err;
+    }
+
+// -----------------------------------------------------------------------------
+// CConnMonIAP::CancelAsyncStopReqs
+// Cancels all asynchronous connection stop request for a specific client.
+// -----------------------------------------------------------------------------
+//
+void CConnMonIAP::CancelAsyncStopReqs( CSession2* aSession )
+    {
+    LOGENTRFN("CConnMonIAP::CancelAsyncStopReqs()")
+
+    LOGIT1("AsyncStopQueue count = %d", iAsyncStopQueue.Count())
+    for ( TInt i = 0; i < iAsyncStopQueue.Count(); i++ )
+        {
+        if ( iAsyncStopQueue[i].iMessage.Session() == aSession )
+            {
+            iAsyncStopQueue[i].iMessage.Complete( KErrCancel );
+            iAsyncStopQueue.Remove( i );
+            i--;
+            LOGIT1("Cancelled a request for session %d", aSession)
+            }
+        }
+
+    LOGEXITFN("CConnMonIAP::CancelAsyncStopReqs()")
     }
 
 // -----------------------------------------------------------------------------

@@ -360,6 +360,25 @@ EXPORT_C TInt RConnectionMonitor::SetBoolAttribute(
     }
 
 // -----------------------------------------------------------------------------
+// RConnectionMonitor::SetBoolAttribute
+// -----------------------------------------------------------------------------
+//
+EXPORT_C void RConnectionMonitor::SetBoolAttribute(
+        const TUint aConnectionId,
+        const TUint aSubConnectionId,
+        const TUint aAttribute,
+        const TBool aValue,
+        TRequestStatus& aStatus ) const
+    {
+    LOGIT5("Client [%d]: SetBoolAttribute() ASYNC, conn.id %d, sub.conn.id %d, attribute %d, value %d",
+            this, aConnectionId, aSubConnectionId, aAttribute, aValue)
+
+    TIpcArgs args( aConnectionId, aSubConnectionId, aAttribute, aValue );
+
+    SendReceive( EReqSetAsyncBoolAttribute, args, aStatus );
+    }
+
+// -----------------------------------------------------------------------------
 // RConnectionMonitor::SetStringAttribute
 // -----------------------------------------------------------------------------
 //

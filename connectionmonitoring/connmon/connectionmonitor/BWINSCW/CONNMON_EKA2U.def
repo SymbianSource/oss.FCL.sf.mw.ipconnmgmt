@@ -99,4 +99,5 @@ EXPORTS
 	?IsProtectedSetupSupported@CConnMonWlanNetwork@@QAEHXZ @ 98 NONAME ; int CConnMonWlanNetwork::IsProtectedSetupSupported(void)
 	??0TConnMonIapInfo@@QAE@ABV0@@Z @ 99 NONAME ; TConnMonIapInfo::TConnMonIapInfo(class TConnMonIapInfo const &)
 	??4TConnMonIapInfo@@QAEAAV0@ABV0@@Z @ 100 NONAME ; class TConnMonIapInfo & TConnMonIapInfo::operator=(class TConnMonIapInfo const &)
+	?SetBoolAttribute@RConnectionMonitor@@QBEXIIIHAAVTRequestStatus@@@Z @ 101 NONAME ; void RConnectionMonitor::SetBoolAttribute(unsigned int, unsigned int, unsigned int, int, class TRequestStatus &) const
 

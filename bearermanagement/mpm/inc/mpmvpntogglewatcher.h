@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2010 Nokia Corporation and/or its subsidiary(-ies). 
+* Copyright (c) 2010 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -34,14 +34,14 @@ const TInt KMpmVpnToggleWatcherCenRepErrorThreshold = 80;
 class MMpmVpnToggleWatcherNotify
 {
 public:
-    
+
     /**
      * Sets values for VPN toggle after VPN toggle key changes in central
      * repository.
      * @param aVpnPreferred Informs if VPN connection is preferred
      *                      connection
      * @param aVpnIapId VPN IAP Id, which is used for VPN connection, when
-     *                  VPN connection is preferred                           
+     *                  VPN connection is preferred
      * @param aSnapId SNAP Id SNAP Id, which is used for VPN connection,
      *                when VPN connection is preferred
      */
@@ -62,94 +62,107 @@ public:
     /**
     * Two-phased constructor.
     * @param aNotify Handler for notify messages.
-    */    
+    */
     static CMpmVpnToggleWatcher* NewL( MMpmVpnToggleWatcherNotify& aNotify );
 
     /**
     * Destructor.
     */
     virtual ~CMpmVpnToggleWatcher();
-    
+
     /**
      * Call this when you want to start listen event.
      */
-    void StartL();    
-        
+    void StartL();
+
     /**
      * Informs if VPN connection is preferred.
      * @return True if VPN connection is preferred.
      */
     TBool IsVpnConnectionPreferred() const;
-    
+
     /**
      * Returns VPN IAP Id, which is used for VPN connection, when VPN
      * connection is preferred.
      * @return VPN IAP Id
      */
     TUint32 VpnIapId() const;
-    
+
     /**
      * Returns SNAP Id, which is used for VPN connection, when VPN
      * connection is preferred.
      * @return SNAP Id
      */
-    TUint32 SnapId() const;    
-    
+    TUint32 SnapId() const;
+
     /**
      * Resets VPN toggle values.
-     */    
+     */
     void ResetVpnToggleValues();
-    
+
 private:
 
     CMpmVpnToggleWatcher( MMpmVpnToggleWatcherNotify& aNotify );
 
     void ConstructL();
-    
+
     /**
      * Request for notifications.
      * @return Error value
      */
     TInt RequestNotifications();
-    
+
     /**
      * Gets VPN toggle values.
      * @return Error value
      */
     TInt GetVpnToggleValues();
 
-// from base class CActive
+protected: // from base class CActive
 
+    /**
+     * Active object's RunL.
+     */
     void RunL();
 
+    /**
+     * Handles a leave occurring in RunL.
+     * @param aError Leave code of RunL method.
+     * @return KErrNone
+     */
+    TInt RunError( TInt aError );
+
+    /**
+     * Active object's DoCancel.
+     */
     void DoCancel();
-    
+
 private: // data
-    
+
     /**
      * Central repository handle
      * Own.
      */
-    CRepository* iRepository;    
-    
+    CRepository* iRepository;
+
     /**
      * Informs if VPN connection is preferred connection
      * Own.
      */
     TBool iVpnConnectionPreferred;
-    
+
     /**
      * VPN IAP Id which is used, when VPN connection is preferred
      * Own.
      */
     TUint32 iVpnIapId;
-    
+
     /**
      * SNAP Id which is used, when VPN connection is preferred
      * Own.
      */
     TUint32 iSnapId;
-    
+
     /**
      * Error counter.
      */
@@ -160,7 +173,7 @@ private: // data
      * Not own.
      */
     MMpmVpnToggleWatcherNotify& iNotify;
-    
+
     };
 
 #endif // MPMVPNTOGGLEWATCHER_H

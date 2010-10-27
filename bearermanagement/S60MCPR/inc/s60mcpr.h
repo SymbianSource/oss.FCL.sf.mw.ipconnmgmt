@@ -174,6 +174,24 @@ public:
      * Clears handshaking flag. 
      */
     void ClearHandshakingFlag();
+
+    /**
+     * Checking whether the node is in the middle of a gone down error
+     * recovery.
+     * 
+     * @return ETrue if recovering a GoneDown error
+     */
+    TBool IsGoneDownRecoveryOngoing() const;
+    
+    /**
+     * Sets gone down recovery flag. 
+     */
+    void SetGoneDownRecoveryOngoing();
+    
+    /**
+     * Clears gone down recovery flag. 
+     */
+    void ClearGoneDownRecoveryOngoing();    
     
     /**
      * Re-send last received policy notification if it exists.
@@ -260,6 +278,19 @@ private:
      * Synchronisation flags, private by design, can be modified only by CMobilityActivity
      */
     TBool                   iIsHandshakingNow; 
+    
+    /**
+     * Status flag indicating that we are currently recovering from GoneDown.
+     * This is set while MPM is making recovery decision, and in case of
+     * mobility connections also for the period while the connection roams 
+     * to a new interface. This is used (at least) for erroring NoBearer
+     * requests coming from the data clients.
+     * 
+     * Even though the bit fields are generally quite useless optimization in
+     * this kind of cases, used also in here since there are a couple of
+     * those above...
+     */
+    TBool                   iGoneDownRecoveryOngoing : 1;
     
     /**
      * Connection preference list

@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2004-2010 Nokia Corporation and/or its subsidiary(-ies). 
+* Copyright (c) 2004-2010 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -24,7 +24,6 @@ Mobility Policy Manager server session implementation.
 #include <e32svr.h>
 #include <gsmerror.h>     // KErrPacketDataTsyMaxPdpContextsReached 
 #include <etelpckt.h>     // KErrUmtsMaxNumOfContextExceededByNetwork
-#include <bldvariant.hrh>                // For feature flags
 #include <centralrepository.h>           // CRepository 
 #include <CoreApplicationUIsSDKCRKeys.h> // KCRUidCoreApplicationUIs, 
                                          // KCoreAppUIsNetworkConnectionAllowed
@@ -96,7 +95,7 @@ void CMPMServerSession::ConstructL()
     MPMLOGSTRING( "CMPMServerSession::ConstructL" )
     if ( !iMyServer.Events() )
         {
-        iMyServer.SetEvents(CMPMConnMonEvents::NewL(
+        iMyServer.SetEvents( CMPMConnMonEvents::NewL(
             *const_cast<CMPMServer*>( &iMyServer ) ) );
         }
 
@@ -547,7 +546,7 @@ void CMPMServerSession::HandleServerCancelRequest( const RMessage2& aMessage )
                 // TODO Change CancelScanL to non-leaving.
                 // Otherwise, nothing clever can be done here.
                 // And OOM may risk MPM stability.
-                TRAP_IGNORE( iMyServer.Events()->CancelScanL( this ))
+                TRAP_IGNORE( iMyServer.Events()->CancelScanL( this ) )
                 iServerSortSNAPMessage.Complete( KErrCancel );
                 }
             break;
@@ -3257,7 +3256,6 @@ void CMPMServerSession::ChooseIapComplete(
     {
     MPMLOGSTRING2( "CMPMServerSession::ChooseIapComplete aError = %d", aError )
 
-    
     // Try to write back arguments and complete message.
     // 
     if ( !iChooseIapMessage.IsNull() )
@@ -3357,9 +3355,6 @@ void CMPMServerSession::ProcessErrorComplete( TInt             aError,
     if ( !iProcessErrorMessage.IsNull() )
         {
         // Try to write back arguments and complete message.
-        // Traps are not necesary here. If WriteL functions leave the
-        // message is still completed in ServiceError
-        //
         if( aErrorReturned )
             {
             MPMLOGSTRING2( "CMPMServerSession::ProcessErrorComplete returned error = %d", 
@@ -3448,8 +3443,8 @@ void CMPMServerSession::MigrateDoneL( TInt aError )
 //
 TBool CMPMServerSession::UseUserConnPref()
     {
-    if ((iAppUid != iMyServer.CsIdWatcher()->ConnectScreenId()) &&
-        iMyServer.UserConnection())
+    if ( ( iAppUid != iMyServer.CsIdWatcher()->ConnectScreenId() ) &&
+         iMyServer.UserConnection() )
         {
         MPMLOGSTRING( "CMPMServerSession::UseUserConnPref - User connection active" );
         

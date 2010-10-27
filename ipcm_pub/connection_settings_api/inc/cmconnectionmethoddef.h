@@ -159,16 +159,15 @@ namespace CMManager
         * These are not bearer specific, but controling attributes.
         */
         ECmInvalidAttribute = 400,  /**<
-                                    * Client application can check which attribute
-                                    * was incorrect in UpdateL().
+                                    * @deprecated
+                                    * Always leaves with error code KErrNotSupported.
                                     * (TUint32 - default: none - read only)
                                     */
 
         ECmLoadResult = 402,        /**<
-                                    * Result of the load process. KErrNone if there
-                                    * was no error. Otherwise a system wide
-                                    * error code.
-                                    * (TUint32 - default: KErrNone - read only)
+                                    * @deprecated
+                                    * Always leaves with error code KErrNotSupported.
+                                    * (TUint32 - default: KErrNotSupported - read only)
                                     */
 
         /**

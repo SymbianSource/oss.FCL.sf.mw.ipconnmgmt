@@ -671,6 +671,13 @@ class CMPMServer : public CPolicyServer,
         static TInt StartForcedRoamingToConnectedWlanL( TAny* aUpdater );
         
         /**
+        * Send preferred IAP notification for each session
+        * 
+        * @since 5.2
+        */       
+        void SendPrefIAPNotificationL();
+        
+        /**
         * Starts forced roaming sequence from WLAN if necessary
         *
         * @param aIapInfo Info about available IAPs
@@ -1013,7 +1020,10 @@ class CMPMServer : public CPolicyServer,
         TConnMonIapInfo iConnMonIapInfo;
         
         // Connection permission query cancellation delay timer
-        CMPMConnPermQueryTimer* iConnPermQueryTimer;
+        CMPMConnPermQueryTimer* iConnPermQueryTimer;        
+        
+        // Component which initiated sending preferred IAP notifications
+        TPrefIAPNotifCaller iCaller;
     };
 
 #include "mpmserver.inl"

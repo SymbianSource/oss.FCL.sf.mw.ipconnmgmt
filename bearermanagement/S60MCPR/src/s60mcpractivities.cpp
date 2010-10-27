@@ -433,6 +433,20 @@ namespace S60MCprStopIAPActivity
     } // S60MCprStopIAPActivity
 
 // -----------------------------------------------------------------------------
+// S60McprNoBearerDuringGoneDownErrorRecovery
+// -----------------------------------------------------------------------------
+//
+namespace S60McprNoBearerDuringGoneDownErrorRecovery
+    {
+    DECLARE_DEFINE_NODEACTIVITY( ECFActivityNoBearer, 
+                                 S60MCprNoBearerDuringGoneDown, 
+                                 TCFControlProvider::TNoBearer )
+    SINGLE_NODEACTIVITY_ENTRY( S60MCprStates::THandleNoBearerDuringGoneDownRecovery, 
+                               S60MCprStates::TAwaitingNoBearerInGoneDownRecovery )
+    NODEACTIVITY_END()
+    }
+	
+// -----------------------------------------------------------------------------
 // S60MCprDataClientIdleActivity
 // -----------------------------------------------------------------------------
 //
@@ -487,6 +501,7 @@ namespace S60MCprActivities
     ACTIVITY_MAP_ENTRY(S60MCprMobilityActivity, MCprMobility) // in s60mcprmobilityactivity.cpp
     ACTIVITY_MAP_ENTRY(S60MCprConnectionGoneDownRecoveryActivity, MCprConnectionGoneDownRecovery)
     ACTIVITY_MAP_ENTRY(S60MCprServiceIdRMessage2HandlerActivity, S60MCprServiceIdLegacyRMessage2Handler)
+    ACTIVITY_MAP_ENTRY(S60McprNoBearerDuringGoneDownErrorRecovery, S60MCprNoBearerDuringGoneDown)
     ACTIVITY_MAP_ENTRY(S60MCprStopIAPActivity, MCprStopIAPActivity)
     ACTIVITY_MAP_ENTRY(S60MCprDataClientIdleActivity, MCprDataClientIdleActivity)
     ACTIVITY_MAP_END_BASE(MobilityMCprActivities, mobilityMCprActivities)

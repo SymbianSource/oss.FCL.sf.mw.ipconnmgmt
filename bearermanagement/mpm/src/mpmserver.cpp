@@ -905,6 +905,7 @@ void CMPMServer::NotifyBMPrefIapL( const TConnMonIapInfo& aIapInfo,
     MPMLOGSTRING2( "CMPMServer::NotifyBMPrefIapL - IAPs count: %d", 
         aIapInfo.iCount)
     TConnMonIapInfo iapInfo = aIapInfo;
+    iCaller = aCaller;
     
 #ifdef _DEBUG
     for (TUint i = 0; i < iapInfo.Count(); i++)
@@ -947,15 +948,8 @@ void CMPMServer::NotifyBMPrefIapL( const TConnMonIapInfo& aIapInfo,
         StartForcedRoamingFromWlanL( iapInfo );
         }
     
-    MPMLOGSTRING2(
-    "CMPMServer::NotifyBMPrefIapL - Send notifications for %d sessions", 
-        iSessions.Count() )
-
-    for ( TInt i = 0; i < iSessions.Count(); i++ )
-        {
-        iapInfo = iSessions[i]->GetAvailableIAPs( );
-        iSessions[i]->PrefIAPNotificationL( iapInfo, aCaller );
-        }
+    // Send notifications for all sessions
+      SendPrefIAPNotificationL();
     }
 
 
@@ -1554,8 +1548,21 @@ void CMPMServer::StartForcedRoamingToWlanL( const TConnMonIapInfo& aIapInfo )
 TInt CMPMServer::StartForcedRoamingToConnectedWlanL( TAny* aUpdater )
     {
     MPMLOGSTRING( "CMPMServer::StartForcedRoamingToConnectedWlanL" );
-    TRAPD( error, static_cast<CMPMServer*>( aUpdater )->StartForcedRoamingToWlanL( 
-           static_cast<CMPMServer*>( aUpdater )->iConnMonIapInfo ) )
+    CMPMServer* self = static_cast<CMPMServer*>( aUpdater );
+    
+    // If IAP availability change was received when connection
+    // was in starting state, then roaming to WLAN didnot happen
+    // at that stage. So, send preferred IAP notification again 
+    // after WLAN is connected. 
+    //
+    TRAPD( err, self->SendPrefIAPNotificationL() );
+    if ( err )
+        {           
+        MPMLOGSTRING2("CMPMServer::StartForcedRoamingToConnectedWlan error = %d, ", err )
+        return 0;
+        }
+    
+    TRAPD( error, self->StartForcedRoamingToWlanL( self->iConnMonIapInfo ) )
     if ( error )
         {        	
         MPMLOGSTRING2("CMPMServer::StartForcedRoamingToConnectedWlan error1 = %d, ", error )
@@ -1565,8 +1572,7 @@ TInt CMPMServer::StartForcedRoamingToConnectedWlanL( TAny* aUpdater )
     // Added also execution of policy based roaming logic because
     // connections that are in EStarting state, when WLAN signal
     // gets weak, would remain in WLAN as long as signal is weak. 
-    TRAP( error, static_cast<CMPMServer*>( aUpdater )->StartForcedRoamingFromWlanL(
-          static_cast<CMPMServer*>( aUpdater )->iConnMonIapInfo ) )
+    TRAP( error, self->StartForcedRoamingFromWlanL( self->iConnMonIapInfo ) )
     if ( error )
         {        	
         MPMLOGSTRING2("CMPMServer::StartForcedRoamingToConnectedWlan error2 = %d, ", error )
@@ -1575,6 +1581,25 @@ TInt CMPMServer::StartForcedRoamingToConnectedWlanL( TAny* aUpdater )
     return 0;
     }
 
+// ---------------------------------------------------------------------------
+// CMPMServer::SendPrefIAPNotificationL
+// ---------------------------------------------------------------------------
+//    
+
+void CMPMServer::SendPrefIAPNotificationL()
+    {
+    MPMLOGSTRING( "CMPMServer::SendPrefIAPNotificationL" )
+            
+    MPMLOGSTRING2(
+     "CMPMServer::SendPrefIAPNotificationL - Send notifications for %d sessions", 
+         iSessions.Count() )
+    
+     for ( TInt i = 0; i < iSessions.Count(); i++ )
+         {
+         TConnMonIapInfo iapInfo = iSessions[i]->GetAvailableIAPs( );
+         iSessions[i]->PrefIAPNotificationL( iapInfo, iCaller );
+         }
+    }
 
 // -----------------------------------------------------------------------------
 // CMPMServer::StartForcedRoamingFromWlanL

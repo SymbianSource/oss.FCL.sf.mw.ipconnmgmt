@@ -119,6 +119,17 @@ namespace S60MCprStates
                               TContext )
     virtual void DoL();
     DECLARE_SMELEMENT_FOOTER( TProcessError )
+
+    /**
+     * TRANSITION/ACTION: Error no bearer request while in gone down recovery.
+     */
+    DECLARE_SMELEMENT_HEADER( THandleNoBearerDuringGoneDownRecovery, 
+                              MeshMachine::TStateTransition<TContext>, 
+                              NetStateMachine::MStateTransition, 
+                              TContext )
+    virtual void DoL();
+    DECLARE_SMELEMENT_FOOTER( THandleNoBearerDuringGoneDownRecovery )
+
     
     /**
      * STATE: Waits for valid select or error message.
@@ -163,6 +174,18 @@ namespace S60MCprStates
                               TContext )
     virtual TBool Accept();
     DECLARE_SMELEMENT_FOOTER( TAwaitingServiceIdRequest )
+
+    /**
+     * STATE: Waits for NoBearer request while in gone down recovery. 
+     * @return ETrue if message is accepted. 
+     */
+    DECLARE_SMELEMENT_HEADER( TAwaitingNoBearerInGoneDownRecovery, 
+                              MeshMachine::TState<TContext>, 
+                              NetStateMachine::MState, 
+                              TContext )
+    virtual TBool Accept();
+    DECLARE_SMELEMENT_FOOTER( TAwaitingNoBearerInGoneDownRecovery )
+    
 
     /**
      * TRANSITION/ACTION: Retrieve ServiceId.

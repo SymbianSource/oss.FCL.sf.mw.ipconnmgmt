@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2010 Nokia Corporation and/or its subsidiary(-ies). 
+* Copyright (c) 2010 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -28,7 +28,7 @@ CMpmVpnToggleWatcher::CMpmVpnToggleWatcher( MMpmVpnToggleWatcherNotify& aNotify 
     : CActive( EPriorityStandard ),
       iNotify( aNotify )
     {
-    CActiveScheduler::Add( this );    
+    CActiveScheduler::Add( this );
     }
 
 
@@ -63,7 +63,7 @@ CMpmVpnToggleWatcher* CMpmVpnToggleWatcher::NewL( MMpmVpnToggleWatcherNotify& aN
 // ---------------------------------------------------------------------------
 //
 CMpmVpnToggleWatcher::~CMpmVpnToggleWatcher()
-    {    
+    {
     Cancel();
     delete iRepository;
     }
@@ -75,7 +75,7 @@ CMpmVpnToggleWatcher::~CMpmVpnToggleWatcher()
 void CMpmVpnToggleWatcher::StartL()
     {
     MPMLOGSTRING( "CMpmVpnToggleWatcher::StartL" )
-            
+
     // Get the initial Connect screen ID from repository.
     User::LeaveIfError( GetVpnToggleValues() );
 
@@ -92,7 +92,7 @@ TInt CMpmVpnToggleWatcher::RequestNotifications()
     MPMLOGSTRING( "CMpmVpnToggleWatcher::RequestNotifications" )
 
     TInt err = iRepository->NotifyRequest( KMpmVpnTogglePreferVpn, iStatus );
-        
+
     if ( err == KErrNone )
         {
         SetActive();
@@ -111,29 +111,29 @@ TInt CMpmVpnToggleWatcher::RequestNotifications()
 TInt CMpmVpnToggleWatcher::GetVpnToggleValues()
     {
     MPMLOGSTRING( "CMpmVpnToggleWatcher::GetVpnToggleValues" )
-            
-    // Get values from central repository    
+
+    // Get values from central repository
     TInt err = iRepository->Get( KMpmVpnTogglePreferVpn, iVpnConnectionPreferred );
     if ( err != KErrNone )
         {
-        MPMLOGSTRING2( "CMpmVpnToggleWatcher::GetVpnToggleValues, preferred value, ERROR: %d", err )    
+        MPMLOGSTRING2( "CMpmVpnToggleWatcher::GetVpnToggleValues, preferred value, ERROR: %d", err )
         return err;
-        }    
-    TInt value(0);    
+        }
+    TInt value(0);
     err = iRepository->Get( KMpmVpnToggleIapId, value );
     if ( err != KErrNone )
         {
         MPMLOGSTRING2( "CMpmVpnToggleWatcher::GetVpnToggleValues, IAP Id value, ERROR: %d", err )
         return err;
-        }    
-    iVpnIapId = value;   
+        }
+    iVpnIapId = value;
     err = iRepository->Get( KMpmVpnToggleSnapId, value );
     if ( err != KErrNone )
         {
         MPMLOGSTRING2( "CMpmVpnToggleWatcher::GetVpnToggleValues, SNAP Id value, ERROR: %d", err )
         return err;
         }
-    iSnapId = value;        
+    iSnapId = value;
     return KErrNone;
     }
 
@@ -177,9 +177,9 @@ void CMpmVpnToggleWatcher::ResetVpnToggleValues()
     iVpnConnectionPreferred = EFalse;
     iVpnIapId = 0;
     iSnapId = 0;
-    
+
     TInt err = iRepository->Set( KMpmVpnTogglePreferVpn, 0 );
-    if ( err == KErrNone ) 
+    if ( err == KErrNone )
         {
         err = iRepository->Set( KMpmVpnToggleIapId, 0 );
         }
@@ -187,9 +187,9 @@ void CMpmVpnToggleWatcher::ResetVpnToggleValues()
         {
         err = iRepository->Set( KMpmVpnToggleSnapId, 0 );
         }
-    
+
     MPMLOGSTRING2( "CMpmVpnToggleWatcher::ResetVpnToggleValues, ERROR: %d", err )
-    
+
     // Restart listening VPN toggle value change
     RequestNotifications();
     }
@@ -200,7 +200,7 @@ void CMpmVpnToggleWatcher::ResetVpnToggleValues()
 // ---------------------------------------------------------------------------
 //
 void CMpmVpnToggleWatcher::RunL()
-    {            
+    {
     if ( iStatus.Int() < KErrNone )
         {
         MPMLOGSTRING2("CMpmVpnToggleWatcher::RunL, status: 0x%08X", iStatus.Int())
@@ -218,17 +218,34 @@ void CMpmVpnToggleWatcher::RunL()
         {
         // Notification is received ok => Reset the counter.
         iErrorCounter = 0;
-    
+
         RequestNotifications();
-        
+
         // Get values from central repository
         GetVpnToggleValues();
-        
+
         // Notify values.
         TRAP_IGNORE( iNotify.SetVpnToggleValuesL( iVpnConnectionPreferred,
                                                   iVpnIapId,
-                                                  iSnapId ) );        
-        }    
+                                                  iSnapId ) );
+        }
+    }
+
+// ---------------------------------------------------------------------------
+// From class CActive.
+// Handles any leave from RunL.
+// ---------------------------------------------------------------------------
+//
+TInt CMpmVpnToggleWatcher::RunError( TInt aError )
+    {
+    MPMLOGSTRING2( "CMpmVpnToggleWatcher::RunError, ERROR: %d", aError );
+    aError = aError;
+    iErrorCounter++;
+    if ( !IsActive() )
+        {
+        RequestNotifications();
+        }
+    return KErrNone;
     }
 
 // ---------------------------------------------------------------------------

@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2002-2009 Nokia Corporation and/or its subsidiary(-ies).
+* Copyright (c) 2002-2010 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -144,12 +144,32 @@ NONSHARABLE_CLASS( CPsdFax ) : public CBase
         TInt GetStartTime( const TUint aConnectionId, TTime& aTime );
 
         /**
-        * Stops the external connection.
+        * Stops the external connection. (Synchronous version)
         * @since
         * @param aConnectionId The connection ID of the PSD connection.
         * @return KErrNone if successfull, otherwise a system wide error code.
         */
         TInt Stop( const TUint aConnectionId );
+        
+        /**
+        * Stops the external connection. (Asynchronous version)
+        *
+        * @param aConnectionId The connection ID of the PSD connection.
+        * @param aStatus KErrNone if successful, a system-wide error code if not.
+        * @return KErrNone if connection ID is valid, KErrNotFound otherwise.
+        */
+        TInt Stop( const TUint aConnectionId, TRequestStatus& aStatus );
+
+        /**
+        * If the stopped connection is still in the connection info array and
+        * connection status notifier isn't running, removes the obsolete
+        * information and notifiers from the connection info array.
+        *
+        * @param aConnectionId The connection ID of the PSD connection.
+        * @return KErrNotFound if connection matching the given ID is not found,
+        * KErrNone otherwise.
+        */
+        TInt CleanupConnectionInfo( const TUint aConnectionId );
 
          /**
         * Delete connections allocated recources.
@@ -284,6 +304,21 @@ NONSHARABLE_CLASS( CPsdFaxConnectionData ) : public CBase
         * @return KErrNone if successfull, otherwise a system wide error code.
         */
         TInt Stop();
+        
+        /**
+        * Stops the external connection (asynchronous).
+        * @param aStatus KErrNone if successful, a system-wide error code if not.
+        * @return void.
+        */
+        void Stop( TRequestStatus& aStatus );
+
+        /**
+        * Cleans up connection related objects and table entries if the status
+        * notifier is not running. If status notifier is running, cleanup will
+        * be triggered by connection specific 'context status deleted'-event.
+        * @return void.
+        */
+        void CleanupConnectionInfo();
 
         /**
         * Removes connection from server tables.

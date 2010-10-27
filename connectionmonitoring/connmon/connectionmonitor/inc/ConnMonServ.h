@@ -23,7 +23,7 @@
 _LIT( KConnMonStartupSemaphore, "ConnMonStartupSemaphore" );
 
 // Security policy
-const TUint KConnMonPolicyRangeCount = 11;
+const TUint KConnMonPolicyRangeCount = 12;
 
 const TInt KConnMonPolicyRanges[KConnMonPolicyRangeCount] =
     {
@@ -33,7 +33,8 @@ const TInt KConnMonPolicyRanges[KConnMonPolicyRangeCount] =
     13,  //range is 13
     14,  //range is 14
     15,  //range is 15
-    16,  //range is 16-499 inclusive
+    16,  //range is 16
+    17,  //range is 17-499 inclusive
     500, //range is 500-507 inclusive
     508, //range is 508-599 inclusive
     600, //range is 600-601 inclusive
@@ -70,9 +71,12 @@ const TUint8 KConnMonPolicyElementsIndex[KConnMonPolicyRangeCount] =
     CPolicyServer::EAlwaysPass,     // Applies to  5th range (request number: 15)
                                             //EReqCancelReceiveEvent
 
-    CPolicyServer::ENotSupported,   // Applies to  6th range (request number: 16-499)
+    CPolicyServer::ECustomCheck,    // Applies to  6th range (request number: 16)
+                                            //EReqSetAsyncBoolAttribute
 
-    4,                              // Applies to  7th range (request number: 500-507)
+    CPolicyServer::ENotSupported,   // Applies to  7th range (request number: 17-499)
+
+    4,                              // Applies to  8th range (request number: 500-507)
                                             //EReqPluginCreateSubSession
                                             //EReqPluginCloseSubSession
                                             //EReqPluginRegisterAttribute
@@ -82,14 +86,14 @@ const TUint8 KConnMonPolicyElementsIndex[KConnMonPolicyRangeCount] =
                                             //EReqPluginCancelGetQuery
                                             //EReqPluginAttribute
 
-    CPolicyServer::ENotSupported,    // Applies to  8th range (request number: 508-599)
+    CPolicyServer::ENotSupported,    // Applies to  9th range (request number: 508-599)
 
-    CPolicyServer::ENotSupported,    // Applies to  9th range (request number: 600-601)
+    CPolicyServer::ENotSupported,    // Applies to  10th range (request number: 600-601)
                                      // Used internally in communicating with plugin
                                             //EReqInternalSetThreshold
                                             //EReqInternalResetThreshold
 
-    CPolicyServer::ENotSupported     // Applies to 10th range (request number: 602-KMaxTInt)
+    CPolicyServer::ENotSupported     // Applies to 11th range (request number: 602-KMaxTInt)
     };
 
 const CPolicyServer::TPolicyElement KConnMonPolicyElements[] =

@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2004-2005 Nokia Corporation and/or its subsidiary(-ies). 
+* Copyright (c) 2004-2010 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -24,6 +24,7 @@ Mobility Policy Manager server entry point.
 #include <e32svr.h>
 
 #include "mpmstarter.h"
+#include "mpmscheduler.h"
 #include "mpmserver.h"
 #include "mpmlogger.h"
 
@@ -37,14 +38,14 @@ Mobility Policy Manager server entry point.
 static void RunServerL()
     {
     MPMLOGSTRING( "MPMStarter::RunServerL" )
-    // create and install the active scheduler we need
-    CActiveScheduler* s=new( ELeave ) CActiveScheduler;
-    CleanupStack::PushL( s );
-    CActiveScheduler::Install( s );
-    //
-    // create the server
+    // Create and install the active scheduler
+    CMpmScheduler* scheduler = CMpmScheduler::NewLC();
+    CActiveScheduler::Install( scheduler );
+
+    // Create the server
     CServer2* server = MPMStarter::CreateAndStartServerL();
     CleanupStack::PushL( server );
+    scheduler->SetMpmServer( server );
 
     User::LeaveIfError( RThread::RenameMe( MPMStarter::ServerName() ) );
 
@@ -53,10 +54,10 @@ static void RunServerL()
 
     // Ready to run
     CActiveScheduler::Start();
-    //
+
     // Cleanup the server and scheduler
     CleanupStack::PopAndDestroy( server );
-    CleanupStack::PopAndDestroy( s );
+    CleanupStack::PopAndDestroy( scheduler );
     }
 
 

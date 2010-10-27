@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2002-2009 Nokia Corporation and/or its subsidiary(-ies).
+* Copyright (c) 2002-2010 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -269,6 +269,11 @@ void CConnMonSession::ServiceL( const RMessage2& aMessage )
 
         case EReqSetBoolAttribute:
             rc = SetBoolAttribute();
+            CompleteMessage( rc );
+            break;
+            
+        case EReqSetAsyncBoolAttribute:
+            rc = SetAsyncBoolAttributeL();
             CompleteMessage( rc );
             break;
 
@@ -1407,6 +1412,37 @@ TInt CConnMonSession::SetBoolAttribute()
     return err;
     }
 
+// -----------------------------------------------------------------------------
+// CConnMonSession::SetAsyncBoolAttributeL
+// -----------------------------------------------------------------------------
+//
+TInt CConnMonSession::SetAsyncBoolAttributeL()
+    {
+    LOGENTRFN("CConnMonSession::SetAsyncBoolAttributeL()")
+    TInt err( KErrNotSupported );
+    TUint attribute( Message().Int2() );
+    LOGIT3("SERVER: EReqSetAsyncBoolAttribute IN: id %d, attr %d, value %d",
+            Message().Int0(), attribute, Message().Int3())
+
+    if ( attribute == KConnectionStop )
+        {
+        // Will check connection id validity first, then bool attribute value.
+        err = iCmServer->Iap()->AsyncConnectionStopL( Message() );
+        }
+    else if ( attribute == KConnectionStopAll )
+        {
+        // Connection id is ignored. Will check bool attribute value.
+        err = iCmServer->Iap()->AsyncConnectionStopAllL( Message() );
+        }
+    else
+        {
+        // No plugin support
+        err = KErrNotSupported;
+        }
+
+    LOGEXITFN1("CConnMonSession::SetAsyncBoolAttributeL()", err)
+    return err;
+    }
 
 // -----------------------------------------------------------------------------
 // CConnMonSession::SetStringAttribute
@@ -1517,6 +1553,11 @@ TInt CConnMonSession::CancelAsyncRequest()
             {
             CompleteActivityRequests( iConnParams[i].iConnectionId, EFalse, KErrCancel );
             }
+        }
+    else if ( EConnMonSetBoolAttribute == requestToCancel )
+        {
+        // Complete all pending asynchronous connection stop requests with status 'KErrCancel'
+        iCmServer->Iap()->CancelAsyncStopReqs( Message().Session() );
         }
 
     // Complete all pending plugin requests (of type Message().Int0()) with 'KErrCancel'

@@ -61,6 +61,37 @@ const TInt KPhoneRetryTimeout = 100000;
 const TInt KConnMonSmallBufferLen = 30;
 const TInt KBitsInByte = 8;
 const TInt KAttributeParameterIndex = 3;
+const TInt KMaxConnectionCount = 16;
+
+// Used to track async stop thread status for a connection
+enum TConnMonAsyncStopStatus
+    {
+    EConnMonAsyncStopNotStarted = 0, // Async stop has not been requested
+    EConnMonAsyncStopStarted,        // Stop thread is running
+    EConnMonStopCompleted            // Connection has been stopped (sync. or async.)
+    };
+
+
+/**
+ * TAsyncStopQueueElement
+ * Object to hold async. connection stop request related information.
+ */
+NONSHARABLE_CLASS( TAsyncStopQueueElement )
+    {
+public:
+    TAsyncStopQueueElement( const RMessage2& aMessage );
+    /**
+     * Add a connection ID to the ID array. Does nothing if the array is already full. 
+     */
+    void Add( TUint aConnectionId );
+
+public:
+    RMessage2 iMessage;             // Client message that will be completed when stop is done.
+    TInt iStatus;                   // Error status for the stop operation
+    TInt iIdCount;                  // Number of connections to be stopped
+    TInt iStopCount;                // Number of stopped connections
+    TUint iId[KMaxConnectionCount]; // IDs of connections to be stopped
+    };
 
 /**
 * TConnInfo
@@ -126,6 +157,9 @@ class TConnInfo
 
         // BearerInfo/BearerGroup notifier
         CConnMonBearerNotifier* iBearerNotifier;
+        
+        // Status flag to track status of possible async. stop request
+        TConnMonAsyncStopStatus iAsyncStopStatus;
     };
 
 /**
@@ -239,6 +273,58 @@ NONSHARABLE_CLASS( CConnMonIAP )
          * @return KErrNone if successfull, otherwise a system wide error code.
          */
         TInt SetBoolAttribute( const RMessage2& aMessage );
+        
+        /**
+         * Stops a connection asynchronously.
+         *
+         * @param aMessage Reference to client message, containing the attribute information.
+         * @return KRequestPending, KErrNone or a system wide error code.
+         */
+        TInt AsyncConnectionStopL( const RMessage2& aMessage );
+
+        /**
+         * Stops all connections asynchronously.
+         *
+         * @param aMessage Reference to client message, containing the attribute information.
+         * @return KRequestPending, KErrNone or a system wide error code.
+         */
+        TInt AsyncConnectionStopAllL( const RMessage2& aMessage );
+
+        /**
+         * Starts a new thread to asynchronously stop a specific connection.
+         *
+         * @param aIndex Index number of the connection in internal connection array.
+         * @return KErrNone if successfull, otherwise a system wide error code.
+         */
+        TInt StartAsyncStopThreadL( TInt aIndex );
+
+        /**
+         * Completes any asynchronous connection stop requests that are ready,
+         * and verifies that the connection and its notifiers are cleaned up.
+         *
+         * @param aConnectionId ID of the connection that was stopped.
+         * @param aError Error status for the connection stop operation.
+         * @return void.
+         */
+        void CompleteAsyncStopReqs( const TUint aConnectionId, const TInt aError );
+
+        /**
+         * If the stopped connection is still in the connection info array and
+         * connection up/down notifier isn't running, removes the obsolete
+         * information and notifiers from the connection info array.
+         *
+         * @param aConnectionId ID of the connection to be cleaned.
+         * @return KErrNone if successfull, otherwise a system wide error code.
+         */
+        TInt CleanupConnectionInfo( const TUint& aConnectionId );
+
+        /**
+         * Cancels all asynchronous connection stop request for a specific client.
+         *
+         * @param aSession Pointer to the session, used for identification.
+         * @return void.
+         */
+        void CancelAsyncStopReqs( CSession2* aSession );
 
         /**
          * Sets a String attribute.
@@ -909,6 +995,9 @@ NONSHARABLE_CLASS( CConnMonIAP )
 
         // DTM status watcher.
         CConnMonDtmNotifier* iDualTransferModeNotifier;
+        
+        // Array for holding async. connection stop requests
+        RArray<TAsyncStopQueueElement> iAsyncStopQueue;
     };
 
 #endif // CONNMONIAP_H

@@ -145,12 +145,12 @@ void CConnMonEventHandler::RunL()
         switch ( iEventInfo.iEventType )
             {
             case EConnMonCreateConnection :
-                iConnMonEvent = new (ELeave) CConnMonCreateConnection(
+                iConnMonEvent = new CConnMonCreateConnection(
                         iEventInfo.iConnectionId );
                 break;
 
             case EConnMonDeleteConnection :
-                iConnMonEvent = new (ELeave) CConnMonDeleteConnection(
+                iConnMonEvent = new CConnMonDeleteConnection(
                         iEventInfo.iConnectionId,
                         iEventInfo.iData,
                         iEventInfo.iData2,
@@ -158,109 +158,109 @@ void CConnMonEventHandler::RunL()
                 break;
 
             case EConnMonDownlinkDataThreshold :
-                iConnMonEvent = new (ELeave) CConnMonDownlinkDataThreshold(
+                iConnMonEvent = new CConnMonDownlinkDataThreshold(
                         iEventInfo.iConnectionId,
                         iEventInfo.iSubConnectionId,
                         iEventInfo.iData );
                 break;
 
             case EConnMonUplinkDataThreshold :
-                iConnMonEvent = new (ELeave) CConnMonUplinkDataThreshold(
+                iConnMonEvent = new CConnMonUplinkDataThreshold(
                         iEventInfo.iConnectionId,
                         iEventInfo.iSubConnectionId,
                         iEventInfo.iData );
                 break;
 
             case EConnMonNetworkStatusChange :
-                iConnMonEvent = new (ELeave) CConnMonNetworkStatusChange(
+                iConnMonEvent = new CConnMonNetworkStatusChange(
                         iEventInfo.iConnectionId,
                         iEventInfo.iData );
                 break;
 
             case EConnMonConnectionStatusChange :
-                iConnMonEvent = new (ELeave) CConnMonConnectionStatusChange(
+                iConnMonEvent = new CConnMonConnectionStatusChange(
                         iEventInfo.iConnectionId,
                         iEventInfo.iSubConnectionId,
                         iEventInfo.iData );
                 break;
 
             case EConnMonConnectionActivityChange :
-                iConnMonEvent = new (ELeave) CConnMonConnectionActivityChange(
+                iConnMonEvent = new CConnMonConnectionActivityChange(
                         iEventInfo.iConnectionId,
                         iEventInfo.iSubConnectionId,
                         iEventInfo.iData );
                 break;
 
             case EConnMonNetworkRegistrationChange :
-                iConnMonEvent = new (ELeave) CConnMonNetworkRegistrationChange(
+                iConnMonEvent = new CConnMonNetworkRegistrationChange(
                         iEventInfo.iConnectionId,
                         iEventInfo.iData );
                 break;
 
             case EConnMonBearerChange :
-                iConnMonEvent = new (ELeave) CConnMonBearerChange(
+                iConnMonEvent = new CConnMonBearerChange(
                         iEventInfo.iConnectionId,
                         iEventInfo.iData );
                 break;
 
             case EConnMonSignalStrengthChange :
-                iConnMonEvent = new (ELeave) CConnMonSignalStrengthChange(
+                iConnMonEvent = new CConnMonSignalStrengthChange(
                         iEventInfo.iConnectionId,
                         iEventInfo.iData );
                 break;
 
             case EConnMonBearerAvailabilityChange :
-                iConnMonEvent = new (ELeave) CConnMonBearerAvailabilityChange(
+                iConnMonEvent = new CConnMonBearerAvailabilityChange(
                         iEventInfo.iConnectionId,
                         iEventInfo.iData );
                 break;
 
             case EConnMonIapAvailabilityChange :
-                iConnMonEvent = new (ELeave) CConnMonIapAvailabilityChange(
+                iConnMonEvent = new CConnMonIapAvailabilityChange(
                         iEventInfo.iConnectionId,
                         reinterpret_cast<const TConnMonIapInfo*>( iExtraBuf.Ptr() ) );
                 break;
 
             case EConnMonTransmitPowerChange :
-                iConnMonEvent = new (ELeave) CConnMonTransmitPowerChange(
+                iConnMonEvent = new CConnMonTransmitPowerChange(
                         iEventInfo.iConnectionId,
                         iEventInfo.iData );
                 break;
 
             case EConnMonSNAPsAvailabilityChange :
-                iConnMonEvent = new (ELeave) CConnMonSNAPsAvailabilityChange(
+                iConnMonEvent = new CConnMonSNAPsAvailabilityChange(
                         iEventInfo.iConnectionId, iEventInfo.iData,
                         reinterpret_cast< const TConnMonSNAPInfo* >( iExtraBuf.Ptr() ) );
                 break;
 
             case EConnMonNewWLANNetworkDetected :
-                iConnMonEvent = new (ELeave) CConnMonNewWLANNetworkDetected(
+                iConnMonEvent = new CConnMonNewWLANNetworkDetected(
                         iEventInfo.iConnectionId );
                 break;
 
             case EConnMonOldWLANNetworkLost :
-                iConnMonEvent = new (ELeave) CConnMonOldWLANNetworkLost(
+                iConnMonEvent = new CConnMonOldWLANNetworkLost(
                         iEventInfo.iConnectionId );
                 break;
 
             case EConnMonPacketDataUnavailable :
-                iConnMonEvent = new (ELeave) CConnMonPacketDataUnavailable(
+                iConnMonEvent = new CConnMonPacketDataUnavailable(
                         iEventInfo.iConnectionId );
                 break;
 
             case EConnMonPacketDataAvailable :
-                iConnMonEvent = new (ELeave) CConnMonPacketDataAvailable(
+                iConnMonEvent = new CConnMonPacketDataAvailable(
                         iEventInfo.iConnectionId );
                 break;
 
             case EConnMonBearerInfoChange :
-                iConnMonEvent = new (ELeave) CConnMonBearerInfoChange(
+                iConnMonEvent = new CConnMonBearerInfoChange(
                         iEventInfo.iConnectionId,
                         iEventInfo.iData );
                 break;
 
             case EConnMonBearerGroupChange :
-                iConnMonEvent = new (ELeave) CConnMonBearerGroupChange(
+                iConnMonEvent = new CConnMonBearerGroupChange(
                         iEventInfo.iConnectionId,
                         iEventInfo.iData2,
                         iEventInfo.iData3,
@@ -271,43 +271,50 @@ void CConnMonEventHandler::RunL()
                 if ( iEventInfo.iEventType >= EConnMonPluginEventBase )
                     {
                     // Size of the data is in 'iEventInfo.iData2'
-                    iConnMonEvent = new (ELeave) CConnMonGenericEvent(
+                    iConnMonEvent = new CConnMonGenericEvent(
                             iEventInfo.iEventType,
                             iEventInfo.iConnectionId,
                             reinterpret_cast<TAny*>( &( iEventInfo.iData ) ) );
                     }
                 else
                     {
-                    iConnMonEvent = new (ELeave) CConnMonEventBase(
+                    iConnMonEvent = new CConnMonEventBase(
                             iEventInfo.iEventType,
                             iEventInfo.iConnectionId );
                     }
             }
 
         // Deliver the event to client handler
-        TRAPD( leaveCode,
-                iObserver->EventL( reinterpret_cast<CConnMonEventBase&>( *iConnMonEvent ) ) );
+        if ( iConnMonEvent )
+            {
+            TRAPD( leaveCode,
+                   iObserver->EventL( reinterpret_cast<CConnMonEventBase&>( *iConnMonEvent ) ) );
 
-        delete iConnMonEvent;
-        iConnMonEvent = NULL;
-
-        LOGIT6("Client [%d]: GOT EVENT: type %d, id %d, data1 %d, data2 %d, data3 %d",
-                &iSession,
-                iEventInfo.iEventType,
-                iEventInfo.iConnectionId,
-                iEventInfo.iData,
-                iEventInfo.iData2,
-                iEventInfo.iData3 )
+            delete iConnMonEvent;
+            iConnMonEvent = NULL;
+                   
+            LOGIT6("Client [%d]: GOT EVENT: type %d, id %d, data1 %d, data2 %d, data3 %d",
+                    &iSession,
+                    iEventInfo.iEventType,
+                    iEventInfo.iConnectionId,
+                    iEventInfo.iData,
+                    iEventInfo.iData2,
+                    iEventInfo.iData3 )
+            
+            // If leave occurs in EventL, log and ignore
+            if ( leaveCode )
+                {
+                LOGIT2("Client [%d]: CConnMonEventHandler::RunL() iObserver->EventL() call left <%d>",
+                       &iSession, leaveCode)
+                }
+            }
+        else
+            {
+            LOGIT1("Client [%d]: CConnMonEventHandler::RunL() failed in creating iConnMonEvent.", &iSession )
+            }
 
         // Initiate the next receive
         ReceiveNotification();
-
-        // If leave occurs in EventL, log and ignore
-        if ( leaveCode )
-            {
-            LOGIT2("Client [%d]: CConnMonEventHandler::RunL() iObserver->EventL() call left <%d>",
-                    &iSession, leaveCode)
-            }
         }
     else
         {

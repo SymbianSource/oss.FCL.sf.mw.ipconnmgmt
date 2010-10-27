@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2006-2009 Nokia Corporation and/or its subsidiary(-ies). 
+* Copyright (c) 2006-2010 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -111,13 +111,20 @@ NONSHARABLE_CLASS( CMPMConfirmDlg ) : protected CMPMDialogBase
         */
         void ConstructL();
 
-    private: // from CActive
+    protected: // from CActive
 
         /**
         * Active Object RunL.
         * @since 3.2
         */
         void RunL();
+
+        /**
+        * Handles a leave occurring in RunL.
+        * @param aError Leave code of RunL method.
+        * @return KErrNone
+        */
+        TInt RunError( TInt aError );
 
         /**
         * Active Object DoCancel.

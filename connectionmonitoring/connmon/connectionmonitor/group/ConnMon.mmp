@@ -58,6 +58,7 @@ SOURCE          connmondtmnoti.cpp
 SOURCE          ConnMonBearerNotifier.cpp ConnMonEGprsNotifier.cpp ConnMonHsdpaNotifier.cpp
 SOURCE          cellulardatausagekeyupdater.cpp
 SOURCE          connmondialupoverridenotifier.cpp
+SOURCE          connmonasyncstopdaemon.cpp
 
 
 USERINCLUDE     ../inc

@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2005-2007 Nokia Corporation and/or its subsidiary(-ies). 
+* Copyright (c) 2005-2010 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -73,6 +73,13 @@ class CMPMDtmWatcher : public CActive
         * @since 3.1
         */
         void RunL();
+
+        /**
+        * Handles a leave occurring in RunL.
+        * @param aError Leave code of RunL method.
+        * @return KErrNone
+        */
+        TInt RunError( TInt aError );
 
     private: // New methods
 
