@@ -1,0 +1,18 @@
+<?xml version="1.0" ?>
+<api id="eab22f6b7dcd5833eaa3a66dcc8bd217" dataversion="1.0">
+  <name>Access Point Engine API</name>
+  <description>Provides applications the possibility to access the Access Point information stored in the communications database.</description>
+  <type>c++</type>
+  <subsystem>networkingutilities</subsystem>
+  <libs>
+    <lib name="apengine.lib" />
+  </libs>
+  <release category="sdk" sinceversion="0.9" deprecatedsince="3.2"/>
+  <attributes>
+     <!-- This indicates wether the api provedes separate html documentation -->
+     <!-- or is the additional documentation generated from headers. -->
+     <!-- If you are unsuere then the value is "no" -->
+     <htmldocprovided>yes</htmldocprovided>
+     <adaptation>no</adaptation>
+  </attributes>
+</api>

@@ -1,0 +1,56 @@
+/*
+* Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies). 
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description: 
+*    This file provides the information required for building the
+*    whole of a ApSettingsUI.
+*
+*/
+
+
+#include <platform_paths.hrh>
+
+PRJ_PLATFORMS
+DEFAULT
+
+PRJ_EXPORTS
+// export iby files
+../Rom/ApSettingsHandlerUI.iby		CORE_MW_LAYER_IBY_EXPORT_PATH(ApSettingsHandlerUI.iby)
+../Rom/ApSettingsHandlerUIResources.iby	LANGUAGE_MW_LAYER_IBY_EXPORT_PATH(ApSettingsHandlerUIResources.iby)
+
+// export localised loc file
+../loc/apsettingshandlerui.loc	MW_LAYER_LOC_EXPORT_PATH(apsettingshandlerui.loc)
+
+PRJ_MMPFILES
+// gnumakefile apsettingshandleruiicons_dc.mk
+
+./Apsettingshandlerui.mmp
+
+
+PRJ_TESTMMPFILES
+
+PRJ_EXTENSIONS
+
+START EXTENSION s60/mifconv
+OPTION TARGETFILE apsettings.mif
+OPTION HEADERFILE apsettings.mbg
+OPTION SOURCES -c8,1 qgn_prop_wml_gprs  \
+               -c8,1 qgn_prop_wml_csd   \
+               -c8,1 qgn_prop_wml_hscsd \
+               -c8,1 qgn_prop_wml_sms   \
+		           -c8,1 qgn_prop_wlan_bearer \
+		           -c8,1 qgn_prop_wlan_easy \
+               -c8,1 qgn_indi_sett_protected_add
+END
+
+// End of File

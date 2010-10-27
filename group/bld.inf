@@ -27,6 +27,7 @@ PRJ_EXPORTS
 
 PRJ_MMPFILES
 #include "../alwayson_net_plugin/group/bld.inf"
+#include "../apengine/group/bld.inf"
 #include "../bearermanagement/group/bld.inf"
 #include "../cmmanager/group/bld.inf"
 #include "../connectionmonitoring/group/bld.inf"

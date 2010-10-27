@@ -1,0 +1,38 @@
+/*
+* Copyright (c) 2002 Nokia Corporation and/or its subsidiary(-ies). 
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description: 
+*     This file contains all the resources for the ApEngine.
+*
+*/
+
+
+//  RESOURCE IDENTIFIER
+NAME    APNG // 4 letter ID
+
+//  INCLUDES
+#include <apengine.loc>
+#include <eikon.rh>
+
+
+//  RESOURCE DEFINITIONS
+
+RESOURCE RSS_SIGNATURE {}
+
+RESOURCE TBUF { buf="ApEngine"; }
+
+RESOURCE TBUF64 r_apng_default_ap_name                { buf =  qtn_set_ap_default_name; }
+
+RESOURCE TBUF64 r_apng_default_vpn_ap_name            { buf =  qtn_vpn_sett_vpn_iap_default_name; }
+
+// End of File

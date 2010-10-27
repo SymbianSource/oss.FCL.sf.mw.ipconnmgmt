@@ -1,0 +1,122 @@
+/*
+* Copyright (c) 2002 Nokia Corporation and/or its subsidiary(-ies). 
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:  Project description file for the Access Point Engine
+*
+*/
+
+
+#include <data_caging_paths.hrh>
+#include <platform_paths.hrh>
+
+TARGET      APEngine.dll
+TARGETTYPE      dll
+UID         0x1000008d  0x10008D3A
+
+CAPABILITY  CAP_GENERAL_DLL
+VENDORID VID_DEFAULT
+
+
+SOURCEPATH  ../src
+SOURCE      ApEngineLogger.cpp
+SOURCE      ApListItem.cpp
+SOURCE      APSelect.cpp
+SOURCE      APDataHandler.cpp
+SOURCE      APUtils.cpp
+SOURCE      APAccessPointItem.cpp
+SOURCE      ApEngineCommons.cpp
+SOURCE      ActiveApDb.cpp
+SOURCE      ActiveApDbNotifier.cpp
+SOURCE      aplistitemlist.cpp
+SOURCE      ApProtHandler.cpp
+SOURCE      ApListItemKey.cpp
+SOURCE		ApNetworkItem.cpp
+SOURCE		APNetworks.cpp
+SOURCE	    apnetworkitemlist.cpp
+SOURCE	    VpnApItem.cpp
+SOURCE	    VpnApEngine.cpp
+
+
+
+START RESOURCE ../Data/ApEngine.rss
+HEADER
+TARGETPATH RESOURCE_FILES_DIR
+LANGUAGE_IDS
+END  // RESOURCE
+
+// Component specific internal headers 
+USERINCLUDE			../inc
+
+// ADO specific internal headers 
+SYSTEMINCLUDE		../../../inc
+
+//Macro to /epoc32 headers
+MW_LAYER_SYSTEMINCLUDE
+
+LIBRARY     commdb.lib 
+LIBRARY     euser.lib
+LIBRARY     efsrv.lib
+LIBRARY     bafl.lib
+LIBRARY     insock.lib
+LIBRARY     esock.lib
+LIBRARY     FeatMgr.lib
+LIBRARY		Vpnapi.lib
+LIBRARY     centralrepository.lib
+
+#if defined(ARMCC)
+    DEFFILE ../EABI/ApEngine_EKA2.def
+#elif defined( WINSCW )
+    DEFFILE ../BWinsCw/ApEngine_EKA2.def
+#elif defined( WINS )
+    DEFFILE ../BWins/ApEngine_EKA2.def
+#else
+    DEFFILE ../BMarm/ApEngine_EKA2.def
+#endif
+
+// Define this macro if you wish to enable logging
+//#define __TEST_APENGINE_LOG_ENABLED
+
+
+// Define this macro if you wish to enable IPv6 support for testing
+// It will override FeatureManager's NOT SUPPORTED....
+//MACRO __TEST_IPV6_SUPPORT    
+
+#ifdef __TEST_APENGINE_LOG_ENABLED
+	MACRO __TEST_APENGINE_LOG__
+	LIBRARY     flogger.lib
+#endif	// __TEST_APENGINE_LOG_ENABLED
+
+// Define this to test CDMA support.
+//MACRO __TEST_CDMA_SUPPORT
+
+
+// Define this to test CSD support.
+//MACRO __TEST_CSD_SUPPORT
+
+
+// Define this to test HSCSD support.
+//MACRO __TEST_HSCSD_SUPPORT
+
+// Define this to test CDMA write-protect support.
+//MACRO __TEST_CDMA_WRITE_PROTECT
+
+// Define this to test WLAN support.
+// MACRO __TEST_WLAN_SUPPORT
+
+
+// Define this to test LAN support.
+#ifdef WINS
+    MACRO __TEST_LAN_BEARER
+#endif
+
+// End of File

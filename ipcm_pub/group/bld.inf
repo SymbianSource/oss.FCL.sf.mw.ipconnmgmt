@@ -17,6 +17,8 @@
 */
 
 #include "../connection_settings_api/group/bld.inf"
+#include "../access_point_engine_api/group/bld.inf"
+#include "../access_point_settings_handler_api/group/bld.inf"
 #include "../data_connection_log_counters_api/group/bld.inf"
 #include "../connection_monitor_server_api/group/bld.inf"
 #include "../connection_settings_ui_api/group/bld.inf"

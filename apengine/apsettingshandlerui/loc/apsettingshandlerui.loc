@@ -1,0 +1,1195 @@
+/*
+* Copyright (c) 2002 Nokia Corporation and/or its subsidiary(-ies). 
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description: 
+*     This is a localisation file for ApSettingsHandlerUi
+*     A .loc file is the one and only place where the logical strings
+*     to be localised are defined.
+*
+*/
+
+
+
+// LOCALISATION STRINGS
+
+
+//d:Command in options menu.
+//d:Selects the currently selected access point.
+//l:list_single_pane_t1_cp2
+//w:
+//r:2.8
+//
+#define qtn_set_cmd_select "Select"
+
+
+//d:Command in options menu.
+//d:Opens the currently selected access point.
+//l:list_single_pane_t1_cp2
+//w:
+//r:2.8
+//
+#define qtn_set_cmd_edit_ap "Edit"
+
+
+
+//d:Command in options menu.
+//d:Create new access point top menu.
+//l:list_single_pane_t1_cp2
+//w:
+//r:2.8
+//
+#define qtn_set_cmd_new_ap "New access point"
+
+
+//d:Sub-command in options menu's qtn_set_cmd_new_ap.
+//d:Create new access point with default values.
+//l:list_single_popup_submenu_pane_t1
+//w:
+//r:2.8
+//
+#define qtn_set_cmd_new_default "Default settings"
+
+
+//d:Sub-command in options menu's qtn_set_cmd_new_ap.
+//d:Create access point based on an existing one.
+//l:list_single_popup_submenu_pane_t1
+//w:
+//r:2.8
+//
+#define qtn_set_cmd_new_existing "Use existing"
+
+
+
+//d:Command in options menu.
+//d:Deletes the currently selected access point.
+//l:list_single_pane_t1_cp2
+//w:
+//r:2.8
+//
+#define qtn_set_cmd_del_ap "Delete"
+
+
+//d:Command in options menu.
+//d:Opens help application with context sensitive help.
+//l:list_single_pane_t1_cp2
+//w:
+//r:2.8
+//
+#define qtn_set_options_help "Help"
+
+
+//d:Command in options menu.
+//d:Exits access point settings.
+//l:list_single_pane_t1_cp2
+//w:
+//r:2.8
+//
+#define qtn_set_options_exit "Exit"
+
+
+
+
+
+
+
+
+
+
+
+//d:Title pane text while in General settings' connection settings.
+//l:title_pane_t2/opt9
+//w:
+//r:2.8
+//
+#define qtn_set_title_settings_inet "Connection settings"
+
+
+
+//d:Title pane text while in General settings' connection settings.
+//l:title_pane_t2/opt9
+//w:
+//r:2.8
+//
+#define qtn_set_navi_ap "Access points"
+
+
+
+
+//d:User has tried to edit active access point.
+//d:Operation is refused with this info note.
+//l:popup_note_window
+//w:
+//r:2.8
+//
+#define qtn_set_note_ap_in_use_edit "Access point in use: Can't be edited."
+
+
+//d:User has tried to delete active access point.
+//d:Operation is refused with this info note.
+//l:popup_note_window
+//w:
+//r:2.8
+//
+#define qtn_set_note_ap_in_use_del "Access point in use: Can't be deleted."
+
+
+
+//d:User trying to delete last access point.
+//d:Operation is confirmed with this info note.
+//d:%U stands for the name of the connection.
+//l:popup_note_window
+//w:
+//r:2.8
+//
+#define qtn_set_note_delete_last_ap "%U connection is the only one. Are you sure to delete it?"
+
+
+
+//d:User enters access points list view and no connections exists.
+//d:User is offered a 'solution' with this info note.
+//l:popup_note_window
+//w:
+//r:3.1
+//
+#define qtn_set_ap_create_new "No access points defined. Define now?"
+
+
+//d:User trying to delete access point which is linked to any other application.
+//d:Operation is confirmed with this info note.
+//l:popup_note_window
+//w:
+//r:2.8
+//
+#define qtn_set_ap_delete_linked "Access point linked to another application.Are you sure to delete?"
+
+
+
+//d:User steps back from access point editing while Access Number field for data call is still empty.
+//d:Operation is confirmed with this confirmation query.
+//l:popup_note_window
+//w:
+//r:2.8
+//
+#define qtn_set_ap_access_number_not "Access point can't\n be saved without \naccess number.\nDelete it?"
+
+
+
+
+
+
+
+//d:Command in options menu in access points view.
+//d:Modifies the currently selected access point.
+//l:list_single_pane_t1_cp2
+//w:
+//r:2.8
+//
+#define qtn_set_options_change "Change"
+
+
+//d:Command in options menu in access points view.
+//d:Opens advanced settings for the access point.
+//l:list_single_pane_t1_cp2
+//w:
+//r:2.8
+//
+#define qtn_set_options_ap_advanced "Advanced settings"
+
+
+
+
+
+// localisation info for the access point setting view/edit part
+// all strings below are items for list_setting_item
+//
+// "Common" for all access point bearer types
+
+//d:Item text in setting list.
+//d:The name of the connection
+//l:list_setting_pane_t1
+//w:
+//r:2.8
+//
+#define qtn_set_ap_conn_name "Connection name"
+
+
+//d:Item text in setting list.
+//d:The name of the bearer type.
+//l:list_setting_pane_t1
+//w:
+//r:2.8
+//
+#define qtn_set_ap_bearer "Bearer type"
+
+
+//d:Item text in setting list.
+//d:Indicates whether connection is secure/unsecure (result: On/Off)
+//l:list_setting_pane_t1
+//w:
+//r:2.8
+//
+#define qtn_set_wtls_security "WTLS security"
+
+
+//d:Item text in setting list.
+//d:Indicates whether the connection type is continuous or temporary
+//l:list_setting_pane_t1
+//w:
+//r:2.8
+//
+#define qtn_set_conn_type "Connection type"
+
+
+// for GPRS bearer
+//d:Item text in setting list.
+//d:The name of the GPRS access point
+//l:list_setting_pane_t1
+//w:
+//r:2.8
+//
+#define qtn_set_access_point_name "Access point name"
+
+
+//d:Item text in setting list.
+//d:The user name
+//l:list_setting_pane_t1
+//w:
+//r:2.8
+//
+#define qtn_set_ap_username "User name"
+
+
+//d:Item text in setting list.
+//d:Prompt password? (Yes/No)
+//l:list_setting_pane_t1
+//w:
+//r:2.8
+//
+#define qtn_set_prompt_passwd "Prompt password"
+
+
+//d:Item text in setting list.
+//l:list_setting_pane_t1
+//w:
+//r:2.8
+//
+#define qtn_set_ap_passwd "Password"
+
+
+//d:Item text in setting list.
+//d:Indicates whther password authentication is secure or normal
+//l:list_setting_pane_t1
+//w:
+//r:2.8
+//
+#define qtn_set_passwd_aut "Password authentication"
+
+
+//d:Item text in setting list.
+//l:list_setting_pane_t1
+//w:
+//r:2.8
+//
+#define qtn_set_gateway_ip "Wap Gateway IP address"
+
+
+//d:Item text in setting list.
+//d:The starting page for this access point.
+//l:list_setting_pane_t1
+//w:
+//r:2.8
+//
+#define qtn_set_starting_page "Starting page"
+
+
+// for GPRS Advanced
+//d:Item text in setting list.
+//l:list_setting_pane_t1
+//w:
+//r:2.8
+//
+#define qtn_set_ip_address "Phone IP address"
+
+
+//d:Item text in setting list.
+//l:list_setting_pane_t1
+//w:
+//r:2.8
+//
+#define qtn_set_primary_dns "Primary Name Server"
+
+
+//d:Item text in setting list.
+//l:list_setting_pane_t1
+//w:
+//r:2.8
+//
+#define qtn_set_secondary_dns "Secondary Name Server"
+
+
+
+// for CSD
+//d:Item text in setting list.
+//l:list_setting_pane_t1
+//w:
+//r:2.8
+//
+#define qtn_set_access_number "Access Number"
+
+
+//d:Item text in setting list.
+//d:Indicates whether data call is analogue or ISDN
+//l:list_setting_pane_t1
+//w:
+//r:2.8
+//
+#define qtn_set_data_call_type "Data call type"
+
+
+//d:Item text in setting list.
+//d:The max. connection speed
+//l:list_setting_pane_t1
+//w:
+//r:2.8
+//
+#define qtn_set_max_speed "Max. connection speed"
+
+
+// for CSD Advanced
+//d:Item text in setting list.
+//l:list_setting_pane_t1
+//w:
+//r:2.8
+//
+#define qtn_set_use_cb "Use call back"
+
+
+//d:Item text in setting list.
+//l:list_setting_pane_t1
+//w:
+//r:2.8
+//
+#define qtn_set_cb_type "Call back type"
+
+
+//d:Item text in setting list.
+//l:list_setting_pane_t1
+//w:
+//r:2.8
+//
+#define qtn_set_cb_number "Call back number"
+
+
+//d:Item text in setting list.
+//d:Indicates whether to use PPP compression or not
+//l:list_setting_pane_t1
+//w:
+//r:2.8
+//
+#define qtn_set_ppp_comp "Enable PPP compression"
+
+
+//d:Item text in setting list.
+//l:list_setting_pane_t1
+//w:
+//r:2.8
+//
+#define qtn_set_use_logins "Use login script"
+
+
+//d:Item text in setting list.
+//l:list_setting_pane_t1
+//w:
+//r:2.8
+//
+#define qtn_set_modem_init_string "Modem init string"
+
+
+// 'Textual' but fixed values for settings
+
+//d:The bearer type is packet data
+//l:list_set_graphic_pane_t1
+//w:
+//r:2.8
+//
+#define qtn_set_bearer_packet_data "Packet data"
+
+//d:The bearer type is data call
+//l:list_set_graphic_pane_t1
+//w:
+//r:2.8
+//
+#define qtn_set_bearer_data_call "Data call"
+
+
+//d:The bearer type is HSCSD data call
+//l:list_set_graphic_pane_t1
+//w:
+//r:2.8
+//
+#define qtn_netw_sett_bearer_hscsd "HSCSD call"
+
+
+//d:Answer to: Prompt for password?
+//l:list_set_graphic_pane_t1
+//w:
+//r:2.8
+//
+#define qtn_set_prompt_passwd_yes "Yes"
+
+
+//d:Answer to: Prompt for password?
+//l:list_set_graphic_pane_t1
+//w:
+//r:2.8
+//
+#define qtn_set_prompt_passwd_no "No"
+
+
+//d:Answer to: qtn_set_passwd_aut,
+//d:whether password authentication is secure or normal
+//l:list_set_graphic_pane_t1
+//w:
+//r:2.8
+//
+#define qtn_set_passwd_aut_normal "Normal"
+
+
+//d:Answer to: qtn_set_passwd_aut,
+//d:whether password authentication is secure or normal
+//l:list_set_graphic_pane_t1
+//w:
+//r:2.8
+//
+#define qtn_set_passwd_aut_secure "Secure"
+
+
+//d:The IP address is dynamic.
+//l:list_set_graphic_pane_t1
+//w:
+//r:2.8
+//
+#define qtn_set_ip_address_dynamic "Dynamic"
+
+
+//d:Answer to: qtn_set_wtls_security
+//d:whether connection is secured or not
+//l:list_set_graphic_pane_t1
+//w:
+//r:2.8
+//
+#define qtn_set_wtls_security_on "On"
+
+
+//d:Answer to: qtn_set_wtls_security
+//d:whether connection is secured or not
+//l:list_set_graphic_pane_t1
+//w:
+//r:2.8
+//
+#define qtn_set_wtls_security_off "Off"
+
+
+//d:Answer to: qtn_set_conn_type
+//d:connection type is continuous
+//l:list_set_graphic_pane_t1
+//w:
+//r:2.8
+//
+#define qtn_set_conn_type_contin "Continuous"
+
+
+//d:Answer to: qtn_set_conn_type
+//d:connection type is temporary
+//l:list_set_graphic_pane_t1
+//w:
+//r:2.8
+//
+#define qtn_set_conn_type_temp "Temporary"
+
+
+//d:Answer to: qtn_set_data_call_type
+//d:The data call type is analogue
+//l:list_set_graphic_pane_t1
+//w:
+//r:2.8
+//
+#define qtn_set_data_call_analolgue "Analogue"
+
+
+//d:Answer to: qtn_set_data_call_type
+//d:The data call type is ISDN v.110
+//l:list_set_graphic_pane_t1
+//w:
+//r:2.8
+//
+#define qtn_set_data_call_isdn_110 "ISDN v.110"
+
+
+//d:Answer to: qtn_set_data_call_type
+//d:The data call type is ISDN v.120
+//l:list_set_graphic_pane_t1
+//w:
+//r:2.8
+//
+#define qtn_set_data_call_isdn_120 "ISDN v.120"
+
+
+//d:Answer to: qtn_set_max_speed
+//l:list_set_graphic_pane_t1
+//w:
+//r:2.8
+//
+#define qtn_set_speed_auto_detect "Auto detect"
+
+
+//d:Answer to: qtn_set_use_cb
+//d: Use call back.
+//l:list_set_graphic_pane_t1
+//w:
+//r:2.8
+//
+#define qtn_set_use_cb_yes "Yes"
+
+
+//d:Answer to: qtn_set_use_cb
+//d:Do not use call back.
+//l:list_set_graphic_pane_t1
+//w:
+//r:2.8
+//
+#define qtn_set_use_cb_no "No"
+
+
+//d:Answer to: qtn_set_cb_type
+//d:Use server number for call back.
+//l:list_set_graphic_pane_t1
+//w:
+//r:2.8
+//
+#define qtn_set_use_server_number "Use server number"
+
+
+//d:Answer to: qtn_set_cb_type
+//d:Use other number for call back.
+//l:list_set_graphic_pane_t1
+//w:
+//r:2.8
+//
+#define qtn_set_use_other_number "Use other number"
+
+
+//d:Answer to: qtn_set_ppp_comp
+//l:list_set_graphic_pane_t1
+//w:
+//r:2.8
+//
+#define qtn_set_ppp_comp_yes "Yes"
+
+
+//d:Answer to: qtn_set_ppp_comp
+//l:list_set_graphic_pane_t1
+//w:
+//r:2.8
+//
+#define qtn_set_ppp_comp_no "No"
+
+
+//d:Answer to: qtn_set_use_logins
+//l:list_set_graphic_pane_t1
+//w:
+//r:2.8
+//
+#define qtn_set_use_logins_no "no"
+
+
+//d:Answer to: qtn_set_use_logins
+//l:list_set_graphic_pane_t1
+//w:
+//r:2.8
+//
+#define qtn_set_use_logins_yes "yes"
+
+
+//d:Prompt text when creating new access point based on an already existing value
+//l:heading_pane_t1
+//w:
+//r:2.8
+//
+#define qtn_set_new_ap_prompt_list "Use existing connection:"
+
+
+//d:Item text in setting list.
+//l:list_setting_pane_t1
+//w:
+//r:2.8
+//
+#define qtn_set_login_script "Login script"
+
+
+
+//d:Text used as prompt text in a text setting item
+//l:list_setting_pane_t1
+//w:
+//r:2.8
+//
+#define qtn_set_default_ap "Default Access Point"
+
+
+
+// not part of spec but added it
+//d:After editing an access point, info after succesful save
+//l:popup_note_window
+//w:
+//r:2.8
+//
+#define qtn_set_ap_saved "Saved"
+
+
+// not part of spec but added it
+//d:User IS in access points list view and no connections exists.
+//d:User is informed of having 0 access points with this 'empty list text'.
+//l:main_list_empty_pane
+//w:
+//r:2.8
+//
+#define qtn_set_ap_none_defined "No access point connections defined."
+
+
+
+//d:When a compulsory setting is not filled, this string indicates that it is compulsory.
+//l:list_set_graphic_pane_t1
+//w:
+//r:2.8
+//
+#define qtn_set_compulsory "Compulsory"
+
+
+
+//d:When no access point is selected, the text None indicates this.
+//l:list_set_graphic_pane_t1
+//w:
+//r:2.8
+//
+#define qtn_mce_settings_mms_none "None"
+
+
+//d: When the entered phonennumber is invalid, this information note is shown
+//l: popup_note_window
+//w:
+//r:2.8
+//
+#define qtn_info_invalid_number "Invalid number"
+
+
+//d: When the entered connection name is invalid, this information note is shown
+//l: popup_note_window
+//w:
+//r:2.8
+//
+#define qtn_info_invalid_conn_name "Invalid connection name"
+
+
+//d:%U stands for the name of the connection.
+//l: popup_note_wait_window
+//w:
+//r:2.8
+//
+#define qtn_set_wait_deleting_ap "Deleting %U"
+
+
+
+//d:Error note message: database is inaccessible.
+//l:popup_note_window
+//w:
+//r:2.8
+//
+#define qtn_set_err_db_inaccessible    "Cannot access\ndatabase.\nTry again later."
+
+
+
+
+//d:Item text in setting list.
+//l:list_setting_pane_t1
+//w:
+//r:2.8
+//
+#define qtn_set_proxy_server_address "Proxy server address"
+
+
+//d:Item text in setting list.
+//l:list_setting_pane_t1
+//w:
+//r:2.8
+//
+#define qtn_set_proxy_port_number "Port Number"
+
+
+
+//d:Item text in setting list.
+//l:list_setting_pane_t1
+//w:
+//r:2.8
+//
+#define qtn_set_network_group "Network group"
+
+
+
+//d:Command in options menu.
+//d:Creates a new network group.
+//l:list_single_pane_t1_cp2
+//w:
+//r:2.8
+//
+#define qtn_set_cmd_new_netw_group "Create new group"
+
+
+
+//d:When there is no homepage value set, it is indicated with the text: none 
+//l:list_set_graphic_pane_t1
+//w:
+//r:2.8
+//
+#define qtn_set_home_page_none "None"
+
+
+//d:If user selected a  WCDMA specific speed, this string presented to confirm it.
+//l:popup_note_window
+//w:
+//r:2.8
+//
+#define qtn_set_conf_max_speed_only_3g "Selected speed is available only in third generation mobile network. Continue?"
+
+
+//d:Item text in setting list. Gives the network type (whether it is IP4 or IP6)
+//l:list_setting_pane_t1
+//w:
+//r:2.8
+//
+#define  qtn_set_network_type "Network type"
+ 
+
+//d: States that the network type is IP4
+//l:list_set_graphic_pane_t1
+//w:
+//r:2.8
+//
+#define qtn_set_nw_type_ipv4 "IPv4"
+
+
+//d: States that the network type is IP6
+//l:list_set_graphic_pane_t1
+//w:
+//r:2.8
+//
+#define qtn_set_nw_type_ipv6 "IPv6"
+
+
+//d:Item text in setting list. Offers IPv4 settings to be changed
+//l:list_setting_pane_t1
+//w:
+//r:2.8
+//
+#define  qtn_set_ipv4_settings "IPv4 settings"
+
+
+//d:Item text in setting list. Offers IPv6 settings to be changed
+//l:list_setting_pane_t1
+//w:
+//r:2.8
+//
+#define  qtn_set_ipv6_settings "IPv6 settings"
+
+
+//d:Item text in setting list. Entrance for the Domain name servers settings
+//l:list_setting_pane_t1
+//w:
+//r:2.8
+//
+#define  qtn_set_dns_servers_ip "Domain name servers"
+
+
+//d: When the entered IP address is not a valid IP address, this error note is shown
+//l: popup_note_window
+//w:
+//r:2.8
+//
+#define qtn_set_info_invalid_ip "Invalid IP address"
+
+
+//d: Name server IP address is user defined
+//l:list_set_graphic_pane_t1
+//w:
+//r:2.8
+//
+#define qtn_set_ip_user_defined "User defined"
+
+
+//d: Name server IP address is well-known
+//l:list_set_graphic_pane_t1
+//w:
+//r:2.8
+//
+#define qtn_set_ip_well_known "Well-known"
+
+
+
+//d:If user selected a  VPN access point for editing, this string presented to inform the user that 
+// to edit a VPN access point, he/she must use the VPN Settings UI
+//l:popup_note_window
+//w:
+//r:2.8
+//
+#define qtn_set_note_vpn_ap_sett "VPN access point, use VPN settings to edit it."
+
+
+//d:User has tried to delete a protected access point.
+//d:Operation is refused with this info note.
+//l:popup_note_window
+//w:
+//r:2.8
+//
+#define qtn_set_note_protected_ap "Protected Access point: Can’t be deleted"
+
+
+//d:User has tried to open a protected access point.
+//d:Operation is refused with this info note.
+//l:popup_note_window
+//w:
+//r:2.8
+//
+#define qtn_set_note_protected_ap_sett  "Protected setting: Can’t be opened"
+
+
+//d:User trying to delete access point, which is linked to an existing another VPN access point.
+//d:Operation is confirmed with this info note.
+//d:%U stands for the name of the VPN connection.
+//l:popup_note_window
+//w:
+//r:2.8
+//
+#define qtn_vpn_quest_delete_iap_associated "Access point is associated with a VPN access point ’%U’. Delete anyway?"
+
+
+//d:User trying to copy a protected access point
+//d:Operation is denied with this info note.
+//l:popup_note_window
+//w:
+//r:2.8
+//
+#define qtn_netw_info_cannot_use_protected_ap "Unable to use protected access point"
+
+
+
+
+//d:User name if left empty
+//l:list_set_graphic_pane_t1
+//w:
+//r:2.8
+#define qtn_set_ap_username_none "None"
+
+
+//d:Domain name servers 'Automatic'
+//l:list_set_graphic_pane_t1
+//w:
+//r:2.8
+#define qtn_set_dns_servers_automatic "Automatic"
+
+
+//d:Primary name server & Secondary name server value 'Automatic' if left empty
+//l:list_set_graphic_pane_t1
+//w:
+//r:2.8
+#define qtn_set_dns_server_automatic "Automatic"
+
+
+//d:Text to be displayed when proxy server address is left empty
+//l:list_set_graphic_pane_t1
+//w:
+//r:2.8
+#define qtn_set_proxy_server_address_none "None"
+
+
+//d:Text to be displayed when the callback number is left empty
+//l:list_set_graphic_pane_t1
+//w:
+//r:2.8
+#define qtn_set_cb_number_none "None"
+
+
+//d:Text to be displayed when the login script number is left empty
+//l:list_set_graphic_pane_t1
+//w:
+//r:2.8
+#define qtn_set_login_script_none "None"
+
+
+//d:Text to be displayed when the modem init string is left empty
+//l:list_set_graphic_pane_t1
+//w:
+//r:2.8
+#define qtn_set_modem_init_none "None"
+
+
+
+
+
+
+// WLAN loc strings
+
+
+
+//d:The bearer type is Wireless LAN
+//l:list_set_graphic_pane_t1
+//w:
+//r:3.0
+//
+#define qtn_wlan_sett_bearer_wlan "Wireless LAN"
+
+
+//d:Item text in setting list.
+//d:The WLAN network name
+//l:list_setting_pane_t1
+//w:
+//r:3.0
+//
+#define qtn_wlan_sett_network_name "WLAN network name"
+
+
+//d:Defines the WLAN network mode, i.e. either infrastructure or ad-hoc.
+//l:list_setting_pane_t1
+//w:
+//r:3.0
+//
+#define qtn_wlan_sett_network_mode "WLAN network mode"
+
+
+//d:Defines the WLAN security mode, i.e. Open, WEP, 802.1x, WPA.
+//l:list_setting_pane_t1
+//w:
+//r:3.0
+//
+#define qtn_wlan_sett_security_mode "WLAN security mode"
+
+
+
+//d:Selecting it will open the WLAN security settings
+//l:list_setting_pane_t1
+//w:
+//r:3.0
+//
+#define qtn_wlan_sett_security_settings "WLAN security settings"
+
+
+//d:Specifies that the network mode is Infrastructure
+//l:list_set_graphic_pane_t1
+//w:
+//r:3.0
+//
+#define qtn_wlan_sett_network_mode_infra "Infrastructure"
+
+
+//d:Specifies that the network mode is Ad-hoc
+//l:list_set_graphic_pane_t1
+//w:
+//r:3.0
+//
+#define qtn_wlan_sett_network_mode_adhoc "Ad-hoc"
+
+
+//d:Specifies that the security mode is Open network
+//l:list_set_graphic_pane_t1
+//w:
+//r:3.0
+//
+#define qtn_wlan_sett_security_mode_open "Open network"
+
+
+//d:Specifies that the security mode is WEP
+//l:list_set_graphic_pane_t1
+//w:
+//r:3.0
+//
+#define qtn_wlan_sett_security_mode_wep "WEP"
+
+
+//d:Specifies that the security mode is 802.1x
+//l:list_set_graphic_pane_t1
+//w:
+//r:3.0
+//
+#define qtn_wlan_sett_security_mode_802_1x "802.1x"
+
+
+//d:Specifies that the security mode is WPA
+//l:list_set_graphic_pane_t1
+//w:
+//r:3.0
+//
+#define qtn_wlan_sett_security_mode_wpa "WPA/WPA2"
+
+
+//d:Specifies that the WLAN network name is user defined
+//l:list_set_graphic_pane_t1
+//w:
+//r:3.0
+//
+#define qtn_wlan_sett_network_name_user_defined "User defined"
+
+
+//d:Specifies that the WLAN network name is selected from a scanned list
+//l:list_set_graphic_pane_t1
+//w:
+//r:3.0
+//
+#define qtn_wlan_sett_network_name_scan "Scan for networks"
+
+
+
+//d:User has tried to save incomplete WLAN access point.
+//d:Operation is refused with this info note.
+//l:popup_note_window
+//w:
+//r:3.0
+//
+#define qtn_wlan_quest_nw_name_not_defined "Incomplete details. WLAN network name must be defined.Delete access point?"
+
+
+
+//d:Defines the WLAN subnet mask to be used
+//l:list_setting_pane_t1
+//w:
+//r:3.0
+//
+#define qtn_netw_sett_subnet_mask "Subnet mask"
+
+
+//d:Defines the WLAN default gateway to be used
+//l:list_setting_pane_t1
+//w:
+//r:3.0
+//
+#define qtn_netw_sett_default_gateway "Default gateway"
+
+
+
+//d:Informs that the selected Open Network does not has security settings.
+//l:popup_note_window
+//w:
+//r:3.0
+//
+#define qtn_wlan_info_no_security_settings "No security settings for ’Open network’"
+
+
+//d:Prompt text for WLAN network name query.
+//l:heading_pane_t1
+//w:
+//r:3.0
+//
+#define qtn_wlan_prmpt_network_name "WLAN network name:"
+
+
+//d:User tries to save an access point which has some compulsory fields which are not filled.
+//d:Operation is confirmed with this confirmation query.
+//l:popup_note_window
+//w:
+//r:3.0
+//
+#define qtn_netw_quest_iap_incomplete_delete "Incomplete access point details. Exit without saving?"
+
+
+
+//d:Prompt text for Ad-hoc channel name query.
+//l:popup_query_data_window
+//w:
+//r:3.0
+//
+#define qtn_wlan_prmpt_adhoc_channel "Ad-hoc channel"
+
+
+//d:Setting item text for Ad-hoc channel.
+//l:list_setting_pane_t1
+//w:
+//r:3.0
+//
+#define qtn_wlan_sett_adhoc_channel "Ad-hoc channel"
+
+
+//d:Defines the ad-hoc channel to be automatic
+//l:list_set_graphic_pane_t1
+//w:
+//r:3.0
+//
+#define qtn_wlan_sett_adhoc_channel_automatic "Automatic"
+
+
+//d:Defines the ad-hoc channel to be user defined
+//l:list_set_graphic_pane_t1
+//w:
+//r:3.0
+//
+#define qtn_wlan_sett_adhoc_channel_user_defined "User defined"
+
+
+//d:User steps back from access point editing while the securuty settings' compulsory fields are not filled.
+//d:Operation is confirmed with this confirmation query.
+//l:popup_note_window
+//w:
+//r:3.0
+//
+#define qtn_wlan_quest_security_settings_empty "Security settings for the selected security mode are incomplete.\nDelete access point?"
+
+
+///d:Item text in setting list "Hidden network"
+//l:list_setting_pane_t1
+//w:
+//r:3.0
+//
+#define qtn_wlan_sett_hidden_network "Hidden network"
+
+
+//d:Option of hidden network
+//l:list_set_graphic_pane_t1
+//w:
+//r:3.0
+//
+#define qtn_wlan_sett_hidden_network_no "No"
+
+
+//d:Option of hidden network
+//l:list_set_graphic_pane_t1
+//w:
+//r:3.0
+//
+#define qtn_wlan_sett_hidden_network_yes "Yes"
+
+
+//d:User is duplicating an access point.
+//d:Options menu item.
+//l:list_single_pane_t1_cp2
+//w:
+//r:3.1
+//
+#define qtn_netw_options_duplicate_iap "Duplicate"
+
+
+//d:User enters access points list view and no connections exists.
+//d:User is informed about it and a 'solution' is offered with this info note.
+//l:popup_note_window
+//w:
+//r:3.1
+//
+#define qtn_netw_info_no_iap_defined "No access points defined. Define one via Connection settings."
+
+
+// End of File

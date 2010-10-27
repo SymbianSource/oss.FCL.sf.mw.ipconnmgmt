@@ -1,0 +1,36 @@
+/*
+* Copyright (c) 2002 Nokia Corporation and/or its subsidiary(-ies). 
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description: 
+*     This file contains variation info for ApSettingsHandlerUi.
+*     The file can be included in C++ or resource file.
+*
+*/
+
+
+#ifndef APSETTINGSHANDLERUIVARIANT_HRH
+#define APSETTINGSHANDLERUIVARIANT_HRH
+
+// This flag indicates whether the Wap related settings are visible 
+// in the Access Point Settings UI or not
+
+#define KWSPSettingsVisible	0x01
+
+
+// feature to disable editing of normal access points and allow it only for VPN
+#define KApUiEditOnlyVPNs 0x02
+
+
+#endif      //  APSETTINGSHANDLERUIVARIANT_HRH
+
+// End of File
