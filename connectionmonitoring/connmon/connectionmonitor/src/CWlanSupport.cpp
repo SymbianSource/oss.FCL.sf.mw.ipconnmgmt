@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2005-2009 Nokia Corporation and/or its subsidiary(-ies).
+* Copyright (c) 2005-2010 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -17,6 +17,7 @@
 
 #include <e32base.h>
 #include <utf.h>
+#include <cmpluginwlandef.h>
 
 #include "CWlanSupport.h"
 #include "CEventQueue.h"
@@ -27,6 +28,7 @@
 #include "ConnMonUtils.h"
 #include "connmonwlannetwork.h"
 
+using namespace CMManager;
 
 // ============================ MEMBER FUNCTIONS ===============================
 
@@ -426,10 +428,24 @@ TInt CWlanSupport::AppendAvailableIapsBySsidL( RArray<TUint>& aIdArray )
 
     // Get ssid of current connection
     TWlanSsid currentSsid;
+    TWlanConnectionMode currentMode;
+    TWlanConnectionExtentedSecurityMode currentSecurityMode;
+
     ret = iWlanMgmt->GetConnectionSsid( currentSsid );
+
+    if ( ret == KErrNone )
+        {
+        ret = iWlanMgmt->GetConnectionMode( currentMode );
+        
+        if ( ret == KErrNone )
+            {
+            ret = iWlanMgmt->GetExtendedConnectionSecurityMode( currentSecurityMode );
+            }
+        }
+
     if ( KErrNone != ret )
         {
-        LOGIT1("ERROR reading current connection ssid from wlan engine <%d>", ret)
+        LOGIT1("ERROR reading current connection ssid/mode/security mode from wlan engine <%d>", ret)
         ret = KErrDisconnected;
         }
     else
@@ -443,6 +459,8 @@ TInt CWlanSupport::AppendAvailableIapsBySsidL( RArray<TUint>& aIdArray )
         TBuf<CConnMonWlanNetwork::KMaxNameLength> ssid16;
         CnvUtfConverter::ConvertToUnicodeFromUtf8( ssid16, currentSsid );
         LOGIT2("AppendAvailableIapsBySsidL: ssid: %S, length: %d", &ssid16, ssid16.Length())
+        LOGIT1("AppendAvailableIapsBySsidL: mode: %d", currentMode)
+        LOGIT1("AppendAvailableIapsBySsidL: security mode: %d", currentSecurityMode)
 
         // Create wlan service record set
         CMDBRecordSet<CCDWlanServiceRecord>* wlanSet =
@@ -457,11 +475,27 @@ TInt CWlanSupport::AppendAvailableIapsBySsidL( RArray<TUint>& aIdArray )
 
         // Set ssid field in wlan service record (see wlancontainer.h)
         wlanRecord->iWLanSSID.SetL( ssid16 );
+
+        // match TWlanConnectionMode to TWlanNetMode
+        switch ( currentMode )
+            {
+            case EWlanConnectionModeInfrastructure:
+            case EWlanConnectionModeSecureInfra:
+                wlanRecord->iWlanConnMode.SetL( EInfra );
+                break;
+            case EWlanConnectionModeAdhoc:
+                wlanRecord->iWlanConnMode.SetL( EAdhoc );
+                break;
+            default:
+            	  wlanRecord->iWlanConnMode.SetL( EInfra );
+                break;
+            }
+
         // Append wlan service record to wlan service record set (currently empty)
         wlanSet->iRecords.AppendL( wlanRecord );
         CleanupStack::Pop( wlanRecord ); // Ownership moved
 
-        // Find matching wlan service records (all wlan service records with same SSID)
+        // Find matching wlan service records (all wlan service records with same SSID and mode)
         if ( wlanSet->FindL( *db ) )
             {
             TInt wlanRecordCount( wlanSet->iRecords.Count() );
@@ -474,6 +508,57 @@ TInt CWlanSupport::AppendAvailableIapsBySsidL( RArray<TUint>& aIdArray )
                 // LoadL() will only look at ElementId and updates the rest of the fields
                 wlanRecord->SetElementId( wlanSet->iRecords[i]->ElementId() );
                 wlanRecord->LoadL( *db );
+                
+                // Check security mode
+                // Map TWlanConnectionExtentedSecurityMode given by WlanEngine
+                // to TWlanSecMode used in CommsDat.
+                switch ( currentSecurityMode )
+                    {
+                    case EWlanConnectionExtentedSecurityModeOpen:
+                        if ( wlanRecord->iWlanSecMode != EWlanSecModeOpen )
+                            {
+                            continue;
+                            }
+                        break;
+                    case EWlanConnectionExtentedSecurityModeWepOpen:
+                    case EWlanConnectionExtentedSecurityModeWepShared:
+                        if ( wlanRecord->iWlanSecMode != EWlanSecModeWep )
+                            {
+                            continue;
+                            }
+                        break;
+                    case EWlanConnectionExtentedSecurityMode802d1x:
+                        if ( wlanRecord->iWlanSecMode != EWlanSecMode802_1x )
+                            {
+                            continue;
+                            }
+                        break;
+                    case EWlanConnectionExtentedSecurityModeWapi:
+                    case EWlanConnectionExtentedSecurityModeWapiPsk:
+                        if ( wlanRecord->iWlanSecMode != EWlanSecModeWAPI )
+                            {
+                            continue;
+                            }
+                        break;
+                    case EWlanConnectionExtentedSecurityModeWpa2:
+                    case EWlanConnectionExtentedSecurityModeWpa2Psk:
+                    	  // CommsDat record has EWlanSecModeWpa unless "WPA2 only mode" is set On.
+                        if ( wlanRecord->iWlanSecMode != EWlanSecModeWpa2 && 
+                             wlanRecord->iWlanSecMode != EWlanSecModeWpa )
+                            {
+                            continue;
+                            }
+                        break;
+                    case EWlanConnectionExtentedSecurityModeWpa:
+                    case EWlanConnectionExtentedSecurityModeWpaPsk:
+                        if ( wlanRecord->iWlanSecMode != EWlanSecModeWpa )
+                            {
+                            continue;
+                            }
+                        break;
+                    default:
+                        continue;
+                    }
 
                 // Create IAP record
                 CCDIAPRecord* iapRecord =

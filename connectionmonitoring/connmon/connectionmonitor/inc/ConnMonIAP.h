@@ -742,6 +742,13 @@ NONSHARABLE_CLASS( CConnMonIAP )
          */
         TInt GetNetworkRegistration_v2( TInt& aRegistration ) const;
 
+         /**
+         * Restores packet network attach mode.
+         * @since
+         * @return void.
+         */
+        void RestoreAttachMode();
+
 
     private: // New methods
         /**

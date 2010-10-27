@@ -221,8 +221,7 @@ NONSHARABLE_CLASS( RCmManager )
         IMPORT_C void AllDestinationsL( RArray<TUint32>& aDestArray ) const;
 
         /**
-        * Returns the destination to which a specified
-        * connection method belongs, search is by destination ID
+        * Returns the destination queried by its ID.
         *
         * @since S60 3.2
         * @param aDestinationId id of destination

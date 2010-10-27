@@ -18,6 +18,7 @@
 #ifndef __CPSDFAX_H
 #define __CPSDFAX_H
 
+#include <e32base.h>
 #include <etel.h>
 #include <etelmm.h>
 #include <etelpckt.h>
@@ -35,6 +36,9 @@ _LIT( KExternalName, "external" );
 
 // max PSD connection number
 const TInt KMaxPsdConnectionCount = 2;
+
+// Restore attach mode interval (3 sec)
+const TInt KRestoreAttachModeInterval = 3000000;
 
 
 /**
@@ -178,6 +182,21 @@ NONSHARABLE_CLASS( CPsdFax ) : public CBase
         */
         void DeleteConnections();
 
+        /**
+        * Timer callback of iRestoreAttachModeTimer
+        *
+        * @param  aObject Object that triggered timer
+        * @since 5.2
+        */
+        static TInt RestoreAttachModeCb( TAny* aObject );
+        
+        /**
+        * Restores attach mode
+        *
+        * @since 5.2
+        */
+        void RestoreAttachMode();
+
     private:
 
     private: // Data
@@ -198,6 +217,9 @@ NONSHARABLE_CLASS( CPsdFax ) : public CBase
 
         // Data table for each connection
         CPsdFaxConnectionData* iConnectionData[KMaxPsdConnectionCount];
+
+        // Timer to restore attach mode in case at+cgatt=0 given 
+        CPeriodic* iRestoreAttachModeTimer;
     };
 
 

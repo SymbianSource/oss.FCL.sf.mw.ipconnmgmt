@@ -29,6 +29,7 @@
 #include "DclPrivateCRKeys.h"
 
 #include "dcl.h"
+#include "dclTimer.h"
 #include "dcl_log.h"
 
 // --------------------------------------------------------------------------

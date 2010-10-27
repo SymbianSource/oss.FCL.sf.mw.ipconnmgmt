@@ -39,7 +39,6 @@
 #endif // __WLAN
 
 #include "dclevent.h"
-#include "dclTimer.h"
 #include "saeobserver.h"
 
 // CONSTANTS

@@ -1082,6 +1082,10 @@ void CConnMonDialUpOverrideTimer::RunL()
     {
     LOGIT(".")
     LOGIT1("RunL: CConnMonDialUpOverrideTimer <%d>", iStatus.Int())
+    
+    // Make sure that ETel goes to correct network status
+    // in case AT+CGATT=0 has been sent from PC.
+    iServer->Iap()->RestoreAttachMode();
     iServer->SetDialUpOverrideStatus( EConnMonDialUpOverrideInactive );
     }
 

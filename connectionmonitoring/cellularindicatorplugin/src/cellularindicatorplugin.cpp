@@ -196,8 +196,8 @@ QVariant CellularIndicatorPlugin::indicatorData(int role) const
             if ( (indicatorInfo[0].toInt() > 1) && indicatorInfo.count() ) {
                 
                 // More than one connection -> show number of connections
-                QString str = QString(hbTrId("txt_occ_dblist_cellular_data_val_l1_connections"));
-                ret = str.arg(indicatorInfo[0].toInt());
+                int count = indicatorInfo[0].toInt();
+                ret = QString( hbTrId("txt_occ_dblist_cellular_data_val_l1_connections", count ) );
             }
             else if ( indicatorInfo[0].toInt() && (indicatorInfo.count() >= 2)) {
                 

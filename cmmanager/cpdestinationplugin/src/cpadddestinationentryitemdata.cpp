@@ -216,7 +216,7 @@ void CpAddDestinationEntryItemData::showErrorNote()
     HbMessageBox *note = new HbMessageBox(HbMessageBox::MessageTypeInformation);
     note->clearActions();
     note->setAttribute(Qt::WA_DeleteOnClose);
-    QString info = hbTrId("txt_occ_info_invalid_name");
+    QString info = hbTrId("txt_occ_info_name_already_in_use");
     note->setText(info);
     note->setTimeout(HbPopup::NoTimeout);
     HbAction *errorOk = new HbAction(

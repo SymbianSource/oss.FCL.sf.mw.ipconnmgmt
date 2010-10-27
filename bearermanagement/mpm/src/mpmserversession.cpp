@@ -111,8 +111,6 @@ void CMPMServerSession::ConstructL()
 //
 CMPMServerSession::~CMPMServerSession()
     {
-    delete iConfirmDlgRoaming;
-    delete iIapSelection;
 
     // Remove serverside objects for notification session.
     // 
@@ -142,6 +140,9 @@ User connection deactivated" )
     
     // Cancel discreet popup
     iMyServer.ConnUiUtils()->CancelConnectingViaDiscreetPopup();
+
+	delete iConfirmDlgRoaming;
+    delete iIapSelection;
     }
 
 
@@ -3447,10 +3448,26 @@ TBool CMPMServerSession::UseUserConnPref()
          iMyServer.UserConnection() )
         {
         MPMLOGSTRING( "CMPMServerSession::UseUserConnPref - User connection active" );
+
+        // If user connection is blacklisted for this connection, don't use it.
+        RArray<TUint32> blacklistedIaps;
+        CleanupClosePushL( blacklistedIaps );
+        iMyServer.GetBlacklistedIAP( iConnId, blacklistedIaps );
+        TInt blacklistedIapFoundError = blacklistedIaps.Find( iMyServer.UserConnPref()->IapId() );
+        CleanupStack::PopAndDestroy( &blacklistedIaps );
         
+        if ( blacklistedIapFoundError != KErrNotFound )
+            {
+            MPMLOGSTRING( "CMPMServerSession::UseUserConnPref -\
+ User connection blacklisted -> don't use user connection" );
+            return EFalse;
+            }
+
         // Check whether default connection will be used
         if ( iIapSelection->MpmConnPref().ConnType() == TMpmConnPref::EConnTypeDefault )
             {
+            MPMLOGSTRING( "CMPMServerSession::UseUserConnPref -\
+ Default connection -> use user connection" );
             return ETrue;
             }
         else if ( ( iIapSelection->MpmConnPref().ConnType() ==
@@ -3458,7 +3475,7 @@ TBool CMPMServerSession::UseUserConnPref()
                   PrefsAllowWlan() )
             {            
             MPMLOGSTRING( "CMPMServerSession::UseUserConnPref -\
- Prompt from the user" );
+ Prompt from the user -> use user connection" );
             // Prompt from the user -> use user connection
             return ETrue;
             }
@@ -3477,6 +3494,8 @@ TBool CMPMServerSession::UseUserConnPref()
 
             if ( ( error == KErrNone ) && ( isInternetSnap ) && PrefsAllowWlan() )
                 {
+                MPMLOGSTRING( "CMPMServerSession::UseUserConnPref -\
+ Application preferencies in Internet SNAP -> use user connection" );
                 // Iap belongs to internet snap -> use user connection
                 return ETrue;
                 }

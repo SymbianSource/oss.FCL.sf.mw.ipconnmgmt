@@ -51,6 +51,9 @@ const TInt    KPhoneRetryCount   = 7;
 //
 const TInt    KPhoneRetryTimeout = 100000;
 
+const TUint32 KMaxOpenTransAttempts = 5;
+const TUint32 KRetryAfter = 200000;
+
 // The granularity with which roaming and starting dialogs will allocate memory chunks. 
 // If set to two there will be space for two instances before new memory will be allocated.
 const TInt    KGranularity       = 2;
@@ -832,9 +835,10 @@ class CMPMServer : public CPolicyServer,
         
         /**
         * Stops cellular connections, except MMS
+        * @param aSilentOnly stop only silent cellular connections
         * @since 5.2
         */
-        void StopCellularConns();
+        void StopCellularConns( TBool aSilentOnly = EFalse );
         
         /**
         * Handle to connection ui utilities
@@ -917,6 +921,13 @@ class CMPMServer : public CPolicyServer,
                                 RAvailableIAPList& aIapList,
                                 TBool aCheckForBestIap,
                                 TMPMBearerType aDestinationBearerType );
+        
+        /**
+         * Check if iap can be disconnected, and disconnect it
+         * @since 5.2
+         * @param aIapId Iap id for checking
+         */
+        void CheckIapForDisconnect( TInt aIapId );
         
 
     private: // Data

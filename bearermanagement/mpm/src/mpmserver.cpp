@@ -481,28 +481,29 @@ void CMPMServer::ResetBMConnection( const TConnectionId aConnId,
 // -----------------------------------------------------------------------------
 //
 void CMPMServer::RemoveBMConnection( const TConnectionId aConnId,
-                                     CMPMServerSession&  /*aSession*/ )
+                                     CMPMServerSession&  aSession )
     {
     MPMLOGSTRING2( "CMPMServer::RemoveBMConnection - aConnId = 0x%x", 
         aConnId )
 
-    TInt count = iActiveBMConns.Count();
-    
-    // Decrement by one, because count is n, 
-    // but indexes in array are 0 .. n-1.
-    // 
-    count--;
-
     // This time we are browsing the array from the end to the beginning, 
     // because removing one element from array affects index numbering.
-    // 
-    for ( TInt i = count; i >= 0; i-- )
+    // Decrement i by one, because count is n, but indexes in array are 0 .. n-1
+    for ( TInt i = iActiveBMConns.Count() - 1; i >= 0; i-- )
         {
         if ( iActiveBMConns[i].iConnInfo.iConnId == aConnId )
             {
+            
+            TInt closeIapId = iActiveBMConns[i].iConnInfo.iIapId;
+            if ( !closeIapId )
+                {
+                TRAP_IGNORE( closeIapId = aSession.IapSelectionL()->MpmConnPref().IapId() );
+                }
+
             // If Connection Id found, remove it. 
             //
             iActiveBMConns.Remove( i );
+            CheckIapForDisconnect( closeIapId );
             }
         }
 
@@ -812,23 +813,13 @@ void CMPMServer::RemoveBMIAPConnection( const TUint32       aIapId,
         "CMPMServer::RemoveBMIAPConnection - aIapId = %i, aConnId = 0x%x", 
         aIapId, aConnId )
 
-    TActiveBMConn conn;
-    conn.iConnInfo.iIapId = aIapId;
-
     // The IAP connection lifetime is determined by the two calls 
     // IAPConnectionStarted and IAPConnectionStopped. 
-    //
-    TInt count = iActiveBMConns.Count();
-
-    // Decrement by one, because count is n, 
-    // but indexes in array are 0 .. n-1.
-    // 
-    count--;
 
     // This time we are browsing the array from the end to the beginning, 
     // because removing one element from array affects index numbering.
-    // 
-    for ( TInt i = count; i >= 0; i-- )
+    // Decrement i by one, because count is n, but indexes in array are 0 .. n-1
+    for ( TInt i = iActiveBMConns.Count() - 1; i >= 0; i-- )
         {
         if ( iActiveBMConns[i].iConnInfo.iIapId == aIapId )
             {
@@ -915,37 +906,61 @@ void CMPMServer::NotifyBMPrefIapL( const TConnMonIapInfo& aIapInfo,
         }
 #endif // _DEBUG
 
-    // Start possible forced roaming
-    TCmUsageOfWlan usageOfWlan = CommsDatAccess()->ForcedRoamingL();
-    if ( usageOfWlan == ECmUsageOfWlanKnown || usageOfWlan == ECmUsageOfWlanKnownAndNew )
+    // Read info for forced roaming from Commdat
+    TUint32 maxOpenTransAttempts ( KMaxOpenTransAttempts ) ;
+    TUint32 retryAfter ( KRetryAfter );
+    TInt err;
+    // CommDat reading might fail because CommDat session could be locked by another process at the moment
+    // So, we may wait/retry to read from CommDat a bit later.
+    TCmUsageOfWlan usageOfWlan ( ECmUsageOfWlanKnown );
+    do
         {
-        if ( IsWlanConnectionStartedL( CommsDatAccess() ) )
+        TRAP ( err, usageOfWlan = CommsDatAccess()->ForcedRoamingL() );
+        
+        if( err )
             {
-            iConnMonIapInfo = aIapInfo;
-                
-            if ( iRoamingToWlanPeriodic )
+            User::After( retryAfter );
+            }
+        } while( err && maxOpenTransAttempts-- );
+    
+    // Start possible forced roaming
+    if ( !err )
+        {
+        if ( usageOfWlan == ECmUsageOfWlanKnown || usageOfWlan == ECmUsageOfWlanKnownAndNew )
+            {
+            if ( IsWlanConnectionStartedL( CommsDatAccess() ) )
                 {
-                iRoamingToWlanPeriodic->Cancel();
+                iConnMonIapInfo = aIapInfo;
+                
+                if ( iRoamingToWlanPeriodic )
+                    {
+                    iRoamingToWlanPeriodic->Cancel();
+                    }
+                else
+                    {
+                    iRoamingToWlanPeriodic = CPeriodic::NewL( 
+                                                   CActive::EPriorityStandard );
+                    }
+                // start periodic object that calls StartForcedRoamingToWlanL after 10s. 
+                // this handles the case when new wlan connection is 
+                // started from e.g. wlan sniffer but IAP is not yet in Internet SNAP 
+                iRoamingToWlanPeriodic->Start( 
+                        TTimeIntervalMicroSeconds32( KRoamingToWlanUpdateInterval ), 
+                        TTimeIntervalMicroSeconds32( KRoamingToWlanUpdateInterval ), 
+                        TCallBack( StartForcedRoamingToConnectedWlanL, this ) );
                 }
             else
                 {
-                iRoamingToWlanPeriodic = CPeriodic::NewL( 
-                                                   CActive::EPriorityStandard );
+                StartForcedRoamingToWlanL( iapInfo );
                 }
-            // start periodic object that calls StartForcedRoamingToWlanL after 10s. 
-            // this handles the case when new wlan connection is 
-            // started from e.g. wlan sniffer but IAP is not yet in Internet SNAP 
-            iRoamingToWlanPeriodic->Start( 
-                   TTimeIntervalMicroSeconds32( KRoamingToWlanUpdateInterval ), 
-                   TTimeIntervalMicroSeconds32( KRoamingToWlanUpdateInterval ), 
-                   TCallBack( StartForcedRoamingToConnectedWlanL, this ) );
-            }
-        else
-            {
-            StartForcedRoamingToWlanL( iapInfo );
-            }
 
-        StartForcedRoamingFromWlanL( iapInfo );
+            StartForcedRoamingFromWlanL( iapInfo );
+            }
+        }
+    else
+        {
+        MPMLOGSTRING2( "CMPMServer::NotifyBMPrefIapL - \
+reading info for forced roaming fails with err %d, forced roaming fails", err )
         }
     
     // Send notifications for all sessions
@@ -1835,7 +1850,7 @@ Connection Id = 0x%x", aConnId );
 // Stop all cellular connections except MMS
 // ---------------------------------------------------------------------------
 //
-void CMPMServer::StopCellularConns()
+void CMPMServer::StopCellularConns( TBool aSilentOnly )
     {
     MPMLOGSTRING( "CMPMServer::StopCellularConns" )
 
@@ -1864,7 +1879,14 @@ void CMPMServer::StopCellularConns()
                 if (!(err == KErrNone && iapId == mmsIap))
                     {
                     // Stop the conn / IAP.
-                    StopConnections( iapId );
+					if ( aSilentOnly )
+                        {
+                        CheckIapForDisconnect( iapId );
+                        }
+                    else
+                        {
+                        StopConnections( iapId );
+                        }
                     stoppedIaps.Append( iapId );
                     }
                 }
@@ -2116,6 +2138,79 @@ TBool CMPMServer::IsConnPermQueryTimerOn()
         }
     return retval;
     }
+
+// -----------------------------------------------------------------------------
+// CMPMServer::CheckIapForDisconnect
+// -----------------------------------------------------------------------------
+//
+void CMPMServer::CheckIapForDisconnect( TInt aIapId )
+    {
+    MPMLOGSTRING2( "CMPMServer::CheckIapForDisconnect - aIapId = 0x%x", 
+        aIapId )
+
+    // Fix for case ou1cimx1#468999: stop sessions to cellular iap
+    // when there is only silent connections to it, and cellular usage is set
+    // to always ask
+    
+    // Check iap type and usage policy
+    TMPMBearerType bearerType( EMPMBearerTypeNone );
+    TRAP_IGNORE( bearerType = CommsDatAccess()->GetBearerTypeL( aIapId ) );
+
+    TBool closeIap = ( bearerType == EMPMBearerTypePacketData
+                && DataUsageWatcher()->CellularDataUsage() == ECmCellularDataUsageConfirm ); 
+    
+    // No need to put iapSessions to CleanupStack; there are no leaves
+    RPointerArray<CMPMServerSession> iapSessions;
+    if ( closeIap )
+        {
+        // Check for non-silent sessions to iap
+        // closeIap is left true also when there are no sessions using the iap
+        for ( TInt i = 0; i < iActiveBMConns.Count(); i++ )
+            {
+
+            CMPMServerSession* session
+                = GetServerSession( iActiveBMConns[i].iConnInfo.iConnId );
+
+            TInt sessionIapId = iActiveBMConns[i].iConnInfo.iIapId;
+            if ( !sessionIapId )
+                {
+                TRAP_IGNORE( sessionIapId = session->IapSelectionL()->MpmConnPref().IapId() );
+                }
+
+            if ( sessionIapId == aIapId )
+                {
+                iapSessions.Append( session ); // Don't mind if Append fails
+                
+                TBool silent( ETrue );
+                TRAP_IGNORE( silent = session->IapSelectionL()->MpmConnPref().NoteBehaviour()
+                                      & TExtendedConnPref::ENoteBehaviourConnDisableNotes );
+                if ( !silent )
+                    {
+                    // Non-silent session to iap found
+                    closeIap = EFalse;
+                    break; // for
+                    }
+                }
+            }
+        }
+    
+    if ( closeIap )
+        {
+        MPMLOGSTRING2( "CMPMServer::CheckIapForDisconnect - stopping silent sessions to iap 0x%x", 
+            aIapId )
+        // Stop all (silent) sessions to iap
+        for ( TInt i = 0; i < iapSessions.Count(); i++)
+            {
+            MPMLOGSTRING2( "CMPMServer::CheckIapForDisconnect - stopping connId 0x%x",
+                    iapSessions[i]->ConnectionId());
+            iapSessions[i]->StopConnection();
+            }
+        }
+
+    iapSessions.Close();
+    
+    }
+
 
 // -----------------------------------------------------------------------------
 // TMPMBlackListConnId::Append
