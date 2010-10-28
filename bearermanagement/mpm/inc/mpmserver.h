@@ -469,10 +469,8 @@ class CMPMServer : public CPolicyServer,
         * @param aConnId Connection Id
         * @param aIapId IAP Id of the connection.
         * @param aCategory Either connection lifetime or temporary. 
-        * @return KErrNone if successful, otherwise one of the
-        * system-wide error codes 
         */
-        TInt HandleServerBlackListIap( const TConnectionId   aConnId, 
+        void HandleServerBlackListIap( const TConnectionId   aConnId, 
                                        TUint32               aIapId, 
                                        TBlacklistCategory    aCategory );
 
@@ -482,10 +480,8 @@ class CMPMServer : public CPolicyServer,
         * @param aConnId Connection Id
         * @param aIapId IAP Id of the connection.
         * @param aCategory Either connection lifetime or temporary. 
-        * @return KErrNone if successful, otherwise one of the
-        * system-wide error codes 
         */
-        TInt BlackListIap( const TConnectionId   aConnId, 
+        void BlackListIap( const TConnectionId   aConnId, 
                            TUint32               aIapId, 
                            TBlacklistCategory    aCategory );
 
@@ -513,18 +509,16 @@ class CMPMServer : public CPolicyServer,
         * @since 3.1
         * @param aConnId Connection Id
         * @param aBlacklistedIAP returns blacklisted iaps.
-        * @return KErrNone if successful.
         */
-        TInt GetBlacklistedIAP( TConnectionId    aConnId, 
+        void GetBlacklistedIAP( TConnectionId    aConnId, 
                                 RArray<TUint32> &aBlacklistedIAP );
 
         /**
         * Get all blacklisted IAPs.
         * @since 3.2
         * @param aBlacklistedIAP returns blacklisted iaps.
-        * @return KErrNone if successful.
         */
-        TInt GetBlacklistedIAP( RArray<TUint32> &aBlacklistedIAP );
+        void GetBlacklistedIAP( RArray<TUint32> &aBlacklistedIAP );
 
         /**
         * Set the ConnMonEvents object.

@@ -26,6 +26,7 @@ DEFAULT
 PRJ_EXPORTS
 // export iby files
 ../rom/cmmserver.iby      CORE_MW_LAYER_IBY_EXPORT_PATH(cmmserver.iby)
+../rom/cmmanager_resources.iby LANGUAGE_APP_LAYER_IBY_EXPORT_PATH(cmmanager_resources.iby)
 
 ../conf/cmmanager.confml            MW_LAYER_CONFML(cmmanager.confml)
 ../conf/cmmanager_10207376.crml     MW_LAYER_CRML(cmmanager_10207376.crml)

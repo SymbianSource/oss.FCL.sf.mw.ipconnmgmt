@@ -33,8 +33,6 @@
 #include "indicatorobserverTraces.h"
 #endif
 
-QTM_USE_NAMESPACE
-
 /*!
     IndicatorObserver::IndicatorObserver
 */
@@ -52,7 +50,7 @@ IndicatorObserver::IndicatorObserver(int argc, char* argv[]) :
     mCellularIndicator(NULL)
     
 {
-    OstTrace0(TRACE_FLOW, INDICATOROBSERVER_CONSTRUCTOR_ENTRY, "-->");
+    OstTraceFunctionEntry0(INDICATOROBSERVER_CONSTRUCTOR_ENTRY);
 
     bool connectStatus = false;
 
@@ -97,7 +95,7 @@ IndicatorObserver::IndicatorObserver(int argc, char* argv[]) :
 
     initializeIndicators();
     
-    OstTrace0(TRACE_FLOW, INDICATOROBSERVER_CONSTRUCTOR_EXIT, "<--");
+    OstTraceFunctionExit0(INDICATOROBSERVER_CONSTRUCTOR_EXIT);
 }
 
 
@@ -106,7 +104,7 @@ IndicatorObserver::IndicatorObserver(int argc, char* argv[]) :
 */
 IndicatorObserver::~IndicatorObserver()
 {
-    OstTrace0(TRACE_FLOW, INDICATOROBSERVER_DESTRUCTOR_ENTRY, "-->");
+    OstTraceFunctionEntry0(INDICATOROBSERVER_DESTRUCTOR_ENTRY);
      
     if(mCellularIndicatorIsActivated) {
         deactivateCellularIndicatorPlugin();
@@ -130,7 +128,7 @@ IndicatorObserver::~IndicatorObserver()
     delete mCellularIndicator;
     delete mWlanIndicator;
     
-    OstTrace0(TRACE_FLOW, INDICATOROBSERVER_DESTRUCTOR_EXIT, "<--");
+    OstTraceFunctionExit0(INDICATOROBSERVER_DESTRUCTOR_EXIT);
 }
 
 /*!
@@ -139,7 +137,7 @@ IndicatorObserver::~IndicatorObserver()
 void IndicatorObserver::initializeIndicators()
 {
 
-    OstTrace0(TRACE_FLOW, INDICATOROBSERVER_INITIALIZEINDICATORS_ENTRY, "-->");
+    OstTraceFunctionEntry0(INDICATOROBSERVER_INITIALIZEINDICATORS_ENTRY);
     
     // create the indicators and make connections
     mCellularIndicator = new HbIndicator();  
@@ -164,7 +162,7 @@ void IndicatorObserver::initializeIndicators()
     updateWlanIndicator();
     updateCellularIndicator();
     
-    OstTrace0(TRACE_FLOW, INDICATOROBSERVER_INITIALIZEINDICATORS_EXIT, "<--");
+    OstTraceFunctionExit0(INDICATOROBSERVER_INITIALIZEINDICATORS_EXIT);
 }
 
 /*!
@@ -172,7 +170,7 @@ void IndicatorObserver::initializeIndicators()
 */
 void IndicatorObserver::updateWlanRadioStatus(const XQSettingsKey &key, const QVariant &value)
 {
-    OstTrace0(TRACE_FLOW, INDICATOROBSERVER_UPDATEWLANRADIOSTATUS_ENTRY, "-->");
+    OstTraceFunctionEntry0(INDICATOROBSERVER_UPDATEWLANRADIOSTATUS_ENTRY);
     
     // The change notification is received either for the WlanOnoff key, or the
     // ForceDisableWlan key
@@ -187,7 +185,7 @@ void IndicatorObserver::updateWlanRadioStatus(const XQSettingsKey &key, const QV
     } else {
         updateWlanIndicator();
     }
-    OstTrace0(TRACE_FLOW, INDICATOROBSERVER_UPDATEWLANRADIOSTATUS_EXIT, "<--");
+    OstTraceFunctionExit0(INDICATOROBSERVER_UPDATEWLANRADIOSTATUS_EXIT);
 }
 
 /*!
@@ -195,7 +193,7 @@ void IndicatorObserver::updateWlanRadioStatus(const XQSettingsKey &key, const QV
 */
 void IndicatorObserver::findActiveConfigurations()
 {
-    OstTrace0(TRACE_FLOW, INDICATOROBSERVER_FINDACTIVECONFIGURATIONS_ENTRY, "-->");
+    OstTraceFunctionEntry0(INDICATOROBSERVER_FINDACTIVECONFIGURATIONS_ENTRY);
     
     mActiveWlanConfigurations->clear();
     mActiveCellularConfigurations->clear();
@@ -219,7 +217,7 @@ void IndicatorObserver::findActiveConfigurations()
             }  
         }
     }
-    OstTrace0(TRACE_FLOW, INDICATOROBSERVER_FINDACTIVECONFIGURATIONS_EXIT, "<--");
+    OstTraceFunctionExit0(INDICATOROBSERVER_FINDACTIVECONFIGURATIONS_EXIT);
 }
 
 /*!
@@ -227,7 +225,7 @@ void IndicatorObserver::findActiveConfigurations()
 */
 void IndicatorObserver::updateWlanIndicator()
 {
-    OstTrace0(TRACE_FLOW, INDICATOROBSERVER_UPDATEWLANINDICATOR_ENTRY, "-->");
+    OstTraceFunctionEntry0(INDICATOROBSERVER_UPDATEWLANINDICATOR_ENTRY);
     QList<QVariant> list;
     
     int count = mActiveWlanConfigurations->count();
@@ -244,7 +242,7 @@ void IndicatorObserver::updateWlanIndicator()
             activateWlanIndicatorPlugin(list);
         }
     }
-    OstTrace0(TRACE_FLOW, INDICATOROBSERVER_UPDATEWLANINDICATOR_EXIT, "<--");
+    OstTraceFunctionExit0(INDICATOROBSERVER_UPDATEWLANINDICATOR_EXIT);
 }
 
 /*!
@@ -252,7 +250,7 @@ void IndicatorObserver::updateWlanIndicator()
 */
 void IndicatorObserver::updateCellularIndicator()
 {
-    OstTrace0(TRACE_FLOW, INDICATOROBSERVER_UPDATECELLULARINDICATOR_ENTRY, "-->");
+    OstTraceFunctionEntry0(INDICATOROBSERVER_UPDATECELLULARINDICATOR_ENTRY);
     
     QList<QVariant> list;
 
@@ -273,7 +271,7 @@ void IndicatorObserver::updateCellularIndicator()
         } 
         activateCellularIndicatorPlugin(list);        
     }
-    OstTrace0(TRACE_FLOW, INDICATOROBSERVER_UPDATECELLULARINDICATOR_EXIT, "<--");
+    OstTraceFunctionExit0(INDICATOROBSERVER_UPDATECELLULARINDICATOR_EXIT);
 }
 
 /*!
@@ -281,7 +279,7 @@ void IndicatorObserver::updateCellularIndicator()
 */
 void IndicatorObserver::handleConfigurationChanged(const QNetworkConfiguration& config)
 {
-    OstTrace0(TRACE_FLOW, INDICATOROBSERVER_HANDLECONFIGURATIONCHANGED_ENTRY, "-->");
+    OstTraceFunctionEntry0(INDICATOROBSERVER_HANDLECONFIGURATIONCHANGED_ENTRY);
     
     switch (config.state())
     {   
@@ -307,31 +305,31 @@ void IndicatorObserver::handleConfigurationChanged(const QNetworkConfiguration& 
         default:
             break;
     }
-    OstTrace0(TRACE_FLOW, INDICATOROBSERVER_HANDLECONFIGURATIONCHANGED_EXIT, "<--");
+    OstTraceFunctionExit0(INDICATOROBSERVER_HANDLECONFIGURATIONCHANGED_EXIT);
 }
 
 void IndicatorObserver::userActivateCellularIndicator(const QString &type, const QVariantMap &data)
 {
-    OstTrace0(TRACE_FLOW, INDICATOROBSERVER_USERACTIVATECELLULARINDICATOR_ENTRY, "-->");
+    OstTraceFunctionEntry0(INDICATOROBSERVER_USERACTIVATECELLULARINDICATOR_ENTRY);
     
     Q_UNUSED(data);
     Q_UNUSED(type);
     // Show connection view
     QProcess::startDetached("connview");
     
-    OstTrace0(TRACE_FLOW, INDICATOROBSERVER_USERACTIVATECELLULARINDICATOR_EXIT, "<--");
+    OstTraceFunctionExit0(INDICATOROBSERVER_USERACTIVATECELLULARINDICATOR_EXIT);
 }
 
 void IndicatorObserver::userActivateWlanIndicator(const QString &type, const QVariantMap &data)
 {
-    OstTrace0(TRACE_FLOW, INDICATOROBSERVER_USERACTIVATEWLANINDICATOR_ENTRY, "-->");
+    OstTraceFunctionEntry0(INDICATOROBSERVER_USERACTIVATEWLANINDICATOR_ENTRY);
     
     Q_UNUSED(data);
     Q_UNUSED(type);
     // Show wlan list view
     QProcess::startDetached("WlanSniffer");
 
-    OstTrace0(TRACE_FLOW, INDICATOROBSERVER_USERACTIVATEWLANINDICATOR_EXIT, "<--");
+    OstTraceFunctionExit0(INDICATOROBSERVER_USERACTIVATEWLANINDICATOR_EXIT);
 }
 
 /*!
@@ -339,7 +337,7 @@ void IndicatorObserver::userActivateWlanIndicator(const QString &type, const QVa
 */
 void IndicatorObserver::activateCellularIndicatorPlugin(QList<QVariant> list)
 {
-    OstTrace0(TRACE_FLOW, INDICATOROBSERVER_ACTIVATECELLULARINDICATORPLUGIN_ENTRY, "-->");
+    OstTraceFunctionEntry0(INDICATOROBSERVER_ACTIVATECELLULARINDICATORPLUGIN_ENTRY);
     
     bool success = mCellularIndicator->activate("com.nokia.hb.indicator.connectivity.cellularindicatorplugin/1.0", list);
      
@@ -350,7 +348,7 @@ void IndicatorObserver::activateCellularIndicatorPlugin(QList<QVariant> list)
         mCellularIndicatorIsActivated = true;
     }
     
-    OstTrace0(TRACE_FLOW, INDICATOROBSERVER_ACTIVATECELLULARINDICATORPLUGIN_EXIT, "<--");
+    OstTraceFunctionExit0(INDICATOROBSERVER_ACTIVATECELLULARINDICATORPLUGIN_EXIT);
 }
 
 /*!
@@ -358,12 +356,12 @@ void IndicatorObserver::activateCellularIndicatorPlugin(QList<QVariant> list)
 */
 void IndicatorObserver::deactivateCellularIndicatorPlugin()
 {
-    OstTrace0(TRACE_FLOW, INDICATOROBSERVER_DEACTIVATECELLULARINDICATORPLUGIN_ENTRY, "-->");
+    OstTraceFunctionEntry0(INDICATOROBSERVER_DEACTIVATECELLULARINDICATORPLUGIN_ENTRY);
     
     mCellularIndicator->deactivate("com.nokia.hb.indicator.connectivity.cellularindicatorplugin/1.0");
     mCellularIndicatorIsActivated = false;
     
-    OstTrace0(TRACE_FLOW, INDICATOROBSERVER_DEACTIVATECELLULARINDICATORPLUGIN_EXIT, "<--");
+    OstTraceFunctionExit0(INDICATOROBSERVER_DEACTIVATECELLULARINDICATORPLUGIN_EXIT);
 }
 
 /*!
@@ -371,7 +369,7 @@ void IndicatorObserver::deactivateCellularIndicatorPlugin()
 */
 void IndicatorObserver::activateWlanIndicatorPlugin(QList<QVariant> list)
 {
-    OstTrace0(TRACE_FLOW, INDICATOROBSERVER_ACTIVATEWLANINDICATORPLUGIN_ENTRY, "-->");
+    OstTraceFunctionEntry0(INDICATOROBSERVER_ACTIVATEWLANINDICATORPLUGIN_ENTRY);
     
     bool success = mWlanIndicator->activate("com.nokia.hb.indicator.connectivity.wlanindicatorplugin/1.0", list);
    
@@ -382,7 +380,7 @@ void IndicatorObserver::activateWlanIndicatorPlugin(QList<QVariant> list)
         mWlanIndicatorIsActivated = true;
     }
     
-    OstTrace0(TRACE_FLOW, INDICATOROBSERVER_ACTIVATEWLANINDICATORPLUGIN_EXIT, "<--");    
+    OstTraceFunctionExit0(INDICATOROBSERVER_ACTIVATEWLANINDICATORPLUGIN_EXIT);    
 }
 
 /*!
@@ -390,10 +388,10 @@ void IndicatorObserver::activateWlanIndicatorPlugin(QList<QVariant> list)
 */
 void IndicatorObserver::deactivateWlanIndicatorPlugin()
 {
-    OstTrace0(TRACE_FLOW, INDICATOROBSERVER_DEACTIVATEWLANINDICATORPLUGIN_ENTRY, "-->");
+    OstTraceFunctionEntry0(INDICATOROBSERVER_DEACTIVATEWLANINDICATORPLUGIN_ENTRY);
 
     mWlanIndicator->deactivate("com.nokia.hb.indicator.connectivity.wlanindicatorplugin/1.0");
     mWlanIndicatorIsActivated = false;
     
-    OstTrace0(TRACE_FLOW, INDICATOROBSERVER_DEACTIVATEWLANINDICATORPLUGIN_EXIT, "<--");   
+    OstTraceFunctionExit0(INDICATOROBSERVER_DEACTIVATEWLANINDICATORPLUGIN_EXIT);   
 }

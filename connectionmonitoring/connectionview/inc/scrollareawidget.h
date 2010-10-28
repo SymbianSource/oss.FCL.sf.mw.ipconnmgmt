@@ -22,8 +22,6 @@
 #include <QGraphicsWidget>
 #include <qnetworkconfigmanager.h>
 
-QTM_USE_NAMESPACE
-
 class ScrollAreaWidget: public QGraphicsWidget
 {
     Q_OBJECT

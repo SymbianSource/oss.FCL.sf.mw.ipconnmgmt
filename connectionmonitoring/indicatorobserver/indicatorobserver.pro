@@ -16,8 +16,7 @@
 
 TEMPLATE = app
 TARGET = indicatorobserver
-CONFIG += hb no_icon mobility
-MOBILITY += bearer
+CONFIG += hb no_icon
 
 INCLUDEPATH += $$MW_LAYER_SYSTEMINCLUDE \
                ./inc \

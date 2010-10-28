@@ -147,11 +147,16 @@ CpBaseSettingView *CpDestinationEntryItemData::createSettingView() const
     CpBaseSettingView* view = new CpBaseSettingView();
     constructSettingView(view);
     
-    // Toolbar. Allow arrange if more than one AP is shown
+    // Toolbar and menu. Allow arrange if more than one AP is shown.
     if (mDestinationId != 0 && mAps->count() > 1) {
         HbToolBar *tb = view->toolBar();
         HbIcon arrangeIcon("qtg_mono_sort");
         (void) tb->addAction(arrangeIcon, "", this, SLOT(activateArrangeMode()));
+        HbMenu *menu = view->menu();
+        (void) menu->addAction(
+            hbTrId("txt_occ_opt_arrange"),
+            this,
+            SLOT(activateArrangeMode()));
     }
     OstTraceFunctionExit0(CPDESTINATIONENTRYITEMDATA_CREATESETTINGVIEW_EXIT);
     return view;        
@@ -254,10 +259,12 @@ void CpDestinationEntryItemData::updateDestinationView()
         CpBaseSettingView  *cpView = static_cast<CpBaseSettingView  *>(view);
         constructSettingView(cpView);
         
-        // Remove Toolbar if necessary
+        // Remove toolbar and menu actions if necessary
         if (mDestinationId != 0 && mAps->count() <= 1) {
             HbToolBar *tb = view->toolBar();
             tb->clearActions();
+            HbMenu *menu = view->menu();
+            menu->clearActions();
         }
     }
     OstTrace0(TRACE_NORMAL, CPDESTINATIONENTRYITEMDATA_UPDATEDESTINATIONVIEW, "CpDestinationEntryItemData::updateDestinationView: Emit destination changed");
@@ -621,6 +628,7 @@ void CpDestinationEntryItemData::createArrangeModeView(HbView *view)
     CmDestinationShim *destination = NULL;
     mList = new HbListWidget();
     view->setWidget(mList);
+    view->setTitle(hbTrId("txt_cp_title_control_panel"));
     
     try {
         destination = mCmm->destination(mDestinationId);

@@ -93,15 +93,15 @@ void CCellularDataConfirmation::StartL( TMsgQueryLinkedResults& aResult,
     // information whether we are in home network is needed
     if ( aHomeNetwork ) 
         {
-        choices.Append( EMsgQueryAutomatically );
-        choices.Append( EMsgQueryThisTime );
-        choices.Append( EMsgQueryCancelled );
+        choices.AppendL( EMsgQueryAutomatically );
+        choices.AppendL( EMsgQueryThisTime );
+        choices.AppendL( EMsgQueryCancelled );
         }
     else
         {
-        choices.Append( EMsgQueryThisTime );
-        choices.Append( EMsgQueryAutomatically );
-        choices.Append( EMsgQueryCancelled );
+        choices.AppendL( EMsgQueryThisTime );
+        choices.AppendL( EMsgQueryAutomatically );
+        choices.AppendL( EMsgQueryCancelled );
         }
 
     // Observer is needed in order to get the user inputs

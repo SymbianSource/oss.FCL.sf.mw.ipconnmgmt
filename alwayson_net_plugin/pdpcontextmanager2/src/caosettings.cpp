@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2004,2006 Nokia Corporation and/or its subsidiary(-ies). 
+* Copyright (c) 2004-2010 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -509,53 +509,57 @@ void CAOSettings::UpdateVPLMNSetting()
 void CAOSettings::UpdateLingerTimerSetting()
     {
     LOG_1( _L("CAOSettings::UpdateLingerTimerSetting"));
-        
+
     TInt           count( 0 );
     TInt           err( KErrNone );
     TLingerSetting ls;
-        
+
     iLingerSettings.Reset();
-    
+
     // Get number of entries (iapId&linger) in Centrep
     err = iRepository->Get( KPdpContextManagerLingerArrayCount, count );
-        
+
     if ( err == KErrNone )
         {
         // read all entries from Centrep
         for ( TInt row=1; row <= count; row++ )
             {
-            err = iRepository->Get( ( KIapColumn | row ), ls.iIap ); 
-        
+            err = iRepository->Get( ( KIapColumn | row ), ls.iIap );
+
             if ( err == KErrNone )
                 {
-                err = iRepository->Get( ( KLingerColumn | row ), ls.iInterval );     
+                err = iRepository->Get( ( KLingerColumn | row ), ls.iInterval );
                 }
-                
-            if ( err == KErrNone ) 
+
+            if ( err == KErrNone )
                 {
-                iLingerSettings.Append( ls );    
+                err = iLingerSettings.Append( ls );
+                if ( err )
+                    {
+                    LOG_2( _L("iLingerSettings.Append >> err: %d"), err);
+                    }
                 }
             else
                 {
                 LOG_3( _L("CRepository::Get() failed >> err: %d, row: %d"),
                 err, row);
-                
-                return;        
-                }    
+
+                break; // for-loop
+                }
             }
         }
     else
         {
         LOG_2( _L("CRepository::Get( KPdpContextManagerLingerArrayCount) >> err: %d"),
-                err);       
-        }        
-      
-    // Write to log    
+                err);
+        }
+
+    // Write to log
     for ( TInt j=0; j < iLingerSettings.Count(); j++ )
         {
         LOG_3( _L("iLingerSettings >> iap: %d, interval: %d"),
         iLingerSettings[ j ].iIap,
-        iLingerSettings[ j ].iInterval);    
+        iLingerSettings[ j ].iInterval);
         }
     }
 

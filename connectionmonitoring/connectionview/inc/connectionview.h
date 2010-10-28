@@ -35,10 +35,6 @@
 
 // Forward declarations
 class HbTranslator;
-
-
-QTM_USE_NAMESPACE
-
 class QSignalMapper;
 
 const QString bearer2G = "2G";

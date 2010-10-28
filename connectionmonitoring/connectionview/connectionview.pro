@@ -17,8 +17,9 @@
 TEMPLATE = app
 TARGET = connview
 
-CONFIG += hb no_icon mobility
-MOBILITY+=bearer
+CONFIG += hb no_icon
+
+QT += network
 
 DEPENDPATH += . inc src
 INCLUDEPATH += .

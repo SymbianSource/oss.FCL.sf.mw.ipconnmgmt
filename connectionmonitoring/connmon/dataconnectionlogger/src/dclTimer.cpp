@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2004 Nokia Corporation and/or its subsidiary(-ies).
+* Copyright (c) 2004-2010 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -59,11 +59,16 @@ CDclTimerAO::~CDclTimerAO()
 // CDclTimerAO::Add
 // -----------------------------------------------------------------------------
 //
-void CDclTimerAO::Add( const TUint& aConnectionId )
+TInt CDclTimerAO::Add( const TUint& aConnectionId )
     {
-    iConnectionIds.Append( aConnectionId );
+    TInt err( KErrNone );
+    err = iConnectionIds.Append( aConnectionId );
 
-    NextTimerAfter();
+    if ( !err )
+        {
+        NextTimerAfter();
+        }
+    return err;
     }
 
 // -----------------------------------------------------------------------------

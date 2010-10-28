@@ -25,9 +25,6 @@
 #endif
 
 
-QTM_USE_NAMESPACE
-
-
 ScrollAreaWidget::ScrollAreaWidget(QGraphicsItem *parent):
     QGraphicsWidget(parent)
 {

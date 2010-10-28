@@ -125,9 +125,12 @@ void CMPMCommsDatAccess::FindAllSnapsL( RArray<TUint>& aSnapIds )
         TUint snapId = dnRecord->iSNAP;
         MPMLOGSTRING2( "CMPMCommsDatAccess::FindAllSnapsL snap %d", snapId )
 
-        // Insert unique ids to array
-        //
-        aSnapIds.InsertInOrder( snapId );
+        // Insert unique IDs to array.
+        TInt err = aSnapIds.InsertInOrder( snapId );
+        if ( err && err != KErrAlreadyExists )
+            {
+            User::Leave( err );
+            }
         delete dnRecord;
         }
 
@@ -240,7 +243,7 @@ void CMPMCommsDatAccess::ValidateIapL(
                 // during the validation of next IAP to support 
                 // using existing WLAN connection SSID.
                 //
-                aSession.MyServer().Events()->AppendConnInfo( aConnId );
+                aSession.MyServer().Events()->AppendConnInfoL( aConnId );
                 aSession.MyServer().Events()->SetConnInfo( aConnId, 
                                                            aIapId, 
                                                            presumedIapId, 
@@ -302,7 +305,7 @@ void CMPMCommsDatAccess::ValidateIapL(
         // during the validation of next IAP to support 
         // using existing PDP context per APN.
         //
-        aSession.MyServer().Events()->AppendConnInfo( aConnId );
+        aSession.MyServer().Events()->AppendConnInfoL( aConnId );
         aSession.MyServer().Events()->SetConnInfo( aConnId, 
                                                    aIapId, 
                                                    presumedIapId, 
@@ -552,8 +555,8 @@ void CMPMCommsDatAccess::DumpSnapsL()
         // 
         if ( found && KErrNotFound == prevRecordIds.Find( linkedAP->RecordId() ) )
             {
-            prevRecordIds.Append( linkedAP->RecordId() );
-            
+            prevRecordIds.AppendL( linkedAP->RecordId() );
+
             // Print the DN and host name pointed by DN-IAP entry.
             // HostName is EText field.
             // 
@@ -1414,8 +1417,8 @@ loading DM selection policy records failed with %d", err )
 
         if ( found && KErrNotFound == prevRecordIds.Find( linkedAP->RecordId() ) )
             {
-            prevRecordIds.Append( linkedAP->RecordId() );
-            
+            prevRecordIds.AppendL( linkedAP->RecordId() );
+
             // Print the DN and host name pointed by DN-IAP entry.
             // HostName is EText field.
             // 
@@ -1581,7 +1584,7 @@ TBool CMPMCommsDatAccess::WlanUnderVirtualL( const TUint32  aVirtualIapId,
         {
         // append this Iap to path
         //
-        aIapPath.Append( aVirtualIapId );
+        aIapPath.AppendL( aVirtualIapId );
         }
     else
         {
@@ -1767,8 +1770,7 @@ void CMPMCommsDatAccess::SearchDNEntriesL( const TUint32&   aSnapId,
             if ( elem.iRanking > 0 )
                 {
                 // Insert elem into RArray
-                // 
-                aDestNetIds.InsertInOrderAllowRepeats(elem, TNetIap::CompareRanking);
+                aDestNetIds.InsertInOrderAllowRepeatsL( elem, TNetIap::CompareRanking );
                 }
             else
                 {
@@ -1893,7 +1895,7 @@ aVirtualIapId is not virtual, return as aRealIapId" )
                 //	
                 if ( aAvailableIAPList[i] != aVirtualIapId )
                     {
-                    tempList.Append( aAvailableIAPList[i] );
+                    tempList.AppendL( aAvailableIAPList[i] );
                     }
                 }
             aSession.IapSelectionL()->ChooseBestIAPL( tempMpmConnPref, tempList );
@@ -2178,51 +2180,51 @@ TBool CMPMCommsDatAccess::IsIntranetSnapL( TUint32 aSnapId )
 // CMPMCommsDatAccess::GetBearerTypeL
 // -----------------------------------------------------------------------------
 //
-TMPMBearerType CMPMCommsDatAccess::GetBearerTypeL( TUint32 aIapId )
+TMPMBearerType CMPMCommsDatAccess::GetBearerTypeL( const TUint32 aIapId )
     {
     MPMLOGSTRING( "CMPMCommsDatAccess::GetBearerTypeL" )
     TMPMBearerType bearerType = EMPMBearerTypeOther;
-    RArray<TUint32> wlanArray;
-    
+
     CMDBSession* db = CMDBSession::NewLC( KCDVersion1_1 );
-    
-    CleanupClosePushL( wlanArray );
-    BuildWlanArrayL(*db, wlanArray);
-    
     CCDIAPRecord* record = LoadIapRecordLC( aIapId, db );
-    
-    TBuf<KMaxTextLength> bearerTypeName( record->iBearerType.GetL() );
+
     TBuf<KMaxTextLength> serviceTypeName( record->iServiceType.GetL() );
-        
+
     if ( ( serviceTypeName == TPtrC( KCDTypeNameOutgoingWCDMA ) ) ||
-         ( serviceTypeName == TPtrC( KCDTypeNameIncomingWCDMA ) ) )
+            ( serviceTypeName == TPtrC( KCDTypeNameIncomingWCDMA ) ) )
         {
         // Packet data
         bearerType = EMPMBearerTypePacketData;
         }
-    else if ( serviceTypeName == TPtrC( KCDTypeNameLANService ) )
+    else
         {
-        // LAN or WLAN
-        TUint32 bearerId( record->iBearer );
-            
-        if ( ( bearerTypeName == TPtrC( KCDTypeNameLANBearer ) ) &&
-             ( IsWlanBearer( wlanArray, record->iBearer ) ) )
+        TBuf<KMaxTextLength> bearerTypeName( record->iBearerType.GetL() );
+        if ( serviceTypeName == TPtrC( KCDTypeNameLANService ) )
             {
-            // WLAN
-            bearerType = EMPMBearerTypeWlan;
+            // LAN or WLAN
+            RArray<TUint32> wlanArray;
+            CleanupClosePushL( wlanArray );
+            BuildWlanArrayL( *db, wlanArray );
+
+            if ( ( bearerTypeName == TPtrC( KCDTypeNameLANBearer ) ) &&
+                    ( IsWlanBearer( wlanArray, record->iBearer ) ) )
+                {
+                // WLAN
+                bearerType = EMPMBearerTypeWlan;
+                }
+            CleanupStack::PopAndDestroy( &wlanArray );
+            }
+        else if ( ( bearerTypeName == TPtrC( KCDTypeNameVirtualBearer ) ) &&
+                ( serviceTypeName == TPtrC ( KCDTypeNameVPNService ) ) )
+            {
+            // VPN
+            bearerType = EMPMBearerTypeVpn;
             }
         }
-    else if ( ( bearerTypeName == TPtrC( KCDTypeNameVirtualBearer ) ) &&
-              ( serviceTypeName == TPtrC ( KCDTypeNameVPNService ) ) )
-        {
-        // VPN
-        bearerType = EMPMBearerTypeVpn;
-        }
-    
+
     CleanupStack::PopAndDestroy( record );
-    CleanupStack::PopAndDestroy( &wlanArray );
     CleanupStack::PopAndDestroy( db );
-    
+
     return bearerType;
     }
 

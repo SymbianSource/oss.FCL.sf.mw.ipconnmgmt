@@ -36,6 +36,8 @@ PRJ_EXPORTS
 ../rom/DisconnectDlg.iby			CORE_MW_LAYER_IBY_EXPORT_PATH(DisconnectDlg.iby)
 ../rom/DisconnectDlgResources.iby		LANGUAGE_MW_LAYER_IBY_EXPORT_PATH(DisconnectDlgResources.iby)
 
+../rom/connectionstatuspopups_resources.iby     LANGUAGE_APP_LAYER_IBY_EXPORT_PATH(connectionstatuspopups_resources.iby)
+
 // export localised loc file
 ../cconndlg/loc/agentdialog.loc				MW_LAYER_LOC_EXPORT_PATH(agentdialog.loc)
 ../ConnectionUiUtilities/loc/connectionuiutilities.loc	MW_LAYER_LOC_EXPORT_PATH(connectionuiutilities.loc)

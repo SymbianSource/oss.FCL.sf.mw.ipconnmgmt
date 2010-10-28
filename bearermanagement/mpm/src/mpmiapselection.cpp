@@ -22,7 +22,9 @@
 #include "mpmconnmonevents.h"
 #include "mpmconfirmdlgstarting.h"
 #include "extendedconnpref.h"
-
+// ONLY for SUT Emualtor test purpose, a flag is defined in the header file 
+#include "mpmsuttest.h"
+// end of define
 // ---------------------------------------------------------------------------
 // CMPMIapSelection::CMPMIapSelection
 // ---------------------------------------------------------------------------
@@ -575,6 +577,24 @@ void CMPMIapSelection::CompleteExplicitSnapConnectionL()
 //
 TBool CMPMIapSelection::CheckGprsServicesAllowedL( TBool aIapLanOrWlan )
     {
+#ifdef _MPM_SUT_TEST_EMULATOR
+    MPMLOGSTRING( "CMPMIapSelection::CheckGprsServicesAllowedL, SUT test ONLY" )
+    TBool retVal = iSession->MyServer().IsVoiceCallActiveL();
+    TBool retVal2 = iSession->MyServer().IsModeGSM();   
+    if ( !iSession->MyServer().IsDTMSupported() )
+        {
+        if( retVal == EFalse || retVal2 == EFalse )
+            {
+            return ETrue;
+            }        
+        if ( !aIapLanOrWlan )
+            {
+            MPMLOGSTRING( "CMPMIapSelection::CheckGprsServicesAllowedL not allowed" )
+            return EFalse;
+            }
+        }
+    return ETrue;
+#endif
     if ( iSession->MyServer().IsVoiceCallActiveL() )
         {
         // Check whether we are in GSM or 3G mode.

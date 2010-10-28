@@ -27,8 +27,6 @@
 class XQSettingsManager;
 class HbIndicator;
 
-QTM_USE_NAMESPACE
-
 const int wlanNotConnected = 0;
 const int wlanConnected = 1;
 

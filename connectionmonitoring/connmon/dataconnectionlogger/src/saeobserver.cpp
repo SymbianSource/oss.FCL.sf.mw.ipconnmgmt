@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2007 Nokia Corporation and/or its subsidiary(-ies).
+* Copyright (c) 2007-2010 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -787,9 +787,9 @@ void CSaeObserver::AddToConnArray( const TSAEConnectionType& aConnType,
     if ( conns && (conns->Find(aConnId) == KErrNotFound) &&
         ((aConnId != EBearerIdGPRS) && (aConnId != EBearerIdWCDMA)) )
         {
-        conns->Append( aConnId );
-        LOG( Log::Printf( _L("DCL: Contexts: GPRS %d, WCDMA %d"),
-             iGPRSConnections.Count(), iWCDMAConnections.Count() ));
+        TInt err = conns->Append( aConnId );
+        LOG( Log::Printf( _L("DCL: Contexts: GPRS %d, WCDMA %d, error: %d"),
+             iGPRSConnections.Count(), iWCDMAConnections.Count(), err ));
         }
     }
 

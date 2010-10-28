@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2004-2006 Nokia Corporation and/or its subsidiary(-ies). 
+* Copyright (c) 2004-2010 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -15,22 +15,19 @@
 *
 */
 
-
 /**
 @file rmpm.cpp
 Mobility Policy Manager server client interface.
 */
 
-// INCLUDE FILES
 #include "rmpm.h"
 #include "mpmcommon.h"
 #include "mpmlauncher.h"
 #include "mpmlogger.h"
 
-// ============================= LOCAL FUNCTIONS ===============================
 
 // -----------------------------------------------------------------------------
-// Panic 
+// Panic
 // Panics the client in case of programming error.
 // -----------------------------------------------------------------------------
 //
@@ -38,9 +35,6 @@ void Panic( TInt aPanic )
     {
     User::Panic( KPanicCategory, aPanic );
     }
-
-
-// ============================ MEMBER FUNCTIONS ===============================
 
 // -----------------------------------------------------------------------------
 // RMPM::LaunchServer
@@ -51,12 +45,11 @@ EXPORT_C TInt RMPM::LaunchServer()
     return KErrNone;
     }
 
-
 // -----------------------------------------------------------------------------
 // RMPM::Connect
 // -----------------------------------------------------------------------------
 //
-EXPORT_C TInt RMPM::Connect(  )
+EXPORT_C TInt RMPM::Connect()
     {
     TRequestStatus status;
     Connect( status );
@@ -66,7 +59,7 @@ EXPORT_C TInt RMPM::Connect(  )
         {
         iConnected = EFalse;
         MPMLOGSTRING2( "RMPM::Connect - Error <%i> in CreateSession", err )
-        } 
+        }
     return err;
     }
 
@@ -81,21 +74,20 @@ EXPORT_C void RMPM::Connect( TRequestStatus& aStatus )
     if ( !iConnected )
         {
         MPMLOGSTRING( "RMPM::Connect: Client connecting to MPM Server" )
-        err = CreateSession( 
+        TVersion version = Version();
+        err = CreateSession(
                 KMPMServerName,
-                Version(),
+                version,
                 KNumMessageSlots,
                 EIpcSession_Unsharable,
                 (TSecurityPolicy*)0,
                 &aStatus );
         if ( err != KErrNone )
             {
-            //Connecting failed, probably because this is the first Connect() attempt.
-            TVersion version = Version();
-            MPMLOGSTRING3("Mobility Policy Manager version %d.%d", version.iMajor, 
-                                                                   version.iMinor )
-            err = MPMLauncher::LaunchServer( KMPMServerImg, 
-                                             KServerUid2, 
+            // Connecting failed, probably because this is the first Connect() attempt.
+            MPMLOGSTRING3("Mobility Policy Manager version %d.%d", version.iMajor, version.iMinor )
+            err = MPMLauncher::LaunchServer( KMPMServerImg,
+                                             KServerUid2,
                                              KServerUid3 );
             if ( err != KErrNone )
                 {
@@ -103,48 +95,49 @@ EXPORT_C void RMPM::Connect( TRequestStatus& aStatus )
                 }
             else
                 {
-                err = CreateSession( 
+                err = CreateSession(
                     KMPMServerName,
-                    Version(),
+                    version,
                     KNumMessageSlots,
                     EIpcSession_Unsharable,
                     (TSecurityPolicy*)0,
                     &aStatus );
 #ifdef _DEBUG
-                if (err != KErrNone)
+                if ( err != KErrNone )
+                    {
                     MPMLOGSTRING2( "RMPM::Connect - Error <%i> in CreateSession", err )
+                    }
 #endif
                 }
-            }   
-        
-        //This can't be else, in case the inner CreateSession() succeeds.
-        if (err == KErrNone)
-           {
-           // session ok but waiting for MPM startup.
-           // We have to assume that it'll be ok.
-           TPtr8 ptr( reinterpret_cast< TUint8* >( NULL ), 0 );
-           TBool errFound = EFalse;
-           for (TUint i=0; ( (i < KNumPtrs) && !errFound ); i++)
-               {
-               err = iPtrArray.Append( ptr );
-               if ( err != KErrNone )
-                   {
-                   MPMLOGSTRING2(
-                       "RMPM::Connect - Error <%i> in ptrArray Append", err )
+            }
+
+        // This can't be else, in case the inner CreateSession() succeeds.
+        if ( err == KErrNone )
+            {
+            // Session ok but waiting for MPM startup.
+            // We have to assume that it'll be ok.
+            TPtr8 ptr( reinterpret_cast< TUint8* >( NULL ), 0 );
+            TBool errFound = EFalse;
+            for ( TUint i = 0; ( ( i < KNumPtrs ) && !errFound ); i++ )
+                {
+                err = iPtrArray.Append( ptr );
+                if ( err != KErrNone )
+                    {
+                    MPMLOGSTRING2( "RMPM::Connect - Error <%i> in ptrArray Append", err )
                     errFound = ETrue;
-                   }
-               }
-           // If everything is fine, set client connected to true.
-           if ( err == KErrNone )
-               {
-               iConnected = ETrue;
-               }
-           // Else close the created session.
-           else
-               {
-               Close();
-               }
-           }
+                    }
+                }
+            // If everything is fine, set client connected to true.
+            if ( err == KErrNone )
+                {
+                iConnected = ETrue;
+                }
+            // Else close the created session.
+            else
+                {
+                Close();
+                }
+            }
         }
     else
         {
@@ -152,15 +145,13 @@ EXPORT_C void RMPM::Connect( TRequestStatus& aStatus )
         err = KErrNone;
         }
 
-    // Finally, always complete the failing connects 
+    // Finally, always complete the failing connects.
     if ( err != KErrNone )
         {
         TRequestStatus* status = &aStatus;
         User::RequestComplete( status, err );
         }
     }
-
-
 
 // -----------------------------------------------------------------------------
 // RMPM::ChooseBestIAP

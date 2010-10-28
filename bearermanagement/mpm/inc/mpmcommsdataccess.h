@@ -278,7 +278,7 @@ class CMPMCommsDatAccess : public CBase
         * @param aIapId Iap id of the connection.
         * @return Type of the bearer.
         */
-        TMPMBearerType GetBearerTypeL( TUint32 aIapId );
+        TMPMBearerType GetBearerTypeL( const TUint32 aIapId );
 
        /**
         * Check if snap is empty.

@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2004,2006 Nokia Corporation and/or its subsidiary(-ies). 
+* Copyright (c) 2004-2010 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -418,11 +418,16 @@ void CAOConnectionManager::HandleInternalConnectionCreatedL(
                                        connInfo, 
                                        iSettings, 
                                        &iSocketServ );
-                                   
-        iLingerArray.Append( ptr );
+
+        err = iLingerArray.Append( ptr );
+        if ( err )
+            {
+            LOG_2( _L("iLingerArray.Append: err: %d"), err );
+            delete ptr;
+            return;
+            }
         }
-                                   
-                                           
+
     if ( iSettings.AccessPointId() == aIapId )
         {
         // Always-on-iap

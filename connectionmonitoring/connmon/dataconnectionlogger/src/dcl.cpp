@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2003-2004 Nokia Corporation and/or its subsidiary(-ies).
+* Copyright (c) 2003-2010 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -1661,17 +1661,25 @@ void CEngine::SwitchToThresholdMode( const TUint aConnectionId, const TUint aThr
             }
         }
 
-    iConnectionMonitor.SetUintAttribute(
+    TInt err = iConnectionMonitor.SetUintAttribute(
             aConnectionId,
             KSubConnectionId,
             KDownlinkDataThreshold,
             threshold );
+    if ( err )
+        {
+        LOGIT1("FAILED to set KDownlinkDataThreshold to ConnMon <%d>", err)
+        }
 
-    iConnectionMonitor.SetUintAttribute(
+    err = iConnectionMonitor.SetUintAttribute(
             aConnectionId,
             KSubConnectionId,
             KUplinkDataThreshold,
             threshold );
+    if ( err )
+        {
+        LOGIT1("FAILED to set KUplinkDataThreshold to ConnMon <%d>", err)
+        }
 
     LOGIT1("Switched to threshold mode, id %d", aConnectionId)
 
@@ -1687,22 +1695,36 @@ void CEngine::SwitchToTimerMode( const TUint aConnectionId )
     LOGENTRFN("CEngine::SwitchToTimerMode()")
     if ( iDclTimerAO != 0 )
         {
-        // Set thresholds to zero.
-        iConnectionMonitor.SetUintAttribute(
-                aConnectionId,
-                KSubConnectionId,
-                KDownlinkDataThreshold,
-                0 );
+        TInt err = iDclTimerAO->Add( aConnectionId );
+        if ( !err )
+            {
+            // Set thresholds to zero.
+            err = iConnectionMonitor.SetUintAttribute(
+                    aConnectionId,
+                    KSubConnectionId,
+                    KDownlinkDataThreshold,
+                    0 );
+            if ( err )
+                {
+                LOGIT1("FAILED to set KDownlinkDataThreshold to ConnMon <%d>", err)
+                }
 
-        iConnectionMonitor.SetUintAttribute(
-                aConnectionId,
-                KSubConnectionId,
-                KUplinkDataThreshold,
-                0 );
+            err = iConnectionMonitor.SetUintAttribute(
+                    aConnectionId,
+                    KSubConnectionId,
+                    KUplinkDataThreshold,
+                    0 );
+            if ( err )
+                {
+                LOGIT1("FAILED to set KUplinkDataThreshold to ConnMon <%d>", err)
+                }
 
-        iDclTimerAO->Add( aConnectionId );
-
-        LOGIT1("Switched to timer mode, id %d", aConnectionId)
+            LOGIT1("Switched to timer mode, id %d", aConnectionId)
+            }
+        else
+            {
+            LOGIT1("Error, RArray::Append failed: %d", err)
+            }
         }
     LOGEXITFN("CEngine::SwitchToTimerMode()")
     }

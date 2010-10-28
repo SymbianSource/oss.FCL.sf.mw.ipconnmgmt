@@ -479,7 +479,7 @@ void CMPMPolicyRequests::IssueRequest()
         PolicyRequest policydata = PolicyRequest();
         policydata.iRequestType  = EPolicyRequestConnect;
         // OK because default granularity is 8 and this is done when first request arrives.
-        iPolicyRequests.Insert(policydata, 0);
+        (void) iPolicyRequests.Insert( policydata, 0 );
         }
 
     S60MCPRLOGSTRING2( "S60MCPR::CMPMPolicyRequests<%x>::IssueRequest() iRequestType %d", this, (TInt)iPolicyRequests[0].iRequestType )

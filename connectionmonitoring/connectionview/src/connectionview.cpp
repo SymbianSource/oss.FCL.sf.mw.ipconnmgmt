@@ -40,11 +40,9 @@
 #include "connectionviewTraces.h"
 #endif
 
-
-QTM_USE_NAMESPACE
-
 const qreal typeLabelWidth = 18.0;
 const QString iapIdentifierPrefix = "I_";
+
 
 ConnectionView::ConnectionView():
     mNetConfigurationManager(new QNetworkConfigurationManager(this)),
@@ -57,7 +55,7 @@ ConnectionView::ConnectionView():
     mTranslator = QSharedPointer<HbTranslator>(new HbTranslator("connectionview"));
    
     // Register custom layout location
-    bool registerStatus = HbStyleLoader::registerFilePath(":/layout/");
+    bool registerStatus = HbStyleLoader::registerFilePath(":connectionview.css");
     Q_ASSERT(registerStatus);
     
     // Map the configurationChanged signal to a slot in order to get
@@ -69,6 +67,7 @@ ConnectionView::ConnectionView():
             SLOT(handleConfigurationChanged(const QNetworkConfiguration&)));
     
     // Create the view and show it
+    setContentsMargins( 0, 0, 0, 0 );
     createView();
     OstTraceFunctionExit0( CONNECTIONVIEW_CONNECTIONVIEW_EXIT );
 }
@@ -123,6 +122,7 @@ void ConnectionView::createView()
     mScrollArea->setScrollDirections(Qt::Vertical);
     mScrollArea->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     mMainLayout->addItem(mScrollArea);
+    mMainLayout->setContentsMargins( 0, 0, 0, 0 );
 
     // Create the mainView and the layout for the window
     mMainView = new HbView();
@@ -130,12 +130,14 @@ void ConnectionView::createView()
     ScrollAreaWidget *scrollContent = new ScrollAreaWidget();
     scrollContent->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     mScrollArea->installEventFilter(scrollContent);
+    mMainView->setContentsMargins( 0, 0, 0, 0 );
     
     mBoxLayout = new QGraphicsLinearLayout(Qt::Vertical);
     mBoxLayout->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     scrollContent->setLayout(mBoxLayout);
     mMainView->setLayout(mMainLayout);
     mScrollArea->setContentWidget(scrollContent);
+    mBoxLayout->setContentsMargins( 0, 0, 0, 0 );
     
     // Create the toolbar and the disconnection action
     mToolBar = new HbToolBar();    
@@ -300,6 +302,8 @@ void ConnectionView::addGroupBox(int iapId, QString iapName)
     groupBox->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Maximum);
     groupBox->setHeading(hbTrId("txt_occ_subhead_connection_details"));
     groupBox->setCollapsable(true);
+  	mMainLayout->addItem( groupBox );
+    groupBox->setContentsMargins( 0, 0, 0, 0 );
     
     // Create the disconnection button
     HbPushButton* button = new HbPushButton(
@@ -308,11 +312,13 @@ void ConnectionView::addGroupBox(int iapId, QString iapName)
     button->setSizePolicy(QSizePolicy::Preferred, 
                           QSizePolicy::Preferred, 
                           QSizePolicy::PushButton);
+   	mMainLayout->addItem( button );
     
     // Create the horizontal layout for the labels
     QGraphicsLinearLayout *labelLayout = new QGraphicsLinearLayout(Qt::Horizontal);
     labelLayout->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     HbLabel *typeLabel = new HbLabel(hbTrId("txt_occ_list_name"));
+    labelLayout->setContentsMargins( 0, 0, 0, 0 );
 
     // get the pixel size matching the spesified 18 units using the HbDeviceProfile
     // and set the width of the label

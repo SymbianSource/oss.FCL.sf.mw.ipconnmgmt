@@ -632,6 +632,20 @@ namespace S60MCprSimpleSelectActivity
         TPolicyConnPref* policypref = (TPolicyConnPref*)aCompletedRequest.iPolicyPref;
 
         iNode.SetPolicyPrefs( *policypref );
+        
+        // Change APId to match SNAP if available.
+        // policypref valid, will PolicyResponse not called otherwise.
+        //
+        TUint32 snap = policypref->SnapAPId();      
+        if ( snap > 0 )
+            {
+            S60MCPRLOGSTRING2("S60MCPR<%x>::CChooseBestIAPCb::PolicyResponse() MCPR Id changed to %d",
+                    (TInt*)&iNode,snap)
+                    
+            // Change the provider info so that it can be found by parties joining to certain SNAP.                    
+            const TProviderInfo& pi = iNode.ProviderInfo();
+            iNode.SetProviderInfo( TProviderInfo( pi.TierId(), snap, &iNode ));
+            }
 
         S60MCPRLOGSTRING3("S60MCPR<%x>::CChooseBestIAPCb::PolicyResponse() IAP %d NET %d",
                   (TInt*)&iNode,policypref->IapId(),policypref->NetId())

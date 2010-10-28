@@ -117,7 +117,7 @@ class CMPMConnMonEvents : public CBase, public MConnectionMonitorObserver
         * @since 3.2
         * @param aConnId Connection Id.
         */                
-        void AppendConnInfo( const TUint& aConnId );
+        void AppendConnInfoL( const TUint& aConnId );
 
         /**
         * Removing connection info.

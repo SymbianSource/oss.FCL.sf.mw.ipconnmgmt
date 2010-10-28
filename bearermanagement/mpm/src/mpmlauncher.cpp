@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2004-2005 Nokia Corporation and/or its subsidiary(-ies). 
+* Copyright (c) 2004-2010 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -20,26 +20,22 @@
 Mobility Policy Manager client DLL entry point.
 */
 
-// INCLUDE FILES
 #include <e32std.h>
 #include "mpmlauncher.h"
 #include "mpmlogger.h"
 
-// ============================= LOCAL FUNCTIONS ===============================
-
-// ============================ MEMBER FUNCTIONS ===============================
 
 // -----------------------------------------------------------------------------
 // MPMLauncher::LaunchServer
 // -----------------------------------------------------------------------------
 //
 TInt MPMLauncher::LaunchServer(
-    const TDesC& aServerFileName,
-    const TUid& aServerUid2,
-    const TUid& aServerUid3)
+        const TDesC& aServerFileName,
+        const TUid& aServerUid2,
+        const TUid& aServerUid3 )
     {
     MPMLOGSTRING("MPMLauncher::LaunchServer")
-    const TUidType serverUid(KNullUid,aServerUid2,aServerUid3);
+    const TUidType serverUid( KNullUid, aServerUid2, aServerUid3 );
     RSemaphore semaphore;
     TInt err( KErrNone );
 
@@ -47,15 +43,15 @@ TInt MPMLauncher::LaunchServer(
     if ( err != KErrNone )
         {
         // Creating semaphore failed, which means some other thread is
-        // creating the server right. Propagate error KErrServerBusy
+        // creating the server right now. Propagate error KErrServerBusy
         // to inform the client it should try connecting again.
         return KErrServerBusy;
         }
-    
+
     MPMLOGSTRING("Create a new server process")
     RProcess server;
-    TInt r=server.Create(aServerFileName,KNullDesC,serverUid);
-    
+    TInt r = server.Create( aServerFileName, KNullDesC, serverUid );
+
     if ( r != KErrNone )
         {
         MPMLOGSTRING2("Server process creation returned error: %d", r)
@@ -63,28 +59,23 @@ TInt MPMLauncher::LaunchServer(
         return r;
         }
     TRequestStatus stat;
-    server.Rendezvous(stat);
+    server.Rendezvous( stat );
     if ( stat != KRequestPending )
         {
-        server.Kill(0);        // abort startup
+        server.Kill( 0 ); // Abort startup.
         }
     else
         {
-        server.Resume();    // logon OK - start the server
+        server.Resume(); // Start the server.
         }
-    User::WaitForRequest(stat);        // wait for start or death
-    // we can't use the 'exit reason' if the server panicked as this
+    User::WaitForRequest( stat ); // Wait for start or death.
+    // We can't use the 'exit reason' if the server panicked as this
     // is the panic 'reason' and may be '0' which cannot be distinguished
-    // from KErrNone
+    // from KErrNone.
     r = ( server.ExitType() == EExitPanic ) ? KErrGeneral : stat.Int();
     server.Close();
     semaphore.Close();
     return r;
     }
 
-
-// ========================== OTHER EXPORTED FUNCTIONS =========================
-
-
-//  End of File 
-
+// End of File

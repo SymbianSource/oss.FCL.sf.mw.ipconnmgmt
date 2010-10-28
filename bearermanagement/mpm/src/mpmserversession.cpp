@@ -3272,6 +3272,7 @@ IAP Id = %d, SNAP Id = %d, Net Id = %d",
             TPolicyConnPref pref;
             pref.SetIapId( aPolicyPref->IapId() );
             pref.SetNetId( aPolicyPref->NetId() );
+            pref.SetSnapAPId( aPolicyPref->SnapId() );
             TInt serviceid(0);
             
             // Resolve the original serviceid for the application.

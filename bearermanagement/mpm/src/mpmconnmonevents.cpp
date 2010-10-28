@@ -127,18 +127,18 @@ void CMPMConnMonEvents::RemoveReqPtr( const CMPMConnMonReqs* aReq )
 // -----------------------------------------------------------------------------
 // CMPMConnMonEvents::AppendConnInfo
 // -----------------------------------------------------------------------------
-// 
-void CMPMConnMonEvents::AppendConnInfo( const TUint& aConnId  )
+//
+void CMPMConnMonEvents::AppendConnInfoL( const TUint& aConnId )
     {
     TInt index( KErrNotFound );
     TConnInfo info;
-    
+
     info.iConnId = aConnId;
     index = iConnInfoArray.Find( info );
 
     if ( index == KErrNotFound )
         {
-        iConnInfoArray.Append( info );
+        iConnInfoArray.AppendL( info );
         }
     }
 

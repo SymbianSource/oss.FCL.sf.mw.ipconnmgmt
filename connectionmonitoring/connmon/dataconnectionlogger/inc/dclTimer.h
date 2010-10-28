@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2004 Nokia Corporation and/or its subsidiary(-ies).
+* Copyright (c) 2004-2010 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -43,9 +43,10 @@ class CDclTimerAO : public CActive
         * Starts the timer mode logging for a connection.
         * @param aConnectionId Id of the connection.
         * @since
-        * @return void.
+        * @return KErrNone if successful, otherwise one of the system-wide
+        * error codes.
         */
-        void Add( const TUint& aConnectionId );
+        TInt Add( const TUint& aConnectionId );
 
         /**
         * Stops the timer mode logging for a connection.

@@ -24,8 +24,6 @@ SUBDIRS += \
     cppacketdataapplugin \
     cpwlanapplugin
 
-CONFIG += ordered
+CONFIG += ordered hb
 
-symbian*: {
-    SYMBIAN_PLATFORMS = WINSCW ARMV5
-} 
+TRANSLATIONS = cmmanager.ts
