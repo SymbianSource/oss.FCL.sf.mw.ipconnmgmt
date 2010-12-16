@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2004-2009 Nokia Corporation and/or its subsidiary(-ies).
+* Copyright (c) 2009-2010 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -17,8 +17,13 @@
 
 
 // INCLUDE FILES
-#include "mpmroamingwatcher.h"
+
+#include <cmgenconnsettings.h>
+
+#include "mpmserver.h"
 #include "mpmlogger.h"
+#include "mpmnetworkwatcher.h"
+#include "mpmroamingwatcher.h"
 
 // EXTERNAL DATA STRUCTURES
 // None.
@@ -43,24 +48,22 @@
 // FORWARD DECLARATIONS
 // None.
 
-// ============================= LOCAL FUNCTIONS ===============================
-// None.
-
-// ============================ MEMBER FUNCTIONS ===============================
-
 // -----------------------------------------------------------------------------
 // CMPMRoamingWatcher::CMPMRoamingWatcher
 // C++ default constructor can NOT contain any code, that might leave.
 // -----------------------------------------------------------------------------
 //
-CMPMRoamingWatcher::CMPMRoamingWatcher( RMobilePhone& aMobilePhone )
+CMPMRoamingWatcher::CMPMRoamingWatcher( RMobilePhone& aMobilePhone,
+                                        CMPMServer* aServer )
     : CActive( CActive::EPriorityStandard ),
       iMobilePhone( aMobilePhone ),
+      iServer( aServer ),
       iRegistrationStatus( RMobilePhone::ERegistrationUnknown ),
       iRoamingStatus( EMPMRoamingStatusUnknown ),
-      iCurrentCountryCode( 0 )
+      iPreviousValidRoamingStatus( EMPMRoamingStatusUnknown )
     {
     MPMLOGSTRING( "CMPMRoamingWatcher::CMPMRoamingWatcher" )
+
     CActiveScheduler::Add( this );
     }
 
@@ -72,20 +75,11 @@ CMPMRoamingWatcher::CMPMRoamingWatcher( RMobilePhone& aMobilePhone )
 void CMPMRoamingWatcher::ConstructL()
     {
     MPMLOGSTRING( "CMPMRoamingWatcher::ConstructL" )
-    // Retrieve current status
-    TRequestStatus status( KErrNone );
-    RMobilePhone::TMobilePhoneRegistrationStatus registrationStatus ( RMobilePhone::ERegistrationUnknown );
-    iMobilePhone.GetNetworkRegistrationStatus( status, registrationStatus );
-    User::WaitForRequest( status );
-        
-    if( status.Int() == KErrNone )
-        {
-        iRoamingStatus = MapRegistrationStatus( registrationStatus );
-        MPMLOGSTRING2( "CMPMRoamingWatcher::ConstructL iRoamingStatus: %d", iRoamingStatus )
-        }
 
-    //Start waiting notification    
-    iMobilePhone.NotifyNetworkRegistrationStatusChange( iStatus, iRegistrationStatus );
+    iNetworkWatcher = CMPMNetworkWatcher::NewL( iMobilePhone, this );
+            
+    // Retrieve current status
+    iMobilePhone.GetNetworkRegistrationStatus( iStatus, iRegistrationStatus );
     SetActive();
     }
 
@@ -94,24 +88,28 @@ void CMPMRoamingWatcher::ConstructL()
 // Two-phased constructor.
 // -----------------------------------------------------------------------------
 //
-CMPMRoamingWatcher* CMPMRoamingWatcher::NewL( RMobilePhone& aMobilePhone )
+CMPMRoamingWatcher* CMPMRoamingWatcher::NewL( RMobilePhone& aMobilePhone,
+                                              CMPMServer* aServer )
     {
     MPMLOGSTRING( "CMPMRoamingWatcher::NewL" )
-    CMPMRoamingWatcher* self = new( ELeave ) CMPMRoamingWatcher( aMobilePhone );
+    CMPMRoamingWatcher* self = new( ELeave ) CMPMRoamingWatcher( aMobilePhone, aServer );
     CleanupStack::PushL( self );
     self->ConstructL();
     CleanupStack::Pop( self );
+    
     return self;
     }
 
 // -----------------------------------------------------------------------------
-// CMPMRoamingWatcher::~CIpdcRoamingObserver
+// CMPMRoamingWatcher::~CMPMRoamingWatcher
 // Destructor.
 // -----------------------------------------------------------------------------
 //
 CMPMRoamingWatcher::~CMPMRoamingWatcher()
     {
     MPMLOGSTRING( "CMPMRoamingWatcher::~CMPMRoamingWatcher" )
+
+    delete iNetworkWatcher;
     Cancel();
     }
 
@@ -124,31 +122,21 @@ void CMPMRoamingWatcher::RunL()
     {
     MPMLOGSTRING( "CMPMRoamingWatcher::RunL" )
 
-    TMPMRoamingStatus roamingStatus = EMPMRoamingStatusUnknown;
-    RMobilePhone::TMobilePhoneRegistrationStatus registrationStatus = RMobilePhone::ERegistrationUnknown;
-
-    TInt status = iStatus.Int();
-
-    //store current value if there was no error
-    if( status == KErrNone )
+    // iRegistrationStatus has been updated when coming to this RunL().
+            
+    if (iStatus.Int() != KErrNone)
         {
-        registrationStatus = iRegistrationStatus;
+        MPMLOGSTRING2( "CMPMRoamingWatcher::RunL: Erroneous registration event, iStatus: %d", iStatus.Int() )
+        iRegistrationStatus = RMobilePhone::ERegistrationUnknown;
         }
+    
+    // Update iRoamingStatus with current registration status value.
+    UpdateRoamingStatus(); 
 
-    //Start listening next status change
+    // Start listening for next status change
     iMobilePhone.NotifyNetworkRegistrationStatusChange( iStatus, iRegistrationStatus );
     SetActive();
-
-    //Map current value
-    roamingStatus = MapRegistrationStatus( registrationStatus ); 
-
-    if( roamingStatus != iRoamingStatus )
-        {
-        iRoamingStatus = roamingStatus;
-        MPMLOGSTRING2( "CMPMRoamingWatcher::RunL iRoamingStatus: %d", iRoamingStatus )
-        }
     }
-
 
 // -----------------------------------------------------------------------------
 // CMPMRoamingWatcher::RunError
@@ -158,6 +146,7 @@ void CMPMRoamingWatcher::RunL()
 TInt CMPMRoamingWatcher::RunError( TInt /*aError*/ )
     {
     MPMLOGSTRING( "CMPMRoamingWatcher::RunError" )
+
     return KErrNone;
     }
 
@@ -169,20 +158,25 @@ TInt CMPMRoamingWatcher::RunError( TInt /*aError*/ )
 void CMPMRoamingWatcher::DoCancel()
     {
     MPMLOGSTRING( "CMPMRoamingWatcher::DoCancel" )
+
     iMobilePhone.CancelAsyncRequest( EMobilePhoneNotifyNetworkRegistrationStatusChange );
     }
 
 // -----------------------------------------------------------------------------
-// CMPMRoamingWatcher::MapRegistrationStatus
-//
+// CMPMRoamingWatcher::UpdateRoamingStatus
+// Updates the class variable iRoamingStatus.
 // -----------------------------------------------------------------------------
 //
-TMPMRoamingStatus CMPMRoamingWatcher::MapRegistrationStatus( RMobilePhone::TMobilePhoneRegistrationStatus aStatus )
+void CMPMRoamingWatcher::UpdateRoamingStatus()
     {
-    MPMLOGSTRING( "CMPMRoamingWatcher::MapRegistrationStatus" )
+    MPMLOGSTRING2( "CMPMRoamingWatcher::UpdateRoamingStatus: iRoamingStatus: %d", iRoamingStatus )
+    MPMLOGSTRING2( "CMPMRoamingWatcher::UpdateRoamingStatus: iPreviousValidRoamingStatus: %d",
+                   iPreviousValidRoamingStatus )            
+    MPMLOGSTRING2( "CMPMRoamingWatcher::UpdateRoamingStatus: iRegistrationStatus: %d", iRegistrationStatus )
+    
     TMPMRoamingStatus roamingStatus = EMPMRoamingStatusUnknown;
 
-    switch (aStatus)
+    switch (iRegistrationStatus)
         {
         case RMobilePhone::ERegisteredOnHomeNetwork:
             {
@@ -192,37 +186,30 @@ TMPMRoamingStatus CMPMRoamingWatcher::MapRegistrationStatus( RMobilePhone::TMobi
             
         case RMobilePhone::ERegisteredRoaming:
             {
-            RMobilePhone::TMobilePhoneNetworkInfoV1 network;
-            RMobilePhone::TMobilePhoneNetworkInfoV1Pckg networkPckg( network );
+            RMobilePhone::TMobilePhoneNetworkInfoV1 currentNetwork;
 
             RMobilePhone::TMobilePhoneNetworkInfoV1 homeNetwork;
             RMobilePhone::TMobilePhoneNetworkInfoV1Pckg homeNetworkPckg( homeNetwork );
 
-            TRequestStatus status( KErrNone );
+            currentNetwork = iNetworkWatcher->NetworkStatus();
 
-            iMobilePhone.GetCurrentNetwork(status, networkPckg);
+            TRequestStatus status( KErrNone );
+            iMobilePhone.GetHomeNetwork( status, homeNetworkPckg );
             User::WaitForRequest( status );
 
-            if(status.Int() == KErrNone)
+            if (status.Int() == KErrNone)
                 {
-                iMobilePhone.GetHomeNetwork(status, homeNetworkPckg);
-                User::WaitForRequest( status );        
-
-                if(status.Int() == KErrNone)
+                RMobilePhone::TMobilePhoneNetworkCountryCode countryCode =
+                        currentNetwork.iCountryCode;
+                if (countryCode.Compare( homeNetwork.iCountryCode ) == 0)
                     {
-                    RMobilePhone::TMobilePhoneNetworkCountryCode countryCode = network.iCountryCode;
-                    
-                    if(countryCode.Compare(homeNetwork.iCountryCode) == 0)
-                        {
-                        roamingStatus = EMPMNationalRoaming;
-                        }
-                    else
-                        {
-                        roamingStatus = EMPMInternationalRoaming;
-                        }
-                    iCurrentCountryCode = countryCode; 
-                    }                
-                }
+                    roamingStatus = EMPMNationalRoaming;
+                    }
+                else
+                    {
+                    roamingStatus = EMPMInternationalRoaming;
+                    }
+                }                
             break;
             }
             
@@ -232,11 +219,32 @@ TMPMRoamingStatus CMPMRoamingWatcher::MapRegistrationStatus( RMobilePhone::TMobi
             break;
             }            
         }
-    MPMLOGSTRING2( "CMPMRoamingWatcher::MapRegistrationStatus roamingStatus: %d", roamingStatus )
 
-    return roamingStatus;
+    // Stop cellular connections if the roaming status has really changed
+    if( ( roamingStatus != EMPMRoamingStatusUnknown ) &&
+        ( roamingStatus != iPreviousValidRoamingStatus ) &&
+        ( iPreviousValidRoamingStatus != EMPMRoamingStatusUnknown ) )
+        {
+        TUint32 currentDataUsage = iServer->DataUsageWatcher()->CellularDataUsage();
+
+        // All cellular connections are stopped when roaming has occurred and cellular
+        // data usage needs to be confirmed from user or it is disabled 
+        if ( ( currentDataUsage == ECmCellularDataUsageConfirm ) ||
+             ( currentDataUsage == ECmCellularDataUsageDisabled ) )
+            {
+            iServer->StopCellularConns();
+            }
+        }
+
+    // Store the previous roaming status if it is a valid roaming status
+    if ( roamingStatus != EMPMRoamingStatusUnknown )
+        {
+        iPreviousValidRoamingStatus = roamingStatus;
+        }
+
+    iRoamingStatus = roamingStatus;
+    MPMLOGSTRING2( "CMPMRoamingWatcher::UpdateRoamingStatus: iRoamingStatus: %d", iRoamingStatus )
     }
-
 
 // -----------------------------------------------------------------------------
 // CMPMRoamingWatcher::RoamingStatus
@@ -246,10 +254,8 @@ TMPMRoamingStatus CMPMRoamingWatcher::MapRegistrationStatus( RMobilePhone::TMobi
 TMPMRoamingStatus CMPMRoamingWatcher::RoamingStatus() const
     {
     MPMLOGSTRING2( "CMPMRoamingWatcher::RoamingStatus iRoamingStatus: %d", iRoamingStatus )
+
     return iRoamingStatus;
     }
-
-// ========================== OTHER EXPORTED FUNCTIONS =========================
-// None.
 
 // End of File

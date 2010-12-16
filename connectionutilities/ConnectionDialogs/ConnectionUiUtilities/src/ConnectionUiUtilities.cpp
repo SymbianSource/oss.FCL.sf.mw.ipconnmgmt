@@ -472,12 +472,39 @@ EXPORT_C void CConnectionUiUtilities::RoamingToMorePrefMethodQuery(
 //
 EXPORT_C void CConnectionUiUtilities::ConfirmMethodUsageQuery(
                                                TMsgQueryLinkedResults& aResult,
-                                               const TBool aHomeNetwork,
+                                               const TBool /* aHomeNetwork */,
                                                TRequestStatus& aStatus )
     {
-    iImpl->ConfirmMethodUsageQuery( aResult, aHomeNetwork, aStatus );
+    // This function is deprecated
+    aResult = EMsgQueryCancelled;
+    TRequestStatus* pS = &aStatus;
+    User::RequestComplete( pS, KErrNotSupported );
     }
 
+// ---------------------------------------------------------
+// CConnectionUiUtilities::ConfirmMethodUsageQuery
+// ---------------------------------------------------------
+//
+EXPORT_C void CConnectionUiUtilities::ConfirmMethodUsageQuery(
+                                               TMsgQueryLinkedResults& aResult,
+                                               const TCellularDataUsageQueryType aQueryType,
+                                               TRequestStatus& aStatus )
+    {
+    // Show dialog only when the dialog query type is supported
+    if ( ( aQueryType == ECellularDataUsageQueryHomeNetwork ) ||
+         ( aQueryType == ECellularDataUsageQueryVisitorNetwork ) ||
+         ( aQueryType == ECellularDataUsageQueryNationalRoaming ) )
+        {
+        iImpl->ConfirmMethodUsageQuery( aResult, aQueryType, aStatus );        
+        }
+    else
+        {
+        // Faulty query type given
+        aResult = EMsgQueryCancelled;
+        TRequestStatus* pS = &aStatus;
+        User::RequestComplete( pS, KErrArgument );
+        }
+    }
 
 // ---------------------------------------------------------
 // CConnectionUiUtilities::OffLineWlanNote

@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2007 Nokia Corporation and/or its subsidiary(-ies).
+* Copyright (c) 2007-2010 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -211,7 +211,14 @@ class CGSConnSettingsPlugin : public CGSBaseView, public MGSPluginLoadObserver, 
          * @param aResourceId Text of the new label
          * @param aCommandId Command id of the MSK
          */
-        void SetMiddleSoftKeyLabelL( const TInt aResourceId, const TInt aCommandId );       
+        void SetMiddleSoftKeyLabelL( const TInt aResourceId, const TInt aCommandId );
+
+        /**
+         * Read KCellularDataUsageSettingAutomaticInHomeNetwork
+         * from Central Repository. When feature is enabled an additional
+         * list item is added to Data usage in home country -dialog.
+         */
+        TInt HomeOperatorSetting() const;
         
         
     private: //Private data
@@ -246,6 +253,12 @@ class CGSConnSettingsPlugin : public CGSBaseView, public MGSPluginLoadObserver, 
          * Flag is uised to ignore duplicate Window's events
          */
         TBool iProcessing;
+        
+        /**
+         * Flag is set when additional item 'Home network only'
+         * is added to Data usage in home country -dialog.
+         */
+        TBool iHomeOperatorSettingSupported;
     };
 
 

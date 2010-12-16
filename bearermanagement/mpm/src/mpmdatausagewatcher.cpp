@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2008-2009 Nokia Corporation and/or its subsidiary(-ies). 
+ * Copyright (c) 2008-2010 Nokia Corporation and/or its subsidiary(-ies). 
  * All rights reserved.
  * This component and the accompanying materials are made available
  * under the terms of "Eclipse Public License v1.0"
@@ -120,10 +120,13 @@ void CMpmDataUsageWatcher::RunL()
 
         if ( GetCurrentDataUsageValue() == KErrNone )
             {
-            // Stop cellular connections if the setting changes into Disabled.
-            if ( oldCellularDataUsage != ECmCellularDataUsageDisabled &&
-                    iCellularDataUsage == ECmCellularDataUsageDisabled &&
-                    iServer->RoamingWatcher()->RoamingStatus() != EMPMRoamingStatusUnknown )
+            // Stop cellular connections if the setting changes from automatic into
+            // Disabled or Confirm. Stop also when changing from confirm to disabled.
+            if ( ( ( oldCellularDataUsage == ECmCellularDataUsageAutomatic &&
+                 iCellularDataUsage != ECmCellularDataUsageAutomatic ) ||
+                 ( oldCellularDataUsage == ECmCellularDataUsageConfirm &&
+                 iCellularDataUsage == ECmCellularDataUsageDisabled ) ) &&
+                 iServer->RoamingWatcher()->RoamingStatus() != EMPMRoamingStatusUnknown )
                 {
                 iServer->StopCellularConns();
                 }

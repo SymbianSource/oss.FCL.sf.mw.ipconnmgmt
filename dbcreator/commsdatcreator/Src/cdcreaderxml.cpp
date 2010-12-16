@@ -477,6 +477,7 @@ _LIT16( KDefaultConnectionType,     "DefaultConnectionType" );
 _LIT16( KDefaultConnectionName,     "DefaultConnectionName" );
 _LIT16( KUsageOfWlan,               "UsageOfWlan" );
 _LIT16( KCellularDataUsageHome,     "CellularDataUsageHome" );
+_LIT16( KAutomaticRoamingInHomeNetworkVisible, "AutomaticRoamingInHomeNetworkVisible" );
 _LIT16( KCellularDataUsageVisitor,  "CellularDataUsageVisitor" );
 _LIT16( KGprsLastSocketActivityTimeout, "GprsLastSocketActivityTimeout" );
 _LIT16( KGprsLastSessionClosedTimeout,  "GprsLastSessionClosedTimeout" );
@@ -1781,6 +1782,7 @@ void CReaderXML::FillGlobalParams()
     iGlobalParams.Append( EInputParams( EDefaultConnectionName, KDefaultConnectionName ) );
     iGlobalParams.Append( EInputParams( EUsageOfWlan,           KUsageOfWlan ) );
     iGlobalParams.Append( EInputParams( ECellularDataUsageHome,         KCellularDataUsageHome ) );
+    iGlobalParams.Append( EInputParams( EAutomaticRoamingInHomeNetworkVisible, KAutomaticRoamingInHomeNetworkVisible ) );
     iGlobalParams.Append( EInputParams( ECellularDataUsageVisitor,      KCellularDataUsageVisitor ) );
     iGlobalParams.Append( EInputParams( EGprsLastSocketActivityTimeout, KGprsLastSocketActivityTimeout ) );
     iGlobalParams.Append( EInputParams( EGprsLastSessionClosedTimeout,  KGprsLastSessionClosedTimeout ) );

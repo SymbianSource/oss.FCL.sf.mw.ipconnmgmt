@@ -96,10 +96,31 @@ void CCellularDataUsageKeyUpdater::UpdateKeyL( const TInt aRegistration ) const
             {
             value = occSettings.iCellularDataUsageVisitor;
             }
-        else if ( aRegistration == ENetworkRegistrationExtHomeNetwork ||
-                  aRegistration == ENetworkRegistrationExtRoamingNational )
+        else if ( aRegistration == ENetworkRegistrationExtHomeNetwork )
             {
-            value = occSettings.iCellularDataUsageHome;
+            // enum ECmCellularDataUsageAutomaticInHomeNetwork must be hidden
+            // from clients that listen to KCurrentCellularDataUsage.
+            if ( occSettings.iCellularDataUsageHome == ECmCellularDataUsageAutomaticInHomeNetwork )
+                {
+                value = ECmCellularDataUsageAutomatic;
+                }
+            else
+                {
+                value = occSettings.iCellularDataUsageHome;
+                }
+            }
+        else if ( aRegistration == ENetworkRegistrationExtRoamingNational )
+            {
+            // enum ECmCellularDataUsageAutomaticInHomeNetwork must be hidden
+            // from clients that listen to KCurrentCellularDataUsage.
+            if ( occSettings.iCellularDataUsageHome == ECmCellularDataUsageAutomaticInHomeNetwork )
+                {
+                value = ECmCellularDataUsageConfirm;
+                }
+            else
+                {
+                value = occSettings.iCellularDataUsageHome;
+                }
             }
         }
 

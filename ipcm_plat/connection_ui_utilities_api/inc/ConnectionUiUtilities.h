@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2002 Nokia Corporation and/or its subsidiary(-ies). 
+* Copyright (c) 2002-2010 Nokia Corporation and/or its subsidiary(-ies). 
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -50,7 +50,19 @@ enum TMsgQueryLinkedResults
     EMsgQueryAutomatically,     
     EMsgQueryThisTime
     };
-    
+
+/**
+* Cellular data usage query types in different networks.
+*/
+enum TCellularDataUsageQueryType
+    {
+    /** Query type when in home network. */
+    ECellularDataUsageQueryHomeNetwork = 0,
+    /** Query type when in visitor network. */
+    ECellularDataUsageQueryVisitorNetwork,
+    /** Query type when roaming nationally. */
+    ECellularDataUsageQueryNationalRoaming
+    };
 
 // CLASS DECLARATION
 /*
@@ -139,7 +151,6 @@ NONSHARABLE_CLASS( CConnectionUiUtilities ) : public CBase
         */
         IMPORT_C void  CancelSearchWLANNetwork();
 
-        
         /**
         * Notifier. Shows a query, "Do you want to create a WLAN connection in 
         * Off-line mode?"
@@ -161,7 +172,8 @@ NONSHARABLE_CLASS( CConnectionUiUtilities ) : public CBase
         /**
         * @deprecated
         *
-        * Use TBool EasyWepDlg( TDes* aKey, TBool& aHex )!
+        * Use:
+        *     TBool EasyWepDlg( TDes* aKey, TBool& aHex );
         *
         * Notifier. Shows a data query, "Enter WEP key for WLAN" 
         * @param aKey Key entered by user. Default value can be passed
@@ -299,7 +311,13 @@ NONSHARABLE_CLASS( CConnectionUiUtilities ) : public CBase
                     TWlanConnectionExtentedSecurityMode& aExtendedSecurityMode );                        
 
         /**
-        * DEPRECATED, PLEASE USE ASYNC VERSION!
+        * @deprecated
+        *
+        * Use:
+        *     void ConnectedViaDestAndConnMethodNote( const TUint32 aDestId, 
+        *                                             const TUint32 aConnMId, 
+        *                                             TRequestStatus& aStatus );
+        *
         * Confirmation note is used after the connection has been successfully 
         * established via destination and connection method.
         * @param aDestId Id of used destination.
@@ -327,7 +345,8 @@ NONSHARABLE_CLASS( CConnectionUiUtilities ) : public CBase
         /**
         * @deprecated
         *
-        * Use void ReconnectToMethodQuery( const TUint32 aDestId, 
+        * Use:
+        *     void ReconnectToMethodQuery( const TUint32 aDestId, 
         *                                  const TUint32 aConnMId, 
         *                                  const TBool aNextBestExists,
         *                                  TMsgQueryLinkedResults& aResult,
@@ -352,11 +371,12 @@ NONSHARABLE_CLASS( CConnectionUiUtilities ) : public CBase
         /**
         * @deprecated
         *
-        * Use void RoamingToMorePrefMethodQuery( const TUint32 aDestId, 
-        *                                     const TUint32 aConnMId, 
-        *                                     const TBool aNextBestExists,
-        *                                     TMsgQueryLinkedResults& aResult,
-        *                                     TRequestStatus& aStatus );
+        * Use:
+        *     void RoamingToMorePrefMethodQuery( const TUint32 aDestId, 
+        *                                        const TUint32 aConnMId, 
+        *                                        const TBool aNextBestExists,
+        *                                        TMsgQueryLinkedResults& aResult,
+        *                                        TRequestStatus& aStatus );
         *
         * Confirmation query is used when more preferred method becomes 
         * available
@@ -399,18 +419,19 @@ NONSHARABLE_CLASS( CConnectionUiUtilities ) : public CBase
         /**
         * @deprecated
         *
-        * Use void ConfirmMethodUsageQuery( const TUint32 aDestId, 
-        *                                   const TUint32 aConnMId, 
-        *                                   const TBool aNextBestExists,
-        *                                   TMsgQueryLinkedResults& aResult,
+        * Use:
+        *     void ConfirmMethodUsageQuery( TMsgQueryLinkedResults& aResult, 
+        *                                   const TCellularDataUsageQueryType aQueryType,
         *                                   TRequestStatus& aStatus );
         *
-        * Notifier. Shows a query, "Connect to\n '%0U' via\n '%1U'?"
-        * @param aDestId Id of used destination.
-        * @param aConnMId Id of used connection method.
-        * @param aResult Result of user selection, ETrue if user accepted 
-        *                query, EFalse otherwise
-        * @param aStatus Status object of notifier.
+        * This function does not work anymore but is here for binary and
+        * source compatibility purposes.
+        * KErrNotSupported is returned if this function is called.
+        *
+        * @param aDestId Ignored
+        * @param aConnMId Ignored
+        * @param aResult EFalse
+        * @param aStatus KErrNotSupported
         */
         IMPORT_C void ConfirmMethodUsageQuery( const TUint32 aDestId, 
                                                const TUint32 aConnMId, 
@@ -423,7 +444,12 @@ NONSHARABLE_CLASS( CConnectionUiUtilities ) : public CBase
         IMPORT_C  void CancelConfirmMethodUsageQuery();
 
         /**
-        * DEPRECATED, PLEASE USE ASYNC VERSION!
+        * @deprecated
+        *
+        * Use:
+        *     void ConnectedViaConnMethodNote( const TUint32 aConnMId, 
+        *                                      TRequestStatus& aStatus );
+        *
         * Confirmation note is used after the connection has been successfully 
         * established via a connection method.
         * @param aConnMId Id of used connection method.
@@ -478,15 +504,35 @@ NONSHARABLE_CLASS( CConnectionUiUtilities ) : public CBase
                                             TRequestStatus& aStatus );
 
         /**
-        * Notifier. Shows a query, "Connect to\n '%0U' via\n '%1U'?"
-        * @param aResult Result of user selection
-        * @param aHomeNetwork Home or foreign network.
-        * @param aStatus Status object of notifier
+        * @deprecated
+        *
+        * Use:
+        *     void ConfirmMethodUsageQuery( TMsgQueryLinkedResults& aResult, 
+        *                                   const TCellularDataUsageQueryType aQueryType,
+        *                                   TRequestStatus& aStatus );
+        *
+        * This function does not work anymore but is here for binary and
+        * source compatibility purposes.
+        * KErrNotSupported is returned if this function is called.
+        *
+        * @param aResult Ignored
+        * @param aHomeNetwork Ignored
+        * @param aStatus KErrNotSupported
         */
         IMPORT_C void ConfirmMethodUsageQuery( TMsgQueryLinkedResults& aResult, 
                                                const TBool aHomeNetwork,
                                                TRequestStatus& aStatus );
 
+        /**
+        * Confirmation query which is shown when cellular data connection is being
+        * started and confirmation from user is needed.
+        * @param aResult Result of user selection
+        * @param aQueryType Type of the query to show
+        * @param aStatus Status object of notifier
+        */
+        IMPORT_C void ConfirmMethodUsageQuery( TMsgQueryLinkedResults& aResult, 
+                                               const TCellularDataUsageQueryType aQueryType,
+                                               TRequestStatus& aStatus );
 
         /**
         * Notifier. Shows a query, "Do you want to create a WLAN connection in 

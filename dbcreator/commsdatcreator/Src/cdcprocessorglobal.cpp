@@ -34,6 +34,8 @@
 #include <commsdattypesv1_1_partner.h>
 #endif
 #include <datamobilitycommsdattypes.h>
+#include <centralrepository.h>
+#include <cmmanagerkeys.h>
 #include <metadatabase.h>
 #include <cmmanagerext.h>
 #include <cmmanager.h>
@@ -477,6 +479,25 @@ void CProcessorGlobal::ProcessTagL( TBool /*aFieldIDPresent*/ )
                 break;
                 }
                 
+            case EAutomaticRoamingInHomeNetworkVisible:
+                {
+                CRepository *cmRepo = NULL;
+                TRAPD( err, cmRepo = CRepository::NewL( KCRUidCmManager ) );
+                
+                if ( err == KErrNone ) 
+                    {
+                    if ( ptrTag->CompareF( KStrYes ) == 0 )
+                        {
+                        cmRepo->Set( KCellularDataUsageSettingAutomaticInHomeNetwork, ETrue );
+                        } 
+                    else 
+                        {
+                        cmRepo->Set( KCellularDataUsageSettingAutomaticInHomeNetwork, EFalse );
+                        }
+                    }
+                delete cmRepo;
+                }
+                
             case ECellularDataUsageVisitor:
                 {
                 SetGenConnSettingCellularDataUsageVisitor( ptrTag );
@@ -729,6 +750,10 @@ void CProcessorGlobal::SetGenConnSettingCellularDataUsageHome( HBufC16* aPtrTag 
         {
         // This value can't be set if WLAN isn't supported
         iGenConnSettings->iCellularDataUsageHome = ECmCellularDataUsageDisabled;
+        }
+    else if ( aPtrTag->CompareF( KStrAutomaticHomeNetwork ) == 0 )
+        {
+        iGenConnSettings->iCellularDataUsageHome = ECmCellularDataUsageAutomaticInHomeNetwork;
         }
     // else: Default value for the string is: "Confirm", set in ConstructL()
     }

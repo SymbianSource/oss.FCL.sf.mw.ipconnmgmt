@@ -122,7 +122,16 @@ void CConnectionErrorDiscreetPopupNotif::Cancel()
         iCancelled = ETrue;
         if ( !iMessage.IsNull() )
             {
-            iMessage.Complete( KErrCancel );
+            // get client thread status
+            RThread clientThread;
+            iMessage.Client( clientThread );
+            TExitType exitType = clientThread.ExitType();
+            // complete message only if client is still alive
+           	if ( exitType == EExitPending )
+           	  {
+           	  iMessage.Complete( KErrCancel );
+          		}
+            clientThread.Close();
             }
         }
     if ( iActiveNote )

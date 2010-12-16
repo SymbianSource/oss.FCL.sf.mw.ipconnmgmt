@@ -265,10 +265,18 @@ namespace S60MCprMobilityActivity
                                 S60MCprMobilityActivity::TSendAvailabilityRequest, 
                                 TTag<MobilityMCprStates::KStartMobilityHandshake> )
     // Clear handshake status and wait for preferred carrier or mobility API close.
+    // If we get an error, we check whether it is possible to "recover" from it.
+    // Basically, all errors notifications coming from MPM are fatal, but if there
+    // is a gone down activity ongoing we can trust it to tear down the stack
     NODEACTIVITY_ENTRY( MobilityMCprStates::KStartMobilityHandshake, 
                         CS60MobilityActivity::TClearHandshakingFlag,
-                        CS60MobilityActivity::TAwaitingPreferredCarrierOrCancelOrRejectedOrErrorNotification, // Ok. Error is fatal.
-                        S60MCprMobilityActivity::TInformMigrationAvailableOrErrorOrCancelTag )
+                        CS60MobilityActivity::TAwaitingPreferredCarrierOrCancelOrRejectedOrErrorNotification,
+                        S60MCprMobilityActivity::TInformMigrationAvailableOrErrorOrRecoverableErrorOrCancelTag )
+    // "Recoverable error"... Relay error notification to data client and revert
+    // the activity back to the state where it waits for next actions.
+    THROUGH_NODEACTIVITY_ENTRY( S60MCprStates::KRecoverableError, 
+                                CS60MobilityActivity::TErrorMobilityOriginator, 
+                                TTag<MobilityMCprStates::KStartMobilityHandshake|NetStateMachine::EBackward> )                        
     // Application rejected active carrier
     THROUGH_NODEACTIVITY_ENTRY( S60MCprStates::KSendInitialApplicationReject, 
                                 S60MCprMobilityActivity::TSendInitialApplicationReject, 

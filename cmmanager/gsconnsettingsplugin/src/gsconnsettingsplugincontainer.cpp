@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2005 Nokia Corporation and/or its subsidiary(-ies).
+* Copyright (c) 2005-2010 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -140,8 +140,9 @@ CGSConnSettingsPluginContainer::~CGSConnSettingsPluginContainer()
 // ---------------------------------------------------------------------------
 //
 CGSConnSettingsPluginContainer::CGSConnSettingsPluginContainer( 
-        MGSConnSettingsMskObserver& aMskObserver )
-        : iMskObserver( aMskObserver )
+        MGSConnSettingsMskObserver& aMskObserver, TBool aHomeOperatorSettingSupported )
+        : iMskObserver( aMskObserver ), 
+          iHomeOperatorSettingSupported( aHomeOperatorSettingSupported )
     {
     FeatureManager::InitializeLibL();
     iIsWlanSupported = FeatureManager::FeatureSupported( KFeatureIdProtocolWlan );
@@ -173,8 +174,16 @@ void CGSConnSettingsPluginContainer::ConstructListBoxL( TInt aResLbxId )
         iUsageOfWlanItems = iCoeEnv->ReadDesC16ArrayResourceL(
                 R_USAGE_OF_WLAN_SETTING_PAGE_LBX );
 
-        iDataUsageHomeNwItems = iCoeEnv->ReadDesC16ArrayResourceL( 
-                R_DATA_USAGE_HOME_NW_SETTING_PAGE_LBX );
+        if ( iHomeOperatorSettingSupported )
+            {
+            iDataUsageHomeNwItems = iCoeEnv->ReadDesC16ArrayResourceL( 
+                R_DATA_USAGE_HOME_NW_SETTING_PAGE_OPERATOR_LBX );
+            }
+        else
+            {
+            iDataUsageHomeNwItems = iCoeEnv->ReadDesC16ArrayResourceL( 
+                R_DATA_USAGE_HOME_NW_SETTING_PAGE_LBX );            
+            }
     
         iDataUsageAbroadItems = iCoeEnv->ReadDesC16ArrayResourceL( 
                 R_DATA_USAGE_ABROAD_SETTING_PAGE_LBX );
@@ -183,8 +192,16 @@ void CGSConnSettingsPluginContainer::ConstructListBoxL( TInt aResLbxId )
         }
     else
         {
-        iDataUsageHomeNwItems = iCoeEnv->ReadDesC16ArrayResourceL( 
+        if ( iHomeOperatorSettingSupported )
+            {
+            iDataUsageHomeNwItems = iCoeEnv->ReadDesC16ArrayResourceL( 
+                R_DATA_USAGE_HOME_NW_SETTING_PAGE_OPERATOR_LBX_NOWLAN );
+            }
+        else
+            {
+            iDataUsageHomeNwItems = iCoeEnv->ReadDesC16ArrayResourceL( 
                 R_DATA_USAGE_HOME_NW_SETTING_PAGE_LBX_NOWLAN );
+            }
     
         iDataUsageAbroadItems = iCoeEnv->ReadDesC16ArrayResourceL( 
                 R_DATA_USAGE_ABROAD_SETTING_PAGE_LBX_NOWLAN );
@@ -333,18 +350,21 @@ void CGSConnSettingsPluginContainer::MakeDataUsageAbroadItemL()
 //
 void CGSConnSettingsPluginContainer::MakeDataUsageHomeNwItemL()
 {
-    TInt currValue = iModel->DataUsageInHomeNw();
-    
+    TInt currValue = iModel->DataUsageInHomeNw( iHomeOperatorSettingSupported );
+
     // We may have to do in this way because EDataUsageAbroadDisabled is equal to 3
     // and the actual index number should be 2 in this case
-    if( !iIsWlanSupported && currValue == EDataUsageAbroadDisabled )
+    if( !iIsWlanSupported && currValue == EDataUsageHomeNwDisabled )
         {
         currValue --;
         }
     
-    AppendListItemL( Index( EGSSettIdDataUsageHomeNw ),
-        iListItems->operator[]( Index( EGSSettIdDataUsageHomeNw ) ),
-        ( *iDataUsageHomeNwItems )[currValue] );
+    if ( currValue < iDataUsageHomeNwItems->Count() )
+        {        
+        AppendListItemL( Index( EGSSettIdDataUsageHomeNw ),
+            iListItems->operator[]( Index( EGSSettIdDataUsageHomeNw ) ),
+            ( *iDataUsageHomeNwItems )[currValue] );
+        }
 }
 
 
@@ -501,7 +521,7 @@ TInt CGSConnSettingsPluginContainer::Index( TInt aIndex )
     {
     return ( iIsWlanSupported ? ( aIndex ) : ( aIndex - 1) );
     }
-    
+
 // ========================== OTHER EXPORTED FUNCTIONS =========================
 
 // End of File

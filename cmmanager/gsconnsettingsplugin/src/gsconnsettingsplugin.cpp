@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2007 Nokia Corporation and/or its subsidiary(-ies).
+* Copyright (c) 2007-2010 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -46,9 +46,10 @@
 #include <ConeResLoader.h>
 #include <barsread.h> // For TResourceReader
 #include <StringLoader.h>
+#include <centralrepository.h>
+#include <cmmanagerkeys.h>
 
 // Constants
-
 
 // ========================= MEMBER FUNCTIONS ================================
 
@@ -117,6 +118,8 @@ void CGSConnSettingsPlugin::ConstructL()
     iIsWlanSupported = FeatureManager::FeatureSupported( KFeatureIdProtocolWlan );
     // Unload FeatureManager
     FeatureManager::UnInitializeLib();
+
+    iHomeOperatorSettingSupported = HomeOperatorSetting();
     
     OpenLocalizedResourceFileL( KGSConnSettingsPluginResourceFileName,
                                 iResourceLoader ); 
@@ -142,7 +145,7 @@ TUid CGSConnSettingsPlugin::Id() const
 //
 void CGSConnSettingsPlugin::NewContainerL()
     {
-    iContainer = new( ELeave ) CGSConnSettingsPluginContainer( *this );
+    iContainer = new( ELeave ) CGSConnSettingsPluginContainer( *this, iHomeOperatorSettingSupported );
     
     //Check if ECOM plugins are already loaded
     if ( iPluginArray == NULL )
@@ -537,19 +540,35 @@ void CGSConnSettingsPlugin::ShowDataUsageInHomeNwSettingPageL()
     
     if ( iIsWlanSupported )
         {
-        items = iCoeEnv->ReadDesC16ArrayResourceL(
-            R_DATA_USAGE_HOME_NW_SETTING_PAGE_LBX );
+        if ( iHomeOperatorSettingSupported )
+            {
+            items = iCoeEnv->ReadDesC16ArrayResourceL(
+                R_DATA_USAGE_HOME_NW_SETTING_PAGE_OPERATOR_LBX );
+            }
+        else
+            {
+            items = iCoeEnv->ReadDesC16ArrayResourceL(
+                R_DATA_USAGE_HOME_NW_SETTING_PAGE_LBX );
+            }
         }
     else
         {
-        items = iCoeEnv->ReadDesC16ArrayResourceL(
-            R_DATA_USAGE_HOME_NW_SETTING_PAGE_LBX_NOWLAN );        
+        if ( iHomeOperatorSettingSupported )
+            {
+            items = iCoeEnv->ReadDesC16ArrayResourceL(
+                R_DATA_USAGE_HOME_NW_SETTING_PAGE_OPERATOR_LBX_NOWLAN );
+            }
+        else
+            {
+            items = iCoeEnv->ReadDesC16ArrayResourceL(
+                R_DATA_USAGE_HOME_NW_SETTING_PAGE_LBX_NOWLAN );
+            }
         }
     
     CleanupStack::PushL( items );
 
-    TInt currentItem = iModel->DataUsageInHomeNw();
-    
+    TInt currentItem = iModel->DataUsageInHomeNw( iHomeOperatorSettingSupported );
+
     // We may have to do in this way because EDataUsageAbroadDisabled is equal to 3
     // and the actual index number should be 2 in this case
     if( !iIsWlanSupported && currentItem == EDataUsageAbroadDisabled )
@@ -564,10 +583,9 @@ void CGSConnSettingsPlugin::ShowDataUsageInHomeNwSettingPageL()
 
     if ( dlg->ExecuteLD( CAknSettingPage::EUpdateWhenChanged ) )
         {
-
         if( currentItem != oldItem )
             {
-            iModel->SetDataUsageInHomeNw( currentItem );
+            iModel->SetDataUsageInHomeNw( currentItem, iHomeOperatorSettingSupported );
             UpdateListBoxL(  EGSSettIdDataUsageHomeNw );
             //Save current settings when the setting is changed
             //If function leaves it is trapped and ignored as there is nothing that we can do about it
@@ -679,6 +697,29 @@ void CGSConnSettingsPlugin::HandlePluginLoaded( KGSPluginLoaderStatus aStatus )
         TRAP_IGNORE( Container()->UpdateListBoxL( EGSExtPluginsListItemId ); );
         #endif // __DEBUG
         }
+    }
+
+// ---------------------------------------------------------------------------
+// Read cellular data usage setting for home operator from Central Repository
+// ---------------------------------------------------------------------------
+//
+TInt CGSConnSettingsPlugin::HomeOperatorSetting() const
+    {
+    // Use default value if repository is not available
+    TInt value( 1 );
+    TInt err( KErrNone );
+    CRepository* cmRepository = NULL;
+    
+    TRAP( err, cmRepository = CRepository::NewL( KCRUidCmManager ) )
+    
+    if ( err == KErrNone )
+        {
+        err = cmRepository->Get( KCellularDataUsageSettingAutomaticInHomeNetwork, value );
+        }
+    
+    delete cmRepository;
+
+    return value;
     }
 
 // End of File

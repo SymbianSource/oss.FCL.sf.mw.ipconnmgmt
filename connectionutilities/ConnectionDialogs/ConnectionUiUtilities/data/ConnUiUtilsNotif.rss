@@ -483,6 +483,11 @@ RESOURCE TBUF r_qtn_occ_detail_cs_data_foreign_nw
     buf = qtn_occ_detail_cs_data_foreign_nw;
     }
 
+RESOURCE TBUF r_qtn_occ_detail_cs_data_national_roaming
+    {    
+    buf = qtn_occ_detail_cs_data_national_roaming;
+    }
+
 RESOURCE TBUF r_qtn_occ_list_cs_data_home_nw_automatic 
     {    
     buf = qtn_occ_list_cs_data_home_nw_automatic;

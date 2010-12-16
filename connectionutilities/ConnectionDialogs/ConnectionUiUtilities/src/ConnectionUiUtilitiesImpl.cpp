@@ -989,10 +989,10 @@ void CConnectionUiUtilitiesImpl::CancelChangingConnectionToNote()
 //
 void CConnectionUiUtilitiesImpl::ConfirmMethodUsageQuery( 
                                                TMsgQueryLinkedResults& aResult,
-                                               const TBool aHomeNetwork,
+                                               const TCellularDataUsageQueryType aQueryType,
                                                TRequestStatus& aStatus )
     { 
-    iNotif.ConfirmMethodUsageQuery( aResult, aHomeNetwork, aStatus );
+    iNotif.ConfirmMethodUsageQuery( aResult, aQueryType, aStatus );
     }
 
 // ---------------------------------------------------------

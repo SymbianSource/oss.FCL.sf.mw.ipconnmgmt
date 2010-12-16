@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2004-2009 Nokia Corporation and/or its subsidiary(-ies).
+* Copyright (c) 2009-2010 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -11,7 +11,7 @@
 *
 * Contributors:
 *
-* Description:  Observes terminals roaming status.
+* Description: Observes terminals roaming status.
 *
 */
 
@@ -46,7 +46,8 @@ enum TMPMRoamingStatus
 // None.
 
 // FORWARD DECLARATIONS
-// None.
+class CMPMNetworkWatcher;
+class CMPMServer;
 
 // CLASS DECLARATION
 /**
@@ -61,8 +62,10 @@ class CMPMRoamingWatcher : public CActive
         /**
         * Two-phased constructor.
         * @param aMobilePhone Reference to RMobilePhone object
+        * @param aServer Pointer to CMPMServer object
         */
-        static CMPMRoamingWatcher* NewL( RMobilePhone& aMobilePhone );
+        static CMPMRoamingWatcher* NewL( RMobilePhone& aMobilePhone,
+                                         CMPMServer* aServer );
         
         /**
         * Destructor.
@@ -77,6 +80,11 @@ class CMPMRoamingWatcher : public CActive
         */
         TMPMRoamingStatus RoamingStatus() const;
         
+        /**
+        * Updates the roaming status.
+        */
+        void UpdateRoamingStatus();
+    
     protected: // Constructors and destructor
         	    
 	    /**
@@ -112,22 +120,29 @@ class CMPMRoamingWatcher : public CActive
         
         /**
         * Constructor.
+        * @param aMobilePhone Reference to RMobilePhone object
+        * @param aServer Pointer to CMPMServer object
         */
-        CMPMRoamingWatcher( RMobilePhone& aMobilePhone );
-        
-        /**
-        * Maps registration value received from ETEL.
-        * @param aStatus Registration value to be mapped
-        * @return Roaming status
-        */
-        TMPMRoamingStatus MapRegistrationStatus(  RMobilePhone::TMobilePhoneRegistrationStatus aStatus );
-    
+        CMPMRoamingWatcher( RMobilePhone& aMobilePhone,
+                            CMPMServer* aServer );
+
         //data
 
         /**
         * Reference to ETEL object
         */
         RMobilePhone& iMobilePhone;
+
+        /**
+        /* Network watcher
+        */
+        CMPMNetworkWatcher* iNetworkWatcher;
+
+        /**
+         * MPM Server object.
+         * Not own.
+         */
+        CMPMServer* iServer;
 
         /**
         * This variable is used to store registration status from async request to ETEL
@@ -138,11 +153,11 @@ class CMPMRoamingWatcher : public CActive
         * Current roaming status
         */
         TMPMRoamingStatus iRoamingStatus;
-
+        
         /**
-        * Current country
+        * Previous valid roaming status
         */
-        RMobilePhone::TMobilePhoneNetworkCountryCode iCurrentCountryCode;
+        TMPMRoamingStatus iPreviousValidRoamingStatus;
 	};
 
 #endif // MPMROAMINGWATCHER_H

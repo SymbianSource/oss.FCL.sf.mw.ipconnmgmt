@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2006-2009 Nokia Corporation and/or its subsidiary(-ies). 
+* Copyright (c) 2006-2010 Nokia Corporation and/or its subsidiary(-ies). 
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -96,22 +96,31 @@ void CMPMConfirmDlg::Start( CMPMDialogBase* aDlg )
             {
             case EConfirmDlgHomeNetwork:
                 {                
-                MPMLOGSTRING( "    Show home network confirm dialog" )
+                MPMLOGSTRING( "CMPMConfirmDlg::Start - show home network confirm dialog" )
                 iUtils->ConfirmMethodUsageQuery( iResult,
-                                                 true,
-                                                 iStatus);
+                                                 ECellularDataUsageQueryHomeNetwork,
+                                                 iStatus );
                 break;
                 }
                 
             case EConfirmDlgVisitorNetwork:
                 {
-                MPMLOGSTRING( "    Show visitor network confirm dialog" )
+                MPMLOGSTRING( "CMPMConfirmDlg::Start - show visitor network confirm dialog" )
                 iUtils->ConfirmMethodUsageQuery( iResult,
-                                                 false,
-                                                 iStatus);
+                                                 ECellularDataUsageQueryVisitorNetwork,
+                                                 iStatus );
                 break;
                 }
                 
+            case EConfirmDlgNationalRoaming:
+                {
+                MPMLOGSTRING( "CMPMConfirmDlg::Start - show national roaming confirm dialog" )
+                iUtils->ConfirmMethodUsageQuery( iResult,
+                                                 ECellularDataUsageQueryNationalRoaming,
+                                                 iStatus );
+                break;
+                }
+                                
             default: 
                 {
                 return;

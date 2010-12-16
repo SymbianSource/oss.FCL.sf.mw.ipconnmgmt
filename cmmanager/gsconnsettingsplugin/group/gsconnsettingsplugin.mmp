@@ -75,6 +75,7 @@ LIBRARY             GSListBox.lib         // For CGSListBoxItemTextArray
 LIBRARY             FeatMgr.lib           // Feature manager
 LIBRARY             hlplch.lib            // for "Help" options menu
 LIBRARY             cmmanager.lib
+LIBRARY             centralrepository.lib
 
 //Documents. Defining these is optional. Used only by IDE's file browser.
 //DOCUMENT            ./gsconnsettingspluginicons.mk

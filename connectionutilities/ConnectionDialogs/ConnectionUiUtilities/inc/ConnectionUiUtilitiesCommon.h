@@ -42,7 +42,8 @@ enum TConnUINoteAndQueryIds
     EConfirmMethodUsageQuery,
     EConnectedViaConnMethodConfirmationNote,
     EConfirmMethodUsageQueryInHomeNetwork,
-    EConfirmMethodUsageQueryInForeignNetwork
+    EConfirmMethodUsageQueryInForeignNetwork,
+    EConfirmMethodUsageQueryNationalRoaming
     };
 
 /**

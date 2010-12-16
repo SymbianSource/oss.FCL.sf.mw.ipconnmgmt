@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2007 Nokia Corporation and/or its subsidiary(-ies).
+* Copyright (c) 2007-2010 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -467,6 +467,66 @@ RESOURCE ARRAY r_data_usage_home_nw_setting_page_lbx_nowlan
         LBUF
             {
             txt = qtn_occ_sett_data_usage_home_nw_automatic;
+            },
+        LBUF
+            {
+            txt = qtn_occ_sett_data_usage_home_nw_confirm;
+            },
+        LBUF
+            {
+            txt = qtn_occ_sett_data_usage_home_nw_disabled;
+            }
+        };
+    }
+
+//----------------------------------------------------
+//    
+// r_data_usage_home_nw_setting_page_operator_lbx
+// Resource for "" listbox items
+//
+//----------------------------------------------------
+//
+RESOURCE ARRAY r_data_usage_home_nw_setting_page_operator_lbx
+    {
+    items =
+        {
+        LBUF
+            {
+            txt = qtn_occ_sett_data_usage_home_nw_automatic;
+            },
+        LBUF
+            {
+            txt = qtn_occ_sett_data_usage_home_nw_operator;
+            },
+        LBUF
+            {
+            txt = qtn_occ_sett_data_usage_home_nw_confirm;
+            },
+        LBUF
+            {
+            txt = qtn_occ_sett_data_usage_home_nw_wlan_only;
+            }
+        };
+    }
+
+//----------------------------------------------------
+//    
+// r_data_usage_home_nw_setting_page_lbx_operator_nowlan
+// Resource for "" listbox items
+//
+//----------------------------------------------------
+//
+RESOURCE ARRAY r_data_usage_home_nw_setting_page_operator_lbx_nowlan
+    {
+    items =
+        {
+        LBUF
+            {
+            txt = qtn_occ_sett_data_usage_home_nw_automatic;
+            },
+        LBUF
+            {
+            txt = qtn_occ_sett_data_usage_home_nw_operator;
             },
         LBUF
             {

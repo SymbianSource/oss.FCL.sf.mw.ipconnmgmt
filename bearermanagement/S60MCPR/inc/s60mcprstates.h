@@ -60,6 +60,7 @@ namespace S60MCprStates
     const TInt KInformMigrationCompleted = 11055;
     const TInt KRequestReConnectToCurrentSP = 11056;
     const TInt KStopActivityNotRunning = 11057;
+    const TInt KRecoverableError = 11058;
     
     /**
      * Execution context

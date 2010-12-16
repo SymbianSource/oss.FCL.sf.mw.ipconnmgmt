@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2005-2007 Nokia Corporation and/or its subsidiary(-ies).
+* Copyright (c) 2005-2010 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -35,6 +35,7 @@
 // EXTERNAL FUNCTION PROTOTYPES
 
 // CONSTANTS
+const   TInt    KSecondRowIndex = 1;
 
 // MACROS
 
@@ -215,7 +216,7 @@ TInt CGSConnSettingsPluginModel::DataUsageAbroad()
 // Maps value from general connection settings API to match index in UI
 // ----------------------------------------------------------------------------
 //
-TInt CGSConnSettingsPluginModel::DataUsageInHomeNw()
+TInt CGSConnSettingsPluginModel::DataUsageInHomeNw( const TBool aHomeOperatorSettingSupported )
     {     
     TInt mappedValue = 0;
 
@@ -241,9 +242,28 @@ TInt CGSConnSettingsPluginModel::DataUsageInHomeNw()
                 }
             break;
 
+       case ECmCellularDataUsageAutomaticInHomeNetwork: //Automatic in home operator network only
+            mappedValue = EDataUsageHomeNwOperator;
+            break;
+
         default:
             break;
         }
+        
+    // Home network only -entry will be displayed on the second row.
+    // Adjust listbox indexes accordingly.
+    if ( aHomeOperatorSettingSupported )
+        {
+        if ( mappedValue == EDataUsageHomeNwOperator )
+            {
+            mappedValue = KSecondRowIndex;
+            }
+        else if ( mappedValue > EDataUsageHomeNwAutomatic )
+            {
+            mappedValue++;
+            }
+        }
+   
     return mappedValue;
     }
 
@@ -304,8 +324,22 @@ void CGSConnSettingsPluginModel::SetDataUsageAbroad( TInt aValue )
 // Maps UI index to according general connection setting API value
 // ----------------------------------------------------------------------------
 //
-void CGSConnSettingsPluginModel::SetDataUsageInHomeNw( TInt aValue )
+void CGSConnSettingsPluginModel::SetDataUsageInHomeNw( TInt aValue, const TBool aHomeOperatorSettingSupported )
     {
+    // Home network only -entry is displayed on the second row.
+    // Adjust aValue accordingly.
+    if ( aHomeOperatorSettingSupported )
+        {
+        if ( aValue == KSecondRowIndex )
+            {
+            aValue = EDataUsageHomeNwOperator;
+            }
+        else if ( aValue > EDataUsageHomeNwAutomatic )
+            {
+    	      aValue--;
+            }
+        }
+    	        
     switch ( aValue )
         {
         case EDataUsageHomeNwAutomatic: //Automatic
@@ -320,7 +354,11 @@ void CGSConnSettingsPluginModel::SetDataUsageInHomeNw( TInt aValue )
         case EDataUsageHomeNwDisabled:
             iSettings.iCellularDataUsageHome = ECmCellularDataUsageDisabled;
             break;
-                        
+
+        case EDataUsageHomeNwOperator: //Automatic in home operator network only
+            iSettings.iCellularDataUsageHome = ECmCellularDataUsageAutomaticInHomeNetwork;
+            break;
+           
         default:
             break;
         }

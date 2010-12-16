@@ -3441,28 +3441,7 @@ TInt CConnMonIAP::GetBearerSupportInfo(
                  nwRegStatus != RPacketService::ERegistrationDenied        &&
                  nwRegStatus != RPacketService::ENotRegisteredAndNotAvailable )
                 {
-                // Query the TSY for the attach mode
-                RPacketService::TAttachMode attachMode( RPacketService::EAttachWhenNeeded );
-                err = iPacketService.GetAttachMode( attachMode );
-
-                LOGIT2("GetBearerSupportInfo: pckt service attach mode:       %d <%d>", attachMode, err)
-                // Query packet network status (but only if the TSY is set to attach when possible)
-                if ( KErrNone == err && attachMode == RPacketService::EAttachWhenPossible )
-                    {
-                    RPacketService::TStatus pcktStatus( RPacketService::EStatusUnattached );
-                    err = iPacketService.GetStatus( pcktStatus );
-
-                    LOGIT2("GetBearerSupportInfo: pckt service status:            %d <%d>", pcktStatus, err)
-                    if ( KErrNone == err && pcktStatus != RPacketService::EStatusUnattached )
-                        {
-                        aByCell = ETrue;
-                        }
-                    }
-                else
-                    {
-                    // Attach mode is 'EAttachWhenNeeded'
-                    aByCell = ETrue;
-                    }
+                aByCell = ETrue;    
                 }
             }
 
@@ -5086,6 +5065,32 @@ TInt CConnMonIAP::BearerIdForBearerAvailability(
 
     LOGEXITFN1("CConnMonIAP::BearerIdForBearerAvailability()", err)
     return err;
+    }
+
+// ---------------------------------------------------------------------------
+// CConnMonIAP::RestoreAttachMode
+// ---------------------------------------------------------------------------
+//
+void CConnMonIAP::RestoreAttachMode()
+    {
+    // AT command AT+CGATT=0 will detach phone from cellular network.
+    // Restore attach mode to cellmo when attach mode is set to EAttachWhenPossible.
+    //
+    RPacketService::TAttachMode attachMode( RPacketService::EAttachWhenNeeded );
+    TInt err = iPacketService.GetAttachMode( attachMode );
+    LOGIT2("CConnMonIAP::RestoreAttachMode: attach mode:       %d <%d>", attachMode, err)
+    
+    if ( err == KErrNone && attachMode == RPacketService::EAttachWhenPossible )
+        {
+        TRequestStatus status( KErrNone );
+
+        iPacketService.SetAttachMode( status, RPacketService::EAttachWhenPossible );
+        User::WaitForRequest( status );
+        LOGIT1("CConnMonIAP::RestoreAttachMode: set --> EAttachWhenPossible, error <%d>", status.Int() )
+
+        return;
+        }
+    LOGIT("No need to restore attach mode.")    
     }
 
 // End-of-file

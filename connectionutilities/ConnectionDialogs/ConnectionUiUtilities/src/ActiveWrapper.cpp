@@ -508,10 +508,8 @@ void CActiveWrapper::StartConnectingViaDiscreetPopup( TPckgBuf< TConnUiConnectin
         {
         iIndexOfNote = EConnectingViaDiscreetPopup;
         iNotif.ConnectingViaDiscreetPopup( aInfo, iStatus );
-        SetActive();
-        iWait.Start();
+        User::WaitForRequest( iStatus );
         }
-
     }
 
 
@@ -527,10 +525,8 @@ void CActiveWrapper::StartConnectionErrorDiscreetPopup( TPckgBuf<TInt>& aErrCode
         {
         iIndexOfNote = EConnectionErrorDiscreetPopup;
         iNotif.ConnectionErrorDiscreetPopup( aErrCode, iStatus );
-        SetActive();
-        iWait.Start();
+        User::WaitForRequest( iStatus );
         }
-
     }
 
 // End of File

@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2008-2009 Nokia Corporation and/or its subsidiary(-ies). 
+* Copyright (c) 2008-2010 Nokia Corporation and/or its subsidiary(-ies). 
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -378,9 +378,11 @@ void CMPMIapSelection::ExplicitConnectionL()
             if ( iSession->IsConfirmFirstL( validateIapId ) &&
                  !( iSession->MyServer().CommsDatAccess()->IsVirtualIapL( validateIapId ) ))
                 {
+                TMPMRoamingStatus roamingStatus = iSession->MyServer().RoamingWatcher()->RoamingStatus();
+                
                 // Check if we are roaming and cellular data usage query has not yet been presented
                 // to the user in this country
-                if ( iSession->MyServer().RoamingWatcher()->RoamingStatus() == EMPMInternationalRoaming )
+                if ( ( roamingStatus == EMPMInternationalRoaming ) || ( roamingStatus == EMPMNationalRoaming ) )
                     {
                     // Check that queries aren't disabled and
                     // enough time has elapsed from the last query cancelled by the user.
@@ -388,18 +390,35 @@ void CMPMIapSelection::ExplicitConnectionL()
                             !iSession->MyServer().IsConnPermQueryTimerOn() )
                         {
                         TConnectionId connId = iSession->ConnectionId();
-                                                            
-                        // International roaming
-                        iConfirmDlgStarting = CMPMConfirmDlgStarting::NewL( 
-                            *this, 
-                            connId,
-                            snap, 
-                            validateIapId, 
-                            CMPMConfirmDlg::EConfirmDlgVisitorNetwork,
-                            iChooseIapPref,
-                            iSession->MyServer(),
-                            *iSession,
-                            EExplicitConnection );
+                        
+                        if ( roamingStatus == EMPMInternationalRoaming )
+                            {
+                            // International roaming
+                            iConfirmDlgStarting = CMPMConfirmDlgStarting::NewL( 
+                                    *this, 
+                                    connId,
+                                    snap, 
+                                    validateIapId, 
+                                    CMPMConfirmDlg::EConfirmDlgVisitorNetwork,
+                                    iChooseIapPref,
+                                    iSession->MyServer(),
+                                    *iSession,
+                                    EExplicitConnection );
+                            }
+                        else
+                            {
+                            // National roaming
+                            iConfirmDlgStarting = CMPMConfirmDlgStarting::NewL( 
+                                    *this, 
+                                    connId,
+                                    snap, 
+                                    validateIapId, 
+                                    CMPMConfirmDlg::EConfirmDlgNationalRoaming,
+                                    iChooseIapPref,
+                                    iSession->MyServer(),
+                                    *iSession,
+                                    EExplicitConnection );
+                            }
                         return;    
                         }
                     else
@@ -542,34 +561,55 @@ void CMPMIapSelection::CompleteExplicitSnapConnectionL()
             if ( !( iChooseIapPref.NoteBehaviour() & TExtendedConnPref::ENoteBehaviourConnDisableQueries ) &&
                     !iSession->MyServer().IsConnPermQueryTimerOn() )
                 {
-                if ( iSession->MyServer().RoamingWatcher()->RoamingStatus() == EMPMInternationalRoaming )
+                switch ( iSession->MyServer().RoamingWatcher()->RoamingStatus() )
                     {
-                    // International roaming
-                    iConfirmDlgStarting = CMPMConfirmDlgStarting::NewL( 
-                            *this, 
-                            connId,
-                            snap, 
-                            validateIapId, 
-                            CMPMConfirmDlg::EConfirmDlgVisitorNetwork,
-                            iChooseIapPref,
-                            iSession->MyServer(),
-                            *iSession,
-                            EExplicitConnection );    
-                    }
-                else
-                    {
-                    // Home network
-                    iConfirmDlgStarting = CMPMConfirmDlgStarting::NewL( 
-                            *this, 
-                            connId,
-                            snap, 
-                            validateIapId, 
-                            CMPMConfirmDlg::EConfirmDlgHomeNetwork, 
-                            iChooseIapPref,
-                            iSession->MyServer(),
-                            *iSession,
-                            EExplicitConnection );
-    
+                    case EMPMInternationalRoaming:
+                        {
+                        // International roaming
+                        iConfirmDlgStarting = CMPMConfirmDlgStarting::NewL( 
+                                *this, 
+                                connId,
+                                snap, 
+                                validateIapId, 
+                                CMPMConfirmDlg::EConfirmDlgVisitorNetwork,
+                                iChooseIapPref,
+                                iSession->MyServer(),
+                                *iSession,
+                                EExplicitConnection );
+                        break;
+                        }
+
+                    case EMPMNationalRoaming:
+                        {
+                        // National roaming
+                        iConfirmDlgStarting = CMPMConfirmDlgStarting::NewL( 
+                                *this, 
+                                connId,
+                                snap, 
+                                validateIapId, 
+                                CMPMConfirmDlg::EConfirmDlgNationalRoaming,
+                                iChooseIapPref,
+                                iSession->MyServer(),
+                                *iSession,
+                                EExplicitConnection );
+                        break;
+                        }
+
+                    default:
+                        {
+                        // Home network
+                        iConfirmDlgStarting = CMPMConfirmDlgStarting::NewL( 
+                                *this, 
+                                connId,
+                                snap, 
+                                validateIapId, 
+                                CMPMConfirmDlg::EConfirmDlgHomeNetwork, 
+                                iChooseIapPref,
+                                iSession->MyServer(),
+                                *iSession,
+                                EExplicitConnection );
+                        break;
+                        }
                     }
                 }
             else
@@ -925,9 +965,11 @@ void CMPMIapSelection::ImplicitConnectionWlanNoteL()
         if ( iSession->IsConfirmFirstL( iUserSelectionIapId ) &&
              !( iSession->MyServer().CommsDatAccess()->IsVirtualIapL( iUserSelectionIapId ) ) )
             {
+            TMPMRoamingStatus roamingStatus = iSession->MyServer().RoamingWatcher()->RoamingStatus();
+            
             // Check if we are roaming and cellular data usage query has not yet been presented
             // to the user in this country
-            if ( iSession->MyServer().RoamingWatcher()->RoamingStatus() == EMPMInternationalRoaming )
+            if ( ( roamingStatus == EMPMInternationalRoaming ) ||( roamingStatus == EMPMNationalRoaming ) )
                 {
                 // Check that queries aren't disabled and
                 // enough time has elapsed from the last query cancelled by the user.
@@ -935,18 +977,35 @@ void CMPMIapSelection::ImplicitConnectionWlanNoteL()
                         !iSession->MyServer().IsConnPermQueryTimerOn() )
                     {
                     TConnectionId connId = iSession->ConnectionId();
-                                                                    
-                    // International roaming
-                    iConfirmDlgStarting = CMPMConfirmDlgStarting::NewL( 
-                        *this, 
-                        connId,
-                        iUserSelectionSnapId, 
-                        iUserSelectionIapId, 
-                        CMPMConfirmDlg::EConfirmDlgVisitorNetwork,
-                        iChooseIapPref,
-                        iSession->MyServer(),
-                        *iSession,
-                        EImplicitConnection );
+
+                    if ( roamingStatus == EMPMInternationalRoaming )
+                        {
+                        // International roaming
+                        iConfirmDlgStarting = CMPMConfirmDlgStarting::NewL( 
+                            *this, 
+                            connId,
+                            iUserSelectionSnapId, 
+                            iUserSelectionIapId, 
+                            CMPMConfirmDlg::EConfirmDlgVisitorNetwork,
+                            iChooseIapPref,
+                            iSession->MyServer(),
+                            *iSession,
+                            EImplicitConnection );
+                        }
+                    else
+                        {
+                        // National roaming
+                        iConfirmDlgStarting = CMPMConfirmDlgStarting::NewL( 
+                            *this, 
+                            connId,
+                            iUserSelectionSnapId, 
+                            iUserSelectionIapId, 
+                            CMPMConfirmDlg::EConfirmDlgNationalRoaming,
+                            iChooseIapPref,
+                            iSession->MyServer(),
+                            *iSession,
+                            EImplicitConnection );
+                        }
                     return;    
                     }
                 else

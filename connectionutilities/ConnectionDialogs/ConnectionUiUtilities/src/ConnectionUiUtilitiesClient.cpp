@@ -360,7 +360,7 @@ void RConnectionUiUtilitiesSession::CancelChangingConnectionToNote()
 //
 void RConnectionUiUtilitiesSession::ConfirmMethodUsageQuery( 
                                                TMsgQueryLinkedResults& aResult,
-                                               TBool aHomeNetwork,
+                                               const TCellularDataUsageQueryType aQueryType,
                                                TRequestStatus& aStatus )
     {
     CLOG_ENTERFN( "RConnectionUiUtilitiesSession::ConfirmMethodUsageQuery" );
@@ -371,16 +371,23 @@ void RConnectionUiUtilitiesSession::ConfirmMethodUsageQuery(
     
     iPassedInfo().iNoteId = EConfirmMethodUsageQuery;
     
-    // Set the dialog type depending on the location
-    if ( aHomeNetwork )
+    // Set the dialog type depending on the location. Type query type has been sanity
+    // checked already so there is no need for error handling if the type is wrong.
+    switch ( aQueryType )
         {
-        iPassedInfo().iNoteId = EConfirmMethodUsageQueryInHomeNetwork; 
+        case ECellularDataUsageQueryVisitorNetwork:
+            iPassedInfo().iNoteId = EConfirmMethodUsageQueryInForeignNetwork;
+            break;
+
+        case ECellularDataUsageQueryNationalRoaming:
+            iPassedInfo().iNoteId = EConfirmMethodUsageQueryNationalRoaming;
+            break;
+
+        default: // ECellularDataUsageQueryHomeNetwork:
+            iPassedInfo().iNoteId = EConfirmMethodUsageQueryInHomeNetwork;
+            break;
         }
-    else
-        {
-        iPassedInfo().iNoteId = EConfirmMethodUsageQueryInForeignNetwork; 
-        }
-    
+
     if ( iNotifier )
         {
         iNotifier->StartNotifierAndGetResponse( aStatus, KUidConfirmationQuery,

@@ -122,7 +122,14 @@ NONSHARABLE_CLASS( CConfirmationQueryNotif )
          * return  Error code
          */  
         static TInt LaunchDialogVisitorL( TAny* aObject );
-        
+
+        /**
+         * Callback is called to launch dialog asynchronously
+         * @param  aObject Pointer to notifier object.
+         * return  Error code
+         */  
+        static TInt LaunchDialogNationalRoamingL( TAny* aObject );
+
     private:
         TBool iTryNextBest;
         TUint32 iConnMethod;

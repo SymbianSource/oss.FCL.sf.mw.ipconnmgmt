@@ -99,6 +99,7 @@ enum TDbCreatorGlobalSettings
     EUsageOfWlan              = 0x0000002b,
     ECellularDataUsageHome    = 0x0000002c,
     ECellularDataUsageVisitor = 0x0000002d,
+    EAutomaticRoamingInHomeNetworkVisible = 0x0000002e,
     EUnused               	  = 0x00010000
     };
     
@@ -345,9 +346,11 @@ _LIT16( KStrKnown,           "Known" );
 _LIT16( KStrManual,          "Manual" );
 
 // General connection settings: Seamlessness: Automatic / Confirm / Wlan only
-_LIT16( KStrAutomatic,       "Automatic" );
-_LIT16( KStrConfirm,         "Confirm" );
-_LIT16( KStrWlanOnly,        "Wlan only" );
+_LIT16( KStrAutomatic,              "Automatic" );
+_LIT16( KStrConfirm,                "Confirm" );
+_LIT16( KStrWlanOnly,               "Wlan only" );
+_LIT16( KStrAutomaticHomeNetwork,   "Automatic in home network only" );
+
 
 // Packet Data Settings
 enum TDbCreatorPacketDataSettings

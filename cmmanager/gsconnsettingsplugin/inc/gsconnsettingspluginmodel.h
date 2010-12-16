@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2005 Nokia Corporation and/or its subsidiary(-ies).
+* Copyright (c) 2005-2010 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -79,9 +79,11 @@ NONSHARABLE_CLASS( CGSConnSettingsPluginModel ): public CBase
 
         /**
         * Gets and maps value from general connection settings API to match index in UI
+         @param aHomeOperatorSettingSupported ETrue if dialog contains 'Home network only'
+        *                                     setting, EFalse otherwise.
         * @return TInt
         */ 
-        TInt DataUsageInHomeNw();
+        TInt DataUsageInHomeNw( const TBool aHomeOperatorSettingSupported );
 
         /**
         * Maps UI index to according general connection setting API value
@@ -98,8 +100,10 @@ NONSHARABLE_CLASS( CGSConnSettingsPluginModel ): public CBase
         /**
         * Maps UI index to according general connection setting API value
         * @param aValue index to be mapped to API value
+        * @param aHomeOperatorSettingSupported ETrue if dialog contains 'Home network only'
+        *                                      setting, EFalse otherwise.   
         */
-        void SetDataUsageInHomeNw( TInt aValue );
+        void SetDataUsageInHomeNw( TInt aValue, const TBool aHomeOperatorSettingSupported );
         
         /**
          * @param

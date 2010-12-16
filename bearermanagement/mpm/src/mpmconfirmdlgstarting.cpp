@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2006-2009 Nokia Corporation and/or its subsidiary(-ies). 
+* Copyright (c) 2006-2010 Nokia Corporation and/or its subsidiary(-ies). 
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -201,7 +201,10 @@ void CMPMConfirmDlgStarting::UserSelectedCancel( const TInt aError )
     iIapSelection.ChooseIapComplete( aError, NULL );
     }
 
-
+// -----------------------------------------------------------------------------
+// CMPMConfirmDlgStarting::UserSelectedConnectThisTime
+// -----------------------------------------------------------------------------
+//
 void CMPMConfirmDlgStarting::UserSelectedConnectThisTime()
     {
     MPMLOGSTRING2( "CMPMConfirmDlgStarting<0x%x>::UserSelectedConnectThisTime", iConnId )
@@ -249,22 +252,39 @@ Complete KErrNone", iConnId )
         }
     }
 
-
+// -----------------------------------------------------------------------------
+// CMPMConfirmDlgStarting::UserSelectedConnectAutomatically
+// -----------------------------------------------------------------------------
+//
 void CMPMConfirmDlgStarting::UserSelectedConnectAutomatically()
     {
     MPMLOGSTRING2( "CMPMConfirmDlgStarting<0x%x>::UserSelectedConnectAutomatically", iConnId )
-    //Store selected value to commsdat if we are in home network
-    if (iDialogType == CMPMConfirmDlg::EConfirmDlgHomeNetwork )
+
+    //Store selected value to commsdat if we are in home network or nationally roaming
+    if ( ( iDialogType == CMPMConfirmDlg::EConfirmDlgHomeNetwork ) ||
+         ( iDialogType == CMPMConfirmDlg::EConfirmDlgNationalRoaming ) )
         {
         TCmGenConnSettings genConnSettings;
 
-        TRAPD(errorCode,genConnSettings = iServer.CommsDatAccess()->ReadGenConnSettingsL()); // call a function
+        TRAPD( errorCode, genConnSettings = iServer.CommsDatAccess()->ReadGenConnSettingsL() );
 
         //If reading of database failed we do not write back to the database to prevent random values
-        if (errorCode == KErrNone)
+        if ( errorCode == KErrNone )
             {
-            genConnSettings.iCellularDataUsageHome = ECmCellularDataUsageAutomatic;        
-            TRAP_IGNORE(iServer.CommsDatAccess()->WriteGenConnSettingsL( genConnSettings )); 
+            // Set data usage to automatic in home network if the setting is always ask
+            if ( ( genConnSettings.iCellularDataUsageHome == ECmCellularDataUsageConfirm ) &&
+                 ( iServer.RoamingWatcher()->RoamingStatus() == EMPMHomenetwork ) )
+                {
+                // No need to check if the national roaming feature is supported. It is done in
+                // cmmanager and set to automatic if the feature is not supported.
+                genConnSettings.iCellularDataUsageHome = ECmCellularDataUsageAutomaticInHomeNetwork;
+                }
+            else
+                {
+                genConnSettings.iCellularDataUsageHome = ECmCellularDataUsageAutomatic; 
+                }
+       
+            TRAP_IGNORE( iServer.CommsDatAccess()->WriteGenConnSettingsL( genConnSettings ) ); 
             }
         } 
     
@@ -308,7 +328,6 @@ Complete KErrNone", iConnId )
  StartWlanQueryIfNeededL failed with %d", iConnId, err )
         iIapSelection.ChooseIapComplete( err, &iPref );       
         }
-       
     }
 
 

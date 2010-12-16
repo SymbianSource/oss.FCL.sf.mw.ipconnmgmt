@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2002-2009 Nokia Corporation and/or its subsidiary(-ies).
+* Copyright (c) 2002-2010 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -18,6 +18,7 @@
 #ifndef __CPSDFAX_H
 #define __CPSDFAX_H
 
+#include <e32base.h>
 #include <etel.h>
 #include <etelmm.h>
 #include <etelpckt.h>
@@ -35,6 +36,9 @@ _LIT( KExternalName, "external" );
 
 // max PSD connection number
 const TInt KMaxPsdConnectionCount = 2;
+
+// Restore attach mode interval (3 sec)
+const TInt KRestoreAttachModeInterval = 3000000;
 
 
 /**
@@ -157,6 +161,21 @@ NONSHARABLE_CLASS( CPsdFax ) : public CBase
         * @return void
         */
         void DeleteConnections();
+        
+        /**
+        * Timer callback of iRestoreAttachModeTimer
+        *
+        * @param  aObject Object that triggered timer
+        * @since 5.2
+        */
+        static TInt RestoreAttachModeCb( TAny* aObject );
+        
+        /**
+        * Restores attach mode
+        *
+        * @since 5.2
+        */
+        void RestoreAttachMode();
 
     private:
 
@@ -178,6 +197,9 @@ NONSHARABLE_CLASS( CPsdFax ) : public CBase
 
         // Data table for each connection
         CPsdFaxConnectionData* iConnectionData[KMaxPsdConnectionCount];
+        
+        // Timer to restore attach mode in case at+cgatt=0 given 
+        CPeriodic* iRestoreAttachModeTimer;
     };
 
 

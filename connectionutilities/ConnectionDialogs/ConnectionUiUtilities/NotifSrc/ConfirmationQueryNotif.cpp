@@ -146,9 +146,14 @@ void CConfirmationQueryNotif::StartL( const TDesC8& aBuffer,
         TCallBack cb( LaunchDialogL, this );
         iLaunchDialogAsync = new( ELeave ) CAsyncCallBack( cb, CActive::EPriorityHigh );    
         }
-    else
+    else if ( iNoteInfo.iNoteId == EConfirmMethodUsageQueryInForeignNetwork )
         {
         TCallBack cb( LaunchDialogVisitorL, this );
+        iLaunchDialogAsync = new( ELeave ) CAsyncCallBack( cb, CActive::EPriorityHigh );
+        }
+    else // EConfirmMethodUsageQueryNationalRoaming;
+        {
+        TCallBack cb( LaunchDialogNationalRoamingL, this );
         iLaunchDialogAsync = new( ELeave ) CAsyncCallBack( cb, CActive::EPriorityHigh );    
         }
 
@@ -319,6 +324,61 @@ TInt CConfirmationQueryNotif::LaunchDialogVisitorL( TAny* aObject )
 
     myself->iDialogVisitor->RunLD();
     CLOG_LEAVEFN( "CConfirmationQueryNotif::LaunchDialogVisitorL" );
+    return 0;
+    }
+
+// ------------------------------------------------------------
+// TInt CConfirmationQueryNotif::LaunchDialogNationalRoamingL()
+// ------------------------------------------------------------
+//
+TInt CConfirmationQueryNotif::LaunchDialogNationalRoamingL( TAny* aObject )
+    {
+    CLOG_ENTERFN( "CCConfirmationQueryNotif::LaunchDialogNationalRoamingL" );
+    CConfirmationQueryNotif* myself =
+                            static_cast<CConfirmationQueryNotif*>( aObject );
+    
+    myself->iDialog = new ( ELeave ) CConfirmationQuery( myself );
+    myself->iDialog->PrepareLC( R_MESSAGE_QUERY );
+                            
+    // Create the list box items
+    RArray<TMsgQueryLinkedResults> choices;
+    CDesCArrayFlat* array = new (ELeave) CDesCArrayFlat(2);
+    CleanupStack::PushL( array );
+    HBufC* heading = NULL;
+    HBufC* messageBase = NULL;
+    HBufC* automatic = NULL;
+    HBufC* thisTime = NULL;
+
+    automatic = StringLoader::LoadLC( R_QTN_OCC_LIST_CS_DATA_HOME_NW_AUTOMATIC );
+    thisTime = StringLoader::LoadLC( R_QTN_OCC_LIST_CS_DATA_HOME_NW_THIS_TIME );
+                                
+    heading = StringLoader::LoadLC( R_QTN_OCC_PRMPT_CS_DATA_HOME_NW );
+    messageBase = StringLoader::LoadLC( R_QTN_OCC_DETAIL_CS_DATA_NATIONAL_ROAMING );
+    // the order of the query options depends on the location
+    choices.Append(EMsgQueryAutomatically);
+    choices.Append(EMsgQueryThisTime);
+    array->AppendL( *automatic );
+    array->AppendL( *thisTime );
+ 
+    // Set the dialog heading and message text
+    myself->iDialog->Heading()->SetTextL(*heading);
+    myself->iDialog->MessageBox()->SetMessageTextL(messageBase);
+    CleanupStack::PopAndDestroy( messageBase );
+    CleanupStack::PopAndDestroy( heading );
+                            
+    // Set the options to the listbox
+    myself->iDialog->SetChoices(choices);
+
+    myself->iDialog->SetItemTextArray( array );
+    myself->iDialog->SetOwnershipType(ELbmOwnsItemArray); // ownership transferred to listbox
+    myself->iDialog->ListBox()->HandleItemAdditionL();
+                            
+    CleanupStack::Pop( thisTime );
+    CleanupStack::Pop( automatic );
+    CleanupStack::Pop( array );
+    myself->iDialog->RunLD();
+                                 
+    CLOG_LEAVEFN( "CConfirmationQueryNotif::LaunchDialogNationalRoamingL" );
     return 0;
     }
 

@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2004-2009 Nokia Corporation and/or its subsidiary(-ies). 
+* Copyright (c) 2004-2010 Nokia Corporation and/or its subsidiary(-ies). 
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -76,7 +76,8 @@ CMPMServerSession::CMPMServerSession(CMPMServer& aServer)
       iStoredIapInfo(),
       iIapSelection( NULL ),
       iMigrateState( EMigrateNone ),
-      iDisconnectDialogShown( EFalse )
+      iDisconnectDialogShown( EFalse ),
+      iConnectionStopped( EFalse )
     {
     }
 
@@ -843,7 +844,9 @@ should not be confirmed - False" )
         currentDataUsage = genConnSettings.iCellularDataUsageVisitor; 
         }
 
-    if ( currentDataUsage == ECmCellularDataUsageConfirm )
+    if ( ( currentDataUsage == ECmCellularDataUsageConfirm ) ||
+         ( ( currentDataUsage == ECmCellularDataUsageAutomaticInHomeNetwork ) &&
+           ( MyServer().RoamingWatcher()->RoamingStatus() == EMPMNationalRoaming ) ) )
         {
         MPMLOGSTRING( "CMPMServerSession::IsConfirmFirstL - True" )
         isConfirmFirst = ETrue;
@@ -944,28 +947,45 @@ void CMPMServerSession::HandleServerApplicationMigratesToCarrierL(
             if ( !( iIapSelection->MpmConnPref().NoteBehaviour() & TExtendedConnPref::ENoteBehaviourConnDisableQueries ) &&
                     !MyServer().IsConnPermQueryTimerOn() )
                 {
-                if ( MyServer().RoamingWatcher()->RoamingStatus() == EMPMInternationalRoaming )
+                switch ( MyServer().RoamingWatcher()->RoamingStatus() )
                     {
-                    //International roaming
-                    iConfirmDlgRoaming = CMPMConfirmDlgRoaming::NewL( 
-                            *this, 
-                            snapId, 
-                            iMigrateIap, 
-                            CMPMConfirmDlg::EConfirmDlgVisitorNetwork, 
-                            reconnect );
-                    }
-                else
-                    {
-                    //Home network
-                    iConfirmDlgRoaming = CMPMConfirmDlgRoaming::NewL( 
-                            *this, 
-                            snapId, 
-                            iMigrateIap, 
-                            CMPMConfirmDlg::EConfirmDlgHomeNetwork,
-                            reconnect );
+                    case EMPMInternationalRoaming:
+                        {
+                        //International roaming
+                        iConfirmDlgRoaming = CMPMConfirmDlgRoaming::NewL( 
+                                *this, 
+                                snapId, 
+                                iMigrateIap, 
+                                CMPMConfirmDlg::EConfirmDlgVisitorNetwork, 
+                                reconnect );
+                        break;
+                        }
+                        
+                    case EMPMNationalRoaming:
+                        {
+                        // National roaming
+                        iConfirmDlgRoaming = CMPMConfirmDlgRoaming::NewL( 
+                                *this, 
+                                snapId, 
+                                iMigrateIap, 
+                                CMPMConfirmDlg::EConfirmDlgNationalRoaming, 
+                                reconnect );                    
+                        break;
+                        }
+                    
+                    default:
+                        {
+                        //Home network
+                        iConfirmDlgRoaming = CMPMConfirmDlgRoaming::NewL( 
+                                *this, 
+                                snapId, 
+                                iMigrateIap, 
+                                CMPMConfirmDlg::EConfirmDlgHomeNetwork,
+                                reconnect );
+                        break;
+                        }
                     }
                 }
-            
             else
                 {
                 RoamingConfirmationCompletedL( KErrCancel, EMsgQueryCancelled, reconnect );
@@ -1096,26 +1116,38 @@ aError %d, aResponse %d, aReconnect %d",
       
             error = KErrCancel;
             }
-        //User selected Connect automatically
+        // User selected Connect automatically
         else if  ( aResponse == EMsgQueryAutomatically ) 
             {
-            //Store selected value to commsdat if we are in home network
-            if ( MyServer().RoamingWatcher()->RoamingStatus() == EMPMHomenetwork )
+            // Store selected value to commsdat if we are in home country
+            if ( !iMyServer.IsVisitorNetwork() )
                 {
                 TCmGenConnSettings genConnSettings;
 
-                TRAPD(errorCode,genConnSettings = MyServer().CommsDatAccess()->ReadGenConnSettingsL()); // call a function
+                TRAPD( errorCode,genConnSettings = MyServer().CommsDatAccess()->ReadGenConnSettingsL() );
 
-                //If reading of database failed we do not write back to the database to prevent random values
-                if (errorCode == KErrNone)
+                // If reading of database failed we do not write back to the database to prevent random values
+                if ( errorCode == KErrNone )
                     {
-                    genConnSettings.iCellularDataUsageHome = ECmCellularDataUsageAutomatic;        
-                    TRAP_IGNORE(MyServer().CommsDatAccess()->WriteGenConnSettingsL( genConnSettings )); 
+                    // Set data usage to automatic in home network if the setting is always ask
+                    if ( ( genConnSettings.iCellularDataUsageHome == ECmCellularDataUsageConfirm ) &&
+                         ( MyServer().RoamingWatcher()->RoamingStatus() == EMPMHomenetwork ) )
+                        {
+                        // No need to check if the national roaming feature is supported. It is done in
+                        // cmmanager and set to automatic if the feature is not supported.
+                        genConnSettings.iCellularDataUsageHome = ECmCellularDataUsageAutomaticInHomeNetwork;
+                        }
+                    else
+                        {
+                        genConnSettings.iCellularDataUsageHome = ECmCellularDataUsageAutomatic; 
+                        }
+
+                    TRAP_IGNORE( MyServer().CommsDatAccess()->WriteGenConnSettingsL( genConnSettings ) ); 
                     }
                 } 
             }
         
-        //user selected connect this time
+        // user selected connect this time
         else
             {
             MPMLOGSTRING3( "CMPMServerSession<0x%x>::RoamingConfirmationCompleted: \
@@ -1448,17 +1480,41 @@ ChooseBestIap has not been called yet" )
             }
         else
             {
-            MPMLOGSTRING( "Disconnect dlg error - leave msg pending" );
+		    if ( iMyServer.StartedConnectionExists() == KErrNotFound )
+                {
+                // There are no existing sessions so propagate error to avoid
+                // that this session would be left pending.
+                MPMLOGSTRING( "CMPMServerSession::HandleServerProcessErrorL - \
+Disconnect dlg error - No connections so propagating error" );
+                TBMNeededAction neededAction( EPropagateError );
+                ProcessErrorComplete( KErrNone, &error, &neededAction );
+                }
+            else
+              {
+              // TODO: When message is left pending, there may be scenarios
+              // when it's pending forever. We have just added above check
+              // whether there is started connections already. MMS IAP or
+              // background apps (returned by IsBackgroundApplication())
+              // could cause some problems.
+              MPMLOGSTRING( "CMPMServerSession::HandleServerProcessErrorL - \
+Disconnect dlg error - leave msg pending" );
+                }
             }
         return;
         }
+
+    // Get the state of the connection for this Iap Id.
+    // 
+    TConnectionState state;
+    iMyServer.GetConnectionState( connId, state );
 
     // Show error popup if it's allowed per client request
     // Don't show the pop up if error code is for disconnect dialog
     //
     if ( !( iIapSelection->MpmConnPref().NoteBehaviour() &
             TExtendedConnPref::ENoteBehaviourConnDisableNotes ) &&
-         !DisconnectDlgErrorCode( error ) )
+         !DisconnectDlgErrorCode( error ) &&
+         !( state == EStarted && error == KErrTimedOut ) )
         {
         CConnectionUiUtilities* connUiUtils = NULL;
         TRAPD( popupCreateError, connUiUtils = CConnectionUiUtilities::NewL() );
@@ -1487,11 +1543,6 @@ ChooseBestIap has not been called yet" )
     RemoveUnavailableIap( availableIAPs, currentIap );
 
     TBMNeededAction neededAction( EIgnoreError );
-
-    // Get the state of the connection for this Iap Id.
-    // 
-    TConnectionState state;
-    iMyServer.GetConnectionState( connId, state );
 
     // We need to blacklist the presumed IAP too
     // 
@@ -1646,9 +1697,9 @@ Unknown state %d", state )
             {
             neededAction = EPropagateError;
 
-            MPMLOGSTRING(
-                "CMPMServerSession::HandleServerProcessErrorL - \
-Tell BM to end the client connection with appropriate error code" )
+            MPMLOGSTRING2(
+                "CMPMServerSession::HandleServerProcessErrorL - Unrecoverable error, \
+Tell BM to end the client connection with error %d", error )
 
             // Send error notification. 
             // Not sent if connection not registered
@@ -1664,9 +1715,9 @@ Tell BM to end the client connection with appropriate error code" )
                 {
                 neededAction = EPropagateError;
     
-                MPMLOGSTRING(
+                MPMLOGSTRING2(
                     "CMPMServerSession::HandleServerProcessErrorL - \
-Tell BM to end the client connection with appropriate error code" )
+Tell BM to end the client IAP connection with error: %d", error )
 
                 TRAP_IGNORE( ErrorNotificationL( KErrNotFound,
                                                  EMPMMobilityErrorNotification ) )
@@ -1720,9 +1771,9 @@ Tell BM to end the client connection with appropriate error code" )
 
                     TRAP_IGNORE( ErrorNotificationL( KErrNotFound,
                                                      EMPMMobilityErrorNotification ) )
-                    MPMLOGSTRING(
-                        "CMPMServerSession::HandleServerProcessErrorL - \
-Tell BM to end the client connection with appropriate error code" )   
+                    MPMLOGSTRING2(
+                        "CMPMServerSession::HandleServerProcessErrorL - No IAP found, \
+Tell BM to end the client connection with error %d", error )   
                     }
                 else
                     {
@@ -2854,6 +2905,10 @@ Roaming from Iap %i to Iap %i", oldIapId, validateIapId )
             MPMLOGSTRING( "CMPMServerSession::PrefIAPNotificationL - \
 Send preferred IAP notification" )
             iNotifMessage.Complete( KErrNone );
+            
+            // Allow StopIAPNotifications to be sent to this session again
+            // when there is a new carrier
+            iConnectionStopped = EFalse;
             }
         }
         // Connection is using IAP
@@ -2948,12 +3003,19 @@ Send start IAP notification" )
 void CMPMServerSession::StopIAPNotificationL( TInt aIapId )
     {
     MPMLOGSTRING2( "CMPMServerSession::StopIAPNotificationL: aConnId = 0x%x", iConnId)
-    
+
     if ( !iNotifRequested )
         {
         MPMLOGSTRING( "CMPMServerSession::StopIAPNotificationL - \
 No notification requested" )
         return;
+        }
+
+    if ( iConnectionStopped )
+        {
+        MPMLOGSTRING( "CMPMServerSession::StopIAPNotificationL - \
+Connection has already been stopped" )
+        return;        
         }
 
     TMpmNotificationStopIAP notifInfo;
@@ -2971,6 +3033,9 @@ No notification requested" )
     //
     iNotifRequested = EFalse;
 
+    // Set connection stopped so that it will not get stopped again
+    iConnectionStopped = ETrue;
+    
     // Now complete WaitNotification to BM
     //
     MPMLOGSTRING( "CMPMServerSession::StopIAPNotificationL - \

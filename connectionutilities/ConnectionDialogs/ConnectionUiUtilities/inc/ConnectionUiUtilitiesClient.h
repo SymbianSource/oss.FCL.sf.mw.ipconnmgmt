@@ -165,16 +165,16 @@ class RConnectionUiUtilitiesSession : public RSessionBase
         void CancelChangingConnectionToNote();
 
         /**
-        * Notifier. Shows a query, "Connect to\n '%0U' via\n '%1U'?"
-        * @param aResult Result of user selection, ETrue if user accepted
-        * roaming, to more preferred method, EFlase otherwise
-        * @param aHomeNetwork   home or foreign network
-        * @param aStatus Status object of notifier.
+        * Confirmation query which is shown when cellular data connection is being
+        * started and confirmation from user is needed.
+        * @param aResult Result of user selection
+        * @param aQueryType Type of the query to show
+        * @param aStatus Status object of notifier
         */
-        void ConfirmMethodUsageQuery( TMsgQueryLinkedResults& aResult,                                     
-                                      const TBool aHomeNetwork,
-                                      TRequestStatus& aStatus);
-        
+        void ConfirmMethodUsageQuery( TMsgQueryLinkedResults& aResult,
+                                      const TCellularDataUsageQueryType aQueryType,
+                                      TRequestStatus& aStatus );
+
         /**
         * Cancel ConfirmMethodUsageQuery
         */

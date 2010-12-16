@@ -220,29 +220,52 @@ namespace S60MCprMobilityActivity
     // S60MCprMobilityActivity::TInformMigrationAvailableOrCancelTag::TransitionTag
     // -----------------------------------------------------------------------------
     //
-    DEFINE_SMELEMENT( TInformMigrationAvailableOrErrorOrCancelTag, NetStateMachine::MStateFork, TContext )
-    TBool TInformMigrationAvailableOrErrorOrCancelTag::TransitionTag()
+    DEFINE_SMELEMENT( TInformMigrationAvailableOrErrorOrRecoverableErrorOrCancelTag, NetStateMachine::MStateFork, TContext )
+    TBool TInformMigrationAvailableOrErrorOrRecoverableErrorOrCancelTag::TransitionTag()
         {        
-        if ( iContext.iNodeActivity->Error() )
-            {
-            S60MCPRLOGSTRING1("S60MCPR<%x>::TInformMigrationAvailableOrErrorOrCancelTag::TransitionTag() KErrorTag",(TInt*)&iContext.Node())
-            return MeshMachine::KErrorTag | NetStateMachine::EForward;
-            }
 
+        if ( iContext.iMessage.IsMessage<TCFS60MCPRMessage::TMPMErrorNotificationMsg>() )
+            {
+            // Error notification from MPM. See whether we are able to recover from
+            // the error situation via other means (by an error recovery activity)
+            TInt errorVal = message_cast<TCFS60MCPRMessage::TMPMErrorNotificationMsg>( &iContext.iMessage )->iValue;
+            ASSERT( errorVal != KErrNone );
+        
+            if ( iContext.iNode.CountActivities( ECFActivityConnectionGoneDownRecovery ) != 0 )
+                {
+                // This error notification is sent by MPM to error clients mobility
+                // interface. The error is unrecoverable in a sense that in this state
+                // there is no way to get the connection back up and running. However,
+                // we can be certain that the error recovery activity cleans up the
+                // stack (MPM instructs us to propagate error). So to avoid possible
+                // race conditions, just pass the error notification forward.
+                S60MCPRLOGSTRING2("S60MCPR<%x>::TInformMigrationAvailableOrErrorOrRecoverableErrorOrCancelTag::TransitionTag() KRecoverableError (%d)",(TInt*)&iContext.Node(), errorVal )
+                return S60MCprStates::KRecoverableError | NetStateMachine::EForward;
+                }
+            else
+                {
+                // No gone down activity running. Hmm, we actually should hit this
+                // branch but for future's sake error this activity and clean up
+                // the stack.
+                iContext.iNodeActivity->SetError( errorVal );                
+                S60MCPRLOGSTRING2("S60MCPR<%x>::TInformMigrationAvailableOrErrorOrRecoverableErrorOrCancelTag::TransitionTag() KErrorTag (error: %d)",(TInt*)&iContext.Node(), errorVal )
+                return MeshMachine::KErrorTag | NetStateMachine::EForward;
+                }
+            }
         else if ( iContext.iMessage.IsMessage<TEBase::TCancel>() )
             {
-            S60MCPRLOGSTRING1("S60MCPR<%x>::TInformMigrationAvailableOrErrorOrCancelTag::TransitionTag() KCancelTag",(TInt*)&iContext.Node())
+            S60MCPRLOGSTRING1("S60MCPR<%x>::TInformMigrationAvailableOrErrorOrRecoverableErrorOrCancelTag::TransitionTag() KCancelTag",(TInt*)&iContext.Node())
             return KCancelTag | NetStateMachine::EForward;
             }
         else if ( iContext.iMessage.IsMessage<TCFMobilityProvider::TMigrationRejected>() )
             {
-            S60MCPRLOGSTRING1("S60MCPR<%x>::TInformMigrationAvailableOrErrorOrCancelTag::TransitionTag() KSendInitialApplicationReject",
+            S60MCPRLOGSTRING1("S60MCPR<%x>::TInformMigrationAvailableOrErrorOrRecoverableErrorOrCancelTag::TransitionTag() KSendInitialApplicationReject",
                     (TInt*)&iContext.Node())
             return S60MCprStates::KSendInitialApplicationReject | NetStateMachine::EForward;
             }
         else
             {
-            S60MCPRLOGSTRING1("S60MCPR<%x>::TInformMigrationAvailableOrErrorOrCancelTag::TransitionTag() KInformMigrationAvailable",(TInt*)&iContext.Node())
+            S60MCPRLOGSTRING1("S60MCPR<%x>::TInformMigrationAvailableOrErrorOrRecoverableErrorOrCancelTag::TransitionTag() KInformMigrationAvailable",(TInt*)&iContext.Node())
             return S60MCprStates::KInformMigrationAvailable | NetStateMachine::EForward;
             }
         }
@@ -543,8 +566,34 @@ namespace S60MCprMobilityActivity
 
 		RNodeInterface* dc = iContext.Node().GetFirstClient<TDefaultClientMatchPolicy>(TClientType(TCFClientType::EData),
 			TClientType(TCFClientType::EData, TCFClientType::ELeaving));
-		iContext.iNodeActivity->PostRequestTo(*dc, TCFDataClient::TStop(iContext.iNodeActivity->Error()).CRef());
+		
+		// This should never be NULL, but check anyway for making sure...
+		if ( dc )
+		    {
+            // Mark flag in case we happen to modify this in future
+            dc->SetFlags(TCFClientType::EStopping);
+            iContext.iNodeActivity->PostRequestTo(*dc, TCFDataClient::TStop(iContext.iNodeActivity->Error()).CRef());
+		    }
 		}
+
+    // -----------------------------------------------------------------------------
+    // CS60MobilityActivity::TErrorMobilityOriginator::DoL
+    // -----------------------------------------------------------------------------
+    //
+    DEFINE_SMELEMENT( CS60MobilityActivity::TErrorMobilityOriginator, 
+                      NetStateMachine::MStateTransition, CS60MobilityActivity::TContext )
+    void CS60MobilityActivity::TErrorMobilityOriginator::DoL()
+        {
+        // Extract the error code from the error notification message
+        TCFS60MCPRMessage::TMPMErrorNotificationMsg* msg =
+                message_cast<TCFS60MCPRMessage::TMPMErrorNotificationMsg>( &iContext.iMessage );
+        // Message needs to be valid here. 
+        ASSERT( msg );
+                
+        // Post error to originators
+        TEBase::TError errmsg(TCFMobilityProvider::TStartMobility::Id(), msg->iValue);
+        iContext.iNodeActivity->PostToOriginators(errmsg);
+        }
     
     // -----------------------------------------------------------------------------
     // CS60MobilityActivity::TAwaitingPreferredCarrierOrCancelOrRejectedOrErrorNotification::Accept
@@ -599,12 +648,8 @@ namespace S60MCprMobilityActivity
             }
         else if ( iContext.iMessage.IsMessage<TCFS60MCPRMessage::TMPMErrorNotificationMsg>() )
             {
-            CS60MobilityActivity& activity = static_cast<CS60MobilityActivity&>(*iContext.iNodeActivity);
-            TCFS60MCPRMessage::TMPMErrorNotificationMsg* msg = 
-                message_cast<TCFS60MCPRMessage::TMPMErrorNotificationMsg>( &iContext.iMessage );
-            S60MCPRLOGSTRING2("S60MCPR<%x>::TAwaitingPreferredCarrierOrCancelOrRejectedOrErrorNotification::Accept() TMPMErrorNotificationMsg %d",(TInt*)&iContext.Node(),msg->iValue)
-            ASSERT( msg->iValue != KErrNone );
-            activity.SetError( msg->iValue );
+            S60MCPRLOGSTRING1("S60MCPR<%x>::TAwaitingPreferredCarrierOrCancelOrRejectedOrErrorNotification::Accept() TMPMErrorNotificationMsg %d",(TInt*)&iContext.Node())
+
             result = ETrue;
             }
 

@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2005 Nokia Corporation and/or its subsidiary(-ies).
+* Copyright (c) 2005-2010 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -65,7 +65,7 @@ class CGSConnSettingsPluginContainer : public CGSBaseContainer
         /**
         * Constructor
         */
-        CGSConnSettingsPluginContainer( MGSConnSettingsMskObserver& aMskObserver );
+        CGSConnSettingsPluginContainer( MGSConnSettingsMskObserver& aMskObserver, TBool aHomeOperatorSettingSupported );
 
     public: //new
 
@@ -152,7 +152,7 @@ class CGSConnSettingsPluginContainer : public CGSBaseContainer
          * Return list index according to wlan variation.
          */
         TInt Index( TInt aIndex );
-        
+
         // from CGSBaseContainer
         /**
         * Required for help.
@@ -213,7 +213,13 @@ class CGSConnSettingsPluginContainer : public CGSBaseContainer
         /**
          * Flag is set when wlan is supported
          */
-        TBool iIsWlanSupported;              
+        TBool iIsWlanSupported;
+
+        /**
+         * Flag is set when additional item 'Home network only'
+         * is added to Data usage in home country -dialog.
+         */
+        TBool iHomeOperatorSettingSupported;
     };
 
 #endif //GSCONNSETTINGSPLUGINCONTAINER_H

@@ -120,5 +120,10 @@
 //r: 5.2
 #define qtn_occ_sett_data_usage_home_nw_disabled "Disabled"
 
+//d:Text in radio button list
+//l:list_set_graphic_pane_t1
+//w:
+//r: 5.2
+#define qtn_occ_sett_data_usage_home_nw_operator "Home network only"
 
 // End of File

@@ -80,6 +80,13 @@ CPsdFax::~CPsdFax()
         delete iConnUpNotifier;
         iConnUpNotifier = NULL;
         }
+        
+    if ( iRestoreAttachModeTimer )
+        {
+        iRestoreAttachModeTimer->Cancel();
+        delete iRestoreAttachModeTimer;
+        iRestoreAttachModeTimer = NULL;
+        }
 
     // Delete all ConnectionData objects
     for ( TUint index = 0; index < KMaxPsdConnectionCount; index++ )
@@ -491,6 +498,51 @@ void CPsdFax::DeleteConnections()
     LOGEXITFN("CPsdFax::DeleteConnections()")
     }
 
+// ---------------------------------------------------------
+// CPsdFax::RestoreAttachModeCb
+// ---------------------------------------------------------
+//
+TInt CPsdFax::RestoreAttachModeCb( TAny* aObject )
+    {
+    LOGENTRFN("CPsdFax::RestoreAttachModeCb()")
+
+    CPsdFax* myself = static_cast<CPsdFax*>( aObject );
+    
+    myself->iRestoreAttachModeTimer->Cancel();
+    
+    // Make sure that ETel goes to correct network status
+    // in case AT+CGATT=0 has been sent from PC. 
+    myself->iServer->Iap()->RestoreAttachMode();
+
+    LOGEXITFN("CPsdFax::RestoreAttachModeCb()")
+
+    return 0;
+    }
+    
+ // ---------------------------------------------------------
+// CPsdFax::RestoreAttachMode
+// ---------------------------------------------------------
+//
+void CPsdFax::RestoreAttachMode()
+    {
+    LOGENTRFN("CPsdFax::RestoreAttachMode()")
+
+    if ( iRestoreAttachModeTimer )
+        {
+        iRestoreAttachModeTimer->Cancel();
+        }
+    else
+        {
+        iRestoreAttachModeTimer = CPeriodic::NewL( CActive::EPriorityStandard );
+        }
+
+    iRestoreAttachModeTimer->Start( 
+        TTimeIntervalMicroSeconds32( KRestoreAttachModeInterval ), 
+        TTimeIntervalMicroSeconds32( KRestoreAttachModeInterval ), 
+        TCallBack( RestoreAttachModeCb, this ) );
+
+    LOGEXITFN("CPsdFax::RestoreAttachMode()")
+    }
 
 // ============================ MEMBER FUNCTIONS ===============================
 
@@ -1283,11 +1335,15 @@ void CPsdFaxStatusNotifier::RunL()
 
             // Close the context
             iConnDataModule->CloseContext();
-
+  
             // Dial-up connection has gone down. Make sure the dial-up PDP
             // context override is disabled.
             LOGIT("External PSD connection status EStatusDeleted, disabling dial-up override")
             iServer->SetDialUpOverrideStatus( EConnMonDialUpOverrideInactive );
+            
+            // Restore packet data network attach mode in case it has been
+            // changed by sending at+cgatt=0 from PC.
+            iFaxModule->RestoreAttachMode();
 
             // Delete all old connection objects. This method should be used
             // carefully because it will delete ConnectionData and

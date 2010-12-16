@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2006 Nokia Corporation and/or its subsidiary(-ies). 
+* Copyright (c) 2006-2010 Nokia Corporation and/or its subsidiary(-ies). 
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -47,6 +47,8 @@
 
 #include <commsdattypesv1_1.h>
 #include <rconnmon.h>
+#include <centralrepository.h>
+#include <cmmanagerkeys.h>
 
 using namespace CMManager;
 using namespace CommsDat;
@@ -2435,7 +2437,15 @@ void CCmManagerImpl::ReadGenConnSettingsL( TCmGenConnSettings& aGenConnSettings 
 
     value = QUERY_INT_FIELD( defConnRecordSet->iRecords[0], KCDTIdCellularDataUsageVisitor );
     aGenConnSettings.iCellularDataUsageVisitor = TCmCellularDataUsage( value );
-            
+
+    if ( aGenConnSettings.iCellularDataUsageHome == ECmCellularDataUsageAutomaticInHomeNetwork )
+        {
+        if ( !HomeOperatorSetting() )
+            {
+            aGenConnSettings.iCellularDataUsageHome = ECmCellularDataUsageAutomatic;
+            }
+        }
+
     CleanupStack::PopAndDestroy( defConnRecordSet );
     RollbackTransaction();
     }
@@ -2472,13 +2482,21 @@ void CCmManagerImpl::ReplaceGenConnSettingsL( const TCmGenConnSettings& aGenConn
     TInt usageOfNewWlan = aGenConnSettings.iUsageOfWlan;
     TInt cellularDataUsageHome    = aGenConnSettings.iCellularDataUsageHome;
     TInt cellularDataUsageVisitor = aGenConnSettings.iCellularDataUsageVisitor;
-    
+
     // Delete the old record
     for ( TInt i = 0; i < defConnRecordSet->iRecords.Count(); ++i )
         {
         defConnRecordSet->iRecords[i]->DeleteL( Session() );
         }
     CleanupStack::PopAndDestroy( defConnRecordSet );
+
+    if ( cellularDataUsageHome == ECmCellularDataUsageAutomaticInHomeNetwork )
+        {
+        if ( !HomeOperatorSetting() )
+            {
+            cellularDataUsageHome = ECmCellularDataUsageAutomatic;
+            }
+        }
 
     CCDDefConnRecord* dcRcd = 
         new (ELeave) CCDDefConnRecord( iDefConnTableId );
@@ -3048,4 +3066,30 @@ TBool CCmManagerImpl::IsBearerSpecific( TUint32 aAttribute ) const
         i++;
         }        
     return EFalse;
+    }
+
+// ---------------------------------------------------------------------------
+// CCmManagerImpl::HomeOperatorSetting
+// ---------------------------------------------------------------------------
+//
+TInt CCmManagerImpl::HomeOperatorSetting() const
+    {
+    LOGGER_ENTERFN( "CCmManagerImpl::HomeOperatorSetting" );
+    // Use default value if repository is not available
+    TInt value( 1 );
+    TInt err( KErrNone );
+    CRepository* cmRepository = NULL;
+    
+    TRAP( err, cmRepository = CRepository::NewL( KCRUidCmManager ) )
+    
+    if ( err == KErrNone )
+        {
+        err = cmRepository->Get( KCellularDataUsageSettingAutomaticInHomeNetwork, value );
+        CLOG_WRITE_FORMAT( "CmManagerImpl::HomeOperatorSetting() value: [%d]", value );
+        CLOG_WRITE_FORMAT( "CmManagerImpl::HomeOperatorSetting() err: [%d]", err );
+        }
+    
+    delete cmRepository;
+
+    return value;
     }

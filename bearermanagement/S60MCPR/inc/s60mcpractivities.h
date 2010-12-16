@@ -561,12 +561,12 @@ namespace S60MCprMobilityActivity
     /**
      * FORK/DECISION: Decides if needs cancel or not.
      */
-    DECLARE_SMELEMENT_HEADER( TInformMigrationAvailableOrErrorOrCancelTag, 
+    DECLARE_SMELEMENT_HEADER( TInformMigrationAvailableOrErrorOrRecoverableErrorOrCancelTag, 
                               MeshMachine::TStateFork<TContext>, 
                               NetStateMachine::MStateFork, 
                               TContext )
     virtual TInt TransitionTag();
-    DECLARE_SMELEMENT_FOOTER( TInformMigrationAvailableOrErrorOrCancelTag )
+    DECLARE_SMELEMENT_FOOTER( TInformMigrationAvailableOrErrorOrRecoverableErrorOrCancelTag )
 
     /**
      * FORK/DECISION: Decides what happens after IPCPR application completes the 
@@ -742,7 +742,16 @@ namespace S60MCprMobilityActivity
 			virtual void DoL();
             DECLARE_SMELEMENT_FOOTER( TErrorOriginatorAndStopDataClient )
 
-
+            /**
+             * TRANSITION/ACTION: Relay error notification to mobility activity originator
+             */
+            DECLARE_SMELEMENT_HEADER( TErrorMobilityOriginator, 
+                                      MeshMachine::TStateTransition<TContext>, 
+                                      NetStateMachine::MStateTransition, 
+                                      CS60MobilityActivity::TContext )
+            virtual void DoL();
+            DECLARE_SMELEMENT_FOOTER( TErrorMobilityOriginator )
+            
             /**
              * TRANSITION/ACTION: Unregister preferred carrier notifications.
              */
